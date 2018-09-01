@@ -1,0 +1,15 @@
+{% load comment_tags %}
+<blockquote class="js-child-comment blockquote text-wrap mb-4">
+    <hr/>
+    <div class="row">
+        {% if profile_app_name and profile_model_name %}
+        <div class="col-2 col-md-1">
+            <a href="{% profile_url reply profile_app_name profile_model_name %}">
+                <img class="w-100"
+                src="{% img_url reply profile_app_name profile_model_name %}" alt="{{reply.user.username}}">
+            </a>
+        </div>
+        {% endif %}
+        {% include 'comment/update_done.html' with obj=reply is_parent=False %}
+    </div>
+</blockquote>

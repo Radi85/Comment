@@ -1,0 +1,20 @@
+{% load widget_tweaks %}
+
+{% if commentform.non_field_errors %}
+    <div class="alert alert-danger" role="alert">
+        {% for error in commentform.non_field_errors %}
+            {{ error }}
+        {% endfor %}
+    </div>
+{% endif %}
+{% for field in commentform.visible_fields %}
+        {% if form.is_bound %}
+            {% if field.errors %}
+                {% render_field field class="js-comment-input form-control form-control-sm is-invalid" placeholder=placeholder_var %}
+            {% else %}
+                {% render_field field class="js-comment-input form-control form-control-sm is-valid" placeholder=placeholder_var %}
+            {% endif %}
+        {% else %}
+            {% render_field field class="js-comment-input form-control form-control-sm" placeholder=placeholder_var %}
+        {% endif %}
+{% endfor %}

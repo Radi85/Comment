@@ -1,0 +1,17 @@
+{% load comment_tags %}
+<div class="col-10 col-md-11">
+    <form class="js-comment-edit-form" method="post" data-url="{% url 'comment:edit' pk=comment.id %}">
+        {% csrf_token %}
+        {% include 'comment/commentform.html' %}
+        <footer class="blockquote-footer edit-comment mt-2">
+            <small>
+                {% if profile_app_name and profile_model_name %}
+                <input name="profile_app_name" value="{{ profile_app_name }}" hidden>
+                <input name="profile_model_name" value="{{ profile_model_name }}" hidden>
+                {% endif %}
+                <button class="btn btn-link" type="submit" name="commentform">modify</button>
+                <a class="js-comment-cancel btn btn-link" href="#">cancel</a>
+            </small>
+        </footer>
+    </form>
+</div>

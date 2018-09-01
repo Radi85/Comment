@@ -1,0 +1,25 @@
+{% load comment_tags %}
+<div class="{% if profile_app_name and profile_model_name %}col-10 col-md-11
+            {% else %}co-12 mx-3{% endif %}">
+    <p class="js-comment-content h6 mb-0">{{ obj.content }}</p>
+    <footer class="blockquote-footer">
+        <small>
+            <a href="{% profile_url obj profile_app_name profile_model_name %}">{{ obj.user }}</a> |
+            {% if obj.is_edited %}
+            <cite title="Edited">Edited: {{ obj.edit_date|timesince }} ago</cite>
+            {% else %}
+            <cite title="Posted">{{ obj.posted_date|timesince }} ago</cite>
+            {% endif %}
+            {% if obj.user == user %}
+            | <a class="js-comment-edit" href="{% url 'comment:edit' pk=obj.id %}?profile_app_name={{profile_app_name}}&profile_model_name={{profile_model_name}}">edit</a>
+            <button class="js-comment-delete btn btn-link" data-url="{% url 'comment:delete' pk=obj.id %}">delete</button>
+            {% endif %}
+            {% if is_parent %}
+            | <span class="js-reply-number text-dark">{{ obj.replies.count }}</span>
+            <a class="js-reply-link ml-1" href="#">
+                Repl{% if obj.replies.count <= 1 %}y{% else %}ies{% endif %}
+            </a>
+            {% endif %}
+        </small>
+    </footer>
+</div>

@@ -1,0 +1,48 @@
+/* for child comment */
+#comments .text-wrap{
+    word-wrap: break-word;
+    /* word-break: break-all; */
+}
+#comments .h7{
+    font-size: 0.9rem;
+    font-family: inherit;
+    font-weight: 500;
+    line-height: 1.2;
+    color: inherit;
+}
+#comments .btn:disabled{
+    cursor: not-allowed;
+}
+#comments textarea{
+    min-height: 31px;
+    padding: 4px 15px !important;
+    overflow: hidden;
+    resize: none;
+}
+#comments textarea:focus{
+    border: 1px solid #00bc8c;
+    outline: none;
+}
+#comments .border-bottom{
+    border-bottom: 2px solid #00bc8c !important;
+}
+.form-control:focus::placeholder,
+.s-input:focus::placeholder,
+input#search-input:focus::placeholder{
+    opacity: 0.5;
+}
+#comments .js-comment-input:invalid{
+    box-shadow:none;
+}
+#comments .js-comment-input:focus{
+    box-shadow: 0 0 0 0.2rem rgba(75, 142, 213, 0.25);
+}
+#comments .edit-comment::before {
+    content: none;
+}
+#comments .btn-link{
+    text-decoration: none !important;
+    padding: 0;
+    font-size: 100%;
+    font-weight: 400;
+}

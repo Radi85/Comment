@@ -1,0 +1,37 @@
+{% load comment_tags %}
+{% if user.is_authenticated %}
+    <form class="js-comment-form" method="post" data-url="{% url 'comment:create' %}">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-sm-9 col-md-10 px-2 m-2 m-sm-0">
+                {% include 'comment/commentform.html' with placeholder_var=placeholder %}
+            </div>
+            <div class="col-sm-3 col-md-2 px-2 m-3 m-sm-0">
+                {% if model_object %}
+                <input name="model" value="{% get_model_name model_object %}" hidden>
+                <input name="model_id" value="{{ model_object.id }}" hidden>
+                <input name="app_name" value="{% get_app_name model_object %}" hidden>
+                {% endif %}
+                {% if profile_app_name and profile_model_name %}
+                <input name="profile_app_name" value="{{ profile_app_name }}" hidden>
+                <input name="profile_model_name" value="{{ profile_model_name }}" hidden>
+                {% endif %}
+                {% if is_child %}
+                <input type="hidden" name="parent_id" value="{{ comment.id }}"/>
+                {% endif %}
+                <button disabled class="js-comment-btn btn btn-outline-success btn-block btn-sm" type="submit" name="commentform">{{button_name}}</button>
+            </div>
+        </div>
+    </form>
+{% else %}
+    <div class="d-flex mb-3">
+        <p class="text-danger {% if is_child %}h7 my-auto {% endif %}"><em>Join discussion:</em></p>
+        <a class="mx-2 text-success {% if is_child %}h7 my-auto {% endif %}" href="{% url 'accounts:login' %}?next={{request.path}}">Login</a>
+        {% if oauth %}
+        <a class="mx-1 my-0 h4 github-color" href="{% url 'social:begin' 'github' %}?next={{request.path}}"><i class="fa fa-github-square"></i></a>
+        <a class="mx-1 my-0 h4 facebook-color" href="{% url 'social:begin' 'facebook' %}?next={{request.path}}"><i class="fa fa-facebook-square"></i></a>
+        <a class="mx-1 my-0 h4 twitter-color" href="{% url 'social:begin' 'twitter' %}?next={{request.path}}"><i class="fa fa-twitter-square"></i></a>
+        <a class="mx-1 my-0 h4 google-color" href="{% url 'social:begin' 'google-oauth2' %}?next={{request.path}}"><i class="fa fa-google-plus-square"></i></a>
+        {% endif %}
+    </div>
+{% endif %}

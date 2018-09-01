@@ -1,0 +1,20 @@
+{% load staticfiles %}
+<link rel="stylesheet" href="{% static 'css/comment.css' %}">
+<section id="comments" class="my-5 mx-3">
+    <strong class="border-bottom pb-2"><span class="js-comment-number">{{model_object.comments.all.count}}</span> Comments</strong>
+    <hr class="mt-1"/>
+    <div class="js-comment comment mb-5">
+        {% include 'comment/create_comment.html' with button_name='comment' is_child=False placeholder="comment on this post..." %}
+    </div>
+    <div class="js-main-comment mt-5">
+      {% for comment in model_object.comments.all_parent_comments %}
+          {% include 'comment/parent_comment.html' %}
+      {% endfor %}
+    </div>
+    <div class="modal fade" id="Modal">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        </div>
+    </div>
+  </div>
+</section>
