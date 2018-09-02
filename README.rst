@@ -94,10 +94,14 @@ should be added (e.g. Post) and the appropriate imports as shown below:
 Step 2
 ~~~~~~
 
-``get_comments`` tag uses 2 positional and 3 optional args: #1. The
-instance of the model. (positional) #2. User. (positional) #3. oauth.
-(optional - Default is false) #4. profile_app_name. (optional) #5.
-profile_model_name. (optional)
+``get_comments`` *tag uses 2 positional and 3 optional args*:
+
+    1. The instance of the model. (positional)
+    2. User instance. (positional)
+    3. oauth. (optional - Default is false)
+    4. profile_app_name. (optional)
+    5. profile_model_name. (optional)
+    
 
 ``include_static`` this tag will include required jquery and javascript
 file. ``include_bootstrap`` for bootstrap 4.1.1 if it’s already included
