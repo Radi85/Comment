@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 setup(
     name='django-comments-dab',
     version='1.0.0',
-    packages=find_packages(exclude=['docs', 'tests*']),
+    packages=find_packages(exclude=['docs', 'test*']),
     include_package_data=True,
     author=u'Radico',
     author_email='mus.radi85@gmail.com',
@@ -12,7 +12,7 @@ setup(
     maintainer_email='mus.radi85@gmail.com',
     url='https://github.com/radi85/Comment',
     license='MIT',
-    description='Dango Comment Framework app. It can be associated with any given model.',
+    description='Django Comment Framework app. It can be associated with any given model.',
     install_requires=[
         'Django>=2.0',
         'django-widget-tweaks>=1.4.2',
