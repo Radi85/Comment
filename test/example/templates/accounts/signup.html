@@ -1,0 +1,14 @@
+{% extends 'accounts/login.html' %}
+{% block formheader %}
+Signup
+{% endblock formheader %}
+{% block formbtn %}
+    <button type="submit" class="btn btn-outline-success btn-block form-btn-w mr-2 mt-2">Sign Up</button>
+{% endblock formbtn %}
+
+{% block form_extra %}
+    <div class="mt-3">
+        You have account?
+        <a  href="{% url 'accounts:login' %}">Login</a>
+    </div>
+{% endblock form_extra %}

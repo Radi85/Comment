@@ -1,0 +1,33 @@
+<nav class="js-navbar navbar navbar-expand-md {% if current_view == 'home' %}navbar-stick{% else %}fixed-top{% endif %} navbar-light px-4 px-md-3">
+    <a class="navbar-brand" href="">Radico</a>    
+    <div class="collapse navbar-collapse" id="navbarText">
+        
+        <ul class="nav navbar-nav navbar mb-3 mb-md-auto">
+            <li class="active">
+                <a class="nav-link" href="{% url 'post:postlist'%}">
+                    Post
+                </a>
+            </li>
+            <li class="">
+                <a class="nav-link" href="{% url 'post:createpost'%}">
+                    Create Post
+                </a>
+            </li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right mb-3 mb-md-auto">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Account</a>
+                <ul class="dropdown-menu dropdown-menu-right">
+                    {% if user.is_authenticated %}
+                    <a class="dropdown-item" href="{% url 'accounts:profile' user.username %}">Profile</a>                    
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="{% url 'accounts:logout'%}">Logout</a>
+                    {% else %}
+                    <a class="dropdown-item" href="{% url 'accounts:login'%}">Login</a>
+                    <a class="dropdown-item" href="{% url 'accounts:signup'%}">Signup</a>
+                    {% endif %}
+                </ul>
+            </li>
+        </ul>
+    </div>
+</nav>

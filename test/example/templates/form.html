@@ -1,0 +1,55 @@
+{% load widget_tweaks %}
+
+{% for hidden_field in form.hidden_fields %}
+    {{ hidden_field }}
+{% endfor %}
+
+{% if form.non_field_errors %}
+    <div class="alert alert-danger" role="alert">
+        {% for error in form.non_field_errors %}
+            {{ error }}
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% for field in form.visible_fields %}
+    <div class="form-group">
+        <label for="{{ field.id_for_label }}" class="mb-0">
+            <strong>{{ field.label }}</strong>
+        </label>
+
+        {% if form.is_bound %}
+            {% if field.errors %}
+                {% if field.label == 'Tag' %}
+                    {% render_field field class="form-control form-control-sm is-invalid d-none" %}
+                    {% include 'tag/tag.html' %}
+                {% else %}
+                    {% render_field field class="form-control form-control-sm is-invalid" %}
+                {% endif %}
+                {% for error in field.errors %}
+                  <div class="invalid-feedback">
+                    {{ error }}
+                  </div>
+                {% endfor %}
+            {% else %}
+                {% if field.label == 'Tag' %}
+                    {% render_field field class="form-control form-control-sm is-valid d-none" %}
+                    {% include 'tag/tag.html' %}
+                {% else %}
+                    {% render_field field class="form-control form-control-sm is-valid" %}
+                {% endif %}
+            {% endif %}
+        {% else %}
+            {% if field.label == 'Tag' %}
+                {% render_field field class="form-control form-control-sm d-none" %}
+                {% include 'tag/tag.html' %}
+            {% else %}
+                {% render_field field class="form-control form-control-sm" %}
+            {% endif %}
+        {% endif %}
+
+        {% if field.help_text %}
+            <small class="form-text text-muted">{{ field.help_text | safe }}</small>
+        {% endif %}
+    </div>
+{% endfor %}

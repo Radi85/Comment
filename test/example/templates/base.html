@@ -1,0 +1,19 @@
+<html lang="en">
+    <!-- Header template -->
+    {% include 'z_base/header.html' %}
+    <body id="mianbody">
+        <div class="section">
+            {% block slideview %}
+                <!-- for home page only -->
+            {% endblock slideview %}
+            <div class="container-fluid {% block add-classes %}{% endblock add-classes %}">
+                <!-- Navbar template -->
+                {% include 'z_base/navbar.html' %}
+
+                {% block content%}
+                {% endblock content %}
+            </div>
+    <!-- javascript CDN and files template -->
+    {% include 'z_base/script.html' %}
+    </body>
+</html>

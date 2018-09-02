@@ -1,0 +1,25 @@
+{% extends 'post/postlist.html' %}
+{% block second_col %}
+col-10 offset-1 mt-5 pl-md-5 pr-md-4 px-4
+{% endblock second_col %}
+
+{% block postcontent %}
+<section id="postcreate">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-10">
+                {% include 'form.html' %}
+            </div>
+            <div class="col-md-2">
+                {% block post-CU %}
+                    <button class="btn btn-outline-success btn-sm btn-block mt-3" type="submit">Create</button>
+                {% endblock post-CU %}
+                <a class="btn btn-outline-success btn-sm btn-block mt-3" href="{% url 'post:postlist' %}">
+                    Cancel
+                </a>
+            </div>
+        </div>
+    </form>
+</section>
+{% endblock %}

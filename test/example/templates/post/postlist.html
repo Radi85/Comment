@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block add-classes %}
+px-0
+{% endblock add-classes %}
+
+{% block content %}
+<section id="postlist" class="p-top-70">
+    <div class="container-fluid">
+        <div class="row bg-light">
+            <div id="js-content" class="{% block second_col %}col-md-6 col-sm-8 offset-md-3 offset-sm-4 my-5{% endblock second_col %}">
+                {% block postcontent %}
+                    {% if object_list.exists %}
+                    <h3 class="text-muted bg-light py-2 pl-2">List of all posts</h3>
+                    {% else %}
+                    <h3 class="text-muted bg-light py-2 pl-2">Currently there are no posts</h3>
+                    {% endif %}
+                    {% for post in object_list %}
+                        <div class="media bg-light my-4 text-wrap shadow border">                             
+                            <div class="media-body px-3 px-sm-2 py-2">
+                                <div class="row">
+                                    <div class="d-none d-sm-block col-sm-2 pr-1">
+                                        <a href="{% url 'accounts:profile' username=post.author.username %}">
+                                            <img class="float-right rounded-circle ml-2 mt-3 w-60"
+                                            src="{{post.author.userprofile.image.url}}" alt="{{post.author}}">
+                                        </a>
+                                    </div>
+                                    <div class="col-12 col-sm-10">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <h5 class=" mt-1 mx-1">
+                                                    <a class="nounderline badge badge-light" href="{% url 'accounts:profile' username=post.author.username %}">
+                                                        <strong>
+                                                            {% if post.author.profile.display_name %}
+                                                                {{post.author.profile.display_name}}
+                                                            {% else %}
+                                                                {{post.author}}
+                                                            {% endif %}
+                                                        </strong>
+                                                    </a>
+                                                </h5>
+                                            </div>
+                                        </div>
+                                        <hr class="mt-0"/>
+                                        <div class="mx-0 pr-2">
+                                            <div class="mb-2">
+                                                <a class="h4 nounderline" href="{% url 'post:postdetail' slug=post.slug %}">{{post.title}}</a>
+                                            </div>
+                                            <h6><small>Created on: {{post.date|date:"N d, Y."}}</small></h6>
+                                            <h6><small>Modified on: {{post.editdate|date:"N d, Y, H:i"}}</small></h6>
+                                        </div>
+                                        <div class="my-2">
+                                            {% for tag in post.tag.all %}
+                                                <span class="post-tag">
+                                                    <a href="{% url 'tag:search_by_tag' name=tag.name %}">{{tag}}</a>
+                                                </span>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="mx-0">
+                                            <form class="d-inline" action="{% url 'post:postdetail' slug=post.slug %}">
+                                                <button class="btn btn-outline-success btn-sm h6" type="submit">
+                                                    Read More
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div><!-- main post panel -->
+                    {% endfor %}
+                    {% if paginator.num_pages > 1 %}
+                        {% include 'pagination.html' %}
+                    {% endif %}
+                {% endblock postcontent %}
+            </div>
+        </div>
+    </div>
+    {% block footercontent %}
+    {% endblock %}
+</section>
+
+{% endblock content %}

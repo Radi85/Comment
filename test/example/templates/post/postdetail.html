@@ -1,0 +1,65 @@
+
+{% extends 'post/postlist.html' %}
+{% comment %} load comment app tags {% endcomment %}
+{% load comment_tags %}
+{% load widget_tweaks %}
+
+{% block first_col %}
+d-none
+{% endblock first_col %}
+
+{% block second_col %}
+col-md-10 offset-md-1 my-5 px-lg-4
+{% endblock second_col %}
+
+{% block third_col %}
+d-none
+{% endblock third_col %}
+
+
+{% block postcontent %}
+
+<section id="postdetail" class="mb-5">
+    <div class="js-author-card card mb-5 px-lg-4">
+        <div class="card-body">
+            <div class="d-none d-sm-inline-block" style="max-width: 120px;">
+                <img class="w-100 mb-4 align-baseline rounded-circle" src="{{post.author.profile.profile_img.url}}" alt="" >
+            </div>
+            <div class="d-inline-block ml-4">
+                <h6>Author:
+                    <span class="h5">
+                        <a class="nounderline text-capitalize badge badge-light" href="{% url 'accounts:profile' username=post.author.username %}">
+                            <strong>{{ post.author.username }}</strong>
+                        </a>
+                    </span>
+                </h6>
+                <h6>Created on: {{post.date|date:"N d, Y."}}</h6>
+                <h6>Latest update: {{post.editdate|timesince}}</h6>                
+                <div class="my-2">
+                </div>
+                <a href="{% url 'post:postlist' %}" class="btn btn-outline-success btn-sm">posts</a>
+                
+            </div>
+        </div>
+    </div>
+    <div class="card px-lg-4">
+        <div class="card-body">
+            <div class="card-title">
+                <h1 class="text-center text-wrap"><strong>{{post.title}}</strong></h1>                
+            </div>
+            <div class="card-text">
+                <hr/>
+                <blockquote class="blockquote text-wrap mt-4">
+                    <p class="mb-0">{{post.body|safe}}</p>
+                </blockquote>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% load static %} 
+{% comment %} call comment app tags {% endcomment %}
+{% get_comments post request.user profile_app_name='accounts' profile_model_name='userprofile' %}
+{% include_bootstrap %} <!-- include bootstrap 4.1.1 -->
+{% include_static %} <!-- include js file and jQuery -->
+{% endblock %}

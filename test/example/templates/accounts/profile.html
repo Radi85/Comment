@@ -1,0 +1,112 @@
+{% extends 'post/postlist.html' %}
+{% block second_col %}
+col-md-8 col-sm-8 mt-5 px-md-5 px-4
+{% endblock second_col %}
+
+
+{% block createbtn %}
+    <div id="createbtn" class="row px-4">
+        <div class="col-sm">
+            <form action="{% url 'post:postlist' %}">
+                <button class="btn btn-success btn-block mb-4" type="submit" >Posts</button>
+            </form>
+        </div>
+    </div>
+{% endblock createbtn %}
+{% block postcontent %}
+    <div class="media bg-light p-3">
+        <div class="row">
+            <div class="col-md-4 col-sm-5 mb-4">
+                <form id="formUpload" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="image-upload w-60 m-auto">
+                        {% if viewed_user == user %}
+                            <label class="m-0" for="id_profile_img">
+                                <div class="hovereffect">
+                                    <img class="img-responsive w-100" src="{{ viewed_user.userprofile.image.url }}" alt="">
+                                    <div class="overlay">
+                                        <p class="icon-links m-0">
+                                            <i class="fa fa-camera-retro"></i> Edit
+                                        </p>
+                                    </div>
+                                </div>
+                            </label>
+                            {% for field in form %}
+                                {{ field }}
+                            {% endfor %}
+                        {% else %}
+                            <img class="img-responsive w-100" src="{{ viewed_user.userprofile.image.url }}" alt="">
+                        {% endif %}
+                    </div>
+                </form>
+
+            </div>
+            <div class="col-md-8 col-sm-7 border-left border-success">
+                <div class="media-body">
+                    <div class="h2">
+                        {{viewed_user.username}}
+                    </div>
+                    <div class="pb-2">
+                        <small>Join Date: {{viewed_user.date_joined|date:"N d, Y"}}</small><br/>
+                    </div>
+                    <div class="pb-2">
+                        <small>Last login: {{viewed_user.last_login|timesince}}</small><br/>
+                    </div>
+                    <h5>Number of Posts:  <span class="badge badge-success badge-pill ml-2 ml-md-3">{{viewed_user.post_set.all.count}}</span></h5>
+
+                </div>
+            </div>
+            <div class="col-12 p-sm-4 p-md-5">
+                <h6>First Name: {{viewed_user.first_name}}</h6>
+                <h6>Last Name: {{viewed_user.last_name}}</h6>
+                {% if viewed_user.profile.birth_date %}
+                    <h6>Date of Birth: {{viewed_user.profile.birth_date}}</h6>
+                {% endif %}
+
+                {% if viewed_user.profile.bio %}
+                    <blockquote class="blockquote">
+                        <h5 class="mt-5">BIO:</h5>
+                        <footer class="blockquote-footer">
+                            {{viewed_user.username}}  | <cite title="Source Title">{{viewed_user.profile.bio}}</cite>
+                        </footer>
+                    </blockquote>
+                {% endif %}
+            </div>
+            <div class="px-sm-4 px-md-5">
+                <div class="card rounded-0 border-success d-sm-flex" style="height: 300px">
+                    <div class="card-header">
+                        <h5 class="text-muted">
+                            {{viewed_user.username }} posts
+                            <span class="float-right badge badge-success badge-pill">
+                                <small>{{viewed_user.post_set.all.count}}</small>
+                            </span>
+                        </h5>
+                        <input id="search-input" class="w-100 border border-success rounded" type="text" placeholder="search for a post"/>
+                    </div>
+                    <ul id="post-search" class="list-group">
+                        {% for post in viewed_user.post_set.all %}
+                            {% if viewed_user == user %}
+                                <div class="list-group-item js-hide-div">
+                                    <div class="row">
+                                        <div class="col-10">
+                                            <a class="list-group-item-action" href="{% url 'post:postdetail' slug=post.slug %}">
+                                                {{post.title_}}</br>
+                                                <small>{{post.editdate}}</small>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <a class="list-group-item list-group-item-action" href="{% url 'post:postdetail' slug=post.slug %}">
+                                    {{post.title_}}</br>
+                                    <small>{{post.editdate}}</small>
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock postcontent %}

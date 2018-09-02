@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<section id="accounts" class="p-top-100">
+    <div class="row">
+    </div>
+    <div class="row">
+        <div class="card bg-light p-4 mb-4 mx-auto card-form-width">
+            <div class="row-fluid">
+                <h3>{% block formheader %}Login{% endblock formheader %}</h3>
+                <hr class="mt-2"/>
+            </div>
+            <form method="post" class="mb-0">
+                {% include 'form.html' %}
+                {% csrf_token %}
+                {% block formbtn %}
+                    <button type="submit" class="btn btn-outline-success btn-block form-btn-w mr-2 mt-2">Login</button>
+                {% endblock formbtn %}
+            </form>
+            {% block form_extra %}
+                <div class="mt-3">
+                    Don't you have account?
+                    <a href="{% url 'accounts:signup' %}">Register</a>
+                </div>
+                <hr>
+                {% comment %}
+                <div class="mb-0 h7"><strong>Login with:</strong></div>
+                <div class="d-flex justify-content-center">
+                   <a class="mx-3 my-2 h1 github-color" href="{% url 'social:begin' 'github' %}"><i class="fa fa-github-square"></i></a>
+                   <a class="mx-3 my-2 h1 facebook-color" href="{% url 'social:begin' 'facebook' %}"><i class="fa fa-facebook-square"></i></a>
+                   <a class="mx-3 my-2 h1 twitter-color" href="{% url 'social:begin' 'twitter' %}"><i class="fa fa-twitter-square"></i></a>
+                   <a class="mx-3 my-2 h1 google-color" href="{% url 'social:begin' 'google-oauth2' %}"><i class="fa fa-google-plus-square"></i></a>
+               </div>
+               {% endcomment %}
+            {% endblock form_extra %}
+        </div>
+    </div>
+  {% block footercontent %}
+  {% endblock %}
+</section>
+{% endblock %}
