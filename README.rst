@@ -128,11 +128,11 @@ the tag will look like the following:
 
 --------------
 
-Styling
--------
+Customize Styling
+-----------------
 
-If you want to customize your comments style do the following steps: #.
-Create a comment.css file inside your static/css directory. #. The new
-created file will overwrite the file used in the app.
+If you want to customize the default style of comments app , you can do the following steps:
+    1. Create a ``comment.css`` file inside your ``static/css`` directory.
+    2. The new created file will overwrite the original file used in the app.
 
 and you’re done.
