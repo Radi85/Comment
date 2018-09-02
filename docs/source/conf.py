@@ -19,9 +19,9 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'Django-comment-dab'
-copyright = '2018, Radi'
-author = 'Radi'
+project = 'Django-comments-dab'
+copyright = '2018, Radico'
+author = 'Radico'
 
 # The short X.Y version
 version = ''
@@ -39,12 +39,11 @@ release = '1.0.0'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.coverage',
     'sphinx.ext.githubpages',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['ntemplates']
+templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -87,7 +86,7 @@ html_theme = 'alabaster'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['nstatic']
+html_static_path = ['_static']
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -103,7 +102,7 @@ html_static_path = ['nstatic']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Django-comment-dabdoc'
+htmlhelp_basename = 'Django-comments-dabdoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -130,8 +129,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'Django-comment-dab.tex', 'Django-comment-dab Documentation',
-     'Radi', 'manual'),
+    (master_doc, 'Django-comments-dab.tex', 'Django-comments-dab Documentation',
+     'Radico', 'manual'),
 ]
 
 
@@ -140,7 +139,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'django-comment-dab', 'Django-comment-dab Documentation',
+    (master_doc, 'django-comments-dab', 'Django-comments-dab Documentation',
      [author], 1)
 ]
 
@@ -151,10 +150,11 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Django-comment-dab', 'Django-comment-dab Documentation',
-     author, 'Django-comment-dab', 'One line description of project.',
+    (master_doc, 'Django-comments-dab', 'Django-comments-dab Documentation',
+     author, 'Django-comments-dab', 'One line description of project.',
      'Miscellaneous'),
 ]
 
+html_theme = "bizstyle"
 
 # -- Extension configuration -------------------------------------------------

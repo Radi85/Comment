@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=source
 set BUILDDIR=build
-set SPHINXPROJ=Django-comment-dab
+set SPHINXPROJ=Django-comments-dab
 
 if "%1" == "" goto help
 
