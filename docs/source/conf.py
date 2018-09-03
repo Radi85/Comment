@@ -155,6 +155,6 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
-html_theme = "bizstyle"
+html_theme = "sphinx_rtd_theme"
 
 # -- Extension configuration -------------------------------------------------
