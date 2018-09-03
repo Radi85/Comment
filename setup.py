@@ -1,9 +1,12 @@
-# -*- coding: utf-8 -*-
-from setuptools import setup, find_packages
+import os
+from setuptools import find_packages, setup
+
+with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
+    README = readme.read()
 
 setup(
     name='django-comments-dab',
-    version='1.0.0',
+    version='1.0.1',
     packages=find_packages(exclude=['docs', 'test*']),
     include_package_data=True,
     author=u'Radico',
@@ -11,8 +14,13 @@ setup(
     maintainer='Radi Mustafa',
     maintainer_email='mus.radi85@gmail.com',
     url='https://github.com/radi85/Comment',
+    project_urls={
+        'Documentation': 'https://django-comment-dab.readthedocs.io/index.html',
+        'Source Code': 'https://github.com/radi85/Comment',
+    },
     license='MIT',
     description='Django Comment Framework app. It can be associated with any given model.',
+    long_description=README,
     install_requires=[
         'Django>=2.0',
         'django-widget-tweaks>=1.4.2',
