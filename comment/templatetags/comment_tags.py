@@ -32,12 +32,14 @@ def profile_url(obj, profile_app_name, profile_model_name):
     """ returns profile url of user """
     try:
         content_type = ContentType.objects.get(
-                            app_label=profile_app_name,
-                            model=profile_model_name.lower()
-                        )
+            app_label=profile_app_name,
+            model=profile_model_name.lower()
+        )
         profile = content_type.get_object_for_this_type(user=obj.user)
         return profile.get_absolute_url()
     except ContentType.DoesNotExist:
+        return ""
+    except AttributeError:
         return ""
 
 
@@ -46,11 +48,14 @@ def img_url(obj, profile_app_name, profile_model_name):
     """ returns url of profile image of a user """
     try:
         content_type = ContentType.objects.get(
-                            app_label=profile_app_name,
-                            model=profile_model_name.lower()
-                        )
+            app_label=profile_app_name,
+            model=profile_model_name.lower()
+        )
     except ContentType.DoesNotExist:
         return ""
+    except AttributeError:
+        return ""
+
     Profile = content_type.model_class()
     fields = Profile._meta.get_fields()
     profile = content_type.model_class().objects.get(user=obj.user)
@@ -59,13 +64,19 @@ def img_url(obj, profile_app_name, profile_model_name):
             return field.value_from_object(profile).url
 
 
-def get_comments(obj, user, oauth=False, profile_app_name=None, profile_model_name=None):
+def get_comments(obj, user, oauth=False):
     """
     Retrieves list of comments related to a certain object and renders
     The appropriate template to view it
     """
     model_object = type(obj).objects.get(id=obj.id)
     comments = Comment.objects.filter_by_object(model_object)
+    try:
+        profile_app_name = settings.PROFILE_APP_NAME
+        profile_model_name = settings.PROFILE_MODEL_NAME
+    except AttributeError:
+        profile_app_name = None
+        profile_model_name = None
 
     return {
         "commentform": CommentForm(),
