@@ -1,8 +1,8 @@
 Introduction
 ============
 
-django-comments-dab App
------------------------
+django-comments-dab App - v1.0.1
+--------------------------------
 
 **dab stands for Django-Ajax-Bootstrap**
 
@@ -10,7 +10,7 @@ django-comments-dab App
 websites.
 
 It allows you to integrate commenting functionality to any model you
-have eg. blogs, pictures, etc…
+have e.g. blogs, pictures, etc…
 
 *List of actions you can do:*
 
@@ -21,6 +21,6 @@ have eg. blogs, pictures, etc…
     3. Delete a comment you posted. (Authenticated)
 
 
-**-All actions are done by ajax - Jquery 3.2.1**
+**-All actions are done by ajax - JQuery 3.2.1**
 
 **-Bootstrap 4.1.1 is used in comment templates for responsive design.**

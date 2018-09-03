@@ -1,5 +1,5 @@
-django-comments-dab Comments
-============================
+django-comments-dab App - v1.0.1
+================================
 
 **dab stands for Django-Ajax-Bootstrap**
 
@@ -7,7 +7,7 @@ django-comments-dab Comments
 websites.
 
 It allows you to integrate commenting functionality to any model you
-have eg. blogs, pictures, etc…
+have e.g. blogs, pictures, etc…
 
 *List of actions you can do:*
 
@@ -18,7 +18,7 @@ have eg. blogs, pictures, etc…
     3. Delete a comment you posted. (Authenticated)
 
 
-**-All actions are done by ajax - Jquery 3.2.1**
+**-All actions are done by ajax - JQuery 3.2.1**
 
 **-Bootstrap 4.1.1 is used in comment templates for responsive design.**
 
@@ -94,14 +94,12 @@ should be added (e.g. Post) and the appropriate imports as shown below:
 Step 2
 ~~~~~~
 
-``get_comments`` *tag uses 2 positional and 3 optional args*:
+``get_comments`` *tag uses 2 positional and 1 optional args*:
 
     1. The instance of the model. (positional)
     2. User instance. (positional)
     3. oauth. (optional - Default is false)
-    4. profile_app_name. (optional)
-    5. profile_model_name. (optional)
-    
+
 
 ``include_static`` this tag will include required jquery and javascript
 file. ``include_bootstrap`` for bootstrap 4.1.1 if it’s already included
@@ -117,18 +115,20 @@ where object is the instance of post.
     {% include_bootstrap %} # Include bootstrap 4.1.1
     {% include_static %} # Include jQuery 3.2.1 and required js file
 
+
+Integrate existing profile app with comments app
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 If you have profile model for the user and you would like to show the
-profile image on each comment you need to pass the profile_app_name and
-profile_model_name arguments to get_comments tag. (e.g if user profile
+profile image on each comment you need to assign PROFILE_APP_NAME and
+PROFILE_MODEL_NAME variables in your ``settings.py`` file. (e.g if user profile
 app is called ``accounts`` and profile model is called ``UserProfile``)
-the tag will look like the following:
+Update your ``settings.py``:
 
 .. code:: python
 
-    {% load comment_tags %}  # Loading the template tag
-    {% get_comments object request.user profile_app_name='accounts' profile_model_name='userprofile'%}  # Include all the comments belonging to a certain object
-    {% include_bootstrap %} # Include bootstrap 4.1.1
-    {% include_static %} # Include jQuery 3.2.1 and required js file
+    PROFILE_APP_NAME = 'accounts'
+    PROFILE_MODEL_NAME = 'UserProfile' # letter case insensitive
 
 --------------
 
