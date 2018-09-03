@@ -31,8 +31,10 @@ def comment_count(obj):
 def profile_url(obj, profile_app_name, profile_model_name):
     """ returns profile url of user """
     try:
-        content_type = ContentType.objects.get(app_label=profile_app_name,
-                                                model=profile_model_name)
+        content_type = ContentType.objects.get(
+                            app_label=profile_app_name,
+                            model=profile_model_name.lower()
+                        )
         profile = content_type.get_object_for_this_type(user=obj.user)
         return profile.get_absolute_url()
     except ContentType.DoesNotExist:
@@ -43,8 +45,10 @@ def profile_url(obj, profile_app_name, profile_model_name):
 def img_url(obj, profile_app_name, profile_model_name):
     """ returns url of profile image of a user """
     try:
-        content_type = ContentType.objects.get(app_label=profile_app_name,
-                                                model=profile_model_name)
+        content_type = ContentType.objects.get(
+                            app_label=profile_app_name,
+                            model=profile_model_name.lower()
+                        )
     except ContentType.DoesNotExist:
         return ""
     Profile = content_type.model_class()
