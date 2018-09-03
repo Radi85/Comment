@@ -25,6 +25,19 @@ have e.g. blogs, pictures, etc…
 Installation
 ------------
 
+
+Requirements:
+~~~~~~~~~~~~~
+
+    1. **django-widget-tweaks==1.4.2**
+    2. **Bootstrap 4.1.1**
+    3. **jQuery 3.2.1**
+    
+
+Installation:
+~~~~~~~~~~~~~
+
+
 Installation is available via ``pip``
 
 ``$ pip install django-comments-dab``
@@ -61,7 +74,7 @@ In your urls.py:
     )
 
 Migrations for Django 2.0 and later
------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Migrate comments:
 
