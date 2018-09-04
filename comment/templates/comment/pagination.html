@@ -1,0 +1,62 @@
+<nav id="pagination-nav" aria-label="Page navigation" class="mt-3 mb-5">
+    <ul class="pagination justify-content-center pagination-sm">
+        {% if comments.has_previous %}
+            <li class="page-item rounded mx-1">
+                <a class="page-link text-success" href="?page=1#comments">first</a>
+            </li>
+            <li class="page-item rounded mx-1">
+                <a class="page-link text-success" href="?page={{ comments.previous_page_number }}#comments" aria-label="Previous">
+                    &laquo;
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item rounded mx-1 disabled">
+                <a class="page-link">first</a>
+            </li>
+            <li class="page-item rounded mx-1 disabled">
+                <a class="page-link" aria-label="Previous"> &laquo; </a>
+            </li>
+        {% endif %}
+        {% if comments.number > 3 %}
+            <li class="page-item rounded mx-1">
+                <a class="page-link text-success" href="?page=1#comments">...</a>
+            </li>
+        {% endif %}
+
+        {% for page in comments.paginator.page_range %}
+            {% if comments.number == page %}
+                <li class="page-item rounded mx-1 active">
+                    <a class="page-link bg-success">{{ page }}</a>
+                </li>
+            {% elif comments.number >= page|add:"-2" and comments.number <= page|add:"2" %}
+                <li class="page-item rounded mx-1">
+                    <a class="page-link text-success" href="?page={{ page }}#comments">{{ page }}</a>
+                </li>
+            {% endif %}            
+        {% endfor %}
+        
+        {% if comments.number < comments.paginator.num_pages|add:"-2" %}
+            <li class="page-item rounded mx-1">
+                <a class="page-link text-success" href="?page={{ comments.paginator.num_pages }}#comments">...</a>
+            </li>
+        {% endif %}
+
+        {% if comments.has_next %}
+            <li class="page-item rounded mx-1">
+                <a class="page-link text-success" href="?page={{ comments.next_page_number }}#comments" aria-label="Next">
+                    &raquo;
+                </a>
+            </li class="page-item rounded mx-1">
+            <li>
+                <a class="page-link text-success" href="?page={{ comments.paginator.num_pages }}#comments">last </a>
+            </li>
+        {% else %}
+            <li class="page-item rounded mx-1 disabled">
+                <a class="page-link" aria-label="Next">&raquo;</a>
+            </li>
+            <li class="page-item rounded mx-1 disabled">
+                <a class="page-link">last </a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
