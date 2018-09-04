@@ -1,5 +1,6 @@
 from django import template
 from django.conf import settings
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.contenttypes.models import ContentType
 from comment.models import Comment
 from comment.forms import CommentForm
@@ -64,13 +65,24 @@ def img_url(obj, profile_app_name, profile_model_name):
             return field.value_from_object(profile).url
 
 
-def get_comments(obj, user, oauth=False):
+def get_comments(obj, request, oauth=False, paginate=False, cpp=10):
     """
     Retrieves list of comments related to a certain object and renders
     The appropriate template to view it
     """
     model_object = type(obj).objects.get(id=obj.id)
     comments = Comment.objects.filter_by_object(model_object)
+    comments_count = comments.count()
+    if paginate:
+        paginator = Paginator(comments, cpp)
+        page = request.GET.get('page')
+        try:
+            comments = paginator.page(page)
+        except PageNotAnInteger:
+            comments = paginator.page(1)
+        except EmptyPage:
+            comments = paginator.page(paginator.num_pages)
+
     try:
         profile_app_name = settings.PROFILE_APP_NAME
         profile_model_name = settings.PROFILE_MODEL_NAME
@@ -81,12 +93,13 @@ def get_comments(obj, user, oauth=False):
     return {
         "commentform": CommentForm(),
         "model_object": obj,
-        "user": user,
+        "user": request.user,
         "comments": comments,
-        "comments_count": comments.count(),
+        "comments_count": comments_count,
         "oauth": oauth,
         "profile_app_name": profile_app_name,
         "profile_model_name": profile_model_name,
+        "paginate": paginate,
     }
 
 register.inclusion_tag('comment/base.html')(get_comments)
