@@ -7,7 +7,7 @@
         {% include 'comment/create_comment.html' with button_name='comment' is_child=False placeholder="comment on this post..." %}
     </div>
     <div class="js-main-comment mt-5">
-      {% for comment in model_object.comments.all_parent_comments %}
+      {% for comment in comments %}
           {% include 'comment/parent_comment.html' %}
       {% endfor %}
     </div>
@@ -18,3 +18,6 @@
     </div>
   </div>
 </section>
+{% if paginate and comments.paginator.num_pages > 1 %}
+{% include 'comment/pagination.html' %}
+{% endif %}
