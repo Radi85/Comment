@@ -90,6 +90,14 @@ def get_comments(obj, request, oauth=False, paginate=False, cpp=10):
         profile_app_name = None
         profile_model_name = None
 
+    try:
+        if settings.LOGIN_URL.startswith("/"):
+            login_url = settings.LOGIN_URL
+        else:
+            login_url = "/" + settings.LOGIN_URL
+    except AttributeError:
+        login_url = ""
+
     return {
         "commentform": CommentForm(),
         "model_object": obj,
@@ -100,6 +108,7 @@ def get_comments(obj, request, oauth=False, paginate=False, cpp=10):
         "profile_app_name": profile_app_name,
         "profile_model_name": profile_model_name,
         "paginate": paginate,
+        "login_url": login_url,
     }
 
 register.inclusion_tag('comment/base.html')(get_comments)

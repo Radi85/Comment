@@ -26,7 +26,7 @@
 {% else %}
     <div class="d-flex mb-3">
         <p class="text-danger {% if is_child %}h7 my-auto {% endif %}"><em>Join discussion:</em></p>
-        <a class="mx-2 text-success {% if is_child %}h7 my-auto {% endif %}" href="{% url 'accounts:login' %}?next={{request.path}}">Login</a>
+        <a class="mx-2 text-success {% if is_child %}h7 my-auto {% endif %}" href="{{login_url}}?next={{request.path}}">Login</a>
         {% if oauth %}
         <a class="mx-1 my-0 h4 github-color" href="{% url 'social:begin' 'github' %}?next={{request.path}}"><i class="fa fa-github-square"></i></a>
         <a class="mx-1 my-0 h4 facebook-color" href="{% url 'social:begin' 'facebook' %}?next={{request.path}}"><i class="fa fa-facebook-square"></i></a>
