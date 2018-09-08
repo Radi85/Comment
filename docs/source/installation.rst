@@ -1,23 +1,25 @@
 Installation
-============
+------------
 
-Requirements:
-"""""""""""""
+
+Requirements
+~~~~~~~~~~~~
 
     1. **django-widget-tweaks==1.4.2**
     2. **Bootstrap 4.1.1**
     3. **jQuery 3.2.1**
 
 
+Installation
+~~~~~~~~~~~~
 
-Installation:
-"""""""""""""
 
 Installation is available via ``pip``
 
 ::
 
     $ pip install django-comments-dab
+
 
 or via source on github
 
@@ -27,8 +29,15 @@ or via source on github
     $ cd Comment
     $ python setup.py install
 
-Add ``comment`` to your installed_apps in your ``settings.py`` file. It
-should be added after ``django.contrib.auth``:
+
+Settings and urls
+~~~~~~~~~~~~~~~~~
+
+    1. Add ``comment`` to your installed_apps in your ``settings.py`` file. It should be added after ``django.contrib.auth``. and,
+    2. Make sure that ``widget-tweaks`` is already included in installed_apps as well.
+    3. ``LOGIN_URL`` shall be defined in the settings.
+
+your ``settings.py`` should look like the following:
 
 .. code:: python
 
@@ -36,9 +45,12 @@ should be added after ``django.contrib.auth``:
         'django.contrib.admin',
         'django.contrib.auth',
         ...
+        'widget-tweaks',
         'comment',
         ..
     )
+
+    LOGIN_URL = 'login'  # or your actual url
 
 In your urls.py:
 
@@ -50,10 +62,10 @@ In your urls.py:
         ...
     )
 
-Migrations for Django 2.0 and later
-"""""""""""""""""""""""""""""""""""
+Migrations
+~~~~~~~~~~
 
-Migrate comments:
+Migrate comment app:
 
 ::
 

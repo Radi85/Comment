@@ -1,7 +1,7 @@
 Introduction
 ============
 
-django-comments-dab App - v1.1.0
+django-comments-dab App - v1.1.1
 --------------------------------
 
 **dab stands for Django-Ajax-Bootstrap**
@@ -21,6 +21,6 @@ have e.g. blogs, pictures, etc…
     3. Delete a comment you posted. (Authenticated)
 
 
-**-All actions are done by ajax - JQuery 3.2.1**
+- All actions are done by ajax - JQuery 3.2.1
 
-**-Bootstrap 4.1.1 is used in comment templates for responsive design.**
+- Bootstrap 4.1.1 is used in comment templates for responsive design.
