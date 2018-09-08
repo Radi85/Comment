@@ -69,7 +69,7 @@ your ``settings.py`` should look like the following:
         'django.contrib.admin',
         'django.contrib.auth',
         ...
-        'widget-tweaks',
+        'widget_tweaks',
         'comment',
         ..
     )
