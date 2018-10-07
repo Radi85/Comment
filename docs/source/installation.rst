@@ -2,16 +2,18 @@ Installation
 ------------
 
 
-Requirements
-~~~~~~~~~~~~
+Requirements:
+~~~~~~~~~~~~~
 
-    1. **django-widget-tweaks==1.4.2**
-    2. **Bootstrap 4.1.1**
-    3. **jQuery 3.2.1**
+    1. **django==2.1**
+    2. **django-widget-tweaks==1.4.2**
+    3. **djangorestframework==3.8.2**  # for API Framework
+    4. **Bootstrap 4.1.1**
+    5. **jQuery 3.2.1**
 
 
-Installation
-~~~~~~~~~~~~
+Installation:
+~~~~~~~~~~~~~
 
 
 Installation is available via ``pip``
@@ -30,8 +32,8 @@ or via source on github
     $ python setup.py install
 
 
-Settings and urls
-~~~~~~~~~~~~~~~~~
+Settings and urls:
+~~~~~~~~~~~~~~~~~~
 
     1. Add ``comment`` to your installed_apps in your ``settings.py`` file. It should be added after ``django.contrib.auth``. and,
     2. Make sure that ``widget-tweaks`` is already included in installed_apps as well.
@@ -47,6 +49,7 @@ your ``settings.py`` should look like the following:
         ...
         'widget_tweaks',
         'comment',
+        'rest_framework',  # for API Framework
         ..
     )
 
@@ -56,14 +59,16 @@ In your urls.py:
 
 .. code:: python
 
-    urlpatterns = patterns('',
-        ...
+    urlpatterns = patterns(
+        path('admin/', admin.site.urls),
         path('comment/', include('comment.urls')),
+        ...
+        path('api/', include('comment.api.urls')),  # for API Framework
         ...
     )
 
-Migrations
-~~~~~~~~~~
+Migrations:
+~~~~~~~~~~~
 
 Migrate comment app:
 

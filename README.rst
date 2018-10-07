@@ -1,4 +1,4 @@
-django-comments-dab App - v1.1.1
+django-comments-dab App - v1.2.0
 ================================
 
 **dab stands for Django-Ajax-Bootstrap**
@@ -11,11 +11,13 @@ have e.g. blogs, pictures, etc…
 
 *List of actions you can do:*
 
-    1. Add a comment. (Authenticated)
+    1. Post a new comment. (Authenticated)
 
-    2. Edit a comment you posted. (Authenticated)
+    2. Reply to an existing comment. (Authenticated)
 
-    3. Delete a comment you posted. (Authenticated)
+    3. Edit a comment you posted. (Authenticated)
+
+    4. Delete a comment you posted. (Authenticated)
 
 
 - All actions are done by ajax - JQuery 3.2.1
@@ -29,9 +31,11 @@ Installation
 Requirements:
 ~~~~~~~~~~~~~
 
-    1. **django-widget-tweaks==1.4.2**
-    2. **Bootstrap 4.1.1**
-    3. **jQuery 3.2.1**
+    1. **django==2.1**
+    2. **django-widget-tweaks==1.4.2**
+    3. **djangorestframework==3.8.2**  # for API Framework
+    4. **Bootstrap 4.1.1**
+    5. **jQuery 3.2.1**
 
 
 Installation:
@@ -71,6 +75,7 @@ your ``settings.py`` should look like the following:
         ...
         'widget_tweaks',
         'comment',
+        'rest_framework',  # for API Framework
         ..
     )
 
@@ -80,9 +85,11 @@ In your urls.py:
 
 .. code:: python
 
-    urlpatterns = patterns('',
-        ...
+    urlpatterns = patterns(
+        path('admin/', admin.site.urls),
         path('comment/', include('comment.urls')),
+        ...
+        path('api/', include('comment.api.urls')),  # for API Framework
         ...
     )
 
@@ -201,6 +208,74 @@ In your template (e.g. post-detail.html) add the following template tags where o
                     return reverse('profile_url_name')
 
 
+Web API
+-------
+
+django-comments-dab uses django-rest-framework to expose a Web API that provides
+developers with access to the same functionalities offered through the web user interface.
+
+There are 6 methods available to perform the following actions:
+
+
+    1. Post a new comment. (Authenticated)
+
+    2. Reply to an existing comment. (Authenticated)
+
+    3. Edit a comment you posted. (Authenticated)
+
+    4. Delete a comment you posted. (Authenticated)
+
+    5. Retrieve the list of all comments and associated replies.
+
+    6. Retrieve the list of comments and associated replies to a given content type and object ID.
+
+
+
+Setup:
+~~~~~~
+
+To integrate the comment API in your content type (e.g Post model), in serializers.py
+for the Post model add comments field as shown below:
+
+
+.. code:: python
+
+    from rest_framework import serializers
+    from comment.models import Comment
+    from comment.api.serializers import CommentSerializer
+
+
+    class PostSerializer(serializers.ModelSerializer):
+
+        comments = serializers.SerializerMethodField()
+
+        class Meta:
+            model = Post
+            fields = ('id',
+                      ...
+                      ...
+                      'comments')
+
+        def get_comments(self, obj):
+            comments_qs = Comment.objects.filter_by_object(obj)
+            return CommentSerializer(comments_qs, many=True).data
+
+if you would like to have comment list url in your api root url, include the
+comment-list url in the returned response as follows:
+
+
+.. code:: python
+
+    from rest_framework.decorators import api_view
+    from rest_framework.response import Response
+    from rest_framework.reverse import reverse
+
+    @api_view(['GET'])
+    def api_root(request, format=None):
+        return Response({
+            'Posts': reverse('post-list', request=request, format=format),
+            'comments': reverse('comments-list', request=request, format=format),
+        })
 
 
 Customize Styling

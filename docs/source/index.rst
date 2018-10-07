@@ -8,6 +8,7 @@ Welcome to django-comment-dab's documentation!
    introduction
    installation
    setup
+   Web API
    styling
    License
    help
