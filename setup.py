@@ -22,14 +22,14 @@ setup(
     description='Django Comment Framework app. It can be associated with any given model.',
     long_description=README,
     install_requires=[
-        'Django>=2.1',
+        'Django>=2.1.2',
         'django-widget-tweaks>=1.4.2',
         'djangorestframework==3.8.2',
     ],
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
-        'Framework :: Django :: 2.1',
+        'Framework :: Django :: 2.1.2',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
