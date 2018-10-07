@@ -6,7 +6,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
 
 setup(
     name='django-comments-dab',
-    version='1.1.1',
+    version='1.2.0',
     packages=find_packages(exclude=['docs', 'test*']),
     include_package_data=True,
     author=u'Radico',
@@ -22,13 +22,14 @@ setup(
     description='Django Comment Framework app. It can be associated with any given model.',
     long_description=README,
     install_requires=[
-        'Django>=2.0',
+        'Django>=2.1',
         'django-widget-tweaks>=1.4.2',
+        'djangorestframework==3.8.2',
     ],
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
-        'Framework :: Django :: 2.0',
+        'Framework :: Django :: 2.1',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
