@@ -1,7 +1,15 @@
-/* for child comment */
+#comments .border-bottom{
+    border-bottom: 3px solid #00bc8c !important;
+}
+#comments .hr{
+    margin-top: 0.2rem;
+    margin-bottom: 2.5rem;
+}
+#comments .bb{
+    padding-bottom: 0.3rem;
+}
 #comments .text-wrap{
     word-wrap: break-word;
-    /* word-break: break-all; */
 }
 #comments .h7{
     font-size: 0.9rem;
@@ -22,9 +30,6 @@
 #comments textarea:focus{
     border: 1px solid #00bc8c;
     outline: none;
-}
-#comments .border-bottom{
-    border-bottom: 2px solid #00bc8c !important;
 }
 .form-control:focus::placeholder,
 .s-input:focus::placeholder,
