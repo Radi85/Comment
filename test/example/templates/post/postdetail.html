@@ -34,18 +34,18 @@ d-none
                     </span>
                 </h6>
                 <h6>Created on: {{post.date|date:"N d, Y."}}</h6>
-                <h6>Latest update: {{post.editdate|timesince}}</h6>                
+                <h6>Latest update: {{post.editdate|timesince}}</h6>
                 <div class="my-2">
                 </div>
                 <a href="{% url 'post:postlist' %}" class="btn btn-outline-success btn-sm">posts</a>
-                
+
             </div>
         </div>
     </div>
     <div class="card px-lg-4">
         <div class="card-body">
             <div class="card-title">
-                <h1 class="text-center text-wrap"><strong>{{post.title}}</strong></h1>                
+                <h1 class="text-center text-wrap"><strong>{{post.title}}</strong></h1>
             </div>
             <div class="card-text">
                 <hr/>
@@ -57,9 +57,9 @@ d-none
     </div>
 </section>
 
-{% load static %} 
+{% load static %}
 {% comment %} call comment app tags {% endcomment %}
-{% get_comments post request.user profile_app_name='accounts' profile_model_name='userprofile' %}
+{% get_comments post request paginate=True cpp=5 %}
 {% include_bootstrap %} <!-- include bootstrap 4.1.1 -->
 {% include_static %} <!-- include js file and jQuery -->
 {% endblock %}

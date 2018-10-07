@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'post',
     'widget_tweaks',
     'comment',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -80,7 +81,7 @@ WSGI_APPLICATION = 'example.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(os.path.dirname(BASE_DIR), 'db.sqlite3'),
     }
 }
 
@@ -119,7 +120,7 @@ USE_TZ = True
 
 LOGIN_URL = '/accounts/login'
 LOGOUT_URL = '/accounts/logout'
-LOGIN_REDIRECT_URL = '/post/'
+LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 # Static files (CSS, JavaScript, Images)
@@ -135,3 +136,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'root/static_root/')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'root/media_root/')
+
+
+PROFILE_APP_NAME = 'accounts'
+PROFILE_MODEL_NAME = 'userprofile'
