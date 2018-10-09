@@ -18,48 +18,52 @@ d-none
 
 
 {% block postcontent %}
+<div class="row">
+    <div class="col-9">
+        <section id="postdetail" class="mb-5">
+            <div class="js-author-card card mb-5 px-lg-4">
+                <div class="card-body">
+                    <div class="d-none d-sm-inline-block" style="max-width: 120px;">
+                        <img class="w-100 mb-4 align-baseline rounded-circle" src="{{post.author.profile.profile_img.url}}" alt="" >
+                    </div>
+                    <div class="d-inline-block ml-4">
+                        <h6>Author:
+                            <span class="h5">
+                                <a class="nounderline text-capitalize badge badge-light" href="{% url 'accounts:profile' username=post.author.username %}">
+                                    <strong>{{ post.author.username }}</strong>
+                                </a>
+                            </span>
+                        </h6>
+                        <h6>Created on: {{post.date|date:"N d, Y."}}</h6>
+                        <h6>Latest update: {{post.editdate|timesince}}</h6>
+                        <div class="my-2">
+                        </div>
+                        <a href="{% url 'post:postlist' %}" class="btn btn-outline-success btn-sm">posts</a>
 
-<section id="postdetail" class="mb-5">
-    <div class="js-author-card card mb-5 px-lg-4">
-        <div class="card-body">
-            <div class="d-none d-sm-inline-block" style="max-width: 120px;">
-                <img class="w-100 mb-4 align-baseline rounded-circle" src="{{post.author.profile.profile_img.url}}" alt="" >
-            </div>
-            <div class="d-inline-block ml-4">
-                <h6>Author:
-                    <span class="h5">
-                        <a class="nounderline text-capitalize badge badge-light" href="{% url 'accounts:profile' username=post.author.username %}">
-                            <strong>{{ post.author.username }}</strong>
-                        </a>
-                    </span>
-                </h6>
-                <h6>Created on: {{post.date|date:"N d, Y."}}</h6>
-                <h6>Latest update: {{post.editdate|timesince}}</h6>
-                <div class="my-2">
+                    </div>
                 </div>
-                <a href="{% url 'post:postlist' %}" class="btn btn-outline-success btn-sm">posts</a>
-
             </div>
-        </div>
+            <div class="card px-lg-4">
+                <div class="card-body">
+                    <div class="card-title">
+                        <h1 class="text-center text-wrap"><strong>{{post.title}}</strong></h1>
+                    </div>
+                    <div class="card-text">
+                        <hr/>
+                        <blockquote class="blockquote text-wrap mt-4">
+                            <p class="mb-0">{{post.body|safe}}</p>
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+        </section>
+        {% load static %}
+        {% comment %} call comment app tags {% endcomment %}
+        {% get_comments post request paginate=True cpp=5 %}        
     </div>
-    <div class="card px-lg-4">
-        <div class="card-body">
-            <div class="card-title">
-                <h1 class="text-center text-wrap"><strong>{{post.title}}</strong></h1>
-            </div>
-            <div class="card-text">
-                <hr/>
-                <blockquote class="blockquote text-wrap mt-4">
-                    <p class="mb-0">{{post.body|safe}}</p>
-                </blockquote>
-            </div>
-        </div>
-    </div>
-</section>
+    <div class="col-3">
 
-{% load static %}
-{% comment %} call comment app tags {% endcomment %}
-{% get_comments post request paginate=True cpp=5 %}
-{% include_bootstrap %} <!-- include bootstrap 4.1.1 -->
-{% include_static %} <!-- include js file and jQuery -->
+    </div>
+
+</div>
 {% endblock %}

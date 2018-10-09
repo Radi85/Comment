@@ -1,6 +1,16 @@
 /* body{
     font-family: sans-serif, Helvetica, Arial, -apple-system, ubuntu;
 } */
+
+
+.customized_styel{
+    padding: 0.25rem 0.1rem !important;
+    font-size: 0.80rem !important;
+}
+#comments textarea:focus {
+    border: 1px solid #4b8ed5 !important;
+}
+
 label{
     font-size: 14px !important;
     font-weight: 700;
