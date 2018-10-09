@@ -5,7 +5,7 @@
 
 # C extensions
 *.so
-
+comment/backup_templates/comment/*
 # Distribution / packaging
 bin/
 build/
