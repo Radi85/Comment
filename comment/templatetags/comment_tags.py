@@ -133,6 +133,12 @@ def include_static():
 
 register.inclusion_tag('comment/static.html')(include_static)
 
+def include_static_jquery():
+    """ include static files """
+    return
+
+register.inclusion_tag('comment/static_jquery.html')(include_static_jquery)
+
 def include_bootstrap():
     """ include static files """
     return
