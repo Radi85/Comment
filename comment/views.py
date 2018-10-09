@@ -77,7 +77,7 @@ def edit_comment(request, pk):
             # child comment
             if comment.parent:
                 context['is_parent'] = False
-            return render(request, 'comment/update_done.html', context)
+            return render(request, 'comment/content.html', context)
     else:
         form = CommentForm(instance=comment)
         context = {'comment': comment, 'commentform': form}
