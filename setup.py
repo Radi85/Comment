@@ -6,7 +6,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
 
 setup(
     name='django-comments-dab',
-    version='1.2.0',
+    version='1.2.1',
     packages=find_packages(exclude=['docs', 'test*']),
     include_package_data=True,
     author=u'Radico',
