@@ -1,4 +1,4 @@
-django-comments-dab App - v1.2.0
+django-comments-dab App - v1.2.1
 ================================
 
 **dab stands for Django-Ajax-Bootstrap**
@@ -23,6 +23,7 @@ have e.g. blogs, pictures, etc…
 - All actions are done by ajax - JQuery 3.2.1
 
 - Bootstrap 4.1.1 is used in comment templates for responsive design.
+
 
 Installation
 ------------
@@ -152,9 +153,39 @@ In your template (e.g. post-detail.html) add the following template tags where o
 
     {% load comment_tags %}  # Loading the template tag
     {% get_comments object request %}  # Include all the comments belonging to a certain object
-    {% include_bootstrap %} # Include bootstrap 4.1.1 - remove this line if BS 4.1.1 is already used in your project
-    {% include_static %} # Include jQuery 3.2.1 and required js file
 
+
+**Include static files:**
+
+The comment app has three template tags for static files that the app requires.
+These tags need to be included in the end of your base template.
+
+
+- *Case 1*
+
+    You already have jQuey in your project then the following tags shall be included
+    below jQuery file:
+
+    .. code:: python
+
+        <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+
+        {% load comment_tags %}  # Loading the template tag
+
+        {% include_static %}  # Include comment.js file only.
+        {% include_bootstrap %}  # Include bootstrap 4.1.1 - remove this line if BS 4.1.1 is already used in your project
+
+
+- *Case 2*
+
+    You don't have jQuery in your project then the following tags shall be included:
+
+    .. code:: python
+
+        {% load comment_tags %}  # Loading the template tag
+
+        {% include_static_jquery %}  # Include mini jQuery 3.2.1 and required js file.
+        {% include_bootstrap %}  # Include bootstrap 4.1.1 - remove this line if BS 4.1.1 is already used in your project
 
 
 2. Advanced usage:
@@ -278,11 +309,38 @@ comment-list url in the returned response as follows:
         })
 
 
-Customize Styling
------------------
+Style Customize:
+----------------
+
+1- Bootstrap classes:
+~~~~~~~~~~~~~~~~~~~~~
+
+BS class used in the default template can be now customized from within your templates directory as follows:
+
+    1. Create ``comment`` folder inside your templates directory.
+
+    2. Create new template file ``.html`` with the same name of the default template you wish to override BS classes in it.
+
+    for example to override the BS classes of comment and reply btn do the following:
+
+    create ``templates/comment/create_comment.html``
+
+    .. code:: python
+
+        {% extends "comment/create_comment.html" %}
+
+        {% block post_btn_cls %}
+        btn btn-primary btn-block btn-sm
+        {% endblock post_btn_cls %}
+
+`Read the Doc`_ for more info about template names and block tags name.
+
+.. _`Read the Doc`: https://django-comment-dab.readthedocs.io/
+
+
+2- CSS file:
+~~~~~~~~~~~~
 
 If you want to customize the default style of comments app , you can do the following steps:
     1. Create a ``comment.css`` file inside your ``static/css`` directory.
-    2. The new created file will overwrite the original file used in the app.
-
-and you’re done.
+    2. The new created file will override the original file used in the app.

@@ -46,9 +46,39 @@ In your template (e.g. post-detail.html) add the following template tags where o
 
     {% load comment_tags %}  # Loading the template tag
     {% get_comments object request %}  # Include all the comments belonging to a certain object
-    {% include_bootstrap %} # Include bootstrap 4.1.1 - remove this line if BS 4.1.1 is already used in your project
-    {% include_static %} # Include jQuery 3.2.1 and required js file
 
+
+**Include static files:**
+
+The comment app has three template tags for static files that the app requires.
+These tags need to be included in the end of your base template.
+
+
+- *Case 1*
+
+    You already have jQuey in your project then the following tags shall be included
+    below jQuery file:
+
+    .. code:: python
+
+        <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+
+        {% load comment_tags %}  # Loading the template tag
+
+        {% include_static %}  # Include comment.js file only.
+        {% include_bootstrap %}  # Include bootstrap 4.1.1 - remove this line if BS 4.1.1 is already used in your project
+
+
+- *Case 2*
+
+    You don't have jQuery in your project then the following tags shall be included:
+
+    .. code:: python
+
+        {% load comment_tags %}  # Loading the template tag
+
+        {% include_static_jquery %}  # Include mini jQuery 3.2.1 and required js file.
+        {% include_bootstrap %}  # Include bootstrap 4.1.1 - remove this line if BS 4.1.1 is already used in your project
 
 
 2. Advanced usage:

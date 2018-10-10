@@ -1,7 +1,7 @@
 Introduction
 ============
 
-django-comments-dab App - v1.2.0
+django-comments-dab App - v1.2.1
 --------------------------------
 
 **dab stands for Django-Ajax-Bootstrap**
