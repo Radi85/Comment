@@ -11,17 +11,18 @@ BS class used in the default template can be now customized from within your tem
 
     2. Create new template file ``.html`` with the same name of the default template you wish to override BS classes in it.
 
-    for example to override the BS classes of comment and reply btn do the following:
 
-    create ``templates/comment/create_comment.html``
+for example to override the BS classes of comment and reply btn do the following:
 
-    .. code:: python
+create ``templates/comment/create_comment.html``
 
-        {% extends "comment/create_comment.html" %}
+.. code:: python
 
-        {% block post_btn_cls %}
-        btn btn-primary btn-block btn-sm
-        {% endblock post_btn_cls %}
+    {% extends "comment/create_comment.html" %}
+
+    {% block post_btn_cls %}
+    btn btn-primary btn-block btn-sm
+    {% endblock post_btn_cls %}
 
 
 |
