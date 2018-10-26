@@ -1,5 +1,8 @@
 $(function () {
     var $deleteCommentButton;
+
+    $(".js-comment-input").val('');
+
     // use modal dialog when deleting a item
     var loadForm = function () {
         var btn = $(this);
@@ -13,6 +16,7 @@ $(function () {
                 $("#Modal").modal("show");
             },
             success: function (data) {
+                // comment per page
                 if (btn.attr("name") === "delete-from-profile"){
                     $("#Modal .modal-content").html(data.html_form);
                 // redirect the user to his profile page instead of blog list
@@ -55,9 +59,11 @@ $(function () {
         e.preventDefault();
         var $form = $(this);
         var $formButton = $form.find("button");
-        var $formData = $form.serialize() + '&' + encodeURI($formButton.attr('name'))
-                        + '=' + encodeURI($formButton.text());
         var $thisURL = $form.attr('data-url') || window.location.href;
+        var $formData = $form.serializeArray();
+        // send button name and value to BE
+        $formData.push({name: $formButton.attr('name'), value: $formButton.text()});
+
         $.ajax({
             method: "POST",
             url: $thisURL,
@@ -65,13 +71,9 @@ $(function () {
             success: function handleFormSuccess(data, textStatus, jqXHR){
                 // parent comment
                 if($formButton.text() === 'comment'){
-                    var $comment = $(".js-parent-comment");
-                    if($comment.length > 0){
-                        $(data).insertBefore($comment[0]);
-                    }else{
-                        var $mainDiv = $(".js-main-comment");
-                        $mainDiv.append(data);
-                    }
+                    // reload all comments only when posting parent comment
+                    $("#comments").replaceWith(data);
+
                 }else{
                     // child comment
                     $(data).insertBefore($form);
@@ -85,18 +87,23 @@ $(function () {
                     }else{
                         $reply.replaceWith('<a class="js-reply-link ml-1" href="#">Reply</a>');
                     }
+                    commentCount(1);
                 }
-                // increase comment count after submission
-                commentCount(1);
+
                 // resize and clear input value
                 $(".js-comment-input").attr("style", "height: 31px;");
                 $(".js-comment-btn").prop("disabled", true);
                 $(".js-comment-input").val('');
+
+                // remove pagination query when posting a new comment
+                var uri = window.location.toString();
+                if (uri.indexOf("?") > 0) {
+                    var clean_uri = uri.substring(0, uri.indexOf("?"));
+                    window.history.replaceState({}, document.title, clean_uri);
+                }
             },
             error: function handleFormError(jqXHR, textStatus, errorThrown){
-                // console.log(jqXHR)
-                // console.log(textStatus)
-                // console.log(errorThrown)
+                alert("Unable to post your comment!, please try again");
             },
         });
     };
@@ -151,12 +158,26 @@ $(function () {
 
     var deleteComment = function(e){
         e.preventDefault();
+        var hasParent, paginate, cpp;
         var $form = $(this);
         var $parentComment = $deleteCommentButton.parents().eq(4);
         var $reply = $deleteCommentButton.parents().eq(6).find(".js-reply-link");
         var $replyNumber = $deleteCommentButton.parents().eq(6).find(".js-reply-number");
-        var $formData = $form.serialize();
+        var $formData = $form.serializeArray();
         var $thisURL = $form.attr("data-url");
+
+        // get the current page number and send it to pagination func
+        var currentURL = window.location.href.split("=")[1];
+        pageNumber = parseInt(currentURL, 10);
+
+        // retrieve the comment status parent or child
+        $.each($formData, function(i, field){
+            if(field.name === "has_parent") hasParent = field.value==="True";
+        });
+
+        // send page number to BE
+        $formData.push({name: 'currentPage', value: pageNumber});
+
         $.ajax({
             method: "POST",
             url: $thisURL,
@@ -164,7 +185,8 @@ $(function () {
             success: function deleteCommentDone(data, textStatus, jqXHR){
                 $("#Modal").modal("hide");
                 $parentComment.remove();
-                if(data.hasParent){
+                var $parentCommentArr = $(".js-parent-comment");
+                if(hasParent){
                     // update replies count if a child was deleted
                     var rNum = Number($replyNumber.text())-1;
                     $replyNumber.replaceWith('<span class="js-reply-number text-dark">'+rNum+'</span>');
@@ -173,10 +195,18 @@ $(function () {
                     }else{
                         $reply.replaceWith('<a class="js-reply-link ml-1" href="#">Reply</a>');
                     }
+                    // update total count of comments
+                    commentCount(-1);
                 }
-                // data.count is number of the children of parent comment
-                // and it is 0 if the deleted comment is a child
-                commentCount(-(data.count+1));
+                else {
+                    // reload all comments only when deleting parent comment
+                    $("#comments").replaceWith(data);
+                    // clear BS classes and attr from body tag
+                    $("body").removeClass("modal-open");
+                    $("body").removeAttr("class");
+                    $("body").removeAttr("style");
+                    $(".modal-backdrop").remove();
+                }
             },
             error: function handleFormError(jqXHR, textStatus, errorThrown){
                 alert("Unable to delete your comment!, please try again");
