@@ -103,12 +103,13 @@ def get_comments(obj, request, oauth=False, paginate=False, cpp=10):
         "model_object": obj,
         "user": request.user,
         "comments": comments,
-        "comments_count": comments_count,
+        # "comments_count": comments_count,
         "oauth": oauth,
         "profile_app_name": profile_app_name,
         "profile_model_name": profile_model_name,
         "paginate": paginate,
         "login_url": login_url,
+        "cpp": cpp
     }
 
 register.inclusion_tag('comment/base.html')(get_comments)
