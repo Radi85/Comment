@@ -1,4 +1,5 @@
-<form class="js-comment-delete-form" method="post" data-url="{% url 'comment:delete' pk=comment.id %}">
+{% load comment_tags %}
+<form class="js-comment-delete-form" method="post" data-url="{% if comment %}{% url 'comment:delete' pk=comment.id %}{% endif %}">
     {% csrf_token %}
     <div class="modal-header">
         <h5 class="modal-title">{% block title %}Confirm comment deletion{% endblock title %}</h5>
@@ -11,7 +12,15 @@
     </div>
     <div class="modal-footer">
         <button type="button" class="{% block close_btn_cls %}btn btn-secondary{% endblock close_btn_cls %}" data-dismiss="modal">Close</button>
-        <button id="modal-btn" type="submit" class="{% block del_btn_cls %}btn btn-danger{% endblock del_btn_cls %}" name="">
+
+        <input name="model_name" value="{{model_name}}" hidden>
+        <input name="model_id" value="{{model_id}}" hidden>
+        <input name="app_name" value="{{app_name}}" hidden>
+        <input name="cpp" value="{{cpp}}" hidden>
+        <input name="paginate" value="{{paginate}}" hidden>
+        <input name="has_parent" value="{{has_parent}}" hidden>
+        <input name="oauth" value="{{oauth}}" hidden>
+        <button id="modal-btn" type="submit" class="{% block del_btn_cls %}btn btn-danger{% endblock del_btn_cls %}" name={{cpp}}>
             Delete
         </button>
     </div>

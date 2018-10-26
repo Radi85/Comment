@@ -5,10 +5,14 @@
         {% include 'comment/commentform.html' %}
         <footer class="blockquote-footer edit-comment mt-2">
             <small>
-                {% if profile_app_name and profile_model_name %}
-                <input name="profile_app_name" value="{{ profile_app_name }}" hidden>
-                <input name="profile_model_name" value="{{ profile_model_name }}" hidden>
-                {% endif %}
+                <input name="model_name" value="{% get_model_name model_object %}" hidden>
+                <input name="model_id" value="{{ model_object.id }}" hidden>
+                <input name="app_name" value="{% get_app_name model_object %}" hidden>
+                <input name="cpp" value="{{cpp}}" hidden>
+                <input name="paginate" value="{{paginate}}" hidden>
+                <input name="has_parent" value="{{has_parent}}" hidden>
+                <input name="oauth" value="{{oauth}}" hidden>
+
                 <button class="btn btn-link" type="submit" name="commentform">modify</button>
                 <a class="js-comment-cancel btn btn-link" href="#">cancel</a>
             </small>

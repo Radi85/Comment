@@ -1,5 +1,3 @@
-{% load staticfiles %}
-<link rel="stylesheet" href="{% static 'css/comment.css' %}">
 <section id="comments" class="{% block btn_name %}my-5 mx-3{% endblock btn_name %}">
     <strong class="border-bottom bb"><span class="js-comment-number">{{model_object.comments.all.count}}</span> Comments</strong>
     <hr class="hr"/>
@@ -16,10 +14,10 @@
         <div class="modal-content">
         </div>
     </div>
-  </div>
+    </div>
+    {% if paginate and comments.paginator.num_pages > 1 %}
+    {% block pagination %}
+    {% include 'comment/pagination.html' with active_btn='bg-success' text_style='text-success' li_cls='page-item rounded mx-1' %}
+    {% endblock pagination %}
+    {% endif %}
 </section>
-{% if paginate and comments.paginator.num_pages > 1 %}
-{% block pagination %}
-{% include 'comment/pagination.html' with active_btn='bg-success' text_style='text-success' li_cls='page-item rounded mx-1' %}
-{% endblock pagination %}
-{% endif %}

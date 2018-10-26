@@ -11,8 +11,8 @@
             <cite title="Posted">{{ obj.posted_date|timesince }} ago</cite>
             {% endif %}
             {% if obj.user == user %}
-            | <a class="js-comment-edit{% block edit_link_cls %}{% endblock edit_link_cls %}" href="{% url 'comment:edit' pk=obj.id %}?profile_app_name={{profile_app_name}}&profile_model_name={{profile_model_name}}">edit</a>
-            <button class="js-comment-delete {% block delete_btn_cls %}btn btn-link{% endblock delete_btn_cls %}" data-url="{% url 'comment:delete' pk=obj.id %}">delete</button>
+            | <a class="js-comment-edit{% block edit_link_cls %}{% endblock edit_link_cls %}" href="{% url 'comment:edit' pk=obj.id %}?cpp={{cpp}}&paginate={{paginate}}&model_name={% get_model_name model_object %}&model_id={{ model_object.id }}&app_name={% get_app_name model_object %}&oauth={{oauth}}">edit</a>
+            <button class="js-comment-delete {% block delete_btn_cls %}btn btn-link{% endblock delete_btn_cls %}" data-url="{% url 'comment:delete' pk=obj.id %}?cpp={{cpp}}&paginate={{paginate}}&model_name={% get_model_name model_object %}&model_id={{ model_object.id }}&app_name={% get_app_name model_object %}&oauth={{oauth}}">delete</button>
             {% endif %}
             {% if is_parent %}
             | <span class="js-reply-number text-dark">{{ obj.replies.count }}</span>
