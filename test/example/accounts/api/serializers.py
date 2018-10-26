@@ -1,10 +1,9 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from django_countries.serializers import CountryFieldMixin
 from accounts.models import UserProfile
 
 
-class UserProfileSerializer(CountryFieldMixin, serializers.ModelSerializer):
+class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ('display_name', 'location', 'birth_date')

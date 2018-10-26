@@ -4,6 +4,9 @@ import sys
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "example.settings")
+    comment_app_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    sys.path.insert(0, comment_app_dir)
+    
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

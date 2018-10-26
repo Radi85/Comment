@@ -24,7 +24,7 @@ d-none
             <div class="js-author-card card mb-5 px-lg-4">
                 <div class="card-body">
                     <div class="d-none d-sm-inline-block" style="max-width: 120px;">
-                        <img class="w-100 mb-4 align-baseline rounded-circle" src="{{post.author.profile.profile_img.url}}" alt="" >
+                        <img class="w-100 mb-4 align-baseline rounded-circle" src="{{post.author.userprofile.image.url}}" alt="" >
                     </div>
                     <div class="d-inline-block ml-4">
                         <h6>Author:
@@ -57,9 +57,9 @@ d-none
                 </div>
             </div>
         </section>
-        {% load static %}
+        {# load static #}
         {% comment %} call comment app tags {% endcomment %}
-        {% get_comments post request paginate=True cpp=5 %}        
+        {% get_comments post request paginate=True cpp=5 %}
     </div>
     <div class="col-3">
 

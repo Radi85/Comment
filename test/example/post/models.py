@@ -22,7 +22,7 @@ class Post(models.Model):
         return reverse('post:postdetail', kwargs={'slug': self.slug})
 
     def __str__(self):
-        return f"By {self.author}: {self.title_}"
+        return f"By {self.author}: {self.title[:25]}"
 
     def save(self, *args, **kwargs):
         if not self.id:
