@@ -10,5 +10,6 @@ Welcome to django-comment-dab's documentation!
    setup
    Web API
    styling
+   Changelog
    License
    help
