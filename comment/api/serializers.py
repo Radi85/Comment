@@ -18,14 +18,20 @@ class UserSerializer(serializers.ModelSerializer):
 def create_comment_serializer(model_type=None, user=None, pk=None, slug=None, parent_id=None):
     class CommentCreateSerializer(serializers.ModelSerializer):
         user = UserSerializer(read_only=True)
+        parent = serializers.SerializerMethodField()
+        replies = serializers.SerializerMethodField()
+        reply_count = serializers.SerializerMethodField()
         class Meta:
             model = Comment
             fields = (
                 'id',
                 'user',
                 'content',
+                'parent',
                 'posted_date',
                 'edit_date',
+                'reply_count',
+                'replies',
             )
         def __init__(self, *args, **kwargs):
             self.model_type = model_type
@@ -65,10 +71,29 @@ def create_comment_serializer(model_type=None, user=None, pk=None, slug=None, pa
                     )
             return comment
 
+        def get_parent(self, obj):
+            if obj.parent: # the object has no parent == parent obj
+                return obj.parent.id
+            else:
+                return None
+
+        def get_replies(self, obj):
+            if not obj.parent: # the object has no parent == parent obj
+                return CommentChildSerializer(obj.replies, many=True).data
+            else:
+                return None
+
+        def get_reply_count(self, obj):
+            if not obj.parent: # the object has no parent == parent obj
+                return obj.replies.count()
+            else:
+                return None
+
     return CommentCreateSerializer
 
 class CommentSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
+    parent = serializers.SerializerMethodField()
     replies = serializers.SerializerMethodField()
     reply_count = serializers.SerializerMethodField()
 
@@ -78,11 +103,18 @@ class CommentSerializer(serializers.ModelSerializer):
           'id',
           'user',
           'content',
+          'parent',
           'posted_date',
           'edit_date',
           'reply_count',
           'replies',
           )
+
+    def get_parent(self, obj):
+        if obj.parent: # the object has no parent == parent obj
+            return obj.parent.id
+        else:
+            return None
 
     def get_replies(self, obj):
         if not obj.parent: # the object has no parent == parent obj
@@ -99,20 +131,30 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class CommentChildSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
+    parent = serializers.SerializerMethodField()
     class Meta:
         model = Comment
         fields = (
             'id',
             'user',
             'content',
+            'parent',
             'posted_date',
             'edit_date'
         )
+
+    def get_parent(self, obj):
+        if obj.parent: # the object has no parent == parent obj
+            return obj.parent.id
+        else:
+            return None
 
 
 class CommentDetailSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     parent = serializers.SerializerMethodField()
+    replies = serializers.SerializerMethodField()
+    reply_count = serializers.SerializerMethodField()
     class Meta:
         model = Comment
         fields = (
@@ -122,10 +164,24 @@ class CommentDetailSerializer(serializers.ModelSerializer):
           'parent',
           'posted_date',
           'edit_date',
+          'reply_count',
+          'replies',
           )
 
     def get_parent(self, obj):
         if obj.parent: # the object has no parent == parent obj
             return obj.parent.id
+        else:
+            return None
+
+    def get_replies(self, obj):
+        if not obj.parent: # the object has no parent == parent obj
+            return CommentChildSerializer(obj.replies, many=True).data
+        else:
+            return None
+
+    def get_reply_count(self, obj):
+        if not obj.parent: # the object has no parent == parent obj
+            return obj.replies.count()
         else:
             return None
