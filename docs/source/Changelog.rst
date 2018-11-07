@@ -1,6 +1,14 @@
 Changelog
 =========
 
+
+1.2.3
+-----
+
+- Change the retrieved comments list in the API from all comments to list of comments and associated replies to a given content type and object ID
+
+
+
 1.2.2
 -----
 

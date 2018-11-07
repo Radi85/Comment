@@ -4,7 +4,7 @@ Web API
 django-comments-dab uses django-rest-framework to expose a Web API that provides
 developers with access to the same functionalities offered through the web user interface.
 
-There are 6 methods available to perform the following actions:
+There are 5 methods available to perform the following actions:
 
 
     1. Post a new comment. (Authenticated)
@@ -15,9 +15,7 @@ There are 6 methods available to perform the following actions:
 
     4. Delete a comment you posted. (Authenticated)
 
-    5. Retrieve the list of all comments and associated replies.
-
-    6. Retrieve the list of comments and associated replies to a given content type and object ID.
+    5. Retrieve the list of comments and associated replies to a given content type and object ID.
 
 
 
