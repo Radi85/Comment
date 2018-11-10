@@ -140,3 +140,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'root/media_root/')
 
 PROFILE_APP_NAME = 'accounts'
 PROFILE_MODEL_NAME = 'userprofile'
+#
+COMMENT_PROFILE_API_FIELDS = ('display_name', 'birth_date', 'image')

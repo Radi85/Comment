@@ -26,6 +26,5 @@ class PostDetail(generics.RetrieveUpdateDestroyAPIView):
 def api_root(request, format=None):
     return Response({
         'users': reverse('user-list', request=request, format=format),
-        'Posts': reverse('post-list', request=request, format=format),
-        'comments': reverse('comments-list', request=request, format=format),
+        'Posts': reverse('post-list', request=request, format=format)
     })

@@ -6,7 +6,7 @@ from accounts.models import UserProfile
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ('display_name', 'location', 'birth_date')
+        fields = ('display_name', 'image', 'birth_date')
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
