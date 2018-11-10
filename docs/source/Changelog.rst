@@ -1,6 +1,12 @@
 Changelog
 =========
 
+1.2.4
+-----
+
+- Integrate profile fields with user serializer
+
+
 
 1.2.3
 -----
