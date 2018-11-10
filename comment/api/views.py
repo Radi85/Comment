@@ -40,7 +40,7 @@ class CommentList(generics.ListAPIView):
         model_type = self.request.GET.get("type")
         slug = self.request.GET.get("slug", None)
         pk = self.request.GET.get("id", None)
-        model_qs = ContentType.objects.filter(model=model_type)
+        model_qs = ContentType.objects.filter(model=model_type.lower())
         if not model_qs.exists() and model_qs.count() != 1:
             raise ValidationError(
                 "this is not a valid content type"
