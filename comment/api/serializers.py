@@ -47,7 +47,6 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = get_profile_fields()
 
 
-
 class UserSerializer(serializers.ModelSerializer):
     profile = serializers.SerializerMethodField()
     class Meta:
@@ -70,9 +69,6 @@ class UserSerializer(serializers.ModelSerializer):
             return ProfileSerializer(profile).data
         except AttributeError:
             return None
-
-
-
 
 
 def create_comment_serializer(model_type=None, user=None, pk=None, slug=None, parent_id=None):
@@ -150,6 +146,7 @@ def create_comment_serializer(model_type=None, user=None, pk=None, slug=None, pa
                 return None
 
     return CommentCreateSerializer
+
 
 class CommentSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
