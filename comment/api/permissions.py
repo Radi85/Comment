@@ -23,7 +23,6 @@ class QuerySetPermission(permissions.BasePermission):
         model_type = request.GET.get("type")
         slug = request.GET.get("slug", None)
         pk = request.GET.get("id", None)
-        print(model_type)
         try:
             model = ContentType.objects.get(model=model_type.lower()).model_class()
             model_obj = model.objects.filter(Q(id=pk)|Q(slug=slug))
