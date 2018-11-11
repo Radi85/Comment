@@ -1,17 +1,13 @@
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError
 from django.db.models import Q
 from rest_framework import generics, permissions
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework.reverse import reverse
 from comment.models import Comment
 from comment.api.serializers import (
     CommentSerializer,
     CommentDetailSerializer,
     create_comment_serializer,
 )
-from comment.api.permissions import IsOwnerOrReadOnly
+from comment.api.permissions import IsOwnerOrReadOnly, QuerySetPermission
 
 
 class CommentCreate(generics.CreateAPIView):
@@ -34,24 +30,21 @@ class CommentCreate(generics.CreateAPIView):
 
 class CommentList(generics.ListAPIView):
     serializer_class = CommentSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly,
+        QuerySetPermission
+    )
 
     def get_queryset(self):
+        '''
+        Parameters are already validated in the QuerySetPermission
+        '''
         model_type = self.request.GET.get("type")
         slug = self.request.GET.get("slug", None)
         pk = self.request.GET.get("id", None)
-        model_qs = ContentType.objects.filter(model=model_type.lower())
-        if not model_qs.exists() and model_qs.count() != 1:
-            raise ValidationError(
-                "this is not a valid content type"
-                )
-        Model = model_qs.first().model_class()
-        model_obj = Model.objects.filter(Q(id=pk)|Q(slug=slug))
-        if not model_obj.exists() and model_obj.count() != 1:
-            raise ValidationError(
-                "this is not a valid id or slug for this model"
-                    )
-        model_obj = model_obj.first()
+        content_type_model = ContentType.objects.get(model=model_type.lower())
+        Model = content_type_model.model_class()
+        model_obj = Model.objects.filter(Q(id=pk)|Q(slug=slug)).first()
         return Comment.objects.filter_by_object(model_obj)
 
 
