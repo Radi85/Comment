@@ -1,10 +1,8 @@
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Q
 from rest_framework import generics, permissions
 from comment.models import Comment
 from comment.api.serializers import (
     CommentSerializer,
-    CommentDetailSerializer,
     create_comment_serializer,
 )
 from comment.api.permissions import IsOwnerOrReadOnly, QuerySetPermission
@@ -16,13 +14,11 @@ class CommentCreate(generics.CreateAPIView):
 
     def get_serializer_class(self):
         model_type = self.request.GET.get("type")
-        slug = self.request.GET.get("slug", None)
-        pk = self.request.GET.get("id", None)
+        pk = self.request.GET.get("id")
         parent_id = self.request.GET.get("parent_id", None)
         return create_comment_serializer(
                 model_type=model_type,
                 pk=pk,
-                slug=slug,
                 parent_id=parent_id,
                 user=self.request.user
                 )
@@ -40,16 +36,15 @@ class CommentList(generics.ListAPIView):
         Parameters are already validated in the QuerySetPermission
         '''
         model_type = self.request.GET.get("type")
-        slug = self.request.GET.get("slug", None)
-        pk = self.request.GET.get("id", None)
+        pk = self.request.GET.get("id")
         content_type_model = ContentType.objects.get(model=model_type.lower())
         Model = content_type_model.model_class()
-        model_obj = Model.objects.filter(Q(id=pk)|Q(slug=slug)).first()
+        model_obj = Model.objects.filter(id=pk).first()
         return Comment.objects.filter_by_object(model_obj)
 
 
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
-    serializer_class = CommentDetailSerializer
+    serializer_class = CommentSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,
                           IsOwnerOrReadOnly)

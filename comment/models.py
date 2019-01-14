@@ -1,8 +1,8 @@
 from django.db import models
-from django.db.models import Q
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+
 
 class CommentManager(models.Manager):
     def all_parent_comments(self):
@@ -11,20 +11,24 @@ class CommentManager(models.Manager):
     def filter_by_object(self, obj):
         content_type = ContentType.objects.get_for_model(obj.__class__)
         object_id = obj.id
-        qs = super(CommentManager, self).filter(content_type=content_type, object_id=object_id).filter(parent=None)
+        qs = super(CommentManager,
+                   self).filter(content_type=content_type,
+                                object_id=object_id).filter(parent=None)
         return qs
 
     def all_comments(self, obj):
         content_type = ContentType.objects.get_for_model(obj.__class__)
         object_id = obj.id
-        qs = super(CommentManager, self).filter(content_type=content_type, object_id=object_id)
+        qs = super(CommentManager,
+                   self).filter(content_type=content_type, object_id=object_id)
         return qs
 
-    def create_by_model_type(self, model_type, pk, slug, content, user, parent_obj=None):
+    def create_by_model_type(self, model_type, pk, content,
+                             user, parent_obj=None):
         model_qs = ContentType.objects.filter(model=model_type)
         if model_qs.exists():
             Model = model_qs.first().model_class()
-            obj_qs = Model.objects.filter(Q(id=pk)|Q(slug=slug))
+            obj_qs = Model.objects.filter(id=pk)
             if obj_qs.exists() and obj_qs.count() == 1:
                 instance = self.model()
                 instance.content = content
@@ -39,14 +43,16 @@ class CommentManager(models.Manager):
 
 
 class Comment(models.Model):
-    user           = models.ForeignKey(User, on_delete=models.CASCADE, default=None)
-    parent         = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
-    content_type   = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id      = models.PositiveIntegerField()
+    user = models.ForeignKey(get_user_model(),
+                             on_delete=models.CASCADE, default=None)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE,
+                               null=True, blank=True)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
-    content        = models.TextField()
-    posted_date    = models.DateTimeField(auto_now_add=True)
-    edit_date      = models.DateTimeField(auto_now=True)
+    content = models.TextField()
+    posted_date = models.DateTimeField(auto_now_add=True)
+    edit_date = models.DateTimeField(auto_now=True)
 
     objects = CommentManager()
 
