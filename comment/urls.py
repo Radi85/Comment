@@ -6,6 +6,6 @@ app_name = 'comment'
 
 urlpatterns = [
     path('create/', create_comment, name='create'),
-    path('edit/<int:pk>', edit_comment, name='edit'),
-    path('delete/<int:pk>', delete_comment, name='delete'),
+    path('edit/<int:pk>/', edit_comment, name='edit'),
+    path('delete/<int:pk>/', delete_comment, name='delete'),
 ]
