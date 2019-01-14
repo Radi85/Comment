@@ -53,7 +53,7 @@ for the Post model add comments field as shown below:
 By default the image field from profile models will be included inside user object
 in JSON response. This can only happen if the profile attributes mentioned early are
 defined in your ``settings.py``. In case you would like to serialize more fields from profile models
-you need to explicitly define the ``COMMENT_PROFILE_API_FIELDS`` tuple inside your ``settings.py``
+you need to explicitly declare the ``COMMENT_PROFILE_API_FIELDS`` tuple inside your ``settings.py``
 as follows:
 
 
@@ -77,11 +77,7 @@ Comment API actions:
 
     - ``type``: is the model name of the content type that have comments associated with it.
     - ``id``: is the id of an object of that model
-    - ``slug``: is the slug of an object of that model
 
-
-
-    **Note** ``id`` or ``slug`` needs to be provided not both
 
 
     For example if you are using axios to retrieve the comment list of second object (id=2) of a model (content type) called post.

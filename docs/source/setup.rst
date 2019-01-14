@@ -4,7 +4,7 @@ Setup
 Step 1
 ~~~~~~
 
-In your models.py add the field comments (Please note that field name
+In your models.py add the field ``comments`` (Please note that field name
 must be ``comments`` not ``comment``) to the model for which comments
 should be added (e.g. Post) and **the appropriate imports** as shown below:
 
@@ -96,10 +96,10 @@ These tags need to be included in the end of your base template.
 
     **2. Integrate existing profile app with comments app:**
 
-    If you have profile model for the user and you would like to show the
+    If you have a profile model for the user and you would like to show the
     profile image on each comment, you need to do these two steps:
 
-    - Assign ``PROFILE_APP_NAME`` and ``PROFILE_MODEL_NAME`` variables in your ``settings.py`` file.
+    - Declare ``PROFILE_APP_NAME`` and ``PROFILE_MODEL_NAME`` variables in your ``settings.py`` file.
         (e.g if user profile app is called ``accounts`` and profile model is called ``UserProfile``)
         Update your ``settings.py`` as follows:
 
@@ -110,7 +110,7 @@ These tags need to be included in the end of your base template.
 
 
 
-    - Make sure that get_absolute_url method is defined in your profile model.
+    - Make sure that ``get_absolute_url`` method is defined in your profile model.
         Update your ``user profile model`` as follows:
 
         .. code:: python

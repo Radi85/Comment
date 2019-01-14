@@ -5,7 +5,7 @@ Installation
 Requirements:
 ~~~~~~~~~~~~~
 
-    1. **django==2.1**
+    1. **django>=2.1.5**
     2. **django-widget-tweaks==1.4.2**
     3. **djangorestframework==3.8.2**  # for API Framework
     4. **Bootstrap 4.1.1**

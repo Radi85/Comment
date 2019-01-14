@@ -1,4 +1,4 @@
-django-comments-dab App - v1.2.4
+django-comments-dab App - v1.3.0
 ================================
 
 **dab stands for Django-Ajax-Bootstrap**
@@ -32,7 +32,7 @@ Installation
 Requirements:
 ~~~~~~~~~~~~~
 
-    1. **django==2.1**
+    1. **django>=2.1.5**
     2. **django-widget-tweaks==1.4.2**
     3. **djangorestframework==3.8.2**  # for API Framework
     4. **Bootstrap 4.1.1**
@@ -111,7 +111,7 @@ Setup
 Step 1
 ~~~~~~
 
-In your models.py add the field comments (Please note that field name
+In your models.py add the field ``comments`` (Please note that field name
 must be ``comments`` not ``comment``) to the model for which comments
 should be added (e.g. Post) and **the appropriate imports** as shown below:
 
@@ -203,10 +203,10 @@ These tags need to be included in the end of your base template.
 
     **2. Integrate existing profile app with comments app:**
 
-    If you have profile model for the user and you would like to show the
+    If you have a profile model for the user and you would like to show the
     profile image on each comment, you need to do these two steps:
 
-    - Assign ``PROFILE_APP_NAME`` and ``PROFILE_MODEL_NAME`` variables in your ``settings.py`` file.
+    - Declare ``PROFILE_APP_NAME`` and ``PROFILE_MODEL_NAME`` variables in your ``settings.py`` file.
         (e.g if user profile app is called ``accounts`` and profile model is called ``UserProfile``)
         Update your ``settings.py`` as follows:
 
@@ -217,7 +217,7 @@ These tags need to be included in the end of your base template.
 
 
 
-    - Make sure that get_absolute_url method is defined in your profile model.
+    - Make sure that ``get_absolute_url`` method is defined in your profile model.
         Update your ``user profile model`` as follows:
 
         .. code:: python
@@ -288,7 +288,7 @@ for the Post model add comments field as shown below:
 By default the image field from profile models will be included inside user object
 in JSON response. This can only happen if the profile attributes mentioned early are
 defined in your ``settings.py``. In case you would like to serialize more fields from profile models
-you need to explicitly define the ``COMMENT_PROFILE_API_FIELDS`` tuple inside your ``settings.py``
+you need to explicitly declare the ``COMMENT_PROFILE_API_FIELDS`` tuple inside your ``settings.py``
 as follows:
 
 
@@ -312,11 +312,8 @@ Comment API actions:
 
     - ``type``: is the model name of the content type that have comments associated with it.
     - ``id``: is the id of an object of that model
-    - ``slug``: is the slug of an object of that model
 
 
-
-    **Note** ``id`` or ``slug`` needs to be provided not both
 
 
     For example if you are using axios to retrieve the comment list of second object (id=2) of a model (content type) called post.

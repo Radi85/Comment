@@ -1,6 +1,13 @@
 Changelog
 =========
 
+1.3.0
+-----
+
+- For more compatibility with ContentType (models), slug option has been deprecated.
+- Now retrieving and creating comment is based on provided ContentType and its id only.
+
+
 1.2.4
 -----
 
