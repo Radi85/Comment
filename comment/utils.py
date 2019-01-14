@@ -14,6 +14,7 @@ def get_model_obj(request):
         model_object = content_type.get_object_for_this_type(
             id=request.POST.get("model_id")
         )
+
     else:
         content_type = ContentType.objects.get(
             app_label=request.GET.get("app_name"),
@@ -24,6 +25,7 @@ def get_model_obj(request):
         )
 
     return model_object
+
 
 def get_view_context(request):
     model_object = get_model_obj(request)
@@ -78,15 +80,6 @@ def get_view_context(request):
         model_name = request.GET.get("model_name")
         model_id = request.GET.get("model_id")
         app_name = request.GET.get("app_name")
-
-        # content_type = ContentType.objects.get(
-        #     app_label=app_name,
-        #     model=model_name.lower()
-        # )
-        # model_object = content_type.get_object_for_this_type(
-        #     id=model_id
-        # )
-
         oauth = request.GET.get("oauth")
         context = {
             "cpp": cpp,

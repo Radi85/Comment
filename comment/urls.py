@@ -1,4 +1,4 @@
-from django.urls import path, re_path
+from django.urls import path
 from comment.views import create_comment, edit_comment, delete_comment
 
 

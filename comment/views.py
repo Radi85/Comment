@@ -1,12 +1,9 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.conf import settings
+from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import redirect_to_login
 from django.template.loader import render_to_string
-from django.contrib.contenttypes.models import ContentType
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from comment.models import Comment
 from comment.forms import CommentForm
 from comment.utils import get_view_context, get_model_obj
@@ -24,10 +21,7 @@ def create_comment(request):
         if form.is_valid():
             # check and get the comment object if it is a parent
             parent_comment = None
-            try:
-                parent_id = int(request.POST.get("parent_id"))
-            except:
-                parent_id = None
+            parent_id = request.POST.get("parent_id")
             if parent_id:
                 parent_qs = Comment.objects.filter(id=parent_id)
                 if parent_qs.exists():
@@ -84,7 +78,6 @@ def edit_comment(request, pk):
 @login_required(login_url='accounts:login')
 def delete_comment(request, pk):
     comment = get_object_or_404(Comment, pk=pk)
-
     has_parent = False
     if comment.parent:
         has_parent = True
