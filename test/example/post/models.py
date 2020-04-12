@@ -5,13 +5,14 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericRelation
 from comment.models import Comment
 
+
 class Post(models.Model):
-    author   = models.ForeignKey(User, on_delete=models.CASCADE, default=None)
-    title    = models.CharField(max_length=150)
-    body     = models.TextField()
-    date     = models.DateTimeField(auto_now_add=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, default=None)
+    title = models.CharField(max_length=150)
+    body = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
     editdate = models.DateTimeField(auto_now=True)
-    slug     = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True)
     # comment app
     comments = GenericRelation(Comment)
 
@@ -32,9 +33,8 @@ class Post(models.Model):
                 _title = _title[:45]
             unique_slug = self.slug = slugify(_title)
             count = 1
-            #keep checking if the new generated slug exits
             while Post.objects.filter(slug=unique_slug).exists():
                 unique_slug = "{0}-{1}".format(self.slug, count)
                 count += 1
             self.slug = unique_slug
-        super(Post, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)

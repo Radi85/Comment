@@ -1,106 +1,102 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.core.exceptions import PermissionDenied
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import redirect_to_login
 from django.template.loader import render_to_string
+from django.views.generic import FormView
+from django.contrib.auth.mixins import LoginRequiredMixin
+
 from comment.models import Comment
 from comment.forms import CommentForm
-from comment.utils import get_view_context, get_model_obj
+from comment.utils import get_comment_context_data, get_model_obj
 
 
-@login_required(login_url='accounts:login')
-def create_comment(request):
-    if not request.user.is_authenticated:
-        return redirect_to_login(request.get_full_path())
+class BaseCommentView(FormView, LoginRequiredMixin):
+    form_class = CommentForm
 
-    if request.method == 'POST':
-        form = CommentForm(request.POST)
-        model_object = get_model_obj(request)
-
-        if form.is_valid():
-            # check and get the comment object if it is a parent
-            parent_comment = None
-            parent_id = request.POST.get("parent_id")
-            if parent_id:
-                parent_qs = Comment.objects.filter(id=parent_id)
-                if parent_qs.exists():
-                    parent_comment = parent_qs.first()
-
-            comment_content = form.cleaned_data['content']
-            comment = Comment.objects.create(
-                content_object=model_object,
-                content=comment_content,
-                user=request.user,
-                parent=parent_comment,
-            )
-            # retrieve context dict after comment been created
-            context = get_view_context(request)
-
-            context['is_parent'] = not parent_comment
-            if request.POST.get("commentform") == "reply":
-                context['reply'] = comment
-                return render(request, 'comment/child_comment.html', context)
-            else:
-                context['comment'] = comment
-                return render(request, 'comment/base.html', context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['comment_form'] = context.pop('form')
+        context.update(get_comment_context_data(self.request))
+        return context
 
 
-@login_required(login_url='accounts:login')
-def edit_comment(request, pk):
-    comment = get_object_or_404(Comment, pk=pk)
-    context = get_view_context(request)
+class CreateComment(BaseCommentView):
+    created_comment = None
+    parent_comment = None
+    is_parent = False
 
-    if not request.user.is_authenticated:
-        return redirect_to_login(request.get_full_path())
-    elif request.user != comment.user:
-        raise PermissionDenied
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.is_parent:
+            context['comment'] = self.created_comment
+        else:
+            context['reply'] = self.created_comment
+        return context
 
-    if request.method == 'POST':
-        form = CommentForm(request.POST, instance=comment)
-        context['commentform'] = form
+    def get_template_names(self):
+        if self.is_parent:
+            return ['comment/base.html']
+        else:
+            return ['comment/child_comment.html']
 
-        if form.is_valid():
-            form.save()
-            context['obj'] = comment
-            context['is_parent'] = True
-            # child comment
-            if comment.parent:
-                context['is_parent'] = False
-            return render(request, 'comment/content.html', context)
-    else:
-        form = CommentForm(instance=comment)
-        context['commentform'] = form
-        context["comment"] = comment
+    def form_valid(self, form):
+        model_object = get_model_obj(self.request)
+        parent_id = self.request.POST.get('parent_id')
+        if parent_id:
+            parent_qs = Comment.objects.filter(id=parent_id)
+            if parent_qs.exists():
+                self.parent_comment = parent_qs.first()
+        comment_content = form.cleaned_data['content']
+        self.created_comment = Comment.objects.create(
+            content_object=model_object,
+            content=comment_content,
+            user=self.request.user,
+            parent=self.parent_comment,
+        )
+        self.is_parent = self.request.POST.get('is_parent') == 'True'
+        return self.render_to_response(self.get_context_data())
+
+
+class UpdateComment(BaseCommentView):
+    updated_comment = None
+
+    def get(self, request, *args, **kwargs):
+        self.updated_comment = get_object_or_404(Comment, pk=self.kwargs.get('pk'))
+        if request.user != self.updated_comment.user:
+            raise PermissionDenied
+        context = self.get_context_data()
+        context['comment_form'] = CommentForm(instance=self.updated_comment)
+        context['comment'] = self.updated_comment
         return render(request, 'comment/update_comment.html', context)
 
+    def post(self, request, *args, **kwargs):
+        self.updated_comment = get_object_or_404(Comment, pk=self.kwargs.get('pk'))
+        if request.user != self.updated_comment.user:
+            raise PermissionDenied
+        form = CommentForm(request.POST, instance=self.updated_comment)
+        context = self.get_context_data()
+        if form.is_valid():
+            form.save()
+            context['obj'] = self.updated_comment
+            context['is_parent'] = not self.updated_comment.parent
+            return render(request, 'comment/content.html', context)
 
-@login_required(login_url='accounts:login')
-def delete_comment(request, pk):
-    comment = get_object_or_404(Comment, pk=pk)
-    has_parent = False
-    if comment.parent:
-        has_parent = True
 
-    if not request.user.is_authenticated:
-        return redirect_to_login(request.get_full_path())
-    elif request.user != comment.user:
-        raise PermissionDenied
-
-    if request.method == 'POST':
-        comment.delete()
-        # retrieve context dict after comment been deleted
-        context = get_view_context(request)
-        context["has_parent"] = has_parent
-        return render(request, 'comment/base.html', context)
-    else:
+class DeleteComment(BaseCommentView):
+    def get(self, request, *args, **kwargs):
+        comment = get_object_or_404(Comment, pk=self.kwargs.get('pk'))
+        if request.user != comment.user:
+            raise PermissionDenied
         data = dict()
-        context = get_view_context(request)
+        context = self.get_context_data()
         context["comment"] = comment
-        context["has_parent"] = has_parent
-        data['html_form'] = render_to_string(
-            'comment/comment_modal.html',
-            context,
-            request=request,
-        )
+        data['html_form'] = render_to_string('comment/comment_modal.html', context, request=request)
         return JsonResponse(data)
+
+    def post(self, request, *args, **kwargs):
+        comment = get_object_or_404(Comment, pk=self.kwargs.get('pk'))
+        if request.user != comment.user:
+            raise PermissionDenied
+        comment.delete()
+        context = self.get_context_data()
+        return render(request, 'comment/base.html', context)

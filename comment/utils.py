@@ -2,93 +2,74 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from comment.models import Comment
-from comment.forms import CommentForm
 
 
 def get_model_obj(request):
-    if request.method == 'POST':
-        content_type = ContentType.objects.get(
-            app_label=request.POST.get("app_name"),
-            model=request.POST.get("model_name").lower()
-        )
-        model_object = content_type.get_object_for_this_type(
-            id=request.POST.get("model_id")
-        )
-
-    else:
-        content_type = ContentType.objects.get(
-            app_label=request.GET.get("app_name"),
-            model=request.GET.get("model_name").lower()
-        )
-        model_object = content_type.get_object_for_this_type(
-            id=request.GET.get("model_id")
-        )
+    app_name = request.GET.get('app_name') or request.POST.get('app_name')
+    model_name = request.GET.get('model_name') or request.POST.get('model_name')
+    model_id = request.GET.get('model_id') or request.POST.get('model_id')
+    content_type = ContentType.objects.get(app_label=app_name, model=model_name.lower())
+    model_object = content_type.get_object_for_this_type(id=model_id)
 
     return model_object
 
 
-def get_view_context(request):
+def has_valid_profile():
+    profile_app_name = getattr(settings, 'PROFILE_APP_NAME', None)
+    profile_model_name = getattr(settings, 'PROFILE_MODEL_NAME', None)
+    if not profile_app_name or not profile_model_name:
+        return False
+    try:
+        content_type = ContentType.objects.get(
+            app_label=profile_app_name,
+            model=profile_model_name.lower()
+        )
+    except ContentType.DoesNotExist:
+        return False
+
+    profile_model = content_type.model_class()
+    fields = profile_model._meta.get_fields()
+    for field in fields:
+        if hasattr(field, "upload_to"):
+            return True
+    return False
+
+
+def get_comment_context_data(request):
     model_object = get_model_obj(request)
-    if request.method == 'POST':
+    comments_per_page = request.POST.get('comments_per_page') or request.GET.get('comments_per_page')
+    oauth = request.POST.get('oauth') or request.GET.get('oauth')
+    page = request.POST.get('currentPage')
+    model_name = request.GET.get('model_name')
+    model_id = request.GET.get('model_id')
+    app_name = request.GET.get('app_name')
 
-        comments = Comment.objects.filter_by_object(model_object)
-
-        cpp = request.POST.get("cpp", None)
-        paginate = request.POST.get("paginate", None)
-        if paginate and cpp:
-            paginator = Paginator(comments, cpp)
-            page = request.POST.get('currentPage')
-            try:
-                comments = paginator.page(page)
-            except PageNotAnInteger:
-                comments = paginator.page(1)
-            except EmptyPage:
-                comments = paginator.page(paginator.num_pages)
-
+    comments = Comment.objects.filter_parents_by_object(model_object)
+    if comments_per_page:
+        paginator = Paginator(comments, comments_per_page)
         try:
-            profile_app_name = settings.PROFILE_APP_NAME
-            profile_model_name = settings.PROFILE_MODEL_NAME
-        except AttributeError:
-            profile_app_name = None
-            profile_model_name = None
+            comments = paginator.page(page)
+        except PageNotAnInteger:
+            comments = paginator.page(1)
+        except EmptyPage:
+            comments = paginator.page(paginator.num_pages)
 
-        try:
-            if settings.LOGIN_URL.startswith("/"):
-                login_url = settings.LOGIN_URL
-            else:
-                login_url = "/" + settings.LOGIN_URL
-        except AttributeError:
-            login_url = ""
+    login_url = getattr(settings, 'LOGIN_URL')
 
-        oauth = request.POST.get("oauth")
-        context = {
-            "commentform": CommentForm(),
-            "model_object": model_object,
-            "user": request.user,
-            "comments": comments,
-            "profile_app_name": profile_app_name,
-            "profile_model_name": profile_model_name,
-            "paginate": paginate,
-            "login_url": login_url,
-            "cpp": cpp,
-            "oauth": oauth
+    if not login_url.startswith('/'):
+        login_url = '/' + login_url
 
-        }
-    else:
-        cpp = request.GET.get("cpp")
-        paginate = request.GET.get("paginate")
-        model_name = request.GET.get("model_name")
-        model_id = request.GET.get("model_id")
-        app_name = request.GET.get("app_name")
-        oauth = request.GET.get("oauth")
-        context = {
-            "cpp": cpp,
-            "paginate": paginate,
-            "model_object": model_object,
-            "model_name": model_name,
-            "model_id": model_id,
-            "app_name": app_name,
-            "oauth": oauth
-            }
+    context = {
+        'model_object': model_object,
+        'model_name': model_name,
+        'model_id': model_id,
+        'app_name': app_name,
+        'user': request.user,
+        'comments': comments,
+        'login_url': login_url,
+        'comments_per_page': comments_per_page,
+        'has_valid_profile': has_valid_profile(),
+        'oauth': oauth
+    }
 
     return context

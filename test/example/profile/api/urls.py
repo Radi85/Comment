@@ -1,6 +1,6 @@
 from django.urls import path, re_path
 from rest_framework.urlpatterns import format_suffix_patterns
-from accounts.api import views
+from profile.api import views
 
 urlpatterns = [
     path('users/', views.user_list, name='user-list'),

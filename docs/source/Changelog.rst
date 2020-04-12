@@ -1,6 +1,14 @@
 Changelog
 =========
 
+1.4.0
+-----
+
+- Remove unnecessary dependencies.
+- Add unittests for all components.
+- Add compatibility checking with django versions >= 2.1
+
+
 1.3.0
 -----
 

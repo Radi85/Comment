@@ -1,6 +1,8 @@
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import permissions
 
+from comment.models import Comment
+
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     """
@@ -14,26 +16,56 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         return obj.user == request.user
 
 
-class QuerySetPermission(permissions.BasePermission):
+class ContentTypePermission(permissions.BasePermission):
+    """
+    This will validate the query params to match a valid ContentType
+    """
     message = ""
 
     def has_permission(self, request, view):
         model_type = request.GET.get("type")
+        if not model_type:
+            self.message = "model type must be provided"
+            return False
         pk = request.GET.get("id")
+        if not pk:
+            self.message = "model id must be provided"
+            return False
         try:
             model_type = model_type.lower()
             ct = ContentType.objects.get(model=model_type).model_class()
-            Model = ct.objects.filter(id=pk)
-            if not Model.exists() and Model.count() != 1:
+            model_class = ct.objects.filter(id=pk)
+            if not model_class.exists() and model_class.count() != 1:
                 self.message = "this is not a valid id for this model"
                 return False
-            return True
         except ContentType.DoesNotExist:
-            self.message = "this is not a valid content type."
-            return False
-        except AttributeError:
-            msg = "content type must be specified to retrieve comment list"
-            self.message = msg
+            self.message = "this is not a valid model type"
             return False
         except ValueError:
-            self.message = "the id must be an integer"
+            self.message = "type id must be an integer"
+            return False
+
+        return True
+
+
+class ParentIdPermission(permissions.BasePermission):
+    """
+    This will validate the parent id
+    """
+    message = ""
+
+    def has_permission(self, request, view):
+        model_id = request.GET.get('id')
+        parent_id = request.GET.get('parent_id')
+        if not parent_id or parent_id == '0':
+            return True
+        try:
+            Comment.objects.get(id=parent_id, object_id=model_id)
+        except Comment.DoesNotExist:
+            self.message = ("this is not a valid id for a parent comment or "
+                            "the parent comment does NOT belong to this model object")
+            return False
+        except ValueError:
+            self.message = "the parent id must be an integer"
+            return False
+        return True

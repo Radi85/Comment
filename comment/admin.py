@@ -3,7 +3,7 @@ from comment.models import Comment
 
 
 class CommentModelAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'posted_date', 'content_type', 'user')
+    list_display = ('__str__', 'posted', 'edited', 'content_type', 'user')
     search_fields = ('content',)
 
     class Meta:

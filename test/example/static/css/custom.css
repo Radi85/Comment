@@ -1,9 +1,8 @@
-/* body{
+body{
     font-family: sans-serif, Helvetica, Arial, -apple-system, ubuntu;
-} */
+}
 
-
-.customized_styel{
+.customized_style{
     padding: 0.25rem 0.1rem !important;
     font-size: 0.80rem !important;
 }

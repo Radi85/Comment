@@ -1,26 +1,43 @@
-django-comments-dab App - v1.3.0
-================================
+.. image:: https://badge.fury.io/py/django-comments-dab.svg
+    :target: https://badge.fury.io/py/django-comments-dab
+
+.. image:: https://badge.fury.io/gh/radi85%2FComment.svg
+    :target: https://badge.fury.io/gh/radi85%2FComment
+
+.. image:: https://travis-ci.org/Radi85/Comment.svg
+    :target: https://travis-ci.org/Radi85/Comment
+
+.. image:: https://coveralls.io/repos/github/Radi85/Comment/badge.svg
+    :target: https://coveralls.io/github/Radi85/Comment
+
+.. image:: https://img.shields.io/pypi/pyversions/django-comments-dab.svg
+   :target: https://pypi.python.org/pypi/django-comments-dab/
+
+.. image:: https://img.shields.io/pypi/djversions/django-comments-dab.svg
+   :target: https://pypi.python.org/pypi/django-comments-dab/
+
+django-comments-dab
+===================
 
 **dab stands for Django-Ajax-Bootstrap**
 
 ``django-comments-dab`` is a commenting application for Django-powered
 websites.
 
-It allows you to integrate commenting functionality with any model you
-have e.g. blogs, pictures, etc…
+It allows you to integrate commenting functionality with any model you have e.g. blogs, pictures, video etc…
 
-*List of actions you can do:*
+*List of actions the authenticated user can do:*
 
-    1. Post a new comment. (Authenticated)
+    1. Post a new comment.
 
-    2. Reply to an existing comment. (Authenticated)
+    2. Reply to an existing comment.
 
-    3. Edit a comment you posted. (Authenticated)
+    3. Edit a comment you posted.
 
-    4. Delete a comment you posted. (Authenticated)
+    4. Delete a comment you posted.
 
 
-- All actions are done by ajax - JQuery 3.2.1
+- All actions are done by ajax calls - JQuery 3.2.1
 
 - Bootstrap 4.1.1 is used in comment templates for responsive design.
 
@@ -28,15 +45,13 @@ have e.g. blogs, pictures, etc…
 Installation
 ------------
 
-
 Requirements:
 ~~~~~~~~~~~~~
 
-    1. **django>=2.1.5**
-    2. **django-widget-tweaks==1.4.2**
-    3. **djangorestframework==3.8.2**  # for API Framework
-    4. **Bootstrap 4.1.1**
-    5. **jQuery 3.2.1**
+    1. **django>=2.1**
+    2. **djangorestframework**  # only for API Framework
+    3. **Bootstrap 4.1.1**
+    4. **jQuery 3.2.1**
 
 
 Installation:
@@ -59,12 +74,11 @@ or via source on github
     $ python setup.py install
 
 
-Settings and urls:
-~~~~~~~~~~~~~~~~~~
+Comment Settings and urls:
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    1. Add ``comment`` to your installed_apps in your ``settings.py`` file. It should be added after ``django.contrib.auth``. and,
-    2. Make sure that ``widget-tweaks`` is already included in installed_apps as well.
-    3. ``LOGIN_URL`` shall be defined in the settings.
+    1. Add ``comment`` to your installed_apps in your ``settings.py`` file. It should be added after ``django.contrib.auth``.
+    2. ``LOGIN_URL`` shall be defined in the settings.
 
 your ``settings.py`` should look like the following:
 
@@ -74,15 +88,13 @@ your ``settings.py`` should look like the following:
         'django.contrib.admin',
         'django.contrib.auth',
         ...
-        'widget_tweaks',
         'comment',
-        'rest_framework',  # for API Framework
         ..
     )
 
     LOGIN_URL = 'login'  # or your actual url
 
-In your urls.py:
+In your ``urls.py``:
 
 .. code:: python
 
@@ -90,7 +102,7 @@ In your urls.py:
         path('admin/', admin.site.urls),
         path('comment/', include('comment.urls')),
         ...
-        path('api/', include('comment.api.urls')),  # for API Framework
+        path('api/', include('comment.api.urls')),  # only for API Framework
         ...
     )
 
@@ -108,12 +120,14 @@ Migrate comment app:
 Setup
 -----
 
-Step 1
-~~~~~~
+Step 1 - Connecting comment model with the target model
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In your models.py add the field ``comments`` (Please note that field name
-must be ``comments`` not ``comment``) to the model for which comments
-should be added (e.g. Post) and **the appropriate imports** as shown below:
+In your models.py add the field ``comments`` as a ``GenericRelation`` field to the required model.
+
+PS: Please note that field name must be ``comments`` **NOT** ``comment``.
+
+E.g. ``Post`` model, as shown below:
 
 .. code:: python
 
@@ -127,16 +141,15 @@ should be added (e.g. Post) and **the appropriate imports** as shown below:
         # the field name should be comments
         comments = GenericRelation(Comment)
 
-Step 2
-~~~~~~
+Step 2 - Adding template tags:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``get_comments`` *tag uses 2 positional and 3 optional args*:
+``render_comments`` *tag uses 2 positional and 2 optional args*:
 
-    1. The instance of the model. (**positional**)
+    1. Instance of the targeted model. (**positional**)
     2. Request object. (**positional**)
     3. oauth. (optional - Default is false)
-    4. paginate. (optional - Default is false)
-    5. cpp (number of Comments Per Page - Default is 10)
+    4. comments_per_page (number of Comments Per Page - Default is 10)
 
 
 1. Basics usage:
@@ -147,68 +160,69 @@ if you already use jquery please make sure it is not the slim version which does
 ``include_bootstrap`` tag is for bootstrap-4.1.1, if it’s already included
 in your project, get rid of this tag.
 
-In your template (e.g. post-detail.html) add the following template tags where object is the instance of post model.
+In your template (e.g. post_detail.html) add the following template tags where ``obj`` is the instance of post model.
 
 .. code:: python
 
     {% load comment_tags %}  # Loading the template tag
-    {% get_comments object request %}  # Include all the comments belonging to a certain object
+    {% render_comments obj request %}  # Render all the comments belonging to a passed object
 
 
 **Include static files:**
 
-The comment app has three template tags for static files that the app requires.
+The ``comment`` app has three template tags for static files that the app requires.
 These tags need to be included in the end of your base template.
 
 
-- **Case 1:** You already have jQuey in your project then the following tags shall be included below jQuery file:
+- **Case 1:** You already have jQuery in your project then the following tags shall be included below jQuery file:
 
 .. code:: html
 
+    {% load comment_tags %}  <!-- Loading the template tag -->
+
     <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
-
-    {% load comment_tags %}  # Loading the template tag
-
-    {% include_static %}  # Include comment.js file only.
-    {% include_bootstrap %}  # Include bootstrap 4.1.1 - remove this line if BS 4.1.1 is already used in your project
+    {% include_static %}  <!-- Include comment.js file only -->
+    {% include_bootstrap %}  <!-- Include bootstrap-4.1.1 - remove this line if it is already used in your project -->
 
 
 - **Case 2:** You don't have jQuery in your project then the following tags shall be included:
 
 .. code:: html
 
-    {% load comment_tags %}  # Loading the template tag
+    {% load comment_tags %}  <!-- Loading the template tag -->
 
-    {% include_static_jquery %}  # Include mini jQuery 3.2.1 and required js file.
-    {% include_bootstrap %}  # Include bootstrap 4.1.1 - remove this line if BS 4.1.1 is already used in your project
+    {% include_static_jquery %}  <!-- Include mini jQuery 3.2.1 and required js file -->
+    {% include_bootstrap %}  <!-- Include bootstrap 4.1.1 - remove this line if BS 4.1.1 is already used in your project -->
 
 
 2. Advanced usage:
 ^^^^^^^^^^^^^^^^^^
 
-    **1. Add pagination:**
+    **1. Customize or remove the pagination:**
 
-    To add pagination to your comments, you need to pass two variables to the ``get_comments`` tag.
-    ``paginate`` must be set to ``True`` and set ``cpp`` var (number of comments per page - default is 10) to the desired number of comments per page.
-    e.g. If you would like to have 5 comments per page, the ``get_comments`` tag should look like this:
+    By default the comments will be paginated, 10 comments per page.
+    To disabled the pagination pass ``comments_per_page=None``
+    To change the default number, pass ``comments_per_page=number`` to ``render_comments``.
 
-    .. code:: python
+    .. code:: html
 
-        {% load comment_tags %}  # Loading the template tag
-        {% get_comments object request paginate=True cpp=5 %}  # Include all the comments belonging to a certain object
-        {% include_bootstrap %} # Include bootstrap 4.1.1 - remove this line if BS 4.1.1 is already used in your project
-        {% include_static %} # Include jQuery 3.2.1 and required js file
+        {% load comment_tags %}  <!-- Loading the template tag -->
+
+        {% render_comments obj request comments_per_page=5 %}  <!-- Include all the comments belonging to a certain object -->
+        {% include_bootstrap %} <!-- Include bootstrap 4.1.1 - remove this line if BS 4.1.1 is already used in your project -->
+        {% include_static %} <!-- Include jQuery 3.2.1 and required js file -->
 
 
 
     **2. Integrate existing profile app with comments app:**
 
     If you have a profile model for the user and you would like to show the
-    profile image on each comment, you need to do these two steps:
+    profile image next to each comment, do the following steps:
 
-    - Declare ``PROFILE_APP_NAME`` and ``PROFILE_MODEL_NAME`` variables in your ``settings.py`` file.
-        (e.g if user profile app is called ``accounts`` and profile model is called ``UserProfile``)
-        Update your ``settings.py`` as follows:
+    - Add ``PROFILE_APP_NAME`` and ``PROFILE_MODEL_NAME`` variables to your ``settings.py`` file.
+        e.g if user profile app is called ``accounts`` and profile model is called ``UserProfile``
+
+        ``settings.py``:
 
         .. code:: python
 
@@ -218,7 +232,6 @@ These tags need to be included in the end of your base template.
 
 
     - Make sure that ``get_absolute_url`` method is defined in your profile model.
-        Update your ``user profile model`` as follows:
 
         .. code:: python
 
@@ -231,14 +244,14 @@ These tags need to be included in the end of your base template.
 
                 # this method must be defined for appropriate url mapping in comments section
                 def get_absolute_url(self):
-                    return reverse('profile_url_name')
+                    return reverse('your_profile_url_name')
 
 
 Web API
 -------
 
 django-comments-dab uses django-rest-framework to expose a Web API that provides
-developers with access to the same functionalities offered through the web user interface.
+developers with access to the same functionality offered through the web user interface.
 
 There are 5 methods available to perform the following actions:
 
@@ -281,15 +294,14 @@ for the Post model add comments field as shown below:
                       'comments')
 
         def get_comments(self, obj):
-            comments_qs = Comment.objects.filter_by_object(obj)
+            comments_qs = Comment.objects.filter_parents_by_object(obj)
             return CommentSerializer(comments_qs, many=True).data
 
 
-By default the image field from profile models will be included inside user object
-in JSON response. This can only happen if the profile attributes mentioned early are
-defined in your ``settings.py``. In case you would like to serialize more fields from profile models
-you need to explicitly declare the ``COMMENT_PROFILE_API_FIELDS`` tuple inside your ``settings.py``
-as follows:
+By default all fields in profile model will be nested inside the user object in JSON response.
+This can only happen if the profile attributes are defined in your ``settings.py``.
+In case you would like to serialize particular fields in the profile model you should explicitly
+declare the ``COMMENT_PROFILE_API_FIELDS`` tuple inside your ``settings.py``:
 
 
 .. code:: python
@@ -319,88 +331,47 @@ Comment API actions:
     For example if you are using axios to retrieve the comment list of second object (id=2) of a model (content type) called post.
     you can do the following:
 
+    ::
 
-    .. code:: javascript
-
-        axios ({
-            method: "get",
-            url: "http://127.0.0.1:8000/api/comments/?type=post&id=2",
-        })
+        $ curl 'http://localhost:8000/api/comments/?type=TYPE&id=ID'
 
 
+    **2- Post a comment or reply to an existing comment:**
 
-    **2- Post a comment and reply to an existing comment:**
-
-    Authorization must be provided in the headers.
-
-    The data queries provided with the url are as above with one more parameter:
+    Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
 
     - ``parent_id``: is 0 or **NOT PROVIDED** for parent comments and for reply comments must be the id of parent comment
 
 
     Example: posting a parent comment
 
-    .. code:: javascript
+    ::
 
-        axios({
-            method: "post",
-            url: "http://127.0.0.1:8000/api/comments/create/?type=post&id=2&parent_id=0",
-            data: {
-                content: "Hello comments"
-            },
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-                Authorization: `Token ${token}`
-            }
-        })
+        $ curl -X POST -u USERNAME:PASSWORD -d "content=CONTENT" "http://localhost:8000/api/comments/create/?type=MODEL&id=ID&parent_id=0"
 
 
     **3- Update a comment:**
 
-    Authorization must be provided in the headers.
+    Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
 
-    The url has no data queries in this action.
-
-    This action requires the ``comment id`` that you want to update:
+    This action requires the ``comment.id`` that you want to update:
 
 
-    .. code:: javascript
+    ::
 
-        axios({
-            method: "put",
-            url: "http://127.0.0.1:8000/api/comments/1",
-            data: {
-                content: "Update comment number 1 (id=1)"
-            },
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-                Authorization: `Token ${token}`
-            }
-        })
+        $ curl -X PUT -u USERNAME:PASSWORD -d "content=CONTENT" "http://localhost:8000/api/comments/ID/
+
 
 
     **4- Delete a comment:**
 
-    Authorization must be provided in the headers.
+    Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
 
-    The url has no data queries in this action.
+    This action requires the ``comment.id`` that you want to delete:
 
-    This action requires the ``comment id`` that you want to delete:
+    ::
 
-
-    .. code:: javascript
-
-        axios({
-            method: "delete",
-            url: "http://127.0.0.1:8000/api/comments/1",
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-                Authorization: `Token ${token}`
-            }
-        })
+        $ curl -X DELETE -u USERNAME:PASSWORD "http://localhost:8000/api/comments/ID/
 
 
 

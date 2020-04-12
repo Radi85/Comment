@@ -6,29 +6,25 @@ from django.contrib.contenttypes.models import ContentType
 
 class CommentManager(models.Manager):
     def all_parent_comments(self):
-        return super(CommentManager, self).all().filter(parent=None)
+        return super().all().filter(parent=None)
 
-    def filter_by_object(self, obj):
+    def filter_parents_by_object(self, obj):
         content_type = ContentType.objects.get_for_model(obj.__class__)
         object_id = obj.id
-        qs = super(CommentManager,
-                   self).filter(content_type=content_type,
-                                object_id=object_id).filter(parent=None)
+        qs = super().filter(content_type=content_type, object_id=object_id).filter(parent=None)
         return qs
 
-    def all_comments(self, obj):
+    def all_comments_by_objects(self, obj):
         content_type = ContentType.objects.get_for_model(obj.__class__)
         object_id = obj.id
-        qs = super(CommentManager,
-                   self).filter(content_type=content_type, object_id=object_id)
+        qs = super().filter(content_type=content_type, object_id=object_id)
         return qs
 
-    def create_by_model_type(self, model_type, pk, content,
-                             user, parent_obj=None):
+    def create_by_model_type(self, model_type, pk, content, user, parent_obj=None):
         model_qs = ContentType.objects.filter(model=model_type)
         if model_qs.exists():
-            Model = model_qs.first().model_class()
-            obj_qs = Model.objects.filter(id=pk)
+            model_class = model_qs.first().model_class()
+            obj_qs = model_class.objects.filter(id=pk)
             if obj_qs.exists() and obj_qs.count() == 1:
                 instance = self.model()
                 instance.content = content
@@ -43,32 +39,33 @@ class CommentManager(models.Manager):
 
 
 class Comment(models.Model):
-    user = models.ForeignKey(get_user_model(),
-                             on_delete=models.CASCADE, default=None)
-    parent = models.ForeignKey('self', on_delete=models.CASCADE,
-                               null=True, blank=True)
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, default=None)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
     content = models.TextField()
-    posted_date = models.DateTimeField(auto_now_add=True)
-    edit_date = models.DateTimeField(auto_now=True)
+    posted = models.DateTimeField(auto_now_add=True)
+    edited = models.DateTimeField(auto_now=True)
 
     objects = CommentManager()
 
     class Meta:
-        ordering = ['-posted_date', ]
+        ordering = ['-posted', ]
 
     def __str__(self):
-        if self.parent is None:
-            return f"comment by {self.user}: {self.content[:20]}"
+        if not self.parent:
+            return f'comment by {self.user}: {self.content[:20]}'
         else:
-            return f"reply by {self.user}: {self.content[:20]}"
+            return f'reply by {self.user}: {self.content[:20]}'
+
+    def __repr__(self):
+        return self.__str__()
 
     @property
     def replies(self):
-        return Comment.objects.filter(parent=self).order_by('posted_date')
+        return Comment.objects.filter(parent=self).order_by('posted')
 
     @property
     def is_edited(self):
-        return self.posted_date.timestamp()+1 < self.edit_date.timestamp()
+        return self.posted.timestamp() + 1 < self.edited.timestamp()

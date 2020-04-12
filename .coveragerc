@@ -1,0 +1,6 @@
+[run]
+branch = True
+include =
+    ./comment/*
+omit =
+    ./comment/tests/*

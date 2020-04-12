@@ -4,27 +4,28 @@
         {% csrf_token %}
         <div class="row">
             <div class="{% block c_form_space %}col-sm-9 col-md-10 px-2 m-2 m-sm-0{% endblock c_form_space %}">
-                {% include 'comment/commentform.html' with placeholder_var=placeholder %}
+                {% include 'comment/comment_form.html' with placeholder=placeholder %}
             </div>
             <div class="{% block post_btn_space %}col-sm-3 col-md-2 px-2 m-3 m-sm-0{% endblock post_btn_space %}">
                 <input name="model_name" value="{% get_model_name model_object %}" hidden>
                 <input name="model_id" value="{{ model_object.id }}" hidden>
                 <input name="app_name" value="{% get_app_name model_object %}" hidden>
-                <input name="cpp" value="{{cpp}}" hidden>
-                <input name="paginate" value="{{paginate}}" hidden>
-                <input name="has_parent" value="{{has_parent}}" hidden>
+                <input name="comments_per_page" value="{{comments_per_page}}" hidden>
+                <input name="is_parent" value="{{is_parent}}" hidden>
                 <input name="oauth" value="{{oauth}}" hidden>
-                {% if is_child %}
-                <input type="hidden" name="parent_id" value="{{ comment.id }}"/>
+                {% if not is_parent %}
+                <input name="parent_id" value="{{ comment.id }}" type="hidden"/>
                 {% endif %}
-                <button disabled class="js-comment-btn {% block post_btn_cls %}btn btn-outline-success btn-block btn-sm{% endblock post_btn_cls %}" type="submit" name="commentform">{{button_name}}</button>
+                <button disabled class="js-comment-btn {% block post_btn_cls %}btn btn-outline-success btn-block btn-sm{% endblock post_btn_cls %}" type="submit" name="form_type" data-type="{% if is_parent %}parent{% else %}child{% endif %}">
+                    {% if is_parent %}Comment{% else %}Reply{% endif %}
+                </button>
             </div>
         </div>
     </form>
 {% else %}
     <div class="d-flex mb-3">
-        <p class="text-danger {% if is_child %}h7 my-auto {% endif %}"><em>Join discussion:</em></p>
-        <a class="mx-2 text-success {% if is_child %}h7 my-auto {% endif %}" href="{{login_url}}?next={{request.path}}">Login</a>
+        <p class="text-danger {% if not is_parent %}h7 my-auto {% endif %}"><em>Join discussion:</em></p>
+        <a class="mx-2 text-success {% if not is_parent %}h7 my-auto {% endif %}" href="{{login_url}}?next={{request.path}}">Login</a>
         {% block oauth %}
         {% if oauth %}
         <a class="mx-1 my-0 h4 github-color" href="{% url 'social:begin' 'github' %}?next={{request.path}}"><i class="fa fa-github-square"></i></a>

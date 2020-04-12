@@ -22,6 +22,7 @@ class PostDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,
                           IsOwnerOrReadOnly)
 
+
 @api_view(['GET'])
 def api_root(request, format=None):
     return Response({
