@@ -37,9 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts',
+    'profile',
     'post',
-    'widget_tweaks',
     'comment',
     'rest_framework',
 ]
@@ -118,27 +117,21 @@ USE_L10N = True
 
 USE_TZ = True
 
-LOGIN_URL = '/accounts/login'
-LOGOUT_URL = '/accounts/logout'
+LOGIN_URL = '/profile/login'
+LOGOUT_URL = '/profile/logout'
 LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/accounts/login/'
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.0/howto/static-files/
+LOGOUT_REDIRECT_URL = '/profile/login/'
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
-    # os.path.join(BASE_DIR, 'comment/static'),
-    )
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'root/static_root/')
+)
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'root/media_root/')
 
 
-PROFILE_APP_NAME = 'accounts'
+PROFILE_APP_NAME = 'profile'
 PROFILE_MODEL_NAME = 'userprofile'
 #
 COMMENT_PROFILE_API_FIELDS = ('display_name', 'birth_date', 'image')

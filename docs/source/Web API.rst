@@ -1,9 +1,8 @@
-
 Web API
 -------
 
 django-comments-dab uses django-rest-framework to expose a Web API that provides
-developers with access to the same functionalities offered through the web user interface.
+developers with access to the same functionality offered through the web user interface.
 
 There are 5 methods available to perform the following actions:
 
@@ -46,15 +45,14 @@ for the Post model add comments field as shown below:
                       'comments')
 
         def get_comments(self, obj):
-            comments_qs = Comment.objects.filter_by_object(obj)
+            comments_qs = Comment.objects.filter_parents_by_object(obj)
             return CommentSerializer(comments_qs, many=True).data
 
 
-By default the image field from profile models will be included inside user object
-in JSON response. This can only happen if the profile attributes mentioned early are
-defined in your ``settings.py``. In case you would like to serialize more fields from profile models
-you need to explicitly declare the ``COMMENT_PROFILE_API_FIELDS`` tuple inside your ``settings.py``
-as follows:
+By default all fields in profile model will be nested inside the user object in JSON response.
+This can only happen if the profile attributes are defined in your ``settings.py``.
+In case you would like to serialize particular fields in the profile model you should explicitly
+declare the ``COMMENT_PROFILE_API_FIELDS`` tuple inside your ``settings.py``:
 
 
 .. code:: python
@@ -80,88 +78,49 @@ Comment API actions:
 
 
 
+
     For example if you are using axios to retrieve the comment list of second object (id=2) of a model (content type) called post.
     you can do the following:
 
+    ::
 
-    .. code:: javascript
-
-        axios ({
-            method: "get",
-            url: "http://127.0.0.1:8000/api/comments/?type=post&id=2",
-        })
+        $ curl 'http://localhost:8000/api/comments/?type=TYPE&id=ID'
 
 
+    **2- Post a comment or reply to an existing comment:**
 
-    **2- Post a comment and reply to an existing comment:**
-
-    Authorization must be provided in the headers.
-
-    The data queries provided with the url are as above with one more parameter:
+    Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
 
     - ``parent_id``: is 0 or **NOT PROVIDED** for parent comments and for reply comments must be the id of parent comment
 
 
     Example: posting a parent comment
 
-    .. code:: javascript
+    ::
 
-        axios({
-            method: "post",
-            url: "http://127.0.0.1:8000/api/comments/create/?type=post&id=2&parent_id=0",
-            data: {
-                content: "Hello comments"
-            },
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-                Authorization: `Token ${token}`
-            }
-        })
+        $ curl -X POST -u USERNAME:PASSWORD -d "content=CONTENT" "http://localhost:8000/api/comments/create/?type=MODEL&id=ID&parent_id=0"
 
 
     **3- Update a comment:**
 
-    Authorization must be provided in the headers.
+    Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
 
-    The url has no data queries in this action.
-
-    This action requires the ``comment id`` that you want to update:
+    This action requires the ``comment.id`` that you want to update:
 
 
-    .. code:: javascript
+    ::
 
-        axios({
-            method: "put",
-            url: "http://127.0.0.1:8000/api/comments/1",
-            data: {
-                content: "Update comment number 1 (id=1)"
-            },
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-                Authorization: `Token ${token}`
-            }
-        })
+        $ curl -X PUT -u USERNAME:PASSWORD -d "content=CONTENT" "http://localhost:8000/api/comments/ID/
+
 
 
     **4- Delete a comment:**
 
-    Authorization must be provided in the headers.
+    Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
 
-    The url has no data queries in this action.
+    This action requires the ``comment.id`` that you want to delete:
 
-    This action requires the ``comment id`` that you want to delete:
+    ::
 
+        $ curl -X DELETE -u USERNAME:PASSWORD "http://localhost:8000/api/comments/ID/
 
-    .. code:: javascript
-
-        axios({
-            method: "delete",
-            url: "http://127.0.0.1:8000/api/comments/1",
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-                Authorization: `Token ${token}`
-            }
-        })

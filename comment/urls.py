@@ -1,11 +1,11 @@
 from django.urls import path
-from comment.views import create_comment, edit_comment, delete_comment
+from comment.views import CreateComment, UpdateComment, DeleteComment
 
 
 app_name = 'comment'
 
 urlpatterns = [
-    path('create/', create_comment, name='create'),
-    path('edit/<int:pk>/', edit_comment, name='edit'),
-    path('delete/<int:pk>/', delete_comment, name='delete'),
+    path('create/', CreateComment.as_view(), name='create'),
+    path('edit/<int:pk>/', UpdateComment.as_view(), name='edit'),
+    path('delete/<int:pk>/', DeleteComment.as_view(), name='delete'),
 ]

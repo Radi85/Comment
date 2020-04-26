@@ -1,8 +1,5 @@
-from django.http.response import HttpResponseRedirect
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.views.generic import ListView, DetailView, UpdateView
-from django.contrib.auth.models import User
-from django.contrib.auth.views import redirect_to_login
 from django.contrib.auth.decorators import login_required
 from post.models import Post
 from post.forms import PostForm
@@ -14,14 +11,12 @@ class PostListView(ListView):
     paginate_by = 10
 
 
-
 class PostDetailView(DetailView):
     model = Post
     template_name = 'post/postdetail.html'
 
 
-
-@login_required(login_url='accounts:login')
+@login_required(login_url='profile:login')
 def createpost_view(request):
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES)
@@ -34,10 +29,3 @@ def createpost_view(request):
         form = PostForm
     context = {'form': form}
     return render(request, 'post/createpost.html', context)
-
-
-class PostUpdateView(UpdateView):
-    form_class = PostForm
-    model = Post
-    template_name = 'post/postupdate.html'
-

@@ -2,11 +2,11 @@
     <strong class="border-bottom bb"><span class="js-comment-number">{{model_object.comments.all.count}}</span> Comments</strong>
     <hr class="hr"/>
     <div class="js-comment comment mb-5">
-        {% include 'comment/create_comment.html' with button_name='comment' is_child=False placeholder="comment on this post..." %}
+        {% include 'comment/create_comment.html' with is_parent=True placeholder="comment on this post..." %}
     </div>
     <div class="js-main-comment mt-5">
       {% for comment in comments %}
-          {% include 'comment/parent_comment.html' %}
+          {% include 'comment/parent_comment.html' with placeholder='reply to this comment...' %}
       {% endfor %}
     </div>
     <div class="modal fade" id="Modal">
@@ -15,7 +15,7 @@
         </div>
     </div>
     </div>
-    {% if paginate and comments.paginator.num_pages > 1 %}
+    {% if comments.paginator.num_pages > 1 %}
     {% block pagination %}
     {% include 'comment/pagination.html' with active_btn='bg-success' text_style='text-success' li_cls='page-item rounded mx-1' %}
     {% endblock pagination %}

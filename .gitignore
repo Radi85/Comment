@@ -50,3 +50,10 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+
+# editor files
+.idea
+
+# env files
+Pipfile.lock
+Pipfile

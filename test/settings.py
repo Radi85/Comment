@@ -7,8 +7,6 @@ DEBUG = True
 SECRET_KEY = 'a2_jwt*^9_)i3=r&)#(=e#3z6k361!5+%7f&do9do-c3ltc4@7khgkgm5'
 
 
-
-
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -18,8 +16,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.messages',
     'comment',
-    'widget_tweaks',
     'test.example.post',
+    'test.example.profile',
 ]
 
 MIDDLEWARE = [
@@ -72,4 +70,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'comment/static'),
-    )
+)
+
+PROFILE_APP_NAME = 'profile'
+PROFILE_MODEL_NAME = 'UserProfile'
+
+LOGIN_URL = 'login'

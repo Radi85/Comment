@@ -2,7 +2,6 @@
 {% extends 'post/postlist.html' %}
 {% comment %} load comment app tags {% endcomment %}
 {% load comment_tags %}
-{% load widget_tweaks %}
 
 {% block first_col %}
 d-none
@@ -18,6 +17,7 @@ d-none
 
 
 {% block postcontent %}
+
 <div class="row">
     <div class="col-9">
         <section id="postdetail" class="mb-5">
@@ -29,7 +29,7 @@ d-none
                     <div class="d-inline-block ml-4">
                         <h6>Author:
                             <span class="h5">
-                                <a class="nounderline text-capitalize badge badge-light" href="{% url 'accounts:profile' username=post.author.username %}">
+                                <a class="nounderline text-capitalize badge badge-light" href="{% url 'profile:profile' username=post.author.username %}">
                                     <strong>{{ post.author.username }}</strong>
                                 </a>
                             </span>
@@ -59,7 +59,7 @@ d-none
         </section>
         {# load static #}
         {% comment %} call comment app tags {% endcomment %}
-        {% get_comments post request paginate=True cpp=5 %}
+        {% render_comments post request comments_per_page=5 %}
     </div>
     <div class="col-3">
 

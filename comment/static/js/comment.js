@@ -68,9 +68,9 @@ $(function () {
             method: "POST",
             url: $thisURL,
             data: $formData,
-            success: function handleFormSuccess(data, textStatus, jqXHR){
+            success: function handleFormSuccess(data){
                 // parent comment
-                if($formButton.text() === 'comment'){
+                if($formButton.data('type') === 'parent'){
                     // reload all comments only when posting parent comment
                     $("#comments").replaceWith(data);
 
@@ -158,7 +158,7 @@ $(function () {
 
     var deleteComment = function(e){
         e.preventDefault();
-        var hasParent, paginate, cpp;
+        var hasParent, paginate, comment_per_page;
         var $form = $(this);
         var $parentComment = $deleteCommentButton.parents().eq(4);
         var $reply = $deleteCommentButton.parents().eq(6).find(".js-reply-link");
@@ -212,7 +212,7 @@ $(function () {
                 alert("Unable to delete your comment!, please try again");
             },
         });
-    }
+    };
 
     $(document).on("submit", '.js-comment-form', commentFormSubmit);
     $(document).on("click", ".js-reply-link", replyLink);

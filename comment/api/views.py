@@ -1,50 +1,38 @@
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import generics, permissions
 from comment.models import Comment
-from comment.api.serializers import (
-    CommentSerializer,
-    create_comment_serializer,
-)
-from comment.api.permissions import IsOwnerOrReadOnly, QuerySetPermission
+from comment.api.serializers import CommentSerializer, CommentCreateSerializer
+
+from comment.api.permissions import IsOwnerOrReadOnly, ContentTypePermission, ParentIdPermission
 
 
 class CommentCreate(generics.CreateAPIView):
-    queryset = Comment.objects.all()
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    serializer_class = CommentCreateSerializer
+    permission_classes = (permissions.IsAuthenticated, ContentTypePermission, ParentIdPermission)
 
-    def get_serializer_class(self):
-        model_type = self.request.GET.get("type")
-        pk = self.request.GET.get("id")
-        parent_id = self.request.GET.get("parent_id", None)
-        return create_comment_serializer(
-                model_type=model_type,
-                pk=pk,
-                parent_id=parent_id,
-                user=self.request.user
-                )
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['user'] = self.request.user
+        context['model_type'] = self.request.GET.get("type")
+        context['model_id'] = self.request.GET.get("id")
+        context['parent_id'] = self.request.GET.get("parent_id")
+        return context
 
 
 class CommentList(generics.ListAPIView):
     serializer_class = CommentSerializer
-    permission_classes = (
-        permissions.IsAuthenticatedOrReadOnly,
-        QuerySetPermission
-    )
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, ContentTypePermission)
 
     def get_queryset(self):
-        '''
-        Parameters are already validated in the QuerySetPermission
-        '''
         model_type = self.request.GET.get("type")
         pk = self.request.GET.get("id")
         content_type_model = ContentType.objects.get(model=model_type.lower())
-        Model = content_type_model.model_class()
-        model_obj = Model.objects.filter(id=pk).first()
-        return Comment.objects.filter_by_object(model_obj)
+        model_class = content_type_model.model_class()
+        model_obj = model_class.objects.filter(id=pk).first()
+        return Comment.objects.filter_parents_by_object(model_obj)
 
 
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
-                          IsOwnerOrReadOnly)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)

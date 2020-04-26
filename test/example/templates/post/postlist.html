@@ -19,7 +19,7 @@ px-0
                             <div class="media-body px-3 px-sm-2 py-2">
                                 <div class="row">
                                     <div class="d-none d-sm-block col-sm-2 pr-1">
-                                        <a href="{% url 'accounts:profile' username=post.author.username %}">
+                                        <a href="{% url 'profile:profile' username=post.author.username %}">
                                             <img class="float-right rounded-circle ml-2 mt-3 w-60"
                                             src="{{post.author.userprofile.image.url}}" alt="{{post.author}}">
                                         </a>
@@ -28,7 +28,7 @@ px-0
                                         <div class="row">
                                             <div class="col-6">
                                                 <h5 class=" mt-1 mx-1">
-                                                    <a class="nounderline badge badge-light" href="{% url 'accounts:profile' username=post.author.username %}">
+                                                    <a class="nounderline badge badge-light" href="{% url 'profile:profile' username=post.author.username %}">
                                                         <strong>
                                                             {% if post.author.profile.display_name %}
                                                                 {{post.author.profile.display_name}}

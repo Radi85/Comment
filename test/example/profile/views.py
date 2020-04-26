@@ -1,20 +1,19 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import login
 from django.contrib.auth.models import User
-from accounts.forms import SignupForm
+from .forms import SignupForm
 
 
 def signup_view(request):
     if request.method == 'POST':
-        signupform = SignupForm(request.POST)
-        if signupform.is_valid():      
-            user = signupform.save()
+        signup_form = SignupForm(request.POST)
+        if signup_form.is_valid():
+            user = signup_form.save()
             login(request, user)
             return redirect('post:postlist')
     else:
-        signupform = SignupForm()
-    context = {'form': signupform}
+        signup_form = SignupForm()
+    context = {'form': signup_form}
     return render(request, 'accounts/signup.html', context)
 
 

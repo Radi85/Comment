@@ -5,7 +5,7 @@
         {% for reply in comment.replies %}
             {% include 'comment/child_comment.html' %}
         {% endfor %}
-        {% include 'comment/create_comment.html' with button_name='reply' is_child=True placeholder="reply to this comment..." %}
+        {% include 'comment/create_comment.html' with is_parent=False placeholder=placeholder %}
     </div>
     <hr/>
 </blockquote>

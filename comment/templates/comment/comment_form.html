@@ -1,0 +1,11 @@
+{% load comment_tags %}
+{% if comment_form.non_field_errors %}
+    <div class='alert alert-danger' role='alert'>
+        {% for error in comment_form.non_field_errors %}
+            {{ error }}
+        {% endfor %}
+    </div>
+{% endif %}
+{% for field in comment_form.visible_fields %}
+       {% render_field field placeholder=placeholder class='js-comment-input form-control form-control-sm rounded-0' %}
+{% endfor %}

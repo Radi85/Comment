@@ -1,4 +1,4 @@
-Welcome to django-comment-dab's documentation!
+Welcome to django-comments-dab's documentation!
 ==============================================
 
 .. toctree::

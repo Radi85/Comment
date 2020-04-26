@@ -1,10 +1,10 @@
 {% load comment_tags %}
 <div class="row">
-    {% if profile_app_name and profile_model_name %}
+    {% if has_valid_profile %}
         <div class="{% block pic_space %}col-2 col-md-1{% endblock pic_space %}">
-            <a href="{% profile_url obj profile_app_name profile_model_name %}">
+            <a href="{% get_profile_url obj %}">
                 <img class="{% block img_cls %}w-100{% endblock img_cls %}"
-                src="{% img_url obj profile_app_name profile_model_name %}" alt="{{obj.user.username}}">
+                     src="{% get_img_path obj %}" alt="{{obj.user.username}}">
             </a>
         </div>
     {% endif %}
