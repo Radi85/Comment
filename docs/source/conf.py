@@ -129,8 +129,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'Django-comment-dab.tex',
-     'Django-comment-dab Documentation',
+    (master_doc, 'Django-comments-dab.tex',
+     'Django-comments-dab Documentation',
      'Radico', 'manual'),
 ]
 
@@ -140,7 +140,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'django-comment-dab', 'Django-comment-dab Documentation',
+    (master_doc, 'django-comments-dab', 'Django-comments-dab Documentation',
      [author], 1)
 ]
 
@@ -151,8 +151,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Django-comment-dab', 'Django-comment-dab Documentation',
-     author, 'Django-comment-dab', 'One line description of project.',
+    (master_doc, 'Django-comments-dab', 'Django-comments-dab Documentation',
+     author, 'Django-comments-dab', 'One line description of project.',
      'Miscellaneous'),
 ]
 
