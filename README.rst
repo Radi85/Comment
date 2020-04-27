@@ -16,6 +16,10 @@
 .. image:: https://img.shields.io/pypi/djversions/django-comments-dab.svg
    :target: https://pypi.python.org/pypi/django-comments-dab/
 
+.. image:: https://readthedocs.org/projects/django-comment-dab/badge/?version=latest
+    :target: https://django-comment-dab.readthedocs.io/?badge=latest
+    :alt: Documentation Status
+
 django-comments-dab
 ===================
 
