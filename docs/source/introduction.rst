@@ -1,5 +1,6 @@
-Introduction
-============
+django-comments-dab
+===================
+
 
 .. image:: https://badge.fury.io/py/django-comments-dab.svg
     :target: https://badge.fury.io/py/django-comments-dab
@@ -19,8 +20,10 @@ Introduction
 .. image:: https://img.shields.io/pypi/djversions/django-comments-dab.svg
    :target: https://pypi.python.org/pypi/django-comments-dab/
 
-django-comments-dab
--------------------
+
+Introduction
+============
+
 
 **dab stands for Django-Ajax-Bootstrap**
 

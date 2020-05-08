@@ -1,6 +1,4 @@
 Django
-django-widget-tweaks
 djangorestframework
 Pillow
-pytz
 django-comments-dab

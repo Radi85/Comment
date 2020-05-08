@@ -1,8 +1,8 @@
 Installation
-------------
+============
 
 Requirements:
-~~~~~~~~~~~~~
+-------------
 
     1. **django>=2.1**
     2. **djangorestframework**  # only for API Framework
@@ -11,7 +11,7 @@ Requirements:
 
 
 Installation:
-~~~~~~~~~~~~~
+-------------
 
 
 Installation is available via ``pip``
@@ -31,7 +31,7 @@ or via source on github
 
 
 Comment Settings and urls:
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 
     1. Add ``comment`` to your installed_apps in your ``settings.py`` file. It should be added after ``django.contrib.auth``.
     2. ``LOGIN_URL`` shall be defined in the settings.
@@ -63,7 +63,7 @@ In your ``urls.py``:
     )
 
 Migrations:
-~~~~~~~~~~~
+-----------
 
 Migrate comment app:
 
