@@ -20,8 +20,24 @@
     :target: https://django-comment-dab.readthedocs.io/?badge=latest
     :alt: Documentation Status
 
+===================
 django-comments-dab
 ===================
+
+    Content:
+
+    * Introduction_
+    * Installation_
+    * Setup_
+    * Usage_
+    * `Web API`_
+    * `Style Customization`_
+    * Example_
+
+.. _Introduction:
+
+Introduction
+============
 
 **dab stands for Django-Ajax-Bootstrap**
 
@@ -45,12 +61,13 @@ It allows you to integrate commenting functionality with any model you have e.g.
 
 - Bootstrap 4.1.1 is used in comment templates for responsive design.
 
+.. _Installation:
 
 Installation
-------------
+============
 
 Requirements:
-~~~~~~~~~~~~~
+-------------
 
     1. **django>=2.1**
     2. **djangorestframework**  # only for API Framework
@@ -59,7 +76,7 @@ Requirements:
 
 
 Installation:
-~~~~~~~~~~~~~
+-------------
 
 
 Installation is available via ``pip``
@@ -79,7 +96,7 @@ or via source on github
 
 
 Comment Settings and urls:
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 
     1. Add ``comment`` to your installed_apps in your ``settings.py`` file. It should be added after ``django.contrib.auth``.
     2. ``LOGIN_URL`` shall be defined in the settings.
@@ -111,7 +128,7 @@ In your ``urls.py``:
     )
 
 Migrations:
-~~~~~~~~~~~
+-----------
 
 Migrate comment app:
 
@@ -120,12 +137,13 @@ Migrate comment app:
     $ python manage.py migrate comment
 
 
+.. _Setup:
 
 Setup
------
+=====
 
 Step 1 - Connecting comment model with the target model
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------------------------
 
 In your models.py add the field ``comments`` as a ``GenericRelation`` field to the required model.
 
@@ -146,7 +164,7 @@ E.g. ``Post`` model, as shown below:
         comments = GenericRelation(Comment)
 
 Step 2 - Adding template tags:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------
 
 ``render_comments`` *tag uses 2 positional and 2 optional args*:
 
@@ -156,8 +174,13 @@ Step 2 - Adding template tags:
     4. comments_per_page (number of Comments Per Page - Default is 10)
 
 
+.. _Usage:
+
+Usage
+=====
+
 1. Basics usage:
-^^^^^^^^^^^^^^^^
+----------------
 
 ``include_static`` this tag will include required jquery and javascript file,
 if you already use jquery please make sure it is not the slim version which doesn't support ajax.
@@ -200,9 +223,10 @@ These tags need to be included in the end of your base template.
 
 
 2. Advanced usage:
-^^^^^^^^^^^^^^^^^^
+------------------
 
-    **1. Customize or remove the pagination:**
+1. Customize or remove the pagination:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     By default the comments will be paginated, 10 comments per page.
     To disabled the pagination pass ``comments_per_page=None``
@@ -218,7 +242,8 @@ These tags need to be included in the end of your base template.
 
 
 
-    **2. Integrate existing profile app with comments app:**
+2. Integrate existing profile app with comments app:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     If you have a profile model for the user and you would like to show the
     profile image next to each comment, do the following steps:
@@ -251,8 +276,10 @@ These tags need to be included in the end of your base template.
                     return reverse('your_profile_url_name')
 
 
+.. _`Web API`:
+
 Web API
--------
+=======
 
 django-comments-dab uses django-rest-framework to expose a Web API that provides
 developers with access to the same functionality offered through the web user interface.
@@ -273,7 +300,7 @@ There are 5 methods available to perform the following actions:
 These actions are explained below.
 
 Setup:
-~~~~~~
+------
 
 To integrate the comment API in your content type (e.g Post model), in ``serializers.py``
 for the Post model add comments field as shown below:
@@ -317,7 +344,7 @@ declare the ``COMMENT_PROFILE_API_FIELDS`` tuple inside your ``settings.py``:
 
 
 Comment API actions:
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 
     **1- Retrieve the list of comments and associated replies to a given content type and object ID:**
 
@@ -379,11 +406,14 @@ Comment API actions:
 
 
 
-Style Customize:
-----------------
+
+.. _`Style Customization`:
+
+Style Customize
+===============
 
 1- Bootstrap classes:
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 BS class used in the default template can be now customized from within your templates directory as follows:
 
@@ -410,10 +440,39 @@ create ``templates/comment/create_comment.html``
 
 
 2- CSS file:
-~~~~~~~~~~~~
+------------
 
 If you want to customize the default style of comments app , you can do the following steps:
 
     1. Create a ``comment.css`` file inside your ``static/css`` directory.
 
     2. The new created file will override the original file used in the app.
+
+
+.. _Example`:
+
+Example
+=======
+
+.. code:: bash
+
+    $ git clone https://github.com/Radi85/Comment.git  # or clone your forked repo
+    $ cd Comment
+    $ python3 -m virtualenv local_env  # or any name. local_env is in .gitignore
+    $ source local_env/bin/activate
+    $ pip install -r test/example/requirements.txt
+    $ python test/example/manage.py runserver
+
+
+Login with:
+
+    username: ``test``
+
+    password: ``django-comments``
+
+.. image:: /docs/_static/img/img_1.png
+
+
+.. image:: /docs/_static/img/img_2.png
+
+
