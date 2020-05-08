@@ -130,6 +130,7 @@ STATICFILES_DIRS = (
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'root/media_root/')
 
+USE_COMMENT_REACTION = True
 
 PROFILE_APP_NAME = 'user_profile'
 PROFILE_MODEL_NAME = 'userprofile'

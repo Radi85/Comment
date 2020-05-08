@@ -53,6 +53,8 @@ docs/_build/
 
 # editor files
 .idea
+.vscode
+*.swp
 
 # env files
 Pipfile.lock

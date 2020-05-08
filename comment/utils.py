@@ -1,7 +1,8 @@
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from comment.models import Comment
+
+from comment.models.comments import Comment
 
 
 def get_model_obj(request):
