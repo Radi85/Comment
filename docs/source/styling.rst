@@ -1,9 +1,9 @@
 Style Customize:
-----------------
+================
 
 
 1- Bootstrap classes:
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 BS class used in the default template can be now customized from within your templates directory as follows:
 
@@ -138,7 +138,7 @@ Templates and block tags names with default BS classes:
 |
 
 2- CSS file:
-~~~~~~~~~~~~
+------------
 
 If you want to customize the default style of comments app , you can do the following steps:
     1. Create a ``comment.css`` file inside your ``static/css`` directory.

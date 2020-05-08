@@ -1,5 +1,5 @@
 Web API
--------
+=======
 
 django-comments-dab uses django-rest-framework to expose a Web API that provides
 developers with access to the same functionality offered through the web user interface.
@@ -20,7 +20,7 @@ There are 5 methods available to perform the following actions:
 These actions are explained below.
 
 Setup:
-~~~~~~
+------
 
 To integrate the comment API in your content type (e.g Post model), in ``serializers.py``
 for the Post model add comments field as shown below:
@@ -64,7 +64,7 @@ declare the ``COMMENT_PROFILE_API_FIELDS`` tuple inside your ``settings.py``:
 
 
 Comment API actions:
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 
     **1- Retrieve the list of comments and associated replies to a given content type and object ID:**
 
@@ -91,10 +91,10 @@ Comment API actions:
 
     Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
 
-    - ``parent_id``: is 0 or **NOT PROVIDED** for parent comments and for reply comments must be the id of parent comment
+    - ``parent_id``: is 0 or **NOT PROVIDED** for parent comments and for reply comments must be the id of the parent comment.
 
 
-    Example: posting a parent comment
+    Example: posting a parent comment:
 
     ::
 
