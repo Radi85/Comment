@@ -1,9 +1,10 @@
 from django.contrib.contenttypes.models import ContentType
-from rest_framework import generics, permissions
-from comment.models import Comment
-from comment.api.serializers import CommentSerializer, CommentCreateSerializer
 
+from rest_framework import generics, permissions
+
+from comment.api.serializers import CommentSerializer, CommentCreateSerializer
 from comment.api.permissions import IsOwnerOrReadOnly, ContentTypePermission, ParentIdPermission
+from comment.models.comments import Comment
 
 
 class CommentCreate(generics.CreateAPIView):
