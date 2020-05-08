@@ -1,7 +1,8 @@
 from django.contrib.contenttypes.models import ContentType
+
 from rest_framework import permissions
 
-from comment.models import Comment
+from comment.models.comments import Comment
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):

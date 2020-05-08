@@ -3,7 +3,8 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.contenttypes.models import ContentType
-from comment.models import Comment
+
+from comment.models.comments import Comment
 from comment.forms import CommentForm
 from comment.utils import has_valid_profile
 

@@ -1,8 +1,10 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
+
 from rest_framework import serializers
-from comment.models import Comment
+
+from comment.models.comments import Comment
 
 
 def get_profile_model():
