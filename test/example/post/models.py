@@ -4,7 +4,7 @@ from django.template.defaultfilters import slugify
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericRelation
 
-from comment.models.comments import Comment
+from comment.models import Comment
 
 
 class Post(models.Model):

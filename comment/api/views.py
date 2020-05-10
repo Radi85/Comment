@@ -4,7 +4,7 @@ from rest_framework import generics, permissions
 
 from comment.api.serializers import CommentSerializer, CommentCreateSerializer
 from comment.api.permissions import IsOwnerOrReadOnly, ContentTypePermission, ParentIdPermission
-from comment.models.comments import Comment
+from comment.models import Comment
 
 
 class CommentCreate(generics.CreateAPIView):
