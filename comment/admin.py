@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from comment.models.comments import Comment
+from comment.models import Comment, Reaction
+from comment.models.reactions import ReactionInstance
 
 
 class CommentModelAdmin(admin.ModelAdmin):
@@ -12,3 +13,17 @@ class CommentModelAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Comment, CommentModelAdmin)
+
+class InlineReactionInstance(admin.TabularInline):
+    model = ReactionInstance
+    extra = 0
+    readonly_fields = ['user', 'reaction', 'reaction_type', 'date_reacted']
+
+
+class ReactionModelAdmin(admin.ModelAdmin):
+    list_display = ('comment', 'likes', 'dislikes')
+    readonly_fields = list_display
+    search_fields = ('comment__content',)
+    inlines = [InlineReactionInstance]
+
+admin.site.register(Reaction, ReactionModelAdmin)
