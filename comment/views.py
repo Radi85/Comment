@@ -5,7 +5,7 @@ from django.template.loader import render_to_string
 from django.views.generic import FormView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from comment.models.comments import Comment
+from comment.models import Comment
 from comment.forms import CommentForm
 from comment.utils import get_comment_context_data, get_model_obj
 

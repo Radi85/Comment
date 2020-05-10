@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from post.models import Post
 
-from comment.models.comments import Comment
+from post.models import Post
+from comment.models import Comment
 from comment.api.serializers import CommentSerializer
 
 
