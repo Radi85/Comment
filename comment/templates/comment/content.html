@@ -1,4 +1,5 @@
 {% load comment_tags %}
+{% load i18n %}
 <div class="{% block text_space %}{% if has_valid_profile %}col-10 col-md-11
             {% else %}co-12 mx-3{% endif %}{% endblock text_space %}">
     <p class="js-comment-content {% block c_text_cls %} h6 mb-0{% endblock c_text_cls %}">{{ obj.content }}</p>
@@ -20,6 +21,10 @@
                 Repl{% if obj.replies.count <= 1 %}y{% else %}ies{% endif %}
             </a>
             {% endif %}
+            | <span class="js-reply-number text-dark">{{ obj.likes }}</span>
+            <small class="js-comment-like {% block like_link_cls %} btn btn-link" {% endblock like_link_cls %} href="{% url 'comment:react' comment_id=obj.id reaction='like' %}">{% trans "Like" %}</small>
+            | <span class="js-reply-number text-dark">{{ obj.dislikes }}</span>
+            <small class="js-comment-dislike {% block dislike_link_cls %} btn btn-link" {% endblock dislike_link_cls %} href="{% url 'comment:react' comment_id=obj.id reaction='dislike' %}">{% trans "Dislike" %}</small>
         </small>
     </footer>
 </div>

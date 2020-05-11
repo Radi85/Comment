@@ -1,7 +1,11 @@
+from enum import IntEnum, unique
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -11,30 +15,30 @@ from comment.models import Comment
 
 class Reaction(models.Model):
 
-    comment = models.ForeignKey(Comment, related_name='comment_reaction', on_delete=models.CASCADE)
+    comment = models.ForeignKey(Comment, related_name='reactions', on_delete=models.CASCADE)
     likes = models.PositiveIntegerField(default=0)
     dislikes = models.PositiveIntegerField(default=0)
     
     objects = models.Manager()
     comment_objects = ReactionManager()
     
-    def increase_likes(self):
+    def _increase_likes(self):
         """Increase likes and save the model"""
         self.likes = models.F('likes') + 1
         self.save()
 
-    def increase_dislikes(self):
+    def _increase_dislikes(self):
         """Increase dislikes and save the model"""
         self.dislikes = models.F('dislikes') + 1
         self.save()
     
-    def decrease_likes(self):
+    def _decrease_likes(self):
         """Decrease likes and save the model"""
         if self.likes > 0:
             self.likes = models.F('likes') - 1
             self.save()
 
-    def decrease_dislikes(self):
+    def _decrease_dislikes(self):
         """Decrease dislikes and save the model"""
         if self.dislikes > 0:
             self.dislikes = models.F('dislikes') - 1
@@ -51,10 +55,10 @@ class Reaction(models.Model):
         Returns:
             None
         """
-        if reaction == ReactionInstance.ReactionType['LIKE']:
-            self.increase_likes()
+        if reaction == ReactionInstance.ReactionType.LIKE.value:
+            self._increase_likes()
         else:
-            self.increase_dislikes()
+            self._increase_dislikes()
 
     def _decrease_reaction_count(self, reaction):
         """
@@ -67,14 +71,92 @@ class Reaction(models.Model):
         Returns:
             None
         """
-        if reaction == ReactionInstance.ReactionType['LIKE']:
-            self.decrease_likes()
+        if reaction == ReactionInstance.ReactionType.LIKE.value:
+            self._decrease_likes()
         else:
-            self.decrease_dislikes()
+            self._decrease_dislikes()
 
-    def update_reaction(self, user, comment, reaction):
+
+class ReactionInstance(models.Model):
+    
+    @unique
+    class ReactionType(IntEnum):
+        LIKE = 1
+        DISLIKE = 2
+
+    reaction_choices = [(r.value, r.name) for r in ReactionType] 
+    
+    reaction = models.ForeignKey(Reaction, related_name='reactions', on_delete=models.CASCADE)
+    user = models.ForeignKey(get_user_model(), related_name='users', on_delete=models.CASCADE)
+    reaction_type = models.SmallIntegerField(choices=reaction_choices)
+    date_reacted = models.DateTimeField(auto_now=timezone.now())
+
+    class Meta:
+        unique_together = ['user', 'reaction']
+
+    @classmethod
+    def clean_reaction_type(cls, reaction_type):
         """
-        Update a Reaction
+        Check if the reaction is a valid one or not
+
+        Args:
+            reaction_type (str): The reaction to be saved
+
+        Returns:
+            int: The integral value that matches to the reaction value in
+                the database
+        """
+        reaction = getattr(cls.ReactionType, reaction_type.upper(), None)
+        if not reaction:
+            return ValidationError(
+                _('%(reaction)s is an invalid reaction'), 
+                code='invalid',
+                params={'reaction':reaction}
+                )
+        return reaction.value
+
+    def save(self, *args, **kwargs):
+        """
+        Increase reaction count in the reaction model after saving an instance
+
+        Args:
+            reaction_type (int): The integral value that matches to the reaction value in
+                the database
+        """
+        super().save(*args, **kwargs)
+        reaction = self.reaction
+        reaction_type = self.reaction_type
+        reaction._increase_reaction_count(reaction_type)
+
+    @classmethod
+    def _delete_and_create_new_instance(cls, instance, user, reaction_type):
+        """
+        Delete the previous instance and create a new instance
+
+        Args:
+            instance (ReactionInstance): the instance to be deleted
+            user (`get_user_model`): the user to be associated to the reaction
+            reaction_type (int): The integral value that matches to the reaction value in
+                the database
+        
+        Returns:
+            None
+        """
+        old_reaction_type = instance.reaction_type
+        reaction_obj = instance.reaction
+        instance.delete()
+        if old_reaction_type != reaction_type:  # create the new instance
+            reaction_obj.refresh_from_db()
+            ReactionInstance.objects.create(
+                reaction=reaction_obj,
+                user=user,
+                reaction_type=reaction_type
+                )
+
+    @classmethod
+    def set_reaction(cls, user, comment, reaction_type):
+        """
+        Set a reaction and update its count
 
         Args:
             user (`get_user_model()`): user.
@@ -84,42 +166,34 @@ class Reaction(models.Model):
         Returns:
             bool: Returns True if a reaction is updated successfully
         """
-        # Check if the reaction is a valid one or not
+        reaction_type = cls.clean_reaction_type(reaction_type=reaction_type)
+        reaction_obj = Reaction.objects.get(comment=comment)
         try:
-            reaction_type = ReactionInstance.ReactionType[reaction.upper()]
-        except KeyError:
-            return ValidationError(_('%(reaction_type)s is an invalid reaction'), code='invalid', params={'reaction':reaction})
-        
-        # Currently, all reaction fields are mutually exclusive
-        old_reaction, created = ReactionInstance.objects.get_or_create(reaction=self, user=user)
+            created = False
+            instance = ReactionInstance.objects.get(
+                reaction=reaction_obj,
+                user=user
+                )
+        except models.ObjectDoesNotExist:
+            instance = ReactionInstance.objects.create(
+                reaction=reaction_obj,
+                user=user,
+                reaction_type=reaction_type
+            )
+            created = True
 
-        if created:
-            self._increase_reaction_count(reaction_type)
+        if not created:
+            cls._delete_and_create_new_instance(
+                instance=instance,
+                user=user,
+                reaction_type=reaction_type
+                )
 
-        else:
-            old_reaction_type = old_reaction.reaction_type
-            old_reaction.delete()
-            if old_reaction_type == reaction_type:  # decrease count
-                self._decrease_reaction_count(reaction_type)
-            else:   # decrease count for the old reaction, create and increment for the new one
-                self._decrease_reaction_count(old_reaction_type)
-                self.refresh_from_db()
-                ReactionInstance.objects.create(reaction=self, user=user, reaction_type=reaction_type)
-                self._increase_reaction_count(reaction_type)
-            
         return True
 
-
-class ReactionInstance(models.Model):
-    
-    class ReactionType(models.IntegerChoices):
-        LIKE = 1, _('Like')
-        DISLIKE = 2, _('Dislike')
-    
-    reaction = models.ForeignKey(Reaction, related_name='reaction', on_delete=models.CASCADE)
-    user = models.ForeignKey(get_user_model(), related_name='user', on_delete=models.CASCADE)
-    reaction_type = models.SmallIntegerField(choices=ReactionType.choices, default=ReactionType.LIKE)
-    date_reacted = models.DateTimeField(auto_now=timezone.now())
-
-    class Meta:
-        unique_together = ['user', 'reaction']
+@receiver(post_delete, sender=ReactionInstance)
+def delete_reaction_instance(sender, instance, using, **kwargs):
+    """Decrease reaction count in the reaction model before deleting an instance"""
+    old_reaction_type = instance.reaction_type
+    reaction = instance.reaction
+    reaction._decrease_reaction_count(old_reaction_type)

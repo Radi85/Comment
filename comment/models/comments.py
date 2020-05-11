@@ -3,7 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models
 
-from comment.manager.comments import CommentManager
+from comment.manager import CommentManager
 
 class Comment(models.Model):
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, default=None)
@@ -29,6 +29,31 @@ class Comment(models.Model):
     def __repr__(self):
         return self.__str__()
 
+    def _get_reaction_count(self, reaction):
+        """
+        Get reaction count for a reaction
+
+        Args:
+            reaction (str): the reaction whose count is needed.
+
+        Returns:
+            int: count of the reaction
+        """
+        reaction_obj, _ = self.reactions.get_or_create(comment=self)
+        return getattr(reaction_obj, reaction, None)
+
     @property
     def replies(self):
         return Comment.objects.filter(parent=self).order_by('posted')
+
+    @property
+    def is_edited(self):
+        return self.posted.timestamp() + 1 < self.edited.timestamp()
+
+    @property
+    def likes(self):
+        return self._get_reaction_count('likes')
+
+    @property
+    def dislikes(self):
+        return self._get_reaction_count('dislikes')
