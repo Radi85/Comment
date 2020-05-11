@@ -1,7 +1,6 @@
 from django.contrib import admin
 
-from comment.models import Comment, Reaction
-from comment.models.reactions import ReactionInstance
+from comment.models import Comment, Reaction, ReactionInstance
 
 
 class CommentModelAdmin(admin.ModelAdmin):
