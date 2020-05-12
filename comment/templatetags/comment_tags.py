@@ -4,7 +4,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.contenttypes.models import ContentType
 
-from comment.models import Comment
+from comment.models import Comment, ReactionInstance
 from comment.forms import CommentForm
 from comment.utils import has_valid_profile
 
@@ -140,3 +140,47 @@ register.inclusion_tag('comment/bootstrap.html')(include_bootstrap)
 def render_field(field, **kwargs):
     field.field.widget.attrs.update(kwargs)
     return field
+
+@register.filter(name='add_one_arg')
+def add_one_arg(arg1, arg2):
+    """
+    Use this filter to when you need to pass more than 2 arguments to your filter.
+
+    Args:
+        arg1 (`Any`): First Argument
+        arg2 (`Any`): Second Argument
+
+    Returns:
+        tuple: a tuple containing both the arguments in the order that they were passed.
+    """
+    return arg1, arg2
+
+@register.filter(name='has_reacted')
+def has_reacted(comment_and_user, reaction):
+    """
+    Returns whether a user has reacted with a particular reaction on a comment or not.
+
+    Args:
+        comment_and_user : tuple
+            arg1(comment:comment): comment to be queried about.
+            arg2(user:User): user to be queried about.
+        reaction (str): reaction to be queried about.
+
+    Returns:
+        bool
+    """
+    comment, user = comment_and_user
+    if user.is_authenticated:
+        reaction_type = getattr(ReactionInstance.ReactionType, reaction.upper(), None)
+        if not reaction_type:
+            raise template.TemplateSyntaxError(
+            'Reaction must be an valid ReactionManager.RelationType. {} is not'.format(reaction)
+            )
+        return ReactionInstance.objects.filter(
+            user=user,
+            reaction_type=reaction_type.value,
+            reaction__comment=comment
+            ).exists()
+    
+    return False
+    
