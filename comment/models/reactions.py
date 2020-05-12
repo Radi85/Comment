@@ -1,10 +1,9 @@
 from enum import IntEnum, unique
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models.signals import post_delete
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -14,7 +13,6 @@ from comment.models import Comment
 
 
 class Reaction(models.Model):
-
     comment = models.ForeignKey(Comment, related_name='reactions', on_delete=models.CASCADE)
     likes = models.PositiveIntegerField(default=0)
     dislikes = models.PositiveIntegerField(default=0)
@@ -49,7 +47,7 @@ class Reaction(models.Model):
         Increase reaction count(likes/dislikes)
 
         Args:
-            reaction ([int]): The integral value that matches to the reaction value in
+            reaction (int): The integral value that matches to the reaction value in
                 the database
             
         Returns:
@@ -65,7 +63,7 @@ class Reaction(models.Model):
         Decrease reaction count(likes/dislikes)
 
         Args:
-            reaction ([int]): The integral value that matches to the reaction value in
+            reaction (int): The integral value that matches to the reaction value in
                 the database
 
         Returns:
@@ -78,16 +76,16 @@ class Reaction(models.Model):
 
 
 class ReactionInstance(models.Model):
-    
+
     @unique
     class ReactionType(IntEnum):
         LIKE = 1
         DISLIKE = 2
 
-    reaction_choices = [(r.value, r.name) for r in ReactionType] 
-    
+    reaction_choices = [(r.value, r.name) for r in ReactionType]
+
     reaction = models.ForeignKey(Reaction, related_name='reactions', on_delete=models.CASCADE)
-    user = models.ForeignKey(get_user_model(), related_name='users', on_delete=models.CASCADE)
+    user = models.ForeignKey(get_user_model(), related_name='reactions', on_delete=models.CASCADE)
     reaction_type = models.SmallIntegerField(choices=reaction_choices)
     date_reacted = models.DateTimeField(auto_now=timezone.now())
 
