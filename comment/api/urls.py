@@ -8,7 +8,7 @@ urlpatterns = [
     path('comments/', views.CommentList.as_view(), name='comments-list'),
     path('comments/create/', views.CommentCreate.as_view(), name='comments-create'),
     path('comments/<int:pk>/', views.CommentDetail.as_view(), name='comment-detail'),
-    path('comments/react/<int:comment_id>/<str:reaction>', react, name='react')
+    path('comments/<int:comment_id>/react/<str:reaction>/', react, name='comments-react')
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
