@@ -2,8 +2,11 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
-from comment.manager import CommentManager
+from comment.manager import CommentManager, ReactionManager
+
 
 class Comment(models.Model):
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, default=None)
@@ -57,3 +60,9 @@ class Comment(models.Model):
     @property
     def dislikes(self):
         return self._get_reaction_count('dislikes')
+
+@receiver(post_save, sender=Comment)
+def add_reaction(sender, instance, created, raw, using, update_fields, **kwargs):
+    """Add a Reaction instance when a comment is created"""
+    if created:
+        instance.reactions.create(comment=instance)
