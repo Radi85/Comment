@@ -1,27 +1,27 @@
-$(function () {
+$(function() {
     var $deleteCommentButton;
 
     $(".js-comment-input").val('');
 
     // use modal dialog when deleting a item
-    var loadForm = function () {
+    var loadForm = function() {
         var btn = $(this);
         $deleteCommentButton = btn;
         $.ajax({
             url: btn.attr("data-url"),
             type: 'get',
             dataType: 'json',
-            beforeSend: function () {
+            beforeSend: function() {
                 $("#Modal .modal-content").html("");
                 $("#Modal").modal("show");
             },
-            success: function (data) {
+            success: function(data) {
                 // comment per page
-                if (btn.attr("name") === "delete-from-profile"){
+                if (btn.attr("name") === "delete-from-profile") {
                     $("#Modal .modal-content").html(data.html_form);
-                // redirect the user to his profile page instead of blog list
+                    // redirect the user to his profile page instead of blog list
                     $("#modal-btn").attr("name", "delete-from-profile");
-                }else{
+                } else {
                     $("#Modal .modal-content").html(data.html_form);
                 }
             }
@@ -29,62 +29,62 @@ $(function () {
     };
 
     // show and hide children comments
-    var replyLink = function(e){
+    var replyLink = function(e) {
         e.preventDefault();
         $(this).parents().eq(3).next(".js-replies").toggleClass("d-none");
     };
 
     // resize the input field according to typed text
-    var commentInput = function(){
+    var commentInput = function() {
         var disabledButton = $(this).parent().next().find(".js-comment-btn");
         // check if the input has an empty value
-        if($(this).val().replace(/^\s+|\s+$/g, "").length === 0){
+        if ($(this).val().replace(/^\s+|\s+$/g, "").length === 0) {
             $(this).attr("style", "height: 31px;")
             disabledButton.prop("disabled", true);
-        }else{
+        } else {
             disabledButton.prop("disabled", false);
         }
         $(this).attr("style", "height: 31px;");
-        $(this).attr("style", "height: "+this.scrollHeight+ "px;");
+        $(this).attr("style", "height: " + this.scrollHeight + "px;");
     };
 
-    function commentCount(num){
+    function commentCount(num) {
         var $commentNumber = $(".js-comment-number");
-        var result = Number($commentNumber.text())+num;
-        $commentNumber.replaceWith("<span class='js-comment-number'>"+result+"</span>");
+        var result = Number($commentNumber.text()) + num;
+        $commentNumber.replaceWith("<span class='js-comment-number'>" + result + "</span>");
     }
 
     // AJAX for create new comment
-    var commentFormSubmit = function(e){
+    var commentFormSubmit = function(e) {
         e.preventDefault();
         var $form = $(this);
         var $formButton = $form.find("button");
         var $thisURL = $form.attr('data-url') || window.location.href;
         var $formData = $form.serializeArray();
         // send button name and value to BE
-        $formData.push({name: $formButton.attr('name'), value: $formButton.text()});
+        $formData.push({ name: $formButton.attr('name'), value: $formButton.text() });
 
         $.ajax({
             method: "POST",
             url: $thisURL,
             data: $formData,
-            success: function handleFormSuccess(data){
+            success: function handleFormSuccess(data) {
                 // parent comment
-                if($formButton.data('type') === 'parent'){
+                if ($formButton.data('type') === 'parent') {
                     // reload all comments only when posting parent comment
                     $("#comments").replaceWith(data);
 
-                }else{
+                } else {
                     // child comment
                     $(data).insertBefore($form);
                     // update number of replies
                     var $reply = $form.parent().prev().find(".js-reply-link");
                     var $replyNumber = $form.parent().prev().find(".js-reply-number");
-                    var rNum = Number($replyNumber.text())+1;
-                    $replyNumber.replaceWith('<span class="js-reply-number text-dark">'+rNum+'</span>');
-                    if(rNum>1){
+                    var rNum = Number($replyNumber.text()) + 1;
+                    $replyNumber.replaceWith('<span class="js-reply-number text-dark">' + rNum + '</span>');
+                    if (rNum > 1) {
                         $reply.replaceWith('<a class="js-reply-link ml-1" href="#">Replies</a>');
-                    }else{
+                    } else {
                         $reply.replaceWith('<a class="js-reply-link ml-1" href="#">Reply</a>');
                     }
                     commentCount(1);
@@ -102,14 +102,14 @@ $(function () {
                     window.history.replaceState({}, document.title, clean_uri);
                 }
             },
-            error: function handleFormError(jqXHR, textStatus, errorThrown){
+            error: function handleFormError(jqXHR, textStatus, errorThrown) {
                 alert("Unable to post your comment!, please try again");
             },
         });
     };
 
     var commentBeforeEdit;
-    var editComment = function(e){
+    var editComment = function(e) {
         // open a new form to edit the comment
         e.preventDefault();
         var commentContent = $(this).parents().eq(2)[0];
@@ -118,45 +118,45 @@ $(function () {
         $.ajax({
             method: 'GET',
             url: $thisURL,
-            success: function updateComment(data, textStatus, jqXHR){
+            success: function updateComment(data, textStatus, jqXHR) {
                 $(commentContent).replaceWith(data);
                 // set the focus on the end of text
                 var num = $(".js-comment-edit-form > textarea").val();
                 $(".js-comment-edit-form > textarea").focus().val('').val(num);
             },
-            error: function handleFormError(jqXHR, textStatus, errorThrown){
+            error: function handleFormError(jqXHR, textStatus, errorThrown) {
                 alert("you can't edit this comment");
             },
         });
     }
 
-    var cancelEdit = function(e){
+    var cancelEdit = function(e) {
         e.preventDefault();
         var editContent = $(this).parents().eq(3)[0];
         $(editContent).replaceWith(commentBeforeEdit);
     }
 
-    var commentEditFormSubmit = function(e){
+    var commentEditFormSubmit = function(e) {
         e.preventDefault();
         var $form = $(this);
         var $formButton = $form.find("button");
-        var $formData = $form.serialize() + '&' + encodeURI($formButton.attr('name'))
-                        + '=' + encodeURI($formButton.text());
+        var $formData = $form.serialize() + '&' + encodeURI($formButton.attr('name')) +
+            '=' + encodeURI($formButton.text());
         var $thisURL = $(this).attr('data-url');
         $.ajax({
             method: 'POST',
             url: $thisURL,
             data: $formData,
-            success: function submitUpdateComment(data, textStatus, jqXHR){
+            success: function submitUpdateComment(data, textStatus, jqXHR) {
                 $form.parent().replaceWith(data);
             },
-            error: function handleFormError(jqXHR, textStatus, errorThrown){
+            error: function handleFormError(jqXHR, textStatus, errorThrown) {
                 alert("Modification didn't take effect!, please try again");
             },
         });
     }
 
-    var deleteComment = function(e){
+    var deleteComment = function(e) {
         e.preventDefault();
         var hasParent, paginate, comment_per_page;
         var $form = $(this);
@@ -171,34 +171,33 @@ $(function () {
         pageNumber = parseInt(currentURL, 10);
 
         // retrieve the comment status parent or child
-        $.each($formData, function(i, field){
-            if(field.name === "has_parent") hasParent = field.value==="True";
+        $.each($formData, function(i, field) {
+            if (field.name === "has_parent") hasParent = field.value === "True";
         });
 
         // send page number to BE
-        $formData.push({name: 'currentPage', value: pageNumber});
+        $formData.push({ name: 'currentPage', value: pageNumber });
 
         $.ajax({
             method: "POST",
             url: $thisURL,
             data: $formData,
-            success: function deleteCommentDone(data, textStatus, jqXHR){
+            success: function deleteCommentDone(data, textStatus, jqXHR) {
                 $("#Modal").modal("hide");
                 $parentComment.remove();
                 var $parentCommentArr = $(".js-parent-comment");
-                if(hasParent){
+                if (hasParent) {
                     // update replies count if a child was deleted
-                    var rNum = Number($replyNumber.text())-1;
-                    $replyNumber.replaceWith('<span class="js-reply-number text-dark">'+rNum+'</span>');
-                    if(rNum>1){
+                    var rNum = Number($replyNumber.text()) - 1;
+                    $replyNumber.replaceWith('<span class="js-reply-number text-dark">' + rNum + '</span>');
+                    if (rNum > 1) {
                         $reply.replaceWith('<a class="js-reply-link ml-1" href="#">Replies</a>');
-                    }else{
+                    } else {
                         $reply.replaceWith('<a class="js-reply-link ml-1" href="#">Reply</a>');
                     }
                     // update total count of comments
                     commentCount(-1);
-                }
-                else {
+                } else {
                     // reload all comments only when deleting parent comment
                     $("#comments").replaceWith(data);
                     // clear BS classes and attr from body tag
@@ -208,8 +207,84 @@ $(function () {
                     $(".modal-backdrop").remove();
                 }
             },
-            error: function handleFormError(jqXHR, textStatus, errorThrown){
+            error: function handleFormError(jqXHR, textStatus, errorThrown) {
                 alert("Unable to delete your comment!, please try again");
+            },
+        });
+    };
+
+    /**
+     * Returns whether a color is empty(None) or not.
+     * @param {str} color - the color to be compared.
+     * @param {str} emptyColor - the value for emptyColor
+     * @param {boolean}
+     */
+    var colorIsNone = function(color, emptyColor = "none") {
+        if (!color || color === emptyColor) return true;
+        return false;
+    }
+
+    /**
+     * Fill the target reaction element, removes color from the other reaction
+     * if it were filled. 
+     * @param {any} $parent - parent of the reaction element that has to be updated
+     * @param {any} $targetReaction - the reaction element to be filled
+     */
+    var fillReaction = function($parent, $targetReaction) {
+        $likeIcon = $parent.find('.reaction-like')[0];
+        $dislikeIcon = $parent.find('.reaction-dislike')[0];
+        var fillColor = "#ffc966";
+        var emptyColor = "none";
+        if (colorIsNone($likeIcon.style.fill) && colorIsNone($dislikeIcon.style.fill)) {
+            $targetReaction.style.fill = fillColor;
+        } else {
+            var $currentReaction = (!$likeIcon.style.fill || $likeIcon.style.fill === "none") ? $dislikeIcon : $likeIcon;
+            $currentReaction.style.fill = emptyColor;
+            if ($targetReaction != $currentReaction) {
+                $targetReaction.style.fill = fillColor;
+            }
+        }
+    };
+
+    /**
+     * Change reaction count for the element that the user reacted upon.
+     * @param {any} $parent - the parent object containing the reactions.
+     * @param {Number} likes - like count
+     * @param {Number} dislikes - dislike count
+     */
+    var changeReactionCount = function($parent, likes, dislikes) {
+        console.log($parent);
+        $parent.find('.js-like-number')[0].textContent = likes;
+        $parent.find('.js-dislike-number')[0].textContent = dislikes;
+    }
+
+    /**
+     * Handle everything related to comment reactions
+     * Fill the appropriate reaction icon
+     * Update the count of reactions
+     * @param {any} e - event which was triggered. 
+     */
+    var commentReact = function(e) {
+        e.preventDefault();
+        var $element = $(this);
+        var $targetReaction = $element.find('.comment-reaction-icon')[0];
+        var $parentReactionEle = $element.parent();
+        var $thisURL = $element.attr('href');
+        var $csrfToken = $element.attr('data-csrf');
+        $.ajax({
+            headers: { 'X-CSRFToken': $csrfToken },
+            method: "POST",
+            url: $thisURL,
+            contentType: 'application/json',
+            success: function commentReactionDone(data, textStatus, jqXHR) {
+                var status = data['status'];
+                if (status === 0) {
+                    fillReaction($parentReactionEle, $targetReaction);
+                    changeReactionCount($parentReactionEle, data['likes'], data['dislikes']);
+                }
+            },
+            error: function handleFormError(jqXHR, textStatus, errorThrown) {
+                alert("Reaction couldn't be processed!, please try again");
             },
         });
     };
@@ -222,4 +297,5 @@ $(function () {
     $(document).on("click", ".js-comment-cancel", cancelEdit);
     $(document).on("click", ".js-comment-delete", loadForm);
     $(document).on("submit", ".js-comment-delete-form", deleteComment);
+    $(document).on("click", ".js-comment-reaction", commentReact);
 });
