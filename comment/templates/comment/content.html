@@ -1,5 +1,4 @@
 {% load comment_tags %}
-{% load static %}
 {% load i18n %}
 <div class="{% block text_space %}{% if has_valid_profile %}col-10 col-md-11
             {% else %}co-12 mx-3{% endif %}{% endblock text_space %}">
@@ -24,18 +23,18 @@
             {% endif %}
         </small>
             <div class="js-comment-reactions mt-2">
-                <span class="js-reply-number text-dark">{{ obj.likes }}</span>
-                <a class="js-comment-like {% block like_link_cls %}" {% endblock like_link_cls %} href="{% url 'comment:react' comment_id=obj.id reaction='like' %}">
+                <span class="js-like-number text-dark">{{ obj.likes }}</span>
+                <a class="js-comment-reaction {% block like_link_cls %}" {% endblock like_link_cls %} href="{% url 'comment:react' comment_id=obj.id reaction='like' %}" data-csrf="{{ csrf_token }}">
                     {% block like_img_icon %}
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill={% if obj|add_one_arg:user|has_reacted:"like" %}{% block liked_img_color %}"#ffc966"{% endblock liked_img_color %}{% else %}"none"{% endif %} stroke="#427297" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="feather feather-thumbs-up">
+                    <svg class="comment-reaction-icon reaction-like" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill={% if obj|add_one_arg:user|has_reacted:"like" %}"#ffc966"{% else %}"none"{% endif %} stroke="#427297" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
                     </svg>
                     {% endblock like_img_icon %}
                 </a>
-                <span class="ml-4 js-reply-number text-dark">{{ obj.dislikes }}</span>
-                <a class="js-comment-dislike {% block dislike_link_cls %}" {% endblock dislike_link_cls %} href="{% url 'comment:react' comment_id=obj.id reaction='dislike' %}">
+                <span class="ml-4 js-dislike-number text-dark">{{ obj.dislikes }}</span>
+                <a class="js-comment-reaction {% block dislike_link_cls %}" {% endblock dislike_link_cls %} href="{% url 'comment:react' comment_id=obj.id reaction='dislike' %}" data-csrf="{{ csrf_token }}">
                     {% block dislike_img_icon %}
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill={% if obj|add_one_arg:user|has_reacted:"dislike" %}{% block disliked_img_color %}"#ffc966"{% endblock disliked_img_color %}{% else %}"none"{% endif %} stroke="#427297" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="feather feather-thumbs-down">
+                    <svg class="comment-reaction-icon reaction-dislike" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill={% if obj|add_one_arg:user|has_reacted:"dislike" %}"#ffc966"{% else %}"none"{% endif %} stroke="#427297" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path>
                     </svg>
                     {% endblock dislike_img_icon %}

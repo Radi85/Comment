@@ -29,6 +29,8 @@ def react(request, comment_id, reaction):
     if ReactionInstance.set_reaction(user=request.user, comment=comment, reaction_type=reaction):
         response.update({
             'status': 0,
-            'msg': _('Your reaction has been updated successfully.')
+            'likes': comment.likes,
+            'dislikes': comment.dislikes,
+            'msg': _('Your action has been updated successfully')     
         })
     return JsonResponse(response)
