@@ -19,7 +19,7 @@ class Reaction(models.Model):
 
     objects = models.Manager()
     comment_objects = ReactionManager()
-    
+
     def _increase_likes(self):
         """Increase likes and save the model"""
         self.likes = models.F('likes') + 1
@@ -49,7 +49,7 @@ class Reaction(models.Model):
         Args:
             reaction (int): The integral value that matches to the reaction value in
                 the database
- 
+
         Returns:
             None
         """
