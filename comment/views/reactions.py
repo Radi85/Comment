@@ -17,7 +17,7 @@ def react(request, comment_id, reaction):
         request (WSGI object): [description]
         comment_id (int): primary key of the comment that needs to record comment.
         reaction (str): the reaction to be recorded
-    """    
+    """
     if not request.is_ajax():
         return HttpResponseBadRequest('Only AJAX request are allowed')
 
@@ -31,6 +31,6 @@ def react(request, comment_id, reaction):
             'status': 0,
             'likes': comment.likes,
             'dislikes': comment.dislikes,
-            'msg': _('Your action has been updated successfully')     
+            'msg': _('Your action has been updated successfully')
         })
     return JsonResponse(response)

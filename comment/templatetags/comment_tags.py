@@ -176,8 +176,8 @@ def has_reacted(comment_and_user, reaction):
         reaction_type = getattr(ReactionInstance.ReactionType, reaction.upper(), None)
         if not reaction_type:
             raise template.TemplateSyntaxError(
-        'Reaction must be an valid ReactionManager.RelationType. {} is not'.format(reaction)
-        )
+                'Reaction must be an valid ReactionManager.RelationType. {} is not'.format(reaction)
+                )
         return ReactionInstance.objects.filter(
             user=user,
             reaction_type=reaction_type.value,
@@ -185,4 +185,3 @@ def has_reacted(comment_and_user, reaction):
             ).exists()
 
     return False
- 
