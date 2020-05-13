@@ -141,6 +141,7 @@ def render_field(field, **kwargs):
     field.field.widget.attrs.update(kwargs)
     return field
 
+
 @register.filter(name='add_one_arg')
 def add_one_arg(arg1, arg2):
     """
@@ -154,6 +155,7 @@ def add_one_arg(arg1, arg2):
         tuple: a tuple containing both the arguments in the order that they were passed.
     """
     return arg1, arg2
+
 
 @register.filter(name='has_reacted')
 def has_reacted(comment_and_user, reaction):
@@ -174,13 +176,13 @@ def has_reacted(comment_and_user, reaction):
         reaction_type = getattr(ReactionInstance.ReactionType, reaction.upper(), None)
         if not reaction_type:
             raise template.TemplateSyntaxError(
-            'Reaction must be an valid ReactionManager.RelationType. {} is not'.format(reaction)
-            )
+        'Reaction must be an valid ReactionManager.RelationType. {} is not'.format(reaction)
+        )
         return ReactionInstance.objects.filter(
             user=user,
             reaction_type=reaction_type.value,
             reaction__comment=comment
             ).exists()
-    
+
     return False
-    
+ 
