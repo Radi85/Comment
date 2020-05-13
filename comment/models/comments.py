@@ -5,7 +5,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from comment.manager import CommentManager, ReactionManager
+from comment.manager import CommentManager
 
 
 class Comment(models.Model):
@@ -60,6 +60,7 @@ class Comment(models.Model):
     @property
     def dislikes(self):
         return self._get_reaction_count('dislikes')
+
 
 @receiver(post_save, sender=Comment)
 def add_reaction(sender, instance, created, raw, using, update_fields, **kwargs):

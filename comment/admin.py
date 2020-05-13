@@ -11,8 +11,6 @@ class CommentModelAdmin(admin.ModelAdmin):
         model = Comment
 
 
-admin.site.register(Comment, CommentModelAdmin)
-
 class InlineReactionInstance(admin.TabularInline):
     model = ReactionInstance
     extra = 0
@@ -25,4 +23,6 @@ class ReactionModelAdmin(admin.ModelAdmin):
     search_fields = ('comment__content',)
     inlines = [InlineReactionInstance]
 
+
+admin.site.register(Comment, CommentModelAdmin)
 admin.site.register(Reaction, ReactionModelAdmin)
