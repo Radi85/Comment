@@ -7,9 +7,9 @@
         <small>
             <a class="{% block user_name %}{% endblock user_name %}" href="{% get_profile_url obj %}">{{ obj.user }}</a> |
             {% if obj.is_edited %}
-            <cite title="Edited">Edited: {{ obj.edited|timesince }} ago</cite>
+            <span class="font-italic" title="Edited">Edited: {{ obj.edited|timesince }} ago</span>
             {% else %}
-            <cite title="Posted">{{ obj.posted|timesince }} ago</cite>
+            <span class="font-italic" title="Posted">{{ obj.posted|timesince }} ago</span>
             {% endif %}
             {% if obj.user == user %}
             | <a class="js-comment-edit {% block edit_link_cls %}btn btn-link{% endblock edit_link_cls %}" href="{% url 'comment:edit' pk=obj.id %}?comments_per_page={{comments_per_page}}&model_name={% get_model_name model_object %}&model_id={{ model_object.id }}&app_name={% get_app_name model_object %}&oauth={{oauth}}">edit</a>
