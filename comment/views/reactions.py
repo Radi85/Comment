@@ -6,6 +6,7 @@ from django.views.decorators.http import require_POST
 
 from comment.models import Comment, ReactionInstance
 
+
 @require_POST
 @login_required
 def react(request, comment_id, reaction):
@@ -16,7 +17,6 @@ def react(request, comment_id, reaction):
         request (WSGI object): [description]
         comment_id (int): primary key of the comment that needs to record comment.
         reaction (str): the reaction to be recorded
-
     """    
     if not request.is_ajax():
         return HttpResponseBadRequest('Only AJAX request are allowed')
@@ -32,4 +32,3 @@ def react(request, comment_id, reaction):
             'msg': _('Your reaction has been updated successfully.')
         })
     return JsonResponse(response)
-    

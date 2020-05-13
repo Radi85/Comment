@@ -1,6 +1,7 @@
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
+
 class CommentManager(models.Manager):
     def all_parent_comments(self):
         return super().all().filter(parent=None)

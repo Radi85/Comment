@@ -78,7 +78,7 @@ class BaseCommentSerializer(serializers.ModelSerializer):
             return obj.replies.count()
         else:
             return None
-    
+
     @staticmethod
     def get_likes(obj):
         if hasattr(obj, 'likes'):
@@ -134,7 +134,7 @@ class CommentSerializer(BaseCommentSerializer):
     class Meta:
         model = Comment
         fields = (
-            'id', 'user', 'content','parent',
+            'id', 'user', 'content', 'parent',
             'posted', 'edited',
             'reply_count', 'replies',
             'likes', 'dislikes'

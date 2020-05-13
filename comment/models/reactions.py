@@ -3,7 +3,7 @@ from enum import IntEnum, unique
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models.signals import post_delete, post_save
+from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -16,7 +16,7 @@ class Reaction(models.Model):
     comment = models.ForeignKey(Comment, related_name='reactions', on_delete=models.CASCADE)
     likes = models.PositiveIntegerField(default=0)
     dislikes = models.PositiveIntegerField(default=0)
-    
+
     objects = models.Manager()
     comment_objects = ReactionManager()
     
@@ -29,7 +29,7 @@ class Reaction(models.Model):
         """Increase dislikes and save the model"""
         self.dislikes = models.F('dislikes') + 1
         self.save()
-    
+
     def _decrease_likes(self):
         """Decrease likes and save the model"""
         if self.likes > 0:
@@ -49,7 +49,7 @@ class Reaction(models.Model):
         Args:
             reaction (int): The integral value that matches to the reaction value in
                 the database
-            
+ 
         Returns:
             None
         """
@@ -107,9 +107,9 @@ class ReactionInstance(models.Model):
         reaction = getattr(cls.ReactionType, reaction_type.upper(), None)
         if not reaction:
             return ValidationError(
-                _('%(reaction)s is an invalid reaction'), 
+                _('%(reaction)s is an invalid reaction'),
                 code='invalid',
-                params={'reaction':reaction}
+                params={'reaction': reaction}
                 )
         return reaction.value
 
@@ -136,7 +136,7 @@ class ReactionInstance(models.Model):
             user (`get_user_model`): the user to be associated to the reaction
             reaction_type (int): The integral value that matches to the reaction value in
                 the database
-        
+
         Returns:
             None
         """
@@ -188,6 +188,7 @@ class ReactionInstance(models.Model):
                 )
 
         return True
+
 
 @receiver(post_delete, sender=ReactionInstance)
 def delete_reaction_instance(sender, instance, using, **kwargs):
