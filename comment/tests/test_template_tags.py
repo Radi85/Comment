@@ -124,20 +124,31 @@ class TemplateTagsTest(BaseCommentTest):
         user = self.user_1
         self.assertTupleEqual((comment, user), add_one_arg(comment, user))
 
+    def test_has_reacted_for_unauthenticated_user(self):
+        """Test whether the filter returns False for unauthenticated users"""
+        class MockUser:
+            """Mock unauthenticated user for template. The User instance always returns True for `is_authenticated`"""
+            is_authenticated = False
+
+        user = MockUser()
+        comment = self.parent_comment_1
+        comment_and_user = add_one_arg(comment, user)
+        self.client.logout()
+        self.assertEqual(False, has_reacted(comment_and_user, 'like'))
+
     def test_has_reacted_on_incorrect_reaction(self):
         """Test whether this function raises an error when incorrect reaction is passed"""
         comment = self.parent_comment_1
         user = self.user_1
-        self.client.force_login(user)
         comment_and_user = add_one_arg(comment, user)
         self.assertRaises(TemplateSyntaxError, has_reacted, comment_and_user, 'likes')
 
-    def test_has_reacted_on_correct_reaction(self):
+    def test_has_reacted_on_correct_reaction_for_authenticated_users(self):
         """Test whether this function returns an appropriate boolean when correct reaction is passed"""
         comment = self.parent_comment_1
         user = self.user_1
-        self.client.force_login(user)
         comment_and_user = add_one_arg(comment, user)
+
         self.assertEqual(True, has_reacted(comment_and_user, 'like'))
         self.assertEqual(False, has_reacted(comment_and_user, 'dislike'))
 
