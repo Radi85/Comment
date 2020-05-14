@@ -1,4 +1,5 @@
 from django.urls import reverse
+from rest_framework import status
 
 from comment.models import Comment
 from comment.tests.base import BaseCommentTest
@@ -150,3 +151,79 @@ class CreateCommentTestCase(BaseCommentTest):
         response = self.client.post(reverse('comment:delete', kwargs={'pk': comment.id}), data=data)
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.reason_phrase, 'Forbidden')
+
+
+class SetReactionTest(BaseCommentTest):
+
+    def setUp(self):
+        super().setUp()
+        self.comment = self.create_comment(self.content_object_1)
+
+    def get_url(self, obj_id, action):
+        """
+        A utility function to construct url.
+
+        Args:
+            obj_id (int): comment id
+            action (str): reaction(like/dislike)
+
+        Returns:
+            str
+        """
+        return reverse('comment:react', kwargs={
+            'comment_id': obj_id,
+            'reaction': action
+        })
+
+    def test_set_reaction_for_authenticated_users(self):
+        """Test whether users can create/change reactions using view"""
+        url = self.get_url(self.comment.id, 'like')
+        user = self.user_2
+        self.client.force_login(user)
+        response = self.client.post(url, **{
+            'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'
+        })
+        data = {
+            'status': 0,
+            'likes': 1,
+            'dislikes': 0,
+            'msg': 'Your reaction has been updated successfully'
+        }
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertDictEqual(response.json(), data)
+
+    def test_set_reaction_for_unauthenticated_users(self):
+        """Test whether unauthenticated users can create/change reactions using view"""
+        url = self.get_url(self.comment.id, 'dislike')
+        self.client.logout()
+        response = self.client.post(url, **{
+            'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'
+        })
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response.url, '/login?next={}'.format(url))
+
+    def test_get_request(self):
+        """Test whether GET requests are allowed or not"""
+        url = self.get_url(self.comment.id, 'like')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_non_ajax_requests(self):
+        """Test response if non AJAX requests are sent"""
+        url = self.get_url(self.comment.id, 'like')
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_incorrect_comment_id(self):
+        """Test response when an incorrect comment id is passed"""
+        url = self.get_url(102_876, 'like')
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_incorrect_reaction(self):
+        """Test response when incorrect reaction is passed"""
+        url = self.get_url(self.comment.id, 'likes')
+        response = self.client.post(url, **{
+            'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'
+        })
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

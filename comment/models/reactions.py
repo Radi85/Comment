@@ -106,7 +106,7 @@ class ReactionInstance(models.Model):
         """
         reaction = getattr(cls.ReactionType, reaction_type.upper(), None)
         if not reaction:
-            return ValidationError(
+            raise ValidationError(
                 _('%(reaction)s is an invalid reaction'),
                 code='invalid',
                 params={'reaction': reaction}
