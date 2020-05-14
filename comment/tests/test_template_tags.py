@@ -2,11 +2,12 @@ from unittest.mock import patch
 
 from django.core.exceptions import ImproperlyConfigured
 from django.test import RequestFactory
+from django.template import TemplateSyntaxError
 
 from comment.forms import CommentForm
 from comment.templatetags.comment_tags import (
     get_model_name, get_app_name, get_comment_count, get_img_path, get_profile_url, render_comments,
-    include_static_jquery, include_bootstrap, include_static, render_field
+    include_static_jquery, include_bootstrap, include_static, render_field, add_one_arg, has_reacted
 )
 from comment.tests.base import BaseCommentTest
 from django.conf import settings
@@ -23,6 +24,9 @@ class TemplateTagsTest(BaseCommentTest):
         self.child_comment_1 = self.create_comment(self.content_object_1, parent=self.parent_comment_1)
         self.child_comment_2 = self.create_comment(self.content_object_1, parent=self.parent_comment_2)
         self.child_comment_3 = self.create_comment(self.content_object_1, parent=self.parent_comment_2)
+        self.reaction_1 = self.create_reaction(self.user_1, self.parent_comment_1, 'like')
+        self.reaction_2 = self.create_reaction(self.user_1, self.parent_comment_2, 'dislike')
+        self.reaction_3 = self.create_reaction(self.user_1, self.parent_comment_3, 'like')
 
     def test_get_model_name(self):
         model_name = get_model_name(self.post_1)
@@ -113,3 +117,39 @@ class TemplateTagsTest(BaseCommentTest):
             self.assertIsNone(field.field.widget.attrs.get('placeholder'))
             field = render_field(field, placeholder='placeholder')
             self.assertEqual(field.field.widget.attrs.get('placeholder'), 'placeholder')
+
+    def test_add_one_arg(self):
+        """Test whether this function returns a tuple of the elements passed"""
+        comment = self.parent_comment_1
+        user = self.user_1
+        self.assertTupleEqual((comment, user), add_one_arg(comment, user))
+
+    def test_has_reacted_on_incorrect_reaction(self):
+        """Test whether this function raises an error when incorrect reaction is passed"""
+        comment = self.parent_comment_1
+        user = self.user_1
+        self.client.force_login(user)
+        comment_and_user = add_one_arg(comment, user)
+        self.assertRaises(TemplateSyntaxError, has_reacted, comment_and_user, 'likes')
+
+    def test_has_reacted_on_correct_reaction(self):
+        """Test whether this function returns an appropriate boolean when correct reaction is passed"""
+        comment = self.parent_comment_1
+        user = self.user_1
+        self.client.force_login(user)
+        comment_and_user = add_one_arg(comment, user)
+        self.assertEqual(True, has_reacted(comment_and_user, 'like'))
+        self.assertEqual(False, has_reacted(comment_and_user, 'dislike'))
+
+        # check for other users
+        user = self.user_2
+        self.client.force_login(user)
+        comment_and_user = add_one_arg(comment, user)
+
+        self.assertEqual(False, has_reacted(comment_and_user, 'like'))
+        self.assertEqual(False, has_reacted(comment_and_user, 'dislike'))
+
+        # check for other comments
+        comment_and_user = add_one_arg(self.parent_comment_2, user)
+        self.assertEqual(False, has_reacted(comment_and_user, 'like'))
+        self.assertEqual(False, has_reacted(comment_and_user, 'dislike'))
