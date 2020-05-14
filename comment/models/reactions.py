@@ -42,7 +42,7 @@ class Reaction(models.Model):
             self.dislikes = models.F('dislikes') - 1
             self.save()
 
-    def _increase_reaction_count(self, reaction):
+    def increase_reaction_count(self, reaction):
         """
         Increase reaction count(likes/dislikes)
 
@@ -58,7 +58,7 @@ class Reaction(models.Model):
         else:
             self._increase_dislikes()
 
-    def _decrease_reaction_count(self, reaction):
+    def decrease_reaction_count(self, reaction):
         """
         Decrease reaction count(likes/dislikes)
 
@@ -124,7 +124,7 @@ class ReactionInstance(models.Model):
         super().save(*args, **kwargs)
         reaction = self.reaction
         reaction_type = self.reaction_type
-        reaction._increase_reaction_count(reaction_type)
+        reaction.increase_reaction_count(reaction_type)
 
     @classmethod
     def _delete_and_create_new_instance(cls, instance, user, reaction_type):
@@ -195,4 +195,4 @@ def delete_reaction_instance(sender, instance, using, **kwargs):
     """Decrease reaction count in the reaction model before deleting an instance"""
     old_reaction_type = instance.reaction_type
     reaction = instance.reaction
-    reaction._decrease_reaction_count(old_reaction_type)
+    reaction.decrease_reaction_count(old_reaction_type)
