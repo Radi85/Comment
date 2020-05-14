@@ -1,5 +1,8 @@
 from time import sleep
-from comment.models import Comment
+
+from django.core.exceptions import ValidationError
+
+from comment.models import Comment, Reaction
 from comment.tests.base import BaseCommentTest
 
 
@@ -22,6 +25,13 @@ class CommentModelTest(BaseCommentTest):
         sleep(1)
         parent_comment.save()
         self.assertTrue(parent_comment.is_edited)
+
+    def test_reaction_signal(self):
+        """Test reaction model instance is created when a comment is created"""
+        parent_comment = self.create_comment(self.content_object_1)
+        self.assertIsNotNone(Reaction.objects.get(comment=parent_comment))
+        # 1 reaction instance is created for every comment
+        self.assertEqual(Reaction.objects.count(), self.increment)
 
 
 class CommentModelManagerTest(BaseCommentTest):
@@ -108,3 +118,67 @@ class CommentModelManagerTest(BaseCommentTest):
             user=self.user_1
         )
         self.assertIsNone(comment)
+
+
+class ReactionInstanceModelTest(CommentModelManagerTest):
+    def test_user_can_create_reaction(self):
+        """Test whether reaction instance can be created"""
+        instance = self.create_reaction(self.user_2, self.child_comment_1, 'like')
+        self.assertIsNotNone(instance)
+
+    def test_comment_property_likes_increment_and_decrement(self):
+        """Test decrement and increment on likes property with subsequent request."""
+        comment = self.child_comment_2
+        self.create_reaction(self.user_2, comment, 'like')
+        comment.refresh_from_db()
+        user = self.user_1
+        self.create_reaction(user, comment, 'like')
+        comment.refresh_from_db()
+        self.assertEqual(comment.likes, 2)
+
+        self.set_reaction(user, comment, 'like')
+        comment.refresh_from_db()
+        self.assertEqual(comment.likes, 1)
+
+    def test_comment_property_dislikes_increment_and_decrement(self):
+        """Test decrement and increment on dislikes property with subsequent request."""
+        comment = self.child_comment_3
+        self.create_reaction(self.user_1, comment, 'dislike')
+        comment.refresh_from_db()
+        user = self.user_2
+        self.create_reaction(user, comment, 'dislike')
+        comment.refresh_from_db()
+        self.assertEqual(comment.dislikes, 2)
+
+        # can't use create_reaction: one user can't create multiple reaction instances for a comment.
+        self.set_reaction(user, comment, 'dislike')
+        comment.refresh_from_db()
+        self.assertEqual(comment.dislikes, 1)
+
+    def test_set_reaction(self):
+        """Test set reactions increments the likes and dislikes property appropriately for subsequent calls"""
+        comment = self.child_comment_4
+        user = self.user_1
+        self.set_reaction(user, comment, 'dislike')
+        comment.refresh_from_db()
+        self.assertEqual(comment.dislikes, 1)
+        self.assertEqual(comment.likes, 0)
+
+        self.set_reaction(user, comment, 'dislike')
+        comment.refresh_from_db()
+        self.assertEqual(comment.dislikes, 0)
+        self.assertEqual(comment.likes, 0)
+
+        self.set_reaction(user, comment, 'like')
+        comment.refresh_from_db()
+        self.assertEqual(comment.dislikes, 0)
+        self.assertEqual(comment.likes, 1)
+
+        self.set_reaction(user, comment, 'dislike')
+        comment.refresh_from_db()
+        self.assertEqual(comment.dislikes, 1)
+        self.assertEqual(comment.likes, 0)
+
+    def test_set_reaction_on_incorrect_reaction(self):
+        """Test ValidationError is raised for incorrect when incorrect reactions are passed"""
+        self.assertRaises(ValidationError, self.set_reaction, self.user_1, self.child_comment_5, 'likes')

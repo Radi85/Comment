@@ -21,6 +21,9 @@ def react(request, comment_id, reaction):
     if not request.is_ajax():
         return HttpResponseBadRequest('Only AJAX request are allowed')
 
+    if not getattr(ReactionInstance.ReactionType, reaction.upper(), None):
+        return HttpResponseBadRequest(_('This is not a valid reaction'))
+
     comment = get_object_or_404(Comment, id=comment_id)
     response = {
         'status': 1,
@@ -31,6 +34,6 @@ def react(request, comment_id, reaction):
             'status': 0,
             'likes': comment.likes,
             'dislikes': comment.dislikes,
-            'msg': _('Your action has been updated successfully')
+            'msg': _('Your reaction has been updated successfully')
         })
     return JsonResponse(response)
