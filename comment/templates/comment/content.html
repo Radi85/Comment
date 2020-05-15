@@ -7,38 +7,23 @@
         <small>
             <a class="{% block user_name %}{% endblock user_name %}" href="{% get_profile_url obj %}">{{ obj.user }}</a> |
             {% if obj.is_edited %}
-            <span class="font-italic" title="Edited">Edited: {{ obj.edited|timesince }} ago</span>
+            <span class="font-italic" title="{% trans 'Edited' %}">{% blocktrans with edited_time=obj.edited|timesince %}Edited: {{ edited_time }} ago{% endblocktrans %}</span>
             {% else %}
-            <span class="font-italic" title="Posted">{{ obj.posted|timesince }} ago</span>
+            <span class="font-italic" title="{% trans 'Posted' %}">{% blocktrans with posted_time=obj.posted|timesince %}{{ posted_time }} ago{% endblocktrans %}</span>
             {% endif %}
             {% if obj.user == user %}
-            | <a class="js-comment-edit {% block edit_link_cls %}btn btn-link{% endblock edit_link_cls %}" href="{% url 'comment:edit' pk=obj.id %}?comments_per_page={{comments_per_page}}&model_name={% get_model_name model_object %}&model_id={{ model_object.id }}&app_name={% get_app_name model_object %}&oauth={{oauth}}">edit</a>
-            <button class="js-comment-delete {% block delete_btn_cls %}btn btn-link{% endblock delete_btn_cls %}" data-url="{% url 'comment:delete' pk=obj.id %}?comments_per_page={{comments_per_page}}&model_name={% get_model_name model_object %}&model_id={{ model_object.id }}&app_name={% get_app_name model_object %}&oauth={{oauth}}">delete</button>
+            | <a class="js-comment-edit {% block edit_link_cls %}btn btn-link{% endblock edit_link_cls %}" href="{% url 'comment:edit' pk=obj.id %}?comments_per_page={{comments_per_page}}&model_name={% get_model_name model_object %}&model_id={{ model_object.id }}&app_name={% get_app_name model_object %}&oauth={{oauth}}">{% trans "edit" %}</a>
+            <button class="js-comment-delete {% block delete_btn_cls %}btn btn-link{% endblock delete_btn_cls %}" data-url="{% url 'comment:delete' pk=obj.id %}?comments_per_page={{comments_per_page}}&model_name={% get_model_name model_object %}&model_id={{ model_object.id }}&app_name={% get_app_name model_object %}&oauth={{oauth}}">{% trans "delete" %}</button>
             {% endif %}
             {% if is_parent %}
-            | <span class="js-reply-number text-dark">{{ obj.replies.count }}</span>
+            {% with reply_count=obj.replies.count %}
+            | <span class="js-reply-number text-dark">{{ reply_count }}</span>
             <a class="js-reply-link {% block reply_link_cls %}btn btn-link ml-1{% endblock reply_link_cls %}" href="#">
-                Repl{% if obj.replies.count <= 1 %}y{% else %}ies{% endif %}
+                {% blocktrans with plural_str=reply_count|pluralize:"y,ies" %} Repl{{ plural_str }} {% endblocktrans %}
+            {% endwith %}
             </a>
             {% endif %}
         </small>
-            <div class="js-comment-reactions mt-2">
-                <span class="js-like-number text-dark">{{ obj.likes }}</span>
-                <a class="js-comment-reaction {% block like_link_cls %}" {% endblock like_link_cls %} href="{% url 'comment:react' comment_id=obj.id reaction='like' %}" data-csrf="{{ csrf_token }}">
-                    {% block like_img_icon %}
-                    <svg class="comment-reaction-icon reaction-like" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill={% if obj|add_one_arg:user|has_reacted:"like" %}"#ffc966"{% else %}"none"{% endif %} stroke="#427297" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
-                    </svg>
-                    {% endblock like_img_icon %}
-                </a>
-                <span class="ml-4 js-dislike-number text-dark">{{ obj.dislikes }}</span>
-                <a class="js-comment-reaction {% block dislike_link_cls %}" {% endblock dislike_link_cls %} href="{% url 'comment:react' comment_id=obj.id reaction='dislike' %}" data-csrf="{{ csrf_token }}">
-                    {% block dislike_img_icon %}
-                    <svg class="comment-reaction-icon reaction-dislike" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill={% if obj|add_one_arg:user|has_reacted:"dislike" %}"#ffc966"{% else %}"none"{% endif %} stroke="#427297" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path>
-                    </svg>
-                    {% endblock dislike_img_icon %}
-                </a>
-            </div>
+        {% include "comment/reactions.html" with comment=obj %}
     </footer>
 </div>

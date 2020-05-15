@@ -8,7 +8,6 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from comment.manager.reactions import ReactionManager
 from comment.models import Comment
 
 
@@ -16,9 +15,6 @@ class Reaction(models.Model):
     comment = models.ForeignKey(Comment, related_name='reactions', on_delete=models.CASCADE)
     likes = models.PositiveIntegerField(default=0)
     dislikes = models.PositiveIntegerField(default=0)
-
-    objects = models.Manager()
-    comment_objects = ReactionManager()
 
     def _increase_likes(self):
         """Increase likes and save the model"""
@@ -32,12 +28,14 @@ class Reaction(models.Model):
 
     def _decrease_likes(self):
         """Decrease likes and save the model"""
+        self.refresh_from_db()
         if self.likes > 0:
             self.likes = models.F('likes') - 1
             self.save()
 
     def _decrease_dislikes(self):
         """Decrease dislikes and save the model"""
+        self.refresh_from_db()
         if self.dislikes > 0:
             self.dislikes = models.F('dislikes') - 1
             self.save()
@@ -162,7 +160,7 @@ class ReactionInstance(models.Model):
             reaction (str): the reaction that needs to be added.
 
         Returns:
-            bool: Returns True if a reaction is updated successfully
+            None
         """
         reaction_type = cls.clean_reaction_type(reaction_type=reaction_type)
         reaction_obj = Reaction.objects.get(comment=comment)
@@ -186,8 +184,6 @@ class ReactionInstance(models.Model):
                 user=user,
                 reaction_type=reaction_type
                 )
-
-        return True
 
 
 @receiver(post_delete, sender=ReactionInstance)

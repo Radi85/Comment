@@ -1,0 +1,25 @@
+{% load i18n %}
+<div class="js-comment-reactions mt-2">
+    <span class="js-like-number text-dark">{{ comment.likes }}</span>
+    {% url 'comment:react' comment_id=comment.id reaction='like' as like_url %}
+    <a title="{% trans "like" %}" class="{% block like_link_cls %} {% endblock like_link_cls %}
+        {% if user.is_authenticated %}
+        js-comment-reaction" href="{{ like_url }}" data-csrf="{{ csrf_token }}"
+        {% else %}
+        " href="{{ login_url }}/?next={{ like_url }}"
+        {% endif %}
+    >
+        {% include "comment/like_icon.html" %}
+    </a>
+    <span class="ml-4 js-dislike-number text-dark">{{ comment.dislikes }}</span>
+    {% url 'comment:react' comment_id=comment.id reaction='dislike' as dislike_url %}
+    <a title="{% trans "dislike" %}" class="{% block dislike_link_cls %} {% endblock dislike_link_cls %}
+        {% if user.is_authenticated %}
+        js-comment-reaction" href="{{ dislike_url }}" data-csrf="{{ csrf_token }}"
+        {% else %}
+        " href="{{ login_url }}/?next={{ dislike_url }}"
+        {% endif %}
+    >
+        {% include "comment/dislike_icon.html" %}
+    </a>
+    </div>

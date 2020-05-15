@@ -253,7 +253,6 @@ $(function() {
      * @param {Number} dislikes - dislike count
      */
     var changeReactionCount = function($parent, likes, dislikes) {
-        console.log($parent);
         $parent.find('.js-like-number')[0].textContent = likes;
         $parent.find('.js-dislike-number')[0].textContent = dislikes;
     }
@@ -273,7 +272,7 @@ $(function() {
         var $csrfToken = $element.attr('data-csrf');
         $.ajax({
             headers: { 'X-CSRFToken': $csrfToken },
-            method: "POST",
+            method: "GET",
             url: $thisURL,
             contentType: 'application/json',
             success: function commentReactionDone(data, textStatus, jqXHR) {
