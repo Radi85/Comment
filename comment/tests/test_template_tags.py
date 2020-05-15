@@ -133,7 +133,6 @@ class TemplateTagsTest(BaseCommentTest):
         user = MockUser()
         comment = self.parent_comment_1
         comment_and_user = add_one_arg(comment, user)
-        self.client.logout()
         self.assertEqual(False, has_reacted(comment_and_user, 'like'))
 
     def test_has_reacted_on_incorrect_reaction(self):
@@ -154,7 +153,6 @@ class TemplateTagsTest(BaseCommentTest):
 
         # check for other users
         user = self.user_2
-        self.client.force_login(user)
         comment_and_user = add_one_arg(comment, user)
 
         self.assertEqual(False, has_reacted(comment_and_user, 'like'))
