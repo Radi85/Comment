@@ -6,7 +6,7 @@
         {% if user.is_authenticated %}
         js-comment-reaction" href="{{ like_url }}" data-csrf="{{ csrf_token }}"
         {% else %}
-        " href="{{ login_url }}/?next={{ like_url }}"
+        " href="{{ login_url }}/?next={{ request.build_absolute_uri }}"
         {% endif %}
     >
         {% include "comment/like_icon.html" %}
@@ -17,7 +17,7 @@
         {% if user.is_authenticated %}
         js-comment-reaction" href="{{ dislike_url }}" data-csrf="{{ csrf_token }}"
         {% else %}
-        " href="{{ login_url }}/?next={{ dislike_url }}"
+        " href="{{ login_url }}/?next={{ request.build_absolute_uri }}"
         {% endif %}
     >
         {% include "comment/dislike_icon.html" %}
