@@ -272,7 +272,7 @@ $(function() {
         var $csrfToken = $element.attr('data-csrf');
         $.ajax({
             headers: { 'X-CSRFToken': $csrfToken },
-            method: "GET",
+            method: "POST",
             url: $thisURL,
             contentType: 'application/json',
             success: function commentReactionDone(data, textStatus, jqXHR) {
