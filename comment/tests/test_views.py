@@ -175,12 +175,12 @@ class SetReactionTest(BaseCommentTest):
             'reaction': action
         })
 
-    def request(self, url, method='get', is_ajax=True):
+    def request(self, url, method='post', is_ajax=True):
         """
-        A utility function to return perform client requests
+        A utility function to return perform client requests.
         Args:
             url (str): The url to perform that needs to be requested.
-            method (str, optional): The HTTP method name. Defaults to 'get'.
+            method (str, optional): The HTTP method name. Defaults to 'POST'.
             is_ajax (bool, optional): Whether AJAX request is to be performed or not. Defaults to True.
 
         Raises:
@@ -219,10 +219,10 @@ class SetReactionTest(BaseCommentTest):
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertEqual(response.url, '/login?next={}'.format(url))
 
-    def test_post_request(self):
-        """Test whether POST requests are allowed or not"""
+    def test_get_request(self):
+        """Test whether GET requests are allowed or not"""
         url = self.get_url(self.comment.id, 'like')
-        response = self.request(url, method='post')
+        response = self.request(url, method='get')
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_non_ajax_requests(self):

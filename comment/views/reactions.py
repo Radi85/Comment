@@ -2,12 +2,12 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_POST
 
 from comment.models import Comment, ReactionInstance
 
 
-@require_GET
+@require_POST
 @login_required
 def react(request, comment_id, reaction):
     """
