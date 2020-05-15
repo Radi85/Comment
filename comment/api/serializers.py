@@ -95,10 +95,16 @@ class CommentCreateSerializer(BaseCommentSerializer):
     parent = serializers.SerializerMethodField()
     replies = serializers.SerializerMethodField()
     reply_count = serializers.SerializerMethodField()
+    likes = serializers.SerializerMethodField()
+    dislikes = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
-        fields = ('id', 'user', 'content', 'parent', 'posted', 'edited', 'reply_count', 'replies')
+        fields = (
+            'id', 'user',
+            'content', 'parent', 'posted', 'edited', 'reply_count', 'replies',
+            'likes', 'dislikes'
+            )
 
     def __init__(self, *args, **kwargs):
         self.model_type = kwargs['context'].get('model_type')
@@ -134,8 +140,7 @@ class CommentSerializer(BaseCommentSerializer):
     class Meta:
         model = Comment
         fields = (
-            'id', 'user', 'content', 'parent',
-            'posted', 'edited',
-            'reply_count', 'replies',
+            'id', 'user',
+            'content', 'parent', 'posted', 'edited', 'reply_count', 'replies',
             'likes', 'dislikes'
         )
