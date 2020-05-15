@@ -1,6 +1,7 @@
 from time import sleep
 
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 
 from comment.models import Comment, Reaction
 from comment.tests.base import BaseCommentTest
@@ -126,8 +127,23 @@ class ReactionInstanceModelTest(CommentModelManagerTest):
         instance = self.create_reaction(self.user_2, self.child_comment_1, 'like')
         self.assertIsNotNone(instance)
 
-    def test_comment_property_likes_increment_and_decrement(self):
-        """Test decrement and increment on likes property with subsequent request."""
+    def test_unique_togetherness_of_user_and_reaction_type(self):
+        """Test Integrity error is raised when one user is set to have more than 1 reaction type for the same comment"""
+        self.create_reaction(self.user_2, self.child_comment_1, 'like')
+        self.assertRaises(IntegrityError, self.create_reaction, self.user_2, self.child_comment_1, 'dislike')
+
+    def test_post_delete_reaction_instance_signal(self):
+        """Test reaction count is decreased when an instance is deleted"""
+        comment = self.child_comment_1
+        instance = self.create_reaction(self.user_2, self.child_comment_1, 'like')
+        comment.refresh_from_db()
+        self.assertEqual(comment.likes, 1)
+        instance.delete()
+        comment.refresh_from_db()
+        self.assertEqual(comment.likes, 0)
+
+    def test_comment_property_likes_increase_and_decrease(self):
+        """Test decrease and increase on likes property with subsequent request."""
         comment = self.child_comment_2
         self.create_reaction(self.user_2, comment, 'like')
         comment.refresh_from_db()
@@ -140,8 +156,8 @@ class ReactionInstanceModelTest(CommentModelManagerTest):
         comment.refresh_from_db()
         self.assertEqual(comment.likes, 1)
 
-    def test_comment_property_dislikes_increment_and_decrement(self):
-        """Test decrement and increment on dislikes property with subsequent request."""
+    def test_comment_property_dislikes_increase_and_decrease(self):
+        """Test decrease and increase on dislikes property with subsequent request."""
         comment = self.child_comment_3
         self.create_reaction(self.user_1, comment, 'dislike')
         comment.refresh_from_db()
@@ -180,5 +196,5 @@ class ReactionInstanceModelTest(CommentModelManagerTest):
         self.assertEqual(comment.likes, 0)
 
     def test_set_reaction_on_incorrect_reaction(self):
-        """Test ValidationError is raised for incorrect when incorrect reactions are passed"""
+        """Test ValidationError is raised when incorrect reaction type is passed"""
         self.assertRaises(ValidationError, self.set_reaction, self.user_1, self.child_comment_5, 'likes')

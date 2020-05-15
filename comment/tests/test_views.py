@@ -175,14 +175,33 @@ class SetReactionTest(BaseCommentTest):
             'reaction': action
         })
 
+    def request(self, url, method='get', is_ajax=True):
+        """
+        A utility function to return perform client requests
+        Args:
+            url (str): The url to perform that needs to be requested.
+            method (str, optional): The HTTP method name. Defaults to 'get'.
+            is_ajax (bool, optional): Whether AJAX request is to be performed or not. Defaults to True.
+
+        Raises:
+            ValueError: When a invalid HTTP method name is passed.
+
+        Returns:
+            `Any`: Response from the request.
+        """
+        request_method = getattr(self.client, method.lower(), None)
+        if not request_method:
+            raise ValueError('This is not a valid request method')
+        if is_ajax:
+            return request_method(url, **{
+                'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'
+            })
+        return request_method(url)
+
     def test_set_reaction_for_authenticated_users(self):
         """Test whether users can create/change reactions using view"""
         url = self.get_url(self.comment.id, 'like')
-        user = self.user_2
-        self.client.force_login(user)
-        response = self.client.post(url, **{
-            'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'
-        })
+        response = self.request(url)
         data = {
             'status': 0,
             'likes': 1,
@@ -196,34 +215,30 @@ class SetReactionTest(BaseCommentTest):
         """Test whether unauthenticated users can create/change reactions using view"""
         url = self.get_url(self.comment.id, 'dislike')
         self.client.logout()
-        response = self.client.post(url, **{
-            'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'
-        })
+        response = self.request(url)
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertEqual(response.url, '/login?next={}'.format(url))
 
-    def test_get_request(self):
-        """Test whether GET requests are allowed or not"""
+    def test_post_request(self):
+        """Test whether POST requests are allowed or not"""
         url = self.get_url(self.comment.id, 'like')
-        response = self.client.get(url)
+        response = self.request(url, method='post')
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_non_ajax_requests(self):
         """Test response if non AJAX requests are sent"""
         url = self.get_url(self.comment.id, 'like')
-        response = self.client.post(url)
+        response = self.request(url, is_ajax=False)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_incorrect_comment_id(self):
         """Test response when an incorrect comment id is passed"""
         url = self.get_url(102_876, 'like')
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        response = self.request(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_incorrect_reaction(self):
         """Test response when incorrect reaction is passed"""
         url = self.get_url(self.comment.id, 'likes')
-        response = self.client.post(url, **{
-            'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'
-        })
+        response = self.request(url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
