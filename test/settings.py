@@ -17,7 +17,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'comment',
     'test.example.post',
-    'test.example.profile',
+    'test.example.user_profile',
 ]
 
 MIDDLEWARE = [
@@ -72,7 +72,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'comment/static'),
 )
 
-PROFILE_APP_NAME = 'profile'
+PROFILE_APP_NAME = 'user_profile'
 PROFILE_MODEL_NAME = 'UserProfile'
 
 LOGIN_URL = 'login'

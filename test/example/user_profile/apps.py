@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class AccountsConfig(AppConfig):
-    name = 'profile'
+    name = 'user_profile'

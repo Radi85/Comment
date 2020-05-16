@@ -2,7 +2,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth.models import User
-from profile.api.serializers import UserSerializer
+
+from user_profile.api.serializers import UserSerializer
 
 
 @api_view(['GET'])

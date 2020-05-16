@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'profile',
+    'user_profile',
     'post',
     'comment',
     'rest_framework',
@@ -131,7 +131,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'root/media_root/')
 
 
-PROFILE_APP_NAME = 'profile'
+PROFILE_APP_NAME = 'user_profile'
 PROFILE_MODEL_NAME = 'userprofile'
 #
 COMMENT_PROFILE_API_FIELDS = ('display_name', 'birth_date', 'image')
