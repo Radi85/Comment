@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
 from django.core.exceptions import ImproperlyConfigured
+from django.conf import settings
 from django.test import RequestFactory
 from django.template import TemplateSyntaxError
 
@@ -10,14 +11,13 @@ from comment.templatetags.comment_tags import (
     include_static_jquery, include_bootstrap, include_static, render_field, has_reacted
 )
 from comment.tests.base import BaseCommentTest
-from django.conf import settings
 
 
 class TemplateTagsTest(BaseCommentTest):
     def setUp(self):
         super().setUp()
         self.factory = RequestFactory()
-        settings.PROFILE_APP_NAME = 'profile'
+        settings.PROFILE_APP_NAME = 'user_profile'
         self.parent_comment_1 = self.create_comment(self.content_object_1)
         self.parent_comment_2 = self.create_comment(self.content_object_1)
         self.parent_comment_3 = self.create_comment(self.content_object_1)

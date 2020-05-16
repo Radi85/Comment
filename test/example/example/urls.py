@@ -5,12 +5,12 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('profile/', include('profile.urls')),
+    path('profile/', include('user_profile.urls')),
     # comment app
     path('comment/', include('comment.urls')),
     # API urls
     path('api/', include('post.api.urls')),
-    path('api/', include('profile.api.urls')),
+    path('api/', include('user_profile.api.urls')),
     path('api/', include('comment.api.urls')),
     path('api-auth/', include('rest_framework.urls')),
     path('', include('post.urls')),

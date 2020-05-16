@@ -251,7 +251,7 @@ class APICommentSerializers(APIBaseTest):
         self.assertIsNone(profile)
 
         # success
-        setattr(settings, 'PROFILE_APP_NAME', 'profile')
+        setattr(settings, 'PROFILE_APP_NAME', 'user_profile')
         profile = get_profile_model()
         self.assertIsNotNone(profile)
 
