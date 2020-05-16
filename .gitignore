@@ -57,6 +57,3 @@ docs/_build/
 # env files
 Pipfile.lock
 Pipfile
-
-# db file
-test/db.sqlite3

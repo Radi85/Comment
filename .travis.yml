@@ -12,5 +12,6 @@ env:
   - DJANGO=master
   - REPO_TOKEN=${REPO_TOKEN}
 install: pip install tox-travis coveralls
-script: tox
+script:
+  - tox
 after_success: coveralls
