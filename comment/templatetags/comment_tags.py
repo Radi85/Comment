@@ -142,23 +142,8 @@ def render_field(field, **kwargs):
     return field
 
 
-@register.filter(name='add_one_arg')
-def add_one_arg(arg1, arg2):
-    """
-    Use this filter to when you need to pass more than 2 arguments to your filter.
-
-    Args:
-        arg1 (`Any`): First Argument
-        arg2 (`Any`): Second Argument
-
-    Returns:
-        tuple: a tuple containing both the arguments in the order that they were passed.
-    """
-    return arg1, arg2
-
-
-@register.filter(name='has_reacted')
-def has_reacted(comment_and_user, reaction):
+@register.simple_tag(name='has_reacted')
+def has_reacted(comment, user, reaction):
     """
     Returns whether a user has reacted with a particular reaction on a comment or not.
 
@@ -171,7 +156,6 @@ def has_reacted(comment_and_user, reaction):
     Returns:
         bool
     """
-    comment, user = comment_and_user
     if user.is_authenticated:
         reaction_type = getattr(ReactionInstance.ReactionType, reaction.upper(), None)
         if not reaction_type:
