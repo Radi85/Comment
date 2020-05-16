@@ -8,7 +8,7 @@ from django.template import TemplateSyntaxError
 from comment.forms import CommentForm
 from comment.templatetags.comment_tags import (
     get_model_name, get_app_name, get_comment_count, get_img_path, get_profile_url, render_comments,
-    include_static_jquery, include_bootstrap, include_static, render_field, add_one_arg, has_reacted
+    include_static_jquery, include_bootstrap, include_static, render_field, has_reacted
 )
 from comment.tests.base import BaseCommentTest
 
@@ -118,12 +118,6 @@ class TemplateTagsTest(BaseCommentTest):
             field = render_field(field, placeholder='placeholder')
             self.assertEqual(field.field.widget.attrs.get('placeholder'), 'placeholder')
 
-    def test_add_one_arg(self):
-        """Test whether this function returns a tuple of the elements passed"""
-        comment = self.parent_comment_1
-        user = self.user_1
-        self.assertTupleEqual((comment, user), add_one_arg(comment, user))
-
     def test_has_reacted_for_unauthenticated_user(self):
         """Test whether the filter returns False for unauthenticated users"""
         class MockUser:
@@ -132,33 +126,28 @@ class TemplateTagsTest(BaseCommentTest):
 
         user = MockUser()
         comment = self.parent_comment_1
-        comment_and_user = add_one_arg(comment, user)
-        self.assertEqual(False, has_reacted(comment_and_user, 'like'))
+        self.assertEqual(False, has_reacted(comment, user, 'like'))
 
     def test_has_reacted_on_incorrect_reaction(self):
         """Test whether this function raises an error when incorrect reaction is passed"""
         comment = self.parent_comment_1
         user = self.user_1
-        comment_and_user = add_one_arg(comment, user)
-        self.assertRaises(TemplateSyntaxError, has_reacted, comment_and_user, 'likes')
+        self.assertRaises(TemplateSyntaxError, has_reacted, comment, user, 'likes')
 
     def test_has_reacted_on_correct_reaction_for_authenticated_users(self):
         """Test whether this function returns an appropriate boolean when correct reaction is passed"""
         comment = self.parent_comment_1
         user = self.user_1
-        comment_and_user = add_one_arg(comment, user)
 
-        self.assertEqual(True, has_reacted(comment_and_user, 'like'))
-        self.assertEqual(False, has_reacted(comment_and_user, 'dislike'))
+        self.assertEqual(True, has_reacted(comment, user, 'like'))
+        self.assertEqual(False, has_reacted(comment, user, 'dislike'))
 
         # check for other users
         user = self.user_2
-        comment_and_user = add_one_arg(comment, user)
 
-        self.assertEqual(False, has_reacted(comment_and_user, 'like'))
-        self.assertEqual(False, has_reacted(comment_and_user, 'dislike'))
+        self.assertEqual(False, has_reacted(comment, user, 'like'))
+        self.assertEqual(False, has_reacted(comment, user, 'dislike'))
 
         # check for other comments
-        comment_and_user = add_one_arg(self.parent_comment_2, user)
-        self.assertEqual(False, has_reacted(comment_and_user, 'like'))
-        self.assertEqual(False, has_reacted(comment_and_user, 'dislike'))
+        self.assertEqual(False, has_reacted(comment, user, 'like'))
+        self.assertEqual(False, has_reacted(comment, user, 'dislike'))
