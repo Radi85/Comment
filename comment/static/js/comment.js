@@ -214,14 +214,31 @@ $(function() {
     };
 
     /**
-     * Returns whether a color is empty(None) or not.
-     * @param {str} color - the color to be compared.
-     * @param {str} emptyColor - the value for emptyColor
+     * Returns whether a classList contains a particular class or not.
+     * @param {Array} classList - the array of classes to be compared.
+     * @param {string} container - the class to be verified, default='user-has-reacted'.
      * @param {boolean}
      */
-    var colorIsNone = function(color, emptyColor = "none") {
-        if (!color || color === emptyColor) return true;
+    var containsClass = function(classList, container = 'user-has-not-reacted') {
+        if (classList.contains(container)) return true;
         return false;
+    }
+
+    /**
+     * Changes/removes class to fill the reacted element.
+     * @param {any} $reactionClass - the reaction element.
+     * @param {string} action -  'add' or 'remove'.
+     */
+    var changeReactionClass = function($reactionEle, action) {
+        var reactiveClass = "user-has-reacted";
+        var unreactiveClass = "user-has-not-reacted";
+        if (action == 'add') {
+            $reactionEle.classList.add(reactiveClass);
+            $reactionEle.classList.remove(unreactiveClass);
+        } else {
+            $reactionEle.classList.remove(reactiveClass);
+            $reactionEle.classList.add(unreactiveClass);
+        }
     }
 
     /**
@@ -233,15 +250,15 @@ $(function() {
     var fillReaction = function($parent, $targetReaction) {
         $likeIcon = $parent.find('.reaction-like')[0];
         $dislikeIcon = $parent.find('.reaction-dislike')[0];
-        var fillColor = "#ffc966";
-        var emptyColor = "none";
-        if (colorIsNone($likeIcon.style.fill) && colorIsNone($dislikeIcon.style.fill)) {
-            $targetReaction.style.fill = fillColor;
+        var isLikeEmpty = containsClass($likeIcon.classList);
+        var isDislikeEmpty = containsClass($dislikeIcon.classList);
+        if (isLikeEmpty && isDislikeEmpty) {
+            changeReactionClass($targetReaction, action = 'add');
         } else {
-            var $currentReaction = (!$likeIcon.style.fill || $likeIcon.style.fill === "none") ? $dislikeIcon : $likeIcon;
-            $currentReaction.style.fill = emptyColor;
+            var $currentReaction = (isLikeEmpty) ? $dislikeIcon : $likeIcon;
+            changeReactionClass($currentReaction, action = 'remove');
             if ($targetReaction != $currentReaction) {
-                $targetReaction.style.fill = fillColor;
+                changeReactionClass($targetReaction, action = 'add');
             }
         }
     };
@@ -274,7 +291,7 @@ $(function() {
             headers: { 'X-CSRFToken': $csrfToken },
             method: "POST",
             url: $thisURL,
-            contentType: 'application/json',
+            contentType: 'json',
             success: function commentReactionDone(data, textStatus, jqXHR) {
                 var status = data['status'];
                 if (status === 0) {
