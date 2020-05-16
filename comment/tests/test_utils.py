@@ -1,10 +1,10 @@
 from unittest.mock import patch
 
+from django.conf import settings
 from django.test import RequestFactory
 
 from comment.utils import get_model_obj, has_valid_profile, get_comment_context_data
 from comment.tests.base import BaseCommentTest
-from django.conf import settings
 
 
 class UtilsTest(BaseCommentTest):
@@ -27,7 +27,7 @@ class UtilsTest(BaseCommentTest):
         self.assertIsInstance(model_object, self.post_1.__class__)
 
     def test_has_valid_profile(self):
-        setattr(settings, 'PROFILE_APP_NAME', 'profile')
+        setattr(settings, 'PROFILE_APP_NAME', 'user_profile')
         setattr(settings, 'PROFILE_MODEL_NAME', 'userprofile')
         has_profile = has_valid_profile()
         self.assertTrue(has_profile)
