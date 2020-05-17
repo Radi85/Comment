@@ -98,18 +98,23 @@ class ReactionInstance(models.Model):
         Args:
             reaction_type (str): The reaction to be saved
 
+        Raises:
+            ValidationError: when reaction_type is not a str or an unexpected reaction.
+
         Returns:
             int: The integral value that matches to the reaction value in
                 the database
         """
-        reaction = getattr(cls.ReactionType, reaction_type.upper(), None)
-        if not reaction:
-            raise ValidationError(
-                _('%(reaction)s is an invalid reaction'),
-                code='invalid',
-                params={'reaction': reaction}
-                )
-        return reaction.value
+        if isinstance(reaction_type, str):
+            reaction = getattr(cls.ReactionType, reaction_type.upper(), None)
+            if reaction:
+                return reaction.value
+
+        raise ValidationError(
+            _('%(reaction)s is an invalid reaction'),
+            code='invalid',
+            params={'reaction': reaction_type}
+            )
 
     def save(self, *args, **kwargs):
         """
