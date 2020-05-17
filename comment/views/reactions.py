@@ -24,7 +24,7 @@ class SetReaction(LoginRequiredMixin, SingleObjectMixin, View):
             False: when reaction is not an acceptable string.
             str: when acceptable, the reaction in lower case form.
         """
-        if not getattr(ReactionInstance.ReactionType, reaction.upper(), None):
+        if (not isinstance(reaction, str)) or (not getattr(ReactionInstance.ReactionType, reaction.upper(), None)):
             return False
         return reaction.lower()
 
