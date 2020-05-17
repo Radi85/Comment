@@ -171,7 +171,7 @@ class SetReactionTest(BaseCommentTest):
             str
         """
         return reverse('comment:react', kwargs={
-            'comment_id': obj_id,
+            'pk': obj_id,
             'reaction': action
         })
 
