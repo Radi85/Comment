@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -17,6 +18,8 @@ class Comment(models.Model):
     edited = models.DateTimeField(auto_now=True)
 
     objects = CommentManager()
+
+    ALLOWED_FLAGS = getattr(settings, 'COMMENT_FLAGS_ALLOWED', 10)
 
     class Meta:
         ordering = ['-posted', ]
@@ -52,3 +55,9 @@ class Comment(models.Model):
     @property
     def dislikes(self):
         return self._get_reaction_count('dislikes')
+
+    @property
+    def is_flagged(self):
+        if self.flags.get(comment=self).count > self.ALLOWED_FLAGS:
+            return True
+        return False
