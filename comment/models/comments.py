@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -19,6 +20,8 @@ class Comment(models.Model):
     edited = models.DateTimeField(auto_now=True)
 
     objects = CommentManager()
+
+    ALLOWED_FLAGS = getattr(settings, 'COMMENT_FLAGS_ALLOWED', 10)
 
     class Meta:
         ordering = ['-posted', ]
@@ -61,9 +64,16 @@ class Comment(models.Model):
     def dislikes(self):
         return self._get_reaction_count('dislikes')
 
+    @property
+    def is_flagged(self):
+        if self.flags.get(comment=comment).count > self.ALLOWED_FLAGS:
+            return True
+        return False
+
 
 @receiver(post_save, sender=Comment)
 def add_reaction(sender, instance, created, raw, using, update_fields, **kwargs):
-    """Add a Reaction instance when a comment is created"""
+    """Add a Reaction, Flag instance when a comment is created"""
     if created:
         instance.reactions.create(comment=instance)
+        instance.flags.create(comment=instance, creator=instance.user)
