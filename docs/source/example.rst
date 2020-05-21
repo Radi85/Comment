@@ -18,8 +18,3 @@ Login with:
     password: ``django-comments``
 
 .. image:: ../_static/img/img_1.png
-
-
-.. image:: ../_static/img/img_2.png
-
-
