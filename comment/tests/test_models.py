@@ -13,12 +13,14 @@ class CommentModelTest(BaseCommentTest):
         self.assertIsNotNone(parent_comment)
         self.assertEqual(str(parent_comment), f'comment by {parent_comment.user}: {parent_comment.content[:20]}')
         self.assertEqual(repr(parent_comment), f'comment by {parent_comment.user}: {parent_comment.content[:20]}')
+        self.assertTrue(parent_comment.is_parent)
         self.assertEqual(parent_comment.replies.count(), 0)
 
         child_comment = self.create_comment(self.content_object_1, parent=parent_comment)
         self.assertIsNotNone(child_comment)
         self.assertEqual(str(child_comment), f'reply by {child_comment.user}: {child_comment.content[:20]}')
         self.assertEqual(repr(child_comment), f'reply by {child_comment.user}: {child_comment.content[:20]}')
+        self.assertFalse(child_comment.is_parent)
         self.assertEqual(parent_comment.replies.count(), 1)
 
         self.assertFalse(parent_comment.is_edited)
@@ -124,18 +126,18 @@ class CommentModelManagerTest(BaseCommentTest):
 class ReactionInstanceModelTest(CommentModelManagerTest):
     def test_user_can_create_reaction(self):
         """Test whether reaction instance can be created"""
-        instance = self.create_reaction(self.user_2, self.child_comment_1, 'like')
+        instance = self.create_reaction_instance(self.user_2, self.child_comment_1, 'like')
         self.assertIsNotNone(instance)
 
     def test_unique_togetherness_of_user_and_reaction_type(self):
         """Test Integrity error is raised when one user is set to have more than 1 reaction type for the same comment"""
-        self.create_reaction(self.user_2, self.child_comment_1, 'like')
-        self.assertRaises(IntegrityError, self.create_reaction, self.user_2, self.child_comment_1, 'dislike')
+        self.create_reaction_instance(self.user_2, self.child_comment_1, 'like')
+        self.assertRaises(IntegrityError, self.create_reaction_instance, self.user_2, self.child_comment_1, 'dislike')
 
     def test_post_delete_reaction_instance_signal(self):
         """Test reaction count is decreased when an instance is deleted"""
         comment = self.child_comment_1
-        instance = self.create_reaction(self.user_2, self.child_comment_1, 'like')
+        instance = self.create_reaction_instance(self.user_2, self.child_comment_1, 'like')
         comment.refresh_from_db()
         self.assertEqual(comment.likes, 1)
         instance.delete()
@@ -145,10 +147,10 @@ class ReactionInstanceModelTest(CommentModelManagerTest):
     def test_comment_property_likes_increase_and_decrease(self):
         """Test decrease and increase on likes property with subsequent request."""
         comment = self.child_comment_2
-        self.create_reaction(self.user_2, comment, 'like')
+        self.create_reaction_instance(self.user_2, comment, 'like')
         comment.refresh_from_db()
         user = self.user_1
-        self.create_reaction(user, comment, 'like')
+        self.create_reaction_instance(user, comment, 'like')
         comment.refresh_from_db()
         self.assertEqual(comment.likes, 2)
 
@@ -159,10 +161,10 @@ class ReactionInstanceModelTest(CommentModelManagerTest):
     def test_comment_property_dislikes_increase_and_decrease(self):
         """Test decrease and increase on dislikes property with subsequent request."""
         comment = self.child_comment_3
-        self.create_reaction(self.user_1, comment, 'dislike')
+        self.create_reaction_instance(self.user_1, comment, 'dislike')
         comment.refresh_from_db()
         user = self.user_2
-        self.create_reaction(user, comment, 'dislike')
+        self.create_reaction_instance(user, comment, 'dislike')
         comment.refresh_from_db()
         self.assertEqual(comment.dislikes, 2)
 

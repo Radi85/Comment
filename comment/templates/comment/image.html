@@ -2,11 +2,11 @@
 <div class="row">
     {% if has_valid_profile %}
         <div class="{% block pic_space %}col-2 col-md-1{% endblock pic_space %}">
-            <a href="{% get_profile_url obj %}">
+            <a href="{% get_profile_url comment %}">
                 <img class="{% block img_cls %}w-100{% endblock img_cls %}"
-                     src="{% get_img_path obj %}" alt="{{obj.user.username}}">
+                     src="{% get_img_path comment %}" alt="{{comment.user.username}}">
             </a>
         </div>
     {% endif %}
-    {% include 'comment/content.html' with obj=obj is_parent=is_parent text_cls=text_cls %}
+    {% include 'comment/content.html' with comment=comment text_cls=text_cls %}
 </div>

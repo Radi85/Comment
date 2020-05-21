@@ -2,7 +2,7 @@
     <strong class="border-bottom bb"><span class="js-comment-number">{{model_object.comments.all.count}}</span> Comments</strong>
     <hr class="hr"/>
     <div class="js-comment comment mb-5">
-        {% include 'comment/create_comment.html' with is_parent=True placeholder="comment on this post..." %}
+        {% include 'comment/create_comment.html' with placeholder="comment on this post..." %}
     </div>
     <div class="js-main-comment mt-5">
       {% for comment in comments %}

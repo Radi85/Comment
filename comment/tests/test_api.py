@@ -17,13 +17,13 @@ class APIBaseTest(BaseCommentTest):
         self.comment_2 = self.create_comment(self.content_object_1)
         self.comment_3 = self.create_comment(self.content_object_1)
         self.comment_4 = self.create_comment(self.content_object_1, parent=self.comment_1)
-        self.reaction_1 = self.create_reaction(self.user_1, self.comment_1, 'like')
+        self.reaction_1 = self.create_reaction_instance(self.user_1, self.comment_1, 'like')
 
         self.comment_5 = self.create_comment(self.content_object_2)
         self.comment_6 = self.create_comment(self.content_object_2)
         self.comment_7 = self.create_comment(self.content_object_2, parent=self.comment_5)
         self.comment_8 = self.create_comment(self.content_object_2, parent=self.comment_5)
-        self.reaction_2 = self.create_reaction(self.user_1, self.comment_5, 'dislike')
+        self.reaction_2 = self.create_reaction_instance(self.user_1, self.comment_5, 'dislike')
         self.addCleanup(patch.stopall)
 
 
