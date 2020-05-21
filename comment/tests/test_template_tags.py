@@ -24,9 +24,9 @@ class TemplateTagsTest(BaseCommentTest):
         self.child_comment_1 = self.create_comment(self.content_object_1, parent=self.parent_comment_1)
         self.child_comment_2 = self.create_comment(self.content_object_1, parent=self.parent_comment_2)
         self.child_comment_3 = self.create_comment(self.content_object_1, parent=self.parent_comment_2)
-        self.reaction_1 = self.create_reaction(self.user_1, self.parent_comment_1, 'like')
-        self.reaction_2 = self.create_reaction(self.user_1, self.parent_comment_2, 'dislike')
-        self.reaction_3 = self.create_reaction(self.user_1, self.parent_comment_3, 'like')
+        self.reaction_1 = self.create_reaction_instance(self.user_1, self.parent_comment_1, 'like')
+        self.reaction_2 = self.create_reaction_instance(self.user_1, self.parent_comment_2, 'dislike')
+        self.reaction_3 = self.create_reaction_instance(self.user_1, self.parent_comment_3, 'like')
 
     def test_get_model_name(self):
         model_name = get_model_name(self.post_1)

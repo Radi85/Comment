@@ -50,6 +50,10 @@ class Comment(models.Model):
         return Comment.objects.filter(parent=self).order_by('posted')
 
     @property
+    def is_parent(self):
+        return self.parent is None
+
+    @property
     def is_edited(self):
         return self.posted.timestamp() + 1 < self.edited.timestamp()
 
