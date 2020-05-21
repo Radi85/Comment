@@ -1,0 +1,38 @@
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
+from django.db import models
+
+
+class ReactionInstanceManager(models.Manager):
+
+    def clean_reaction_type(self, reaction_type):
+        if isinstance(reaction_type, str):
+            reaction = getattr(self.model().ReactionType, reaction_type.upper(), None)
+            if reaction:
+                return reaction.value
+
+        raise ValidationError(
+            _('%(reaction)s is an invalid reaction'),
+            code='invalid',
+            params={'reaction': reaction_type}
+        )
+
+    def _delete_and_create_new_instance(self, instance, user, reaction_type):
+        old_reaction_type = instance.reaction_type
+        reaction_obj = instance.reaction
+        instance.delete()
+        if old_reaction_type != reaction_type:  # create the new instance
+            reaction_obj.refresh_from_db()
+            self.create(reaction=reaction_obj, user=user, reaction_type=reaction_type)
+
+    def set_reaction(self, user, reaction, reaction_type):
+        reaction_type = self.clean_reaction_type(reaction_type=reaction_type)
+        created = False
+        try:
+            instance = self.get(reaction=reaction, user=user)
+        except models.ObjectDoesNotExist:
+            instance = self.create(reaction=reaction, user=user, reaction_type=reaction_type)
+            created = True
+
+        if not created:
+            self._delete_and_create_new_instance(instance=instance, user=user, reaction_type=reaction_type)

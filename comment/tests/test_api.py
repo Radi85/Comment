@@ -354,3 +354,8 @@ class APICommentSerializers(APIBaseTest):
         # get reaction count
         self.assertEqual(serializer.get_likes(self.comment_1), 1)
         self.assertEqual(serializer.get_dislikes(self.comment_5), 1)
+
+        mocked_hasattr = patch('comment.api.serializers.hasattr').start()
+        mocked_hasattr.return_value = False
+        self.assertIsNone(serializer.get_likes(self.comment_2))
+        self.assertIsNone(serializer.get_dislikes(self.comment_2))
