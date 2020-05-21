@@ -2,10 +2,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
-from comment.manager import CommentManager
+from comment.managers import CommentManager
 
 
 class Comment(models.Model):
@@ -32,18 +30,8 @@ class Comment(models.Model):
     def __repr__(self):
         return self.__str__()
 
-    def _get_reaction_count(self, reaction):
-        """
-        Get reaction count for a reaction
-
-        Args:
-            reaction (str): the reaction whose count is needed.
-
-        Returns:
-            int: count of the reaction
-        """
-        reaction_obj, _ = self.reactions.get_or_create(comment=self)
-        return getattr(reaction_obj, reaction, None)
+    def _get_reaction_count(self, reaction_type):
+        return getattr(self.reaction, reaction_type, None)
 
     @property
     def replies(self):
@@ -64,10 +52,3 @@ class Comment(models.Model):
     @property
     def dislikes(self):
         return self._get_reaction_count('dislikes')
-
-
-@receiver(post_save, sender=Comment)
-def add_reaction(sender, instance, created, raw, using, update_fields, **kwargs):
-    """Add a Reaction instance when a comment is created"""
-    if created:
-        instance.reactions.create(comment=instance)

@@ -45,35 +45,20 @@ class BaseCommentTest(TestCase):
             parent=parent,
         )
 
-    def create_reaction(self, user, comment, reaction):
-        """Increment total reactions, create a new ReactionInstance
-
-        Args:
-            user (get_user_model()): user to be associated to the reaction instance
-            comment (Comment): comment to be associated with the reaction instance
-            reaction (str): reaction to be recorded
-
-        Returns:
-            ReactionInstance: The ReactionInstance created
-        """
+    def create_reaction_instance(self, user, comment, reaction):
         reaction_type = getattr(ReactionInstance.ReactionType, reaction.upper(), None)
         if reaction_type:
             reaction_obj = Reaction.objects.get(comment=comment)
-            return ReactionInstance.objects.create(
+            self.reactions += 1
+            reaction_instance = ReactionInstance.objects.create(
                 user=user,
                 reaction_type=reaction_type.value,
                 reaction=reaction_obj
             )
-            self.reactions += 1
+            comment.reaction.refresh_from_db()
+            return reaction_instance
         raise ValueError('{} is not a valid reaction type'.format(reaction))
 
-    def set_reaction(self, user, comment, reaction):
-        """
-        Set a reaction using the model function `set_reaction` of ReactionInstance
-
-        Args:
-            user (`get_user_model()`): user to be associated with the reaction.
-            comment (Comment): comment which needs to set the reaction.
-            reaction (str): the reaction to be set.
-        """
-        ReactionInstance.set_reaction(user, comment, reaction)
+    @staticmethod
+    def set_reaction(user, comment, reaction):
+        ReactionInstance.objects.set_reaction(user, comment.reaction, reaction)

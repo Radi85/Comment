@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 from django.core.exceptions import PermissionDenied
 from django.template.loader import render_to_string
 from django.views.generic import FormView
@@ -18,6 +18,11 @@ class BaseCommentView(FormView, LoginRequiredMixin):
         context['comment_form'] = context.pop('form')
         context.update(get_comment_context_data(self.request))
         return context
+
+    def post(self, request, *args, **kwargs):
+        if not request.is_ajax():
+            return HttpResponseBadRequest('Only AJAX request are allowed')
+        return super().post(request, *args, **kwargs)
 
 
 class CreateComment(BaseCommentView):

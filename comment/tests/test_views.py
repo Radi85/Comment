@@ -19,7 +19,7 @@ class CreateCommentTestCase(BaseCommentTest):
             'model_name': 'post',
             'model_id': self.post_1.id
         }
-        response = self.client.post(reverse('comment:create'), data=data)
+        response = self.client.post(reverse('comment:create'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'comment/base.html')
         parent_comment = Comment.objects.get(content='parent comment body', object_id=self.post_1.id)
@@ -36,7 +36,7 @@ class CreateCommentTestCase(BaseCommentTest):
             'parent_id': parent_comment.id,
             'model_id': self.post_1.id
         }
-        response = self.client.post(reverse('comment:create'), data=data)
+        response = self.client.post(reverse('comment:create'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'comment/child_comment.html')
         child_comment = Comment.objects.get(content='child comment body', object_id=self.post_1.id)
@@ -53,11 +53,21 @@ class CreateCommentTestCase(BaseCommentTest):
             'parent_id': 100,
             'model_id': self.post_1.id
         }
-        response = self.client.post(reverse('comment:create'), data=data)
+        response = self.client.post(reverse('comment:create'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
         child_comment = Comment.objects.get(content='not child comment body', object_id=self.post_1.id)
         self.assertTrue(child_comment.is_parent)
         self.assertIsNone(child_comment.parent)
+
+    def test_create_comment_non_ajax_request(self):
+        data = {
+            'content': 'parent comment body',
+            'app_name': 'post',
+            'model_name': 'post',
+            'model_id': self.post_1.id
+        }
+        response = self.client.post(reverse('comment:create'), data=data)
+        self.assertEqual(response.status_code, 400)  # bad request
 
     def test_edit_comment(self):
         comment = self.create_comment(self.content_object_1)
