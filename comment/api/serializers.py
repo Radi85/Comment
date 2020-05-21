@@ -101,10 +101,8 @@ class CommentCreateSerializer(BaseCommentSerializer):
     class Meta:
         model = Comment
         fields = (
-            'id', 'user',
-            'content', 'parent', 'posted', 'edited', 'reply_count', 'replies',
-            'likes', 'dislikes'
-            )
+            'id', 'user', 'content', 'parent', 'posted', 'edited', 'reply_count', 'replies', 'likes', 'dislikes'
+        )
 
     def __init__(self, *args, **kwargs):
         self.model_type = kwargs['context'].get('model_type')
@@ -140,7 +138,14 @@ class CommentSerializer(BaseCommentSerializer):
     class Meta:
         model = Comment
         fields = (
-            'id', 'user',
-            'content', 'parent', 'posted', 'edited', 'reply_count', 'replies',
-            'likes', 'dislikes'
+            'id', 'user', 'content', 'parent', 'posted', 'edited', 'reply_count', 'replies', 'likes', 'dislikes'
         )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        context = kwargs.get('context')
+        reaction_update = False
+        if context:
+            reaction_update = context.get('reaction_update')
+        if reaction_update:
+            self.fields['content'].read_only = True
