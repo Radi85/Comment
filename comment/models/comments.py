@@ -66,7 +66,7 @@ class Comment(models.Model):
 
     @property
     def is_flagged(self):
-        if self.flags.get(comment=comment).count > self.ALLOWED_FLAGS:
+        if self.flags.get(comment=self).count > self.ALLOWED_FLAGS:
             return True
         return False
 

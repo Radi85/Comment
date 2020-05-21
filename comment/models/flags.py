@@ -11,6 +11,7 @@ from django.utils.translation import gettext_lazy as _
 
 from comment.models import Comment
 
+
 User = get_user_model()
 
 class Flag(models.Model):
@@ -52,7 +53,7 @@ class Flag(models.Model):
 
 
 class FlagInstance(models.Model):
-    
+
     REASONS = getattr(settings, 'COMMENT_FLAG_REASONS', [
         (1, _('Spam | Exists only to promote a service')),
         (2, _('Abusive | Intended at promoting hatred')),
@@ -67,7 +68,7 @@ class FlagInstance(models.Model):
     reasons = []
     for reason in REASONS:
         reasons.append(Reason(*reason))
-    
+
     reason_values = [reason.value for reason in reasons]
 
     flag = models.ForeignKey(Flag, on_delete=models.CASCADE, related_name='flags')
@@ -109,9 +110,9 @@ class FlagInstance(models.Model):
         reason = self.clean_reason(self.reason)
         if reason == self.reason_values[-1] and (not self.info):
             raise ValidationError(
-            _('Please supply some information as the reason for flagging'),
-            code='invalid'
-            )
+                _('Please supply some information as the reason for flagging'),
+                code='invalid'
+                )
 
     def save(self, *args, **kwargs):
         """Increase reaction count in the reaction model after saving an instance"""
@@ -154,6 +155,3 @@ class FlagInstance(models.Model):
 def delete_flag_instance(sender, instance, using, **kwargs):
     """Decrease flag count in the flag model before deleting an instance"""
     instance.decrease_count()
-
-    
-
