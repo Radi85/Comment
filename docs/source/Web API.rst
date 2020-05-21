@@ -15,7 +15,9 @@ There are 5 methods available to perform the following actions:
 
     4. Delete a comment you posted. (Authenticated)
 
-    5. Retrieve the list of comments and associated replies to a given content type and object ID.
+    5. React to a comment. (Authenticated)
+
+    6. Retrieve the list of comments and associated replies to a given content type and object ID.
 
 These actions are explained below.
 
@@ -39,10 +41,12 @@ for the Post model add comments field as shown below:
 
         class Meta:
             model = Post
-            fields = ('id',
-                      ...
-                      ...
-                      'comments')
+            fields = (
+                'id',
+                ...
+                ...
+                'comments'
+            )
 
         def get_comments(self, obj):
             comments_qs = Comment.objects.filter_parents_by_object(obj)
@@ -66,7 +70,7 @@ declare the ``COMMENT_PROFILE_API_FIELDS`` tuple inside your ``settings.py``:
 Comment API actions:
 --------------------
 
-    **1- Retrieve the list of comments and associated replies to a given content type and object ID:**
+**1- Retrieve the list of comments and associated replies to a given content type and object ID:**
 
     This action can be performed by providing the url with data queries related to the content type.
 
@@ -84,24 +88,26 @@ Comment API actions:
 
     ::
 
-        $ curl 'http://localhost:8000/api/comments/?type=TYPE&id=ID'
+        $ curl -H "Content-Type: application/json" 'http://localhost:8000/api/comments/?type=MODEL_NAME&id=ID'
 
 
-    **2- Post a comment or reply to an existing comment:**
+**2- Create a comment or reply to an existing comment:**
 
     Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
 
-    - ``parent_id``: is 0 or **NOT PROVIDED** for parent comments and for reply comments must be the id of the parent comment.
+    - ``type``: is the model name of the content type that have comments associated with it.
+    - ``id``: is the id of an object of that model
+    - ``parent_id``: is 0 or **NOT PROVIDED** for parent comments and for reply comments must be the id of parent comment
 
 
-    Example: posting a parent comment:
+    Example: posting a parent comment
 
     ::
 
-        $ curl -X POST -u USERNAME:PASSWORD -d "content=CONTENT" "http://localhost:8000/api/comments/create/?type=MODEL&id=ID&parent_id=0"
+        $ curl -X POST -u USERNAME:PASSWORD -d "content=CONTENT" -H "Content-Type: application/json" "http://localhost:8000/api/comments/create/?type=MODEL_NAME&id=ID&parent_id=0"
 
 
-    **3- Update a comment:**
+**3- Update a comment:**
 
     Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
 
@@ -110,11 +116,10 @@ Comment API actions:
 
     ::
 
-        $ curl -X PUT -u USERNAME:PASSWORD -d "content=CONTENT" "http://localhost:8000/api/comments/ID/
+        $ curl -X PUT -u USERNAME:PASSWORD -d "content=CONTENT" -H "Content-Type: application/json" "http://localhost:8000/api/comments/ID/
 
 
-
-    **4- Delete a comment:**
+**4- Delete a comment:**
 
     Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
 
@@ -122,5 +127,23 @@ Comment API actions:
 
     ::
 
-        $ curl -X DELETE -u USERNAME:PASSWORD "http://localhost:8000/api/comments/ID/
+        $ curl -X DELETE -u USERNAME:PASSWORD -H "Content-Type: application/json" "http://localhost:8000/api/comments/ID/
+
+
+**5- React to a comment:**
+
+    ``POST`` is the allowed method to perform a reaction on a comment.
+
+    Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
+
+    This action requires the ``comment.id``. and,
+    ``reaction_type``: one of ``like`` or ``dislike``
+
+    ::
+
+       $ curl -X POST -u USERNAME:PASSWORD -H "Content-Type: application/json" "http://localhost:8000/api/comments/ID/react/REACTION_TYPE/
+
+
+    PS: As in the UI, clicking the **liked** button will remove the reaction => unlike the comment. This behaviour is performed when repeating the same post request.
+        .
 

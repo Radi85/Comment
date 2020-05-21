@@ -1,6 +1,12 @@
 Changelog
 =========
 
+1.5.0
+-----
+
+- Add reactions - (LIKE and DISLIKE)
+- Restrict the requests to AJAX calls only
+
 1.4.0
 -----
 
