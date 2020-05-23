@@ -21,7 +21,7 @@ class SetReaction(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         comment = get_object_or_404(Comment, id=kwargs.get('pk'))
         if not request.is_ajax():
-            return HttpResponseBadRequest('Only AJAX request are allowed')
+            return HttpResponseBadRequest(_('Only AJAX request are allowed'))
 
         reaction = kwargs.get('reaction', None)
         reaction_type = self._clean_reaction(reaction)
