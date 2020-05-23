@@ -64,12 +64,12 @@ col-md-8 col-sm-8 mt-5 px-md-5 px-4
                 {% endif %}
 
                 {% if viewed_user.profile.bio %}
-                    <blockquote class="blockquote">
+                    <div class="blockquote">
                         <h5 class="mt-5">BIO:</h5>
                         <footer class="blockquote-footer">
-                            {{viewed_user.username}}  | <cite title="Source Title">{{viewed_user.profile.bio}}</cite>
+                            {{viewed_user.username}}  | <span class="font-italics" title="Source Title">{{viewed_user.profile.bio}}</span>
                         </footer>
-                    </blockquote>
+                    <div>
                 {% endif %}
             </div>
             <div class="px-sm-4 px-md-5">

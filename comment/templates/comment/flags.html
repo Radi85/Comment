@@ -1,0 +1,6 @@
+{% load i18n %}
+{% url 'comment:flag' pk=comment.id  as flag_url %}
+<span class="ml-4 js-comment-flag" data-url="{% if user.is_authenticated %}{{ flag_url }}{% else %}{{ flag_url }}/?next={{ request.build_absolute_uri }}{% endif %}">
+    {% include "comment/flag_icon.html" %}
+    {% include "comment/flag_modal.html" %}
+</span>
