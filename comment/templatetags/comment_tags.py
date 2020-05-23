@@ -4,7 +4,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.contenttypes.models import ContentType
 
-from comment.models import Comment, ReactionInstance
+from comment.models import Comment, ReactionInstance, FlagInstance
 from comment.forms import CommentForm
 from comment.utils import has_valid_profile
 
@@ -169,3 +169,16 @@ def has_reacted(comment, user, reaction):
             ).exists()
 
     return False
+
+
+@register.filter(name='has_flagged')
+def has_flagged(user, comment):
+    if user.is_authenticated:
+        return FlagInstance.objects.filter(user=user, flag__comment=comment).exists()
+
+    return False
+
+
+@register.simple_tag(name='render_flag_reasons')
+def render_flag_reasons():
+    return FlagInstance.objects.reasons
