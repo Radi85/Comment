@@ -3,13 +3,17 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 
-ALLOWED_FLAGS = getattr(settings, 'COMMENT_FLAGS_ALLOWED', 10)
-
 class CommentManager(models.Manager):
+
+    ALLOWED_FLAGS = getattr(settings, 'COMMENT_FLAGS_ALLOWED', 0)
+
     def get_queryset(self):
         """Filter out comments that have been flagged"""
+        if not self.ALLOWED_FLAGS:
+            return super().get_queryset()
+
         return super().get_queryset().annotate(
-            flag_count=models.Count('flags')).filter(flag_count__gt=ALLOWED_FLAGS)
+            flag_count=models.Count('flag')).filter(flag_count__lt=self.ALLOWED_FLAGS)
 
     def all_parent_comments(self):
         return super().all().filter(parent=None)
