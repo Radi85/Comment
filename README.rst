@@ -20,6 +20,9 @@
     :target: https://django-comment-dab.readthedocs.io/?badge=latest
     :alt: Documentation Status
 
+.. image:: https://img.shields.io/github/license/radi85/Comment
+   :alt: GitHub
+
 ===================
 django-comments-dab
 ===================
@@ -52,12 +55,14 @@ It allows you to integrate commenting functionality with any model you have e.g.
 
     2. Reply to an existing comment.
 
-    3. Edit a comment you posted.
+    3. Edit a comment.
 
-    4. Delete a comment you posted.
+    4. Delete a comment.
+
+    5. React to a comment. Available reactions are LIKE and DISLIKE  # open PR if you would like to have more reactions
 
 
-- All actions are done by ajax calls - JQuery 3.2.1
+- All actions are done by AJAX calls - JQuery 3.2.1
 
 - Bootstrap 4.1.1 is used in comment templates for responsive design.
 
@@ -70,7 +75,7 @@ Requirements:
 -------------
 
     1. **django>=2.1**
-    2. **djangorestframework**  # only for API Framework
+    2. **djangorestframework**  # only for the API Framework
     3. **Bootstrap 4.1.1**
     4. **jQuery 3.2.1**
 
@@ -166,10 +171,10 @@ E.g. ``Post`` model, as shown below:
 Step 2 - Adding template tags:
 ------------------------------
 
-``render_comments`` *tag uses 2 positional and 2 optional args*:
+``render_comments`` *tag uses 2 required and 2 optional args*:
 
-    1. Instance of the targeted model. (**positional**)
-    2. Request object. (**positional**)
+    1. Instance of the targeted model. (**Required**)
+    2. Request object. (**Required**)
     3. oauth. (optional - Default is false)
     4. comments_per_page (number of Comments Per Page - Default is 10)
 
@@ -295,7 +300,9 @@ There are 5 methods available to perform the following actions:
 
     4. Delete a comment you posted. (Authenticated)
 
-    5. Retrieve the list of comments and associated replies to a given content type and object ID.
+    5. React to a comment. (Authenticated)
+
+    6. Retrieve the list of comments and associated replies to a given content type and object ID.
 
 These actions are explained below.
 
@@ -319,10 +326,12 @@ for the Post model add comments field as shown below:
 
         class Meta:
             model = Post
-            fields = ('id',
-                      ...
-                      ...
-                      'comments')
+            fields = (
+                'id',
+                ...
+                ...
+                'comments'
+            )
 
         def get_comments(self, obj):
             comments_qs = Comment.objects.filter_parents_by_object(obj)
@@ -346,7 +355,7 @@ declare the ``COMMENT_PROFILE_API_FIELDS`` tuple inside your ``settings.py``:
 Comment API actions:
 --------------------
 
-    **1- Retrieve the list of comments and associated replies to a given content type and object ID:**
+**1- Retrieve the list of comments and associated replies to a given content type and object ID:**
 
     This action can be performed by providing the url with data queries related to the content type.
 
@@ -364,13 +373,15 @@ Comment API actions:
 
     ::
 
-        $ curl 'http://localhost:8000/api/comments/?type=TYPE&id=ID'
+        $ curl -H "Content-Type: application/json" 'http://localhost:8000/api/comments/?type=MODEL_NAME&id=ID'
 
 
-    **2- Post a comment or reply to an existing comment:**
+**2- Create a comment or reply to an existing comment:**
 
     Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
 
+    - ``type``: is the model name of the content type that have comments associated with it.
+    - ``id``: is the id of an object of that model
     - ``parent_id``: is 0 or **NOT PROVIDED** for parent comments and for reply comments must be the id of parent comment
 
 
@@ -378,10 +389,10 @@ Comment API actions:
 
     ::
 
-        $ curl -X POST -u USERNAME:PASSWORD -d "content=CONTENT" "http://localhost:8000/api/comments/create/?type=MODEL&id=ID&parent_id=0"
+        $ curl -X POST -u USERNAME:PASSWORD -d "content=CONTENT" -H "Content-Type: application/json" "http://localhost:8000/api/comments/create/?type=MODEL_NAME&id=ID&parent_id=0"
 
 
-    **3- Update a comment:**
+**3- Update a comment:**
 
     Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
 
@@ -390,11 +401,10 @@ Comment API actions:
 
     ::
 
-        $ curl -X PUT -u USERNAME:PASSWORD -d "content=CONTENT" "http://localhost:8000/api/comments/ID/
+        $ curl -X PUT -u USERNAME:PASSWORD -d "content=CONTENT" -H "Content-Type: application/json" "http://localhost:8000/api/comments/ID/
 
 
-
-    **4- Delete a comment:**
+**4- Delete a comment:**
 
     Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
 
@@ -402,9 +412,24 @@ Comment API actions:
 
     ::
 
-        $ curl -X DELETE -u USERNAME:PASSWORD "http://localhost:8000/api/comments/ID/
+        $ curl -X DELETE -u USERNAME:PASSWORD -H "Content-Type: application/json" "http://localhost:8000/api/comments/ID/
 
 
+**5- React to a comment:**
+
+    ``POST`` is the allowed method to perform a reaction on a comment.
+
+    Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
+
+    This action requires the ``comment.id``. and,
+    ``reaction_type``: one of ``like`` or ``dislike``
+
+    ::
+
+       $ curl -X POST -u USERNAME:PASSWORD -H "Content-Type: application/json" "http://localhost:8000/api/comments/ID/react/REACTION_TYPE/
+
+
+    PS: As in the UI, clicking the **liked** button will remove the reaction => unlike the comment. This behaviour is performed when repeating the same post request.
 
 
 .. _`Style Customization`:
@@ -473,6 +498,6 @@ Login with:
 .. image:: /docs/_static/img/img_1.png
 
 
-.. image:: /docs/_static/img/img_2.png
+The icons are picked from `Feather`_. Many thanks for the good work.
 
-
+.. _`Feather`: https://feathericons.com

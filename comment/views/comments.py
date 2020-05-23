@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 from django.core.exceptions import PermissionDenied
 from django.template.loader import render_to_string
 from django.views.generic import FormView
@@ -19,22 +19,23 @@ class BaseCommentView(FormView, LoginRequiredMixin):
         context.update(get_comment_context_data(self.request))
         return context
 
+    def post(self, request, *args, **kwargs):
+        if not request.is_ajax():
+            return HttpResponseBadRequest('Only AJAX request are allowed')
+        return super().post(request, *args, **kwargs)
+
 
 class CreateComment(BaseCommentView):
     created_comment = None
     parent_comment = None
-    is_parent = False
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if self.is_parent:
-            context['comment'] = self.created_comment
-        else:
-            context['reply'] = self.created_comment
+        context['comment'] = self.created_comment
         return context
 
     def get_template_names(self):
-        if self.is_parent:
+        if self.created_comment.is_parent:
             return ['comment/base.html']
         else:
             return ['comment/child_comment.html']
@@ -53,7 +54,6 @@ class CreateComment(BaseCommentView):
             user=self.request.user,
             parent=self.parent_comment,
         )
-        self.is_parent = self.request.POST.get('is_parent') == 'True'
         return self.render_to_response(self.get_context_data())
 
 
@@ -77,8 +77,7 @@ class UpdateComment(BaseCommentView):
         context = self.get_context_data()
         if form.is_valid():
             form.save()
-            context['obj'] = self.updated_comment
-            context['is_parent'] = not self.updated_comment.parent
+            context['comment'] = self.updated_comment
             return render(request, 'comment/content.html', context)
 
 

@@ -4,7 +4,8 @@ from django.conf import settings
 from django.test import RequestFactory
 
 from comment.models import Comment
-from comment.api.serializers import get_profile_model, get_user_fields, UserSerializer, CommentCreateSerializer
+from comment.api.serializers import get_profile_model, get_user_fields, UserSerializer, CommentCreateSerializer, \
+    CommentSerializer
 from comment.api.permissions import IsOwnerOrReadOnly, ContentTypePermission, ParentIdPermission
 from comment.api.views import CommentList
 from comment.tests.base import BaseCommentTest
@@ -17,13 +18,13 @@ class APIBaseTest(BaseCommentTest):
         self.comment_2 = self.create_comment(self.content_object_1)
         self.comment_3 = self.create_comment(self.content_object_1)
         self.comment_4 = self.create_comment(self.content_object_1, parent=self.comment_1)
-        self.reaction_1 = self.create_reaction(self.user_1, self.comment_1, 'like')
+        self.reaction_1 = self.create_reaction_instance(self.user_1, self.comment_1, 'like')
 
         self.comment_5 = self.create_comment(self.content_object_2)
         self.comment_6 = self.create_comment(self.content_object_2)
         self.comment_7 = self.create_comment(self.content_object_2, parent=self.comment_5)
         self.comment_8 = self.create_comment(self.content_object_2, parent=self.comment_5)
-        self.reaction_2 = self.create_reaction(self.user_1, self.comment_5, 'dislike')
+        self.reaction_2 = self.create_reaction_instance(self.user_1, self.comment_5, 'dislike')
         self.addCleanup(patch.stopall)
 
 
@@ -232,6 +233,34 @@ class APICommentViewTest(APIBaseTest):
         self.assertEqual(response.status_code, 204)
         self.assertEqual(Comment.objects.all().count(), count - 2)
 
+    def test_react_to_comment_success(self):
+        # post like - comment has no reaction
+        self.assertEqual(self.comment_3.likes, 0)
+        self.assertEqual(self.comment_3.dislikes, 0)
+        response = self.client.post(f'/api/comments/{self.comment_3.id}/react/like/')
+        self.assertEqual(response.status_code, 200)
+        self.comment_3.reaction.refresh_from_db()
+        self.assertEqual(self.comment_3.likes, 1)
+        self.assertEqual(self.comment_3.dislikes, 0)
+
+        # post dislike - comment is liked by the user
+        response = self.client.post(f'/api/comments/{self.comment_3.id}/react/dislike/')
+        self.assertEqual(response.status_code, 200)
+        self.comment_3.reaction.refresh_from_db()
+        self.assertEqual(self.comment_3.likes, 0)
+        self.assertEqual(self.comment_3.dislikes, 1)
+
+        # post dislike - comment is disliked by the user => comment reaction is removed
+        response = self.client.post(f'/api/comments/{self.comment_3.id}/react/dislike/')
+        self.assertEqual(response.status_code, 200)
+        self.comment_3.reaction.refresh_from_db()
+        self.assertEqual(self.comment_3.likes, 0)
+        self.assertEqual(self.comment_3.dislikes, 0)
+
+    def test_react_to_comment_with_invalid_reaction_type(self):
+        response = self.client.post(f'/api/comments/{self.comment_3.id}/react/invalid_type/')
+        self.assertEqual(response.status_code, 400)
+
 
 class APICommentSerializers(APIBaseTest):
     def test_get_profile_model(self):
@@ -354,3 +383,15 @@ class APICommentSerializers(APIBaseTest):
         # get reaction count
         self.assertEqual(serializer.get_likes(self.comment_1), 1)
         self.assertEqual(serializer.get_dislikes(self.comment_5), 1)
+
+        mocked_hasattr = patch('comment.api.serializers.hasattr').start()
+        mocked_hasattr.return_value = False
+        self.assertIsNone(serializer.get_likes(self.comment_2))
+        self.assertIsNone(serializer.get_dislikes(self.comment_2))
+
+    def test_passing_context_to_serializer(self):
+        serializer = CommentSerializer(self.comment_1)
+        self.assertFalse(serializer.fields['content'].read_only)
+
+        serializer = CommentSerializer(self.comment_1, context={'reaction_update': True})
+        self.assertTrue(serializer.fields['content'].read_only)

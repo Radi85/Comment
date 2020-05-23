@@ -2,21 +2,21 @@
 {% load i18n %}
 <div class="{% block text_space %}{% if has_valid_profile %}col-10 col-md-11
             {% else %}co-12 mx-3{% endif %}{% endblock text_space %}">
-    <p class="js-comment-content {% block c_text_cls %} h6 mb-0{% endblock c_text_cls %}">{{ obj.content }}</p>
+    <p class="js-comment-content {% block c_text_cls %} h6 mb-0{% endblock c_text_cls %}">{{ comment.content }}</p>
     <footer class="blockquote-footer">
         <small>
-            <a class="{% block user_name %}{% endblock user_name %}" href="{% get_profile_url obj %}">{{ obj.user }}</a> |
-            {% if obj.is_edited %}
-            <span class="font-italic" title="{% trans 'Edited' %}">{% blocktrans with edited_time=obj.edited|timesince %}Edited: {{ edited_time }} ago{% endblocktrans %}</span>
+            <a class="{% block user_name %}{% endblock user_name %}" href="{% get_profile_url comment %}">{{ comment.user }}</a> |
+            {% if comment.is_edited %}
+            <span class="font-italic" title="{% trans 'Edited' %}">{% blocktrans with edited_time=comment.edited|timesince %}Edited: {{ edited_time }} ago{% endblocktrans %}</span>
             {% else %}
-            <span class="font-italic" title="{% trans 'Posted' %}">{% blocktrans with posted_time=obj.posted|timesince %}{{ posted_time }} ago{% endblocktrans %}</span>
+            <span class="font-italic" title="{% trans 'Posted' %}">{% blocktrans with posted_time=comment.posted|timesince %}{{ posted_time }} ago{% endblocktrans %}</span>
             {% endif %}
-            {% if obj.user == user %}
-            | <a class="js-comment-edit {% block edit_link_cls %}btn btn-link{% endblock edit_link_cls %}" href="{% url 'comment:edit' pk=obj.id %}?comments_per_page={{comments_per_page}}&model_name={% get_model_name model_object %}&model_id={{ model_object.id }}&app_name={% get_app_name model_object %}&oauth={{oauth}}">{% trans "edit" %}</a>
-            <button class="js-comment-delete {% block delete_btn_cls %}btn btn-link{% endblock delete_btn_cls %}" data-url="{% url 'comment:delete' pk=obj.id %}?comments_per_page={{comments_per_page}}&model_name={% get_model_name model_object %}&model_id={{ model_object.id }}&app_name={% get_app_name model_object %}&oauth={{oauth}}">{% trans "delete" %}</button>
+            {% if comment.user == user %}
+            | <a class="js-comment-edit {% block edit_link_cls %}btn btn-link{% endblock edit_link_cls %}" href="{% url 'comment:edit' pk=comment.id %}?comments_per_page={{comments_per_page}}&model_name={% get_model_name model_object %}&model_id={{ model_object.id }}&app_name={% get_app_name model_object %}&oauth={{oauth}}">{% trans "edit" %}</a>
+            <button class="js-comment-delete {% block delete_btn_cls %}btn btn-link{% endblock delete_btn_cls %}" data-url="{% url 'comment:delete' pk=comment.id %}?comments_per_page={{comments_per_page}}&model_name={% get_model_name model_object %}&model_id={{ model_object.id }}&app_name={% get_app_name model_object %}&oauth={{oauth}}">{% trans "delete" %}</button>
             {% endif %}
-            {% if is_parent %}
-            {% with reply_count=obj.replies.count %}
+            {% if comment.is_parent %}
+            {% with reply_count=comment.replies.count %}
             | <span class="js-reply-number text-dark">{{ reply_count }}</span>
             <a class="js-reply-link {% block reply_link_cls %}btn btn-link ml-1{% endblock reply_link_cls %}" href="#">
                 {% blocktrans with plural_str=reply_count|pluralize:"y,ies" %} Repl{{ plural_str }} {% endblocktrans %}
@@ -24,6 +24,6 @@
             </a>
             {% endif %}
         </small>
-        {% include "comment/reactions.html" with comment=obj %}
+        {% include "comment/reactions.html" with comment=comment %}
     </footer>
 </div>

@@ -20,10 +20,11 @@ django-comments-dab
 .. image:: https://img.shields.io/pypi/djversions/django-comments-dab.svg
    :target: https://pypi.python.org/pypi/django-comments-dab/
 
+.. image:: https://img.shields.io/github/license/radi85/Comment
+   :alt: GitHub
 
 Introduction
 ============
-
 
 **dab stands for Django-Ajax-Bootstrap**
 
@@ -38,11 +39,13 @@ It allows you to integrate commenting functionality with any model you have e.g.
 
     2. Reply to an existing comment.
 
-    3. Edit a comment you posted.
+    3. Edit a comment.
 
-    4. Delete a comment you posted.
+    4. Delete a comment.
+
+    5. React to a comment. Available reactions are LIKE and DISLIKE  # open PR if you would like to have more reactions
 
 
-- All actions are done by ajax calls - JQuery 3.2.1
+- All actions are done by AJAX calls - JQuery 3.2.1
 
 - Bootstrap 4.1.1 is used in comment templates for responsive design.
