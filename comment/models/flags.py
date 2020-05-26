@@ -42,7 +42,7 @@ class FlagInstance(models.Model):
 
     flag = models.ForeignKey(Flag, on_delete=models.CASCADE, related_name='flags')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='flags')
-    info = models.TextField(null=True, blank=False)
+    info = models.TextField(null=True, blank=True)
     date_flagged = models.DateTimeField(auto_now=timezone.now())
 
     objects = FlagInstanceManager()
