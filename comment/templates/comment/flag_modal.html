@@ -1,0 +1,30 @@
+{% load i18n %}
+{% load comment_tags %}
+<div class="flag-modal modal fade">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="flag-modal-header modal-header">
+                <h5 class="flag-modal-title">{% block flag_modal_title %}{% trans "Please select a reason for flagging" %}{% endblock flag_modal_title %}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="{% trans "Close" %}">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="flag-modal-body modal-body">
+                {% render_flag_reasons as reasons %}
+                <form class="flag-modal-form">
+                    {% for reason in reasons %}
+                    <label>
+                        <input class="mr-2 flag-reason {% if forloop.last %}flag-last-reason{% endif %}" type="radio" value="{{ reason.value }}" name="reason" required>{{ reason.reason }}
+                    </label><br>
+                    {% endfor %}
+                    <textarea class="flag-modal-info" rows="10" cols="10" name="info"></textarea>
+                </form>
+            </div>
+            <div class="flag-modal-footer modal-footer">
+                {% trans "Flag" as flag %}
+                <button title="{{ flag }}" class="btn btn-sm btn-danger flag-modal-submit {% block flag_link_cls %}{% endblock flag_link_cls %}">{{ flag }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+    

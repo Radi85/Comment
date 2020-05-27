@@ -1,5 +1,6 @@
 $(function() {
     var $deleteCommentButton;
+    var csrfToken = window.CSRF_TOKEN;
 
     $(".js-comment-input").val('');
 
@@ -216,7 +217,7 @@ $(function() {
     /**
      * Returns whether a classList contains a particular class or not.
      * @param {Array} classList - the array of classes to be compared.
-     * @param {string} container - the class to be verified, default='user-has-reacted'.
+     * @param {string} container - the class to be verified, default='user-has-not-reacted'.
      * @param {boolean}
      */
     var containsClass = function(classList, container = 'user-has-not-reacted') {
@@ -226,18 +227,18 @@ $(function() {
 
     /**
      * Changes/removes class to fill the reacted element.
-     * @param {any} $reactionClass - the reaction element.
+     * @param {any} element - the DOM element that needs to be toggled.
+     * @param {string} addClass -  the class to be added when action is 'add'.
+     * @param {string} removeClass -  the class to be removed when action is 'add'.
      * @param {string} action -  'add' or 'remove'.
      */
-    var changeReactionClass = function($reactionEle, action) {
-        var reactiveClass = "user-has-reacted";
-        var unreactiveClass = "user-has-not-reacted";
+    var toggleClass = function(element, addClass, removeClass, action) {
         if (action == 'add') {
-            $reactionEle.classList.add(reactiveClass);
-            $reactionEle.classList.remove(unreactiveClass);
+            element.classList.add(addClass);
+            element.classList.remove(removeClass);
         } else {
-            $reactionEle.classList.remove(reactiveClass);
-            $reactionEle.classList.add(unreactiveClass);
+            element.classList.remove(addClass);
+            element.classList.add(removeClass);
         }
     }
 
@@ -247,18 +248,20 @@ $(function() {
      * @param {any} $parent - parent of the reaction element that has to be updated
      * @param {any} $targetReaction - the reaction element to be filled
      */
-    var fillReaction = function($parent, $targetReaction) {
-        $likeIcon = $parent.find('.reaction-like')[0];
-        $dislikeIcon = $parent.find('.reaction-dislike')[0];
-        var isLikeEmpty = containsClass($likeIcon.classList);
-        var isDislikeEmpty = containsClass($dislikeIcon.classList);
+    var fillReaction = function($parent, targetReaction) {
+        likeIcon = $parent.find('.reaction-like')[0];
+        dislikeIcon = $parent.find('.reaction-dislike')[0];
+        var isLikeEmpty = containsClass(likeIcon.classList);
+        var isDislikeEmpty = containsClass(dislikeIcon.classList);
+        var addClass = "user-has-reacted";
+        var removeClass = "user-has-not-reacted";
         if (isLikeEmpty && isDislikeEmpty) {
-            changeReactionClass($targetReaction, action = 'add');
+            toggleClass(targetReaction, addClass, removeClass, action = 'add');
         } else {
-            var $currentReaction = (isLikeEmpty) ? $dislikeIcon : $likeIcon;
-            changeReactionClass($currentReaction, action = 'remove');
-            if ($targetReaction != $currentReaction) {
-                changeReactionClass($targetReaction, action = 'add');
+            var currentReaction = (isLikeEmpty) ? dislikeIcon : likeIcon;
+            toggleClass(currentReaction, addClass, removeClass, action = 'remove');
+            if (targetReaction != currentReaction) {
+                toggleClass(targetReaction, addClass, removeClass, action = 'add');
             }
         }
     };
@@ -283,7 +286,7 @@ $(function() {
     var commentReact = function(e) {
         e.preventDefault();
         var $element = $(this);
-        var $targetReaction = $element.find('.comment-reaction-icon')[0];
+        var targetReaction = $element.find('.comment-reaction-icon')[0];
         var $parentReactionEle = $element.parent();
         var $thisURL = $element.attr('href');
         var $csrfToken = $element.attr('data-csrf');
@@ -291,11 +294,11 @@ $(function() {
             headers: { 'X-CSRFToken': $csrfToken },
             method: "POST",
             url: $thisURL,
-            contentType: 'json',
+            dataType: 'json',
             success: function commentReactionDone(data, textStatus, jqXHR) {
                 var status = data['status'];
                 if (status === 0) {
-                    fillReaction($parentReactionEle, $targetReaction);
+                    fillReaction($parentReactionEle, targetReaction);
                     changeReactionCount($parentReactionEle, data['likes'], data['dislikes']);
                 }
             },
@@ -303,6 +306,72 @@ $(function() {
                 alert("Reaction couldn't be processed!, please try again");
             },
         });
+    };
+
+    var sendFlag = function($flag, action, reason = null, info = null) {
+        data = {
+            'reason': reason,
+            'info': info,
+            'action': action
+        }
+        var url = $flag.attr('data-url');
+        var $modal = $flag.find('.flag-modal');
+        $.ajax({
+            headers: { 'X-CSRFToken': csrfToken },
+            method: "POST",
+            url: url,
+            data: data,
+            dataType: 'json',
+            success: function commentFlagDone(data, textStatus, jqXHR) {
+                var addClass = 'user-has-flagged';
+                var removeClass = 'user-has-not-flagged';
+                var flagIcon = $flag.find('.comment-flag-icon')[0]
+                if (data.flag === 1) {
+                    toggleClass(flagIcon, addClass, removeClass, action = 'add');
+                } else {
+                    toggleClass(flagIcon, addClass, removeClass, action = 'remove')
+                }
+                alert(data.msg);
+            },
+            complete: function closeFlagModal(data) {
+                $modal.modal('hide');
+            }
+        });
+    };
+
+    var handleFlagModal = function($flagEle) {
+        var $modal = $flagEle.find('.flag-modal');
+        $modal.modal('show');
+        form = $modal.find('.flag-modal-form')[0];
+        var choice = form.querySelector('input[name="reason"]:checked');
+        if (choice) {
+            var reason = choice.value;
+        }
+        var lastReason = form.querySelector('.flag-last-reason');
+        var flagInfo = form.querySelector('textarea');
+        form.onchange = function(e) {
+            if (e.target === lastReason) {
+                flagInfo.required = true;
+                flagInfo.style.display = "block";
+            } else {
+                flagInfo.style.display = "none";
+            }
+        };
+        var submit = $modal.find('.flag-modal-submit')[0];
+        submit.onclick = function(e) {
+            e.preventDefault();
+            sendFlag($flagEle, 'create', reason, flagInfo.value);
+        }
+    };
+
+    var loadFlagModal = function(e) {
+        var $parent = $(this);
+        var $flag = $parent.find('.comment-flag-icon')[0];
+        if (containsClass($flag.classList, container = 'user-has-not-flagged')) {
+            handleFlagModal($parent);
+        } else {
+            sendFlag($parent, action = 'delete');
+        }
     };
 
     $(document).on("submit", '.js-comment-form', commentFormSubmit);
@@ -314,4 +383,5 @@ $(function() {
     $(document).on("click", ".js-comment-delete", loadForm);
     $(document).on("submit", ".js-comment-delete-form", deleteComment);
     $(document).on("click", ".js-comment-reaction", commentReact);
+    $(document).on("click", ".js-comment-flag", loadFlagModal);
 });

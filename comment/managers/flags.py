@@ -44,44 +44,53 @@ class FlagInstanceManager(models.Manager):
 
     reason_values = [reason.value for reason in reasons]
 
-    def clean_reason(self, reason):
-        if isinstance(reason, int):
+    def _clean_reason(self, reason):
+        try:
+            reason = int(reason)
             if reason in self.reason_values:
                 return reason
 
-        raise ValidationError(
-            _('%(reason)s is an invalid reaction'),
-            code='invalid',
-            params={'reason': reason}
-            )
+        except (ValueError, TypeError):
+            raise ValidationError(
+                _('%(reason)s is an invalid reaction'),
+                code='invalid',
+                params={'reason': reason}
+                )
 
-    def clean(self):
-        reason = self.clean_reason(self.reason)
+    def _clean_action(self, action):
+        if isinstance(action, str):
+            act = action.lower()
+            if act in ['create', 'delete']:
+                return act
+
+        return ValidationError(_('This is not a valid action'), code='invalid')
+
+    def _clean(self, reason, info):
+        reason = self._clean_reason(reason)
         if not reason:
             raise ValidationError(
                 {'reason': _('Please supply a reason for flagging')},
                 code='required'
                 )
 
-        if reason == self.reason_values[-1] and (not self.info):
+        if reason == self.reason_values[-1] and (not info):
             raise ValidationError(
                 {'info': _('Please supply some information as the reason for flagging')},
                 code='required'
                 )
 
-    def set_flag(self, user, flag, reason, info=None):
-        self.clean()
-        try:
-            created = False
+    def set_flag(self, user, flag, data):
+        reason = data.get('reason', None)
+        info = data.get('info', None)
+        action = data.get('action', None)
+        self._clean_action(action)
+        if action == 'delete':
             instance = self.get(flag=flag, user=user)
             instance.delete()
-        except models.ObjectDoesNotExist:
-            instance = self.create(
-                flag=flag,
-                user=user,
-                reason=reason,
-                info=info
-            )
+            created = False
+        else:
+            self._clean(reason, info)
+            self.create(flag=flag, user=user, reason=reason, info=info)
             created = True
 
         return created

@@ -16,25 +16,24 @@ class SetFlag(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         if not request.is_ajax():
             return HttpResponseBadRequest(_('Only AJAX request are allowed'))
-        
+
         comment = get_object_or_404(Comment, id=kwargs.get('pk'))
-        reason = request.POST.get('reason', None)
-        info = request.POST.get('info', None)
         response = {
             'status': 1
         }
         try:
-            if FlagInstance.objects.set_flag(request.user, comment.flag, reason, info):
+            if FlagInstance.objects.set_flag(request.user, comment.flag, data=request.POST):
                 response['msg'] = _('Comment flagged')
+                response['flag'] = 1
             else:
-                response.update['msg'] = _('Comment flag removed')
-            
+                response['msg'] = _('Comment flag removed')
+
             response.update({
                 'status': 0
             })
         except ValidationError as e:
             response.update({
-                'msg': e.message
+                'msg': e.messages
             })
 
         return JsonResponse(response)
