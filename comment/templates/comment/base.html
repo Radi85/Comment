@@ -1,5 +1,6 @@
 <script>window.CSRF_TOKEN = "{{ csrf_token }}"</script>
 <section id="comments" class="{% block btn_name %}my-5 mx-3{% endblock btn_name %}">
+    <div id="comment-response"></div>
     <strong class="border-bottom bb"><span class="js-comment-number">{{model_object.comments.all.count}}</span> Comments</strong>
     <hr class="hr"/>
     <div class="js-comment comment mb-5">

@@ -103,7 +103,7 @@ $(function() {
                     window.history.replaceState({}, document.title, clean_uri);
                 }
             },
-            error: function handleFormError(jqXHR, textStatus, errorThrown) {
+            error: function handleFormError($XHR, textStatus, errorThrown) {
                 alert("Unable to post your comment!, please try again");
             },
         });
@@ -119,13 +119,13 @@ $(function() {
         $.ajax({
             method: 'GET',
             url: $thisURL,
-            success: function updateComment(data, textStatus, jqXHR) {
+            success: function updateComment(data, textStatus, $XHR) {
                 $(commentContent).replaceWith(data);
                 // set the focus on the end of text
                 var num = $(".js-comment-edit-form > textarea").val();
                 $(".js-comment-edit-form > textarea").focus().val('').val(num);
             },
-            error: function handleFormError(jqXHR, textStatus, errorThrown) {
+            error: function handleFormError($XHR, textStatus, errorThrown) {
                 alert("you can't edit this comment");
             },
         });
@@ -148,10 +148,10 @@ $(function() {
             method: 'POST',
             url: $thisURL,
             data: $formData,
-            success: function submitUpdateComment(data, textStatus, jqXHR) {
+            success: function submitUpdateComment(data, textStatus, $XHR) {
                 $form.parent().replaceWith(data);
             },
-            error: function handleFormError(jqXHR, textStatus, errorThrown) {
+            error: function handleFormError($XHR, textStatus, errorThrown) {
                 alert("Modification didn't take effect!, please try again");
             },
         });
@@ -183,7 +183,7 @@ $(function() {
             method: "POST",
             url: $thisURL,
             data: $formData,
-            success: function deleteCommentDone(data, textStatus, jqXHR) {
+            success: function deleteCommentDone(data, textStatus, $XHR) {
                 $("#Modal").modal("hide");
                 $parentComment.remove();
                 var $parentCommentArr = $(".js-parent-comment");
@@ -208,7 +208,7 @@ $(function() {
                     $(".modal-backdrop").remove();
                 }
             },
-            error: function handleFormError(jqXHR, textStatus, errorThrown) {
+            error: function handleFormError($XHR, textStatus, errorThrown) {
                 alert("Unable to delete your comment!, please try again");
             },
         });
@@ -289,24 +289,66 @@ $(function() {
         var targetReaction = $element.find('.comment-reaction-icon')[0];
         var $parentReactionEle = $element.parent();
         var $thisURL = $element.attr('href');
-        var $csrfToken = $element.attr('data-csrf');
         $.ajax({
-            headers: { 'X-CSRFToken': $csrfToken },
+            headers: { 'X-CSRFToken': csrfToken },
             method: "POST",
             url: $thisURL,
             dataType: 'json',
-            success: function commentReactionDone(data, textStatus, jqXHR) {
+            success: function commentReactionDone(data, textStatus, $XHR) {
                 var status = data['status'];
                 if (status === 0) {
                     fillReaction($parentReactionEle, targetReaction);
                     changeReactionCount($parentReactionEle, data['likes'], data['dislikes']);
                 }
             },
-            error: function handleFormError(jqXHR, textStatus, errorThrown) {
+            error: function handleFormError($XHR, textStatus, errorThrown) {
                 alert("Reaction couldn't be processed!, please try again");
             },
         });
     };
+
+    /**
+     * Create a temporary div, append it to the div'#response', fix it to the top and fade it.
+     * @param {int} status - an integer based upon the response received for AJAX request.
+     * (-1->'error'|0->'success'| 1->'warning')
+     * @param {string} msg - a string depicting the message to be displayed in the response. 
+     * @param {int} time - time after which the response fades away
+     */
+    function createResponse(status, msg, time = 5000) {
+        switch (status) {
+            case -1:
+                status = "danger";
+                break;
+            case 0:
+                status = "success";
+                break;
+            case 1:
+                status = "warning";
+        }
+        var cls = 'alert alert-' + status;
+        var response = $('#comment-response');
+        var temp = $('<div/>')
+            .addClass(cls)
+            .html('<div>' + msg + '</div>');
+        response.append(temp);
+        fixToTop(temp);
+        temp.fadeIn(time);
+        temp.fadeOut(2 * time);
+        setTimeout(function() {
+            temp.remove();
+        }, 2 * time + 10);
+    }
+    /**
+     * Fixes an element to the top of the viewport.
+     * @param {element} div - element that is to be fixed at the top of the viewport. 
+     */
+    function fixToTop(div) {
+        var isfixed = div.css('position') == 'fixed';
+        if (div.scrollTop() > 200 && !isfixed)
+            div.css({ 'position': 'fixed', 'top': '0px' });
+        if (div.scrollTop < 200 && isfixed)
+            div.css({ 'position': 'static', 'top': '0px' });
+    }
 
     var sendFlag = function($flag, action, reason = null, info = null) {
         data = {
@@ -322,7 +364,7 @@ $(function() {
             url: url,
             data: data,
             dataType: 'json',
-            success: function commentFlagDone(data, textStatus, jqXHR) {
+            success: function commentFlagDone(data, textStatus, $XHR) {
                 var addClass = 'user-has-flagged';
                 var removeClass = 'user-has-not-flagged';
                 var flagIcon = $flag.find('.comment-flag-icon')[0]
@@ -331,10 +373,14 @@ $(function() {
                 } else {
                     toggleClass(flagIcon, addClass, removeClass, action = 'remove')
                 }
-                alert(data.msg);
             },
             complete: function closeFlagModal(data) {
                 $modal.modal('hide');
+                data = data.responseJSON;
+                createResponse(data.status, data.msg);
+            },
+            error: function handleFormError($XHR, textStatus, errorThrown) {
+                alert("The flag action couldn't be processed!, please try again");
             }
         });
     };

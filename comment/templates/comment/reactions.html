@@ -4,7 +4,7 @@
     {% url 'comment:react' pk=comment.id reaction='like' as like_url %}
     <a title="{% trans "like" %}" class="{% block like_link_cls %} {% endblock like_link_cls %}
         {% if user.is_authenticated %}
-        js-comment-reaction" href="{{ like_url }}" data-csrf="{{ csrf_token }}"
+        js-comment-reaction" href="{{ like_url }}"
         {% else %}
         " href="{{ login_url }}/?next={{ request.build_absolute_uri }}"
         {% endif %}
@@ -15,7 +15,7 @@
     {% url 'comment:react' pk=comment.id reaction='dislike' as dislike_url %}
     <a title="{% trans "dislike" %}" class="{% block dislike_link_cls %} {% endblock dislike_link_cls %}
         {% if user.is_authenticated %}
-        js-comment-reaction" href="{{ dislike_url }}" data-csrf="{{ csrf_token }}"
+        js-comment-reaction" href="{{ dislike_url }}"
         {% else %}
         " href="{{ login_url }}/?next={{ request.build_absolute_uri }}"
         {% endif %}
