@@ -309,12 +309,13 @@ $(function() {
 
     /**
      * Create a temporary div, append it to the div'#response', fix it to the top and fade it.
+     * @param {string} responseEle - The DOM element to be used for displaying in the response.
      * @param {int} status - an integer based upon the response received for AJAX request.
      * (-1->'error'|0->'success'| 1->'warning')
      * @param {string} msg - a string depicting the message to be displayed in the response. 
      * @param {int} time - time after which the response fades away
      */
-    function createResponse(status, msg, time = 5000) {
+    function createResponse(responseEle, status, msg, time = 5000) {
         switch (status) {
             case -1:
                 status = "danger";
@@ -326,11 +327,10 @@ $(function() {
                 status = "warning";
         }
         var cls = 'alert alert-' + status;
-        var response = $('#comment-response');
         var temp = $('<div/>')
             .addClass(cls)
-            .html('<div>' + msg + '</div>');
-        response.append(temp);
+            .html(msg);
+        responseEle.prepend(temp[0]);
         fixToTop(temp);
         temp.fadeIn(time);
         temp.fadeOut(2 * time);
@@ -343,10 +343,11 @@ $(function() {
      * @param {element} div - element that is to be fixed at the top of the viewport. 
      */
     function fixToTop(div) {
+        var top = 200;
         var isfixed = div.css('position') == 'fixed';
-        if (div.scrollTop() > 200 && !isfixed)
+        if (div.scrollTop() > top && !isfixed)
             div.css({ 'position': 'fixed', 'top': '0px' });
-        if (div.scrollTop < 200 && isfixed)
+        if (div.scrollTop < top && isfixed)
             div.css({ 'position': 'static', 'top': '0px' });
     }
 
@@ -377,7 +378,7 @@ $(function() {
             complete: function closeFlagModal(data) {
                 $modal.modal('hide');
                 data = data.responseJSON;
-                createResponse(data.status, data.msg);
+                createResponse($flag.parents().find('.js-parent-comment')[0], data.status, data.msg);
             },
             error: function handleFormError($XHR, textStatus, errorThrown) {
                 alert("The flag action couldn't be processed!, please try again");

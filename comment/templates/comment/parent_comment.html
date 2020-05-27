@@ -1,5 +1,5 @@
 {% load comment_tags %}
-<blockquote class="js-parent-comment blockquote text-wrap">
+<div class="js-parent-comment blockquote text-wrap">
     {% include 'comment/image.html' with comment=comment %}
     <div class="js-replies ml-5 my-4 d-none">
         {% for comment in comment.replies %}
@@ -8,4 +8,4 @@
         {% include 'comment/create_comment.html' with placeholder=placeholder %}
     </div>
     <hr/>
-</blockquote>
+<div>
