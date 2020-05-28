@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from comment.models import Comment, Reaction, ReactionInstance
+from comment.models import Comment, Flag, FlagInstance, Reaction, ReactionInstance
 
 
 class CommentModelAdmin(admin.ModelAdmin):
@@ -24,5 +24,19 @@ class ReactionModelAdmin(admin.ModelAdmin):
     inlines = [InlineReactionInstance]
 
 
+class InlineFlagInstance(admin.TabularInline):
+    model = FlagInstance
+    extra = 0
+    readonly_fields = ['user', 'flag', 'reason', 'info', 'date_flagged']
+
+
+class FlagModelAdmin(admin.ModelAdmin):
+    list_display = ('comment', 'count', 'comment_author')
+    readonly_fields = list_display
+    search_fields = ('comment__content',)
+    inlines = [InlineFlagInstance]
+
+
 admin.site.register(Comment, CommentModelAdmin)
 admin.site.register(Reaction, ReactionModelAdmin)
+admin.site.register(Flag, FlagModelAdmin)

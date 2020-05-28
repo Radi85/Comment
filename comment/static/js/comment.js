@@ -218,7 +218,6 @@ $(function() {
      * Returns whether a classList contains a particular class or not.
      * @param {Array} classList - the array of classes to be compared.
      * @param {string} container - the class to be verified, default='user-has-not-reacted'.
-     * @param {boolean}
      */
     var containsClass = function(classList, container = 'user-has-not-reacted') {
         if (classList.contains(container)) return true;
@@ -227,7 +226,7 @@ $(function() {
 
     /**
      * Changes/removes class to fill the reacted element.
-     * @param {any} element - the DOM element that needs to be toggled.
+     * @param {object} element - the DOM element that needs to be toggled.
      * @param {string} addClass -  the class to be added when action is 'add'.
      * @param {string} removeClass -  the class to be removed when action is 'add'.
      * @param {string} action -  'add' or 'remove'.
@@ -245,8 +244,8 @@ $(function() {
     /**
      * Fill the target reaction element, removes color from the other reaction
      * if it were filled. 
-     * @param {any} $parent - parent of the reaction element that has to be updated
-     * @param {any} $targetReaction - the reaction element to be filled
+     * @param {object} $parent - parent of the reaction element that has to be updated
+     * @param {object} $targetReaction - the reaction element to be filled
      */
     var fillReaction = function($parent, targetReaction) {
         likeIcon = $parent.find('.reaction-like')[0];
@@ -268,7 +267,7 @@ $(function() {
 
     /**
      * Change reaction count for the element that the user reacted upon.
-     * @param {any} $parent - the parent object containing the reactions.
+     * @param {object} $parent - the parent object containing the reactions.
      * @param {Number} likes - like count
      * @param {Number} dislikes - dislike count
      */
@@ -326,7 +325,7 @@ $(function() {
             case 1:
                 status = "warning";
         }
-        var cls = 'alert alert-' + status;
+        var cls = 'h6 alert alert-' + status;
         var temp = $('<div/>')
             .addClass(cls)
             .html(msg);
@@ -340,7 +339,7 @@ $(function() {
     }
     /**
      * Fixes an element to the top of the viewport.
-     * @param {element} div - element that is to be fixed at the top of the viewport. 
+     * @param {object} div - element that is to be fixed at the top of the viewport. 
      */
     function fixToTop(div) {
         var top = 200;
@@ -351,6 +350,13 @@ $(function() {
             div.css({ 'position': 'static', 'top': '0px' });
     }
 
+    /**
+     * Perform an AJAX request to the flag API and handle response.
+     * @param {object} $flag - the parent DOM element that contains flag. 
+     * @param {string} action - 'create'/'delete'.
+     * @param {string} reason - the value of the reason for flagging, default=null.
+     * @param {string} info - any extra information to be passed when flagging, default=null.
+     */
     var sendFlag = function($flag, action, reason = null, info = null) {
         data = {
             'reason': reason,
@@ -377,8 +383,10 @@ $(function() {
             },
             complete: function closeFlagModal(data) {
                 $modal.modal('hide');
-                data = data.responseJSON;
-                createResponse($flag.parents().find('.js-parent-comment')[0], data.status, data.msg);
+                if (data) {
+                    data = data.responseJSON;
+                    createResponse($flag.parents().find('.js-parent-comment')[0], data.status, data.msg);
+                }
             },
             error: function handleFormError($XHR, textStatus, errorThrown) {
                 alert("The flag action couldn't be processed!, please try again");
@@ -386,6 +394,10 @@ $(function() {
         });
     };
 
+    /**
+     * Opens the modal form and handles everthing that occurs inside it.
+     * @param {object} $flagEle - the parent DOM element that contains flag  
+     */
     var handleFlagModal = function($flagEle) {
         var $modal = $flagEle.find('.flag-modal');
         $modal.modal('show');
@@ -411,7 +423,11 @@ $(function() {
         }
     };
 
-    var loadFlagModal = function(e) {
+    /**
+     * Create or remove a flag option on a comment.
+     * @param {any} e - the event triggered this action. 
+     */
+    var commentFlag = function(e) {
         var $parent = $(this);
         var $flag = $parent.find('.comment-flag-icon')[0];
         if (containsClass($flag.classList, container = 'user-has-not-flagged')) {
@@ -430,5 +446,5 @@ $(function() {
     $(document).on("click", ".js-comment-delete", loadForm);
     $(document).on("submit", ".js-comment-delete-form", deleteComment);
     $(document).on("click", ".js-comment-reaction", commentReact);
-    $(document).on("click", ".js-comment-flag", loadFlagModal);
+    $(document).on("click", ".js-comment-flag", commentFlag);
 });

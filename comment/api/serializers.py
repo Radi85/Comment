@@ -89,6 +89,11 @@ class BaseCommentSerializer(serializers.ModelSerializer):
         if hasattr(obj, 'dislikes'):
             return obj.dislikes
 
+    @staticmethod
+    def is_flagged(obj):
+        if hasattr(obj, 'flag'):
+            return obj.flag.count > obj.objects.ALLOWED_FLAGS
+
 
 class CommentCreateSerializer(BaseCommentSerializer):
     user = UserSerializer(read_only=True)
@@ -97,11 +102,13 @@ class CommentCreateSerializer(BaseCommentSerializer):
     reply_count = serializers.SerializerMethodField()
     likes = serializers.SerializerMethodField()
     dislikes = serializers.SerializerMethodField()
+    is_flagged = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
         fields = (
-            'id', 'user', 'content', 'parent', 'posted', 'edited', 'reply_count', 'replies', 'likes', 'dislikes'
+            'id', 'user', 'content', 'parent', 'posted', 'edited', 'reply_count', 'replies', 'likes', 'dislikes',
+            'is_flagged'
         )
 
     def __init__(self, *args, **kwargs):
@@ -134,18 +141,22 @@ class CommentSerializer(BaseCommentSerializer):
     reply_count = serializers.SerializerMethodField()
     likes = serializers.SerializerMethodField()
     dislikes = serializers.SerializerMethodField()
+    is_flagged = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
         fields = (
-            'id', 'user', 'content', 'parent', 'posted', 'edited', 'reply_count', 'replies', 'likes', 'dislikes'
+            'id', 'user', 'content', 'parent', 'posted', 'edited', 'reply_count', 'replies', 'likes', 'dislikes',
+            'is_flagged'
         )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         context = kwargs.get('context')
         reaction_update = False
+        flag_update = False
         if context:
             reaction_update = context.get('reaction_update')
-        if reaction_update:
+            flag_update = context.get('flag_update')
+        if reaction_update or flag_update:
             self.fields['content'].read_only = True

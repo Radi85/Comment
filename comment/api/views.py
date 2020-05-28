@@ -1,12 +1,14 @@
+from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
-
+from django.utils.translation import gettext_lazy as _
 from rest_framework import generics, permissions, status
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from comment.api.serializers import CommentSerializer, CommentCreateSerializer
 from comment.api.permissions import IsOwnerOrReadOnly, ContentTypePermission, ParentIdPermission
-from comment.models import Comment, ReactionInstance
+from comment.models import Comment, ReactionInstance, FlagInstance
+from comment.views import SetFlag, SetReaction
 
 
 class CommentCreate(generics.CreateAPIView):
@@ -64,6 +66,7 @@ class CommentDetailForReaction(generics.RetrieveAPIView):
         if not reaction_type:
             data = {'error': 'This is an invalid reaction type'}
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
+        reaction = SetReaction._get_reaction_object(comment)
         ReactionInstance.objects.set_reaction(
             user=request.user,
             reaction=comment.reaction,
@@ -72,3 +75,30 @@ class CommentDetailForReaction(generics.RetrieveAPIView):
         comment.reaction.refresh_from_db()
         serializer = self.get_serializer(comment)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CommentDetailForFlag(generics.RetrieveAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['flag_update'] = True
+        return context
+
+    def post(self, request, *args, **kwargs):
+        comment = get_object_or_404(Comment, id=kwargs.get('pk'))
+        response = {}
+        flag = SetFlag._get_flag_object(comment)
+        try:
+            if FlagInstance.objects.set_flag(request.user, flag, data=request.POST):
+                response['msg'] = _('Comment flagged')
+                response['flag'] = 1
+            else:
+                response['msg'] = _('Comment flag removed')
+
+        except ValidationError as e:
+            return Response({'error': e.messages}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(response, status=status.HTTP_200_OK)
