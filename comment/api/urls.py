@@ -7,7 +7,8 @@ urlpatterns = [
     path('comments/', views.CommentList.as_view(), name='comments-list'),
     path('comments/create/', views.CommentCreate.as_view(), name='comments-create'),
     path('comments/<int:pk>/', views.CommentDetail.as_view(), name='comment-detail'),
-    path('comments/<int:pk>/react/<str:reaction>/', views.CommentDetailForReaction.as_view(), name='comments-react')
+    path('comments/<int:pk>/react/<str:reaction>/', views.CommentDetailForReaction.as_view(), name='comments-react'),
+    path('comments/<int:pk>/flag/', views.CommentDetailForFlag.as_view(), name='comments-flag')
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

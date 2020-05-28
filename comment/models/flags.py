@@ -64,6 +64,6 @@ def delete_flag_instance(sender, instance, using, **kwargs):
 
 
 @receiver(post_save, sender=Comment)
-def add_reaction(sender, instance, created, raw, using, update_fields, **kwargs):
+def add_flag(sender, instance, created, raw, using, update_fields, **kwargs):
     if created:
         Flag.objects.create(comment=instance)
