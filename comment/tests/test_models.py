@@ -1,10 +1,11 @@
 from time import sleep
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 
-from comment.models import Comment, Reaction, ReactionInstance
-from comment.tests.base import BaseCommentTest
+from comment.models import Comment, Flag, FlagInstance, Reaction, ReactionInstance
+from comment.tests.base import BaseCommentTest, BaseCommentFlagTest
 
 
 class CommentModelTest(BaseCommentTest):
@@ -35,6 +36,19 @@ class CommentModelTest(BaseCommentTest):
         self.assertIsNotNone(Reaction.objects.get(comment=parent_comment))
         # 1 reaction instance is created for every comment
         self.assertEqual(Reaction.objects.count(), self.increment)
+
+    def test_flag_signal(self):
+        """Test flag model instance is created when a comment is created"""
+        parent_comment = self.create_comment(self.content_object_1)
+        self.assertIsNotNone(Flag.objects.get(comment=parent_comment))
+        # 1 flag instance is created for every comment
+        self.assertEqual(Flag.objects.count(), 1)
+
+    def test_is_flagged_property(self):
+        settings.COMMENT_FLAG_COUNT = 1
+        comment = self.create_comment(self.content_object_1)
+        self.create_flag_instance(self.user_1, comment)
+        self.assertTrue(True, comment.is_flagged)
 
 
 class CommentModelManagerTest(BaseCommentTest):
@@ -121,6 +135,12 @@ class CommentModelManagerTest(BaseCommentTest):
             user=self.user_1
         )
         self.assertIsNone(comment)
+
+    def test_filtering_flagged_comment(self):
+        settings.COMMENT_FLAGS_ALLOWED = 1
+        comment = self.parent_comment_1
+        self.create_flag_instance(self.user_1, comment)
+        self.assertTrue(Comment.objects.all(), self.increment - 1)
 
 
 class ReactionInstanceModelTest(CommentModelManagerTest):
@@ -244,3 +264,84 @@ class ReactionInstanceManagerTest(BaseCommentTest):
 
         # invalid reaction type
         self.assertRaises(ValidationError, ReactionInstance.objects.clean_reaction_type, 'likes')
+
+
+class FlagInstanceModelTest(BaseCommentFlagTest):
+    def test_create_flag(self):
+        data = self.flag_data
+        comment = self.comment
+        instance = self.create_flag_instance(self.user, comment, **data)
+        self.assertIsNotNone(instance)
+        comment.refresh_from_db()
+        self.assertEqual(comment.flag.count, 1)
+
+    def test_post_delete_flag_instance_signal(self):
+        """Test flag count is decreased when an instance is deleted"""
+        data = self.flag_data
+        comment = self.comment
+        instance = self.create_flag_instance(self.user, comment, **data)
+        comment.refresh_from_db()
+        self.assertEqual(comment.flag.count, 1)
+        instance.delete()
+        comment.refresh_from_db()
+        self.assertEqual(comment.flag.count, 0)
+
+    def test_increase_count_on_save(self):
+        comment = self.comment
+        self.create_flag_instance(self.user, comment)
+        comment.refresh_from_db()
+        self.assertTrue(comment.flag.count, 1)
+
+
+class FlagInstanceManagerTest(BaseCommentFlagTest):
+    def setUp(self):
+        super().setUp()
+        self.flag_data['action'] = 'create'
+
+    def test_clean_reason_for_invalid_value(self):
+        data = self.flag_data
+        data.update({'reason': -1})
+        self.assertRaises(ValidationError, self.set_flag, self.user, self.comment, **data)
+
+        data.update({'reason': 'abcd'})
+        self.assertRaises(ValidationError, self.set_flag, self.user, self.comment, **data)
+
+    def test_clean_action_for_invalid_value(self):
+        data = self.flag_data
+        data.update({'action': 'bla'})
+        self.assertRaises(ValidationError, self.set_flag, self.user, self.comment, **data)
+        data.update({'action': 0})
+        self.assertRaises(ValidationError, self.set_flag, self.user, self.comment, **data)
+
+    def test_clean_for_invalid_values(self):
+        data = self.flag_data
+        data.update({'reason': FlagInstance.objects.reason_values[-1]})
+        self.assertRaises(ValidationError, self.set_flag, self.user, self.comment, **data)
+
+        data.pop('reason')
+        self.assertRaises(ValidationError, self.set_flag, self.user, self.comment, **data)
+
+    def test_set_flag_for_create(self):
+        self.assertEqual(True, self.set_flag(self.user, self.comment, **self.flag_data))
+
+    def test_set_flag_for_delete(self):
+        data = {
+            'action': 'delete'
+        }
+        self.assertEqual(False, self.set_flag(self.user_2, self.comment_2, **data))
+
+
+class FlagModelTest(BaseCommentFlagTest):
+    def test_flag_count(self):
+        comment = self.comment
+        self.assertEqual(comment.flag.count, 0)
+        comment.flag.increase_count()
+        comment.refresh_from_db()
+        self.assertEqual(comment.flag.count, 1)
+        comment.flag.decrease_count()
+        comment.flag.refresh_from_db()
+        self.assertEqual(comment.flag.count, 0)
+
+    def test_comment_author(self):
+        comment = self.comment
+        self.assertEqual(comment.user, comment.flag.comment_author)

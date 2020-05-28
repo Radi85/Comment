@@ -25,6 +25,13 @@ class APIBaseTest(BaseCommentTest):
         self.comment_7 = self.create_comment(self.content_object_2, parent=self.comment_5)
         self.comment_8 = self.create_comment(self.content_object_2, parent=self.comment_5)
         self.reaction_2 = self.create_reaction_instance(self.user_1, self.comment_5, 'dislike')
+
+        self.flag = self.create_flag_instance(self.user_1, self.comment_1)
+        self.flag_data = {
+            'reason': 1,
+            'info': '',
+            'action': 'create'
+        }
         self.addCleanup(patch.stopall)
 
 
@@ -261,6 +268,47 @@ class APICommentViewTest(APIBaseTest):
         response = self.client.post(f'/api/comments/{self.comment_3.id}/react/invalid_type/')
         self.assertEqual(response.status_code, 400)
 
+    def test_flag_to_comment_success(self):
+        comment = self.comment_3
+        data = self.flag_data
+        response_created = {
+            'msg': 'Comment flagged',
+            'flag': 1
+        }
+        response_deleted = {
+            'msg': 'Comment flag removed',
+        }
+        # flag - comment has no flags
+        self.assertEqual(comment.flag.count, 0)
+        response = self.client.post(f'/api/comments/{comment.id}/flag/', data=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(response.json(), response_created)
+        comment.flag.refresh_from_db()
+        self.assertEqual(comment.flag.count, 1)
+
+        # unflag - comment is flagged by the user
+        data.update({'action': 'delete'})
+        response = self.client.post(f'/api/comments/{comment.id}/flag/', data=data)
+        self.assertEqual(response.status_code, 200)
+        comment.flag.refresh_from_db()
+        self.assertDictEqual(response.json(), response_deleted)
+        self.assertEqual(comment.flag.count, 0)
+
+        # post flag - comment flag object is not present
+        comment.flag.delete()   # delete the flag object
+        data.update({'action': 'create'})
+        response = self.client.post(f'/api/comments/{comment.id}/flag/', data=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(response.json(), response_created)
+        comment.refresh_from_db()
+        self.assertEqual(comment.flag.count, 1)
+
+    def test_react_to_comment_with_invalid_reason(self):
+        data = self.flag_data
+        data.update({'reason': -1})
+        response = self.client.post(f'/api/comments/{self.comment_3.id}/flag/', data=data)
+        self.assertEqual(response.status_code, 400)
+
 
 class APICommentSerializers(APIBaseTest):
     def test_get_profile_model(self):
@@ -384,14 +432,24 @@ class APICommentSerializers(APIBaseTest):
         self.assertEqual(serializer.get_likes(self.comment_1), 1)
         self.assertEqual(serializer.get_dislikes(self.comment_5), 1)
 
+        # test is_flagged field
+        is_flagged = serializer.get_is_flagged(self.comment_2)
+        self.assertIsNotNone(is_flagged)
+        # test default value
+        self.assertEqual(False, is_flagged)
+
         mocked_hasattr = patch('comment.api.serializers.hasattr').start()
         mocked_hasattr.return_value = False
         self.assertIsNone(serializer.get_likes(self.comment_2))
         self.assertIsNone(serializer.get_dislikes(self.comment_2))
+        self.assertEqual(False, serializer.get_is_flagged(self.comment_2))
 
     def test_passing_context_to_serializer(self):
         serializer = CommentSerializer(self.comment_1)
         self.assertFalse(serializer.fields['content'].read_only)
 
         serializer = CommentSerializer(self.comment_1, context={'reaction_update': True})
+        self.assertTrue(serializer.fields['content'].read_only)
+
+        serializer = CommentSerializer(self.comment_1, context={'flag_update': True})
         self.assertTrue(serializer.fields['content'].read_only)

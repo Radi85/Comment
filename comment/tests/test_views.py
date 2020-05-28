@@ -2,7 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 
 from comment.models import Comment
-from comment.tests.base import BaseCommentTest
+from comment.tests.base import BaseCommentTest, BaseCommentFlagTest
 
 
 class CreateCommentTestCase(BaseCommentTest):
@@ -182,7 +182,7 @@ class SetReactionTest(BaseCommentTest):
 
     def request(self, url, method='post', is_ajax=True):
         """
-        A utility function to return perform client requests.
+        A utility function to return performed client requests.
         Args:
             url (str): The url to perform that needs to be requested.
             method (str, optional): The HTTP method name. Defaults to 'POST'.
@@ -206,6 +206,21 @@ class SetReactionTest(BaseCommentTest):
     def test_set_reaction_for_authenticated_users(self):
         """Test whether users can create/change reactions using view"""
         url = self.get_url(self.comment.id, 'like')
+        response = self.request(url)
+        data = {
+            'status': 0,
+            'likes': 1,
+            'dislikes': 0,
+            'msg': 'Your reaction has been updated successfully'
+        }
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertDictEqual(response.json(), data)
+
+    def test_set_reaction_for_old_comments(self):
+        """Test backward compatibility for this update"""
+        url = self.get_url(self.comment.id, 'like')
+        # delete the reaction object
+        self.comment.reaction.delete()
         response = self.request(url)
         data = {
             'status': 0,
@@ -252,3 +267,130 @@ class SetReactionTest(BaseCommentTest):
         url = self.get_url(self.comment.id, 1)
         response = self.request(url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class SetFlagTest(BaseCommentFlagTest):
+    def setUp(self):
+        super().setUp()
+        self.flag_data.update({
+            'action': 'create',
+            'info': ''
+            })
+        self.response_data = {
+            'status': 1
+        }
+
+    def get_url(self, obj_id=None):
+        """
+        A utility function to construct url.
+
+        Args:
+            obj_id (int): comment id, defaults to comment id of comment of the object.
+
+        Returns:
+            str
+        """
+        if not obj_id:
+            obj_id = self.comment.id
+        return reverse('comment:flag', kwargs={'pk': obj_id})
+
+    def request(self, url, method='post', is_ajax=True, **kwargs):
+        """
+        A utility function to return performed client requests.
+        Args:
+            url (str): The url to perform that needs to be requested.
+            method (str, optional): The HTTP method name. Defaults to 'POST'.
+            is_ajax (bool, optional): Whether AJAX request is to be performed or not. Defaults to True.
+
+        Raises:
+            ValueError: When a invalid HTTP method name is passed.
+
+        Returns:
+            `Any`: Response from the request.
+        """
+        request_method = getattr(self.client, method.lower(), None)
+        if not request_method:
+            raise ValueError('This is not a valid request method')
+        if is_ajax:
+            return request_method(url, data=kwargs, **{
+                'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'
+            })
+        return request_method(url, data=kwargs)
+
+    def test_set_flag_for_flagging(self):
+        url = self.get_url()
+        data = self.flag_data
+        response = self.request(url, **data)
+        response_data = {
+            'status': 0,
+            'flag': 1,
+            'msg': 'Comment flagged'
+        }
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(response.json(), response_data)
+
+    def test_set_flag_for_flagging_old_comments(self):
+        """Test backward compatibility for this update"""
+        url = self.get_url()
+        data = self.flag_data
+        # delete the flag object
+        self.comment.flag.delete()
+        response = self.request(url, **data)
+        response_data = {
+            'status': 0,
+            'flag': 1,
+            'msg': 'Comment flagged'
+        }
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(response.json(), response_data)
+
+    def test_set_flag_for_unflagging(self):
+        url = self.get_url(self.comment_2.id)
+        data = self.flag_data
+        data.update({'action': 'delete'})
+        self.client.force_login(self.user_2)
+        response = self.request(url, **data)
+        response_data = {
+            'status': 0,
+            'msg': 'Comment flag removed'
+        }
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(response.json(), response_data)
+
+    def test_set_flag_for_unauthenticated_user(self):
+        """Test whether unauthenticated user can create/delete flag using view"""
+        url = self.get_url()
+        self.client.logout()
+        response = self.request(url, **self.flag_data)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response.url, '/login?next={}'.format(url))
+
+    def test_get_request(self):
+        """Test whether GET requests are allowed or not"""
+        url = self.get_url()
+        response = self.request(url, method='get')
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_non_ajax_requests(self):
+        """Test response if non AJAX requests are sent"""
+        url = self.get_url()
+        response = self.request(url, is_ajax=False)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_incorrect_comment_id(self):
+        """Test response when an incorrect comment id is passed"""
+        url = self.get_url(102_876)
+        response = self.request(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_incorrect_reason(self):
+        """Test response when incorrect reason is passed"""
+        url = self.get_url()
+        data = self.flag_data
+        reason = -1
+        data.update({'reason': reason})
+        response = self.request(url, **data)
+        response_data = self.response_data
+        response_data['msg'] = [f'{reason} is an invalid reason']
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(response.json(), response_data)

@@ -103,7 +103,7 @@ $(function() {
                     window.history.replaceState({}, document.title, clean_uri);
                 }
             },
-            error: function handleFormError($XHR, textStatus, errorThrown) {
+            error: function handleFormError(jqXHR, textStatus, errorThrown) {
                 alert("Unable to post your comment!, please try again");
             },
         });
@@ -119,13 +119,13 @@ $(function() {
         $.ajax({
             method: 'GET',
             url: $thisURL,
-            success: function updateComment(data, textStatus, $XHR) {
+            success: function updateComment(data, textStatus, jqXHR) {
                 $(commentContent).replaceWith(data);
                 // set the focus on the end of text
                 var num = $(".js-comment-edit-form > textarea").val();
                 $(".js-comment-edit-form > textarea").focus().val('').val(num);
             },
-            error: function handleFormError($XHR, textStatus, errorThrown) {
+            error: function handleFormError(jqXHR, textStatus, errorThrown) {
                 alert("you can't edit this comment");
             },
         });
@@ -148,10 +148,10 @@ $(function() {
             method: 'POST',
             url: $thisURL,
             data: $formData,
-            success: function submitUpdateComment(data, textStatus, $XHR) {
+            success: function submitUpdateComment(data, textStatus, jqXHR) {
                 $form.parent().replaceWith(data);
             },
-            error: function handleFormError($XHR, textStatus, errorThrown) {
+            error: function handleFormError(jqXHR, textStatus, errorThrown) {
                 alert("Modification didn't take effect!, please try again");
             },
         });
@@ -183,7 +183,7 @@ $(function() {
             method: "POST",
             url: $thisURL,
             data: $formData,
-            success: function deleteCommentDone(data, textStatus, $XHR) {
+            success: function deleteCommentDone(data, textStatus, jqXHR) {
                 $("#Modal").modal("hide");
                 $parentComment.remove();
                 var $parentCommentArr = $(".js-parent-comment");
@@ -208,7 +208,7 @@ $(function() {
                     $(".modal-backdrop").remove();
                 }
             },
-            error: function handleFormError($XHR, textStatus, errorThrown) {
+            error: function handleFormError(jqXHR, textStatus, errorThrown) {
                 alert("Unable to delete your comment!, please try again");
             },
         });
@@ -218,7 +218,6 @@ $(function() {
      * Returns whether a classList contains a particular class or not.
      * @param {Array} classList - the array of classes to be compared.
      * @param {string} container - the class to be verified, default='user-has-not-reacted'.
-     * @param {boolean}
      */
     var containsClass = function(classList, container = 'user-has-not-reacted') {
         if (classList.contains(container)) return true;
@@ -227,7 +226,7 @@ $(function() {
 
     /**
      * Changes/removes class to fill the reacted element.
-     * @param {any} element - the DOM element that needs to be toggled.
+     * @param {object} element - the DOM element that needs to be toggled.
      * @param {string} addClass -  the class to be added when action is 'add'.
      * @param {string} removeClass -  the class to be removed when action is 'add'.
      * @param {string} action -  'add' or 'remove'.
@@ -245,12 +244,12 @@ $(function() {
     /**
      * Fill the target reaction element, removes color from the other reaction
      * if it were filled. 
-     * @param {any} $parent - parent of the reaction element that has to be updated
-     * @param {any} $targetReaction - the reaction element to be filled
+     * @param {object} $parent - parent of the reaction element that has to be updated
+     * @param {object} $targetReaction - the reaction element to be filled
      */
     var fillReaction = function($parent, targetReaction) {
-        likeIcon = $parent.find('.reaction-like')[0];
-        dislikeIcon = $parent.find('.reaction-dislike')[0];
+        likeIcon = $parent.find('.reaction-like').eq(0)[0];
+        dislikeIcon = $parent.find('.reaction-dislike').eq(0)[0];
         var isLikeEmpty = containsClass(likeIcon.classList);
         var isDislikeEmpty = containsClass(dislikeIcon.classList);
         var addClass = "user-has-reacted";
@@ -268,13 +267,13 @@ $(function() {
 
     /**
      * Change reaction count for the element that the user reacted upon.
-     * @param {any} $parent - the parent object containing the reactions.
+     * @param {object} $parent - the parent object containing the reactions.
      * @param {Number} likes - like count
      * @param {Number} dislikes - dislike count
      */
     var changeReactionCount = function($parent, likes, dislikes) {
-        $parent.find('.js-like-number')[0].textContent = likes;
-        $parent.find('.js-dislike-number')[0].textContent = dislikes;
+        $parent.find('.js-like-number').eq(0)[0].textContent = likes;
+        $parent.find('.js-dislike-number').eq(0)[0].textContent = dislikes;
     }
 
     /**
@@ -286,7 +285,7 @@ $(function() {
     var commentReact = function(e) {
         e.preventDefault();
         var $element = $(this);
-        var targetReaction = $element.find('.comment-reaction-icon')[0];
+        var targetReaction = $element.find('.comment-reaction-icon').eq(0)[0];
         var $parentReactionEle = $element.parent();
         var $thisURL = $element.attr('href');
         $.ajax({
@@ -294,14 +293,14 @@ $(function() {
             method: "POST",
             url: $thisURL,
             dataType: 'json',
-            success: function commentReactionDone(data, textStatus, $XHR) {
+            success: function commentReactionDone(data, textStatus, jqXHR) {
                 var status = data['status'];
                 if (status === 0) {
                     fillReaction($parentReactionEle, targetReaction);
                     changeReactionCount($parentReactionEle, data['likes'], data['dislikes']);
                 }
             },
-            error: function handleFormError($XHR, textStatus, errorThrown) {
+            error: function handleFormError(jqXHR, textStatus, errorThrown) {
                 alert("Reaction couldn't be processed!, please try again");
             },
         });
@@ -326,7 +325,7 @@ $(function() {
             case 1:
                 status = "warning";
         }
-        var cls = 'alert alert-' + status;
+        var cls = 'h6 alert alert-' + status;
         var temp = $('<div/>')
             .addClass(cls)
             .html(msg);
@@ -340,7 +339,7 @@ $(function() {
     }
     /**
      * Fixes an element to the top of the viewport.
-     * @param {element} div - element that is to be fixed at the top of the viewport. 
+     * @param {object} div - element that is to be fixed at the top of the viewport. 
      */
     function fixToTop(div) {
         var top = 200;
@@ -351,6 +350,13 @@ $(function() {
             div.css({ 'position': 'static', 'top': '0px' });
     }
 
+    /**
+     * Perform an AJAX request to the flag API and handle response.
+     * @param {object} $flag - the parent DOM element that contains flag. 
+     * @param {string} action - 'create'/'delete'.
+     * @param {string} reason - the value of the reason for flagging, default=null.
+     * @param {string} info - any extra information to be passed when flagging, default=null.
+     */
     var sendFlag = function($flag, action, reason = null, info = null) {
         data = {
             'reason': reason,
@@ -365,10 +371,10 @@ $(function() {
             url: url,
             data: data,
             dataType: 'json',
-            success: function commentFlagDone(data, textStatus, $XHR) {
+            success: function commentFlagDone(data, textStatus, jqXHR) {
                 var addClass = 'user-has-flagged';
                 var removeClass = 'user-has-not-flagged';
-                var flagIcon = $flag.find('.comment-flag-icon')[0]
+                var flagIcon = $flag.find('.comment-flag-icon').eq(0)[0];
                 if (data.flag === 1) {
                     toggleClass(flagIcon, addClass, removeClass, action = 'add');
                 } else {
@@ -377,23 +383,25 @@ $(function() {
             },
             complete: function closeFlagModal(data) {
                 $modal.modal('hide');
-                data = data.responseJSON;
-                createResponse($flag.parents().find('.js-parent-comment')[0], data.status, data.msg);
+                if (data) {
+                    data = data.responseJSON;
+                    createResponse($flag.closest('.js-parent-comment')[0], data.status, data.msg);
+                }
             },
-            error: function handleFormError($XHR, textStatus, errorThrown) {
+            error: function handleFormError(jqXHR, textStatus, errorThrown) {
                 alert("The flag action couldn't be processed!, please try again");
             }
         });
     };
 
+    /**
+     * Opens the modal form and handles everthing that occurs inside it.
+     * @param {object} $flagEle - the parent DOM element that contains flag  
+     */
     var handleFlagModal = function($flagEle) {
         var $modal = $flagEle.find('.flag-modal');
         $modal.modal('show');
-        form = $modal.find('.flag-modal-form')[0];
-        var choice = form.querySelector('input[name="reason"]:checked');
-        if (choice) {
-            var reason = choice.value;
-        }
+        form = $modal.find('.flag-modal-form').eq(0)[0];
         var lastReason = form.querySelector('.flag-last-reason');
         var flagInfo = form.querySelector('textarea');
         form.onchange = function(e) {
@@ -404,16 +412,24 @@ $(function() {
                 flagInfo.style.display = "none";
             }
         };
-        var submit = $modal.find('.flag-modal-submit')[0];
+        var submit = $modal.find('.flag-modal-submit').eq(0)[0];
         submit.onclick = function(e) {
             e.preventDefault();
-            sendFlag($flagEle, 'create', reason, flagInfo.value);
+            var choice = form.querySelector('input[name="reason"]:checked');
+            if (choice) {
+                var reason = choice.value;
+                sendFlag($flagEle, 'create', reason, flagInfo.value);
+            }
         }
     };
 
-    var loadFlagModal = function(e) {
+    /**
+     * Create or remove a flag option on a comment.
+     * @param {any} e - the event triggered this action. 
+     */
+    var commentFlag = function(e) {
         var $parent = $(this);
-        var $flag = $parent.find('.comment-flag-icon')[0];
+        var $flag = $parent.find('.comment-flag-icon').eq(0)[0];
         if (containsClass($flag.classList, container = 'user-has-not-flagged')) {
             handleFlagModal($parent);
         } else {
@@ -430,5 +446,5 @@ $(function() {
     $(document).on("click", ".js-comment-delete", loadForm);
     $(document).on("submit", ".js-comment-delete-form", deleteComment);
     $(document).on("click", ".js-comment-reaction", commentReact);
-    $(document).on("click", ".js-comment-flag", loadFlagModal);
+    $(document).on("click", ".js-comment-flag", commentFlag);
 });

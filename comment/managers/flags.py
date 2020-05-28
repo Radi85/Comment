@@ -45,17 +45,19 @@ class FlagInstanceManager(models.Manager):
     reason_values = [reason.value for reason in reasons]
 
     def _clean_reason(self, reason):
+        err = ValidationError(
+                _('%(reason)s is an invalid reason'),
+                params={'reason': reason},
+                code='invalid'
+                )
         try:
             reason = int(reason)
             if reason in self.reason_values:
                 return reason
+            raise err
 
         except (ValueError, TypeError):
-            raise ValidationError(
-                _('%(reason)s is an invalid reaction'),
-                code='invalid',
-                params={'reason': reason}
-                )
+            raise err
 
     def _clean_action(self, action):
         if isinstance(action, str):
@@ -63,26 +65,32 @@ class FlagInstanceManager(models.Manager):
             if act in ['create', 'delete']:
                 return act
 
-        return ValidationError(_('This is not a valid action'), code='invalid')
+        raise ValidationError(
+                _('%(action)s is not a valid action'),
+                params={'action': action},
+                code='invalid'
+                )
 
     def _clean(self, reason, info):
         reason = self._clean_reason(reason)
         if not reason:
             raise ValidationError(
-                {'reason': _('Please supply a reason for flagging')},
+                _('Please supply a reason for flagging'),
+                params={'reason': reason},
                 code='required'
                 )
 
         if reason == self.reason_values[-1] and (not info):
             raise ValidationError(
-                {'info': _('Please supply some information as the reason for flagging')},
+                _('Please supply some information as the reason for flagging'),
+                params={'info': info},
                 code='required'
                 )
 
-    def set_flag(self, user, flag, data):
-        reason = data.get('reason', None)
-        info = data.get('info', None)
-        action = data.get('action', None)
+    def set_flag(self, user, flag, **kwargs):
+        reason = kwargs.get('reason', None)
+        info = kwargs.get('info', None)
+        action = kwargs.get('action', None)
         self._clean_action(action)
         if action == 'delete':
             instance = self.get(flag=flag, user=user)
