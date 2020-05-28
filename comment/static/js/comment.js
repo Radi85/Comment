@@ -103,7 +103,7 @@ $(function() {
                     window.history.replaceState({}, document.title, clean_uri);
                 }
             },
-            error: function handleFormError($XHR, textStatus, errorThrown) {
+            error: function handleFormError(jqXHR, textStatus, errorThrown) {
                 alert("Unable to post your comment!, please try again");
             },
         });
@@ -119,13 +119,13 @@ $(function() {
         $.ajax({
             method: 'GET',
             url: $thisURL,
-            success: function updateComment(data, textStatus, $XHR) {
+            success: function updateComment(data, textStatus, jqXHR) {
                 $(commentContent).replaceWith(data);
                 // set the focus on the end of text
                 var num = $(".js-comment-edit-form > textarea").val();
                 $(".js-comment-edit-form > textarea").focus().val('').val(num);
             },
-            error: function handleFormError($XHR, textStatus, errorThrown) {
+            error: function handleFormError(jqXHR, textStatus, errorThrown) {
                 alert("you can't edit this comment");
             },
         });
@@ -148,10 +148,10 @@ $(function() {
             method: 'POST',
             url: $thisURL,
             data: $formData,
-            success: function submitUpdateComment(data, textStatus, $XHR) {
+            success: function submitUpdateComment(data, textStatus, jqXHR) {
                 $form.parent().replaceWith(data);
             },
-            error: function handleFormError($XHR, textStatus, errorThrown) {
+            error: function handleFormError(jqXHR, textStatus, errorThrown) {
                 alert("Modification didn't take effect!, please try again");
             },
         });
@@ -183,7 +183,7 @@ $(function() {
             method: "POST",
             url: $thisURL,
             data: $formData,
-            success: function deleteCommentDone(data, textStatus, $XHR) {
+            success: function deleteCommentDone(data, textStatus, jqXHR) {
                 $("#Modal").modal("hide");
                 $parentComment.remove();
                 var $parentCommentArr = $(".js-parent-comment");
@@ -208,7 +208,7 @@ $(function() {
                     $(".modal-backdrop").remove();
                 }
             },
-            error: function handleFormError($XHR, textStatus, errorThrown) {
+            error: function handleFormError(jqXHR, textStatus, errorThrown) {
                 alert("Unable to delete your comment!, please try again");
             },
         });
@@ -248,8 +248,8 @@ $(function() {
      * @param {object} $targetReaction - the reaction element to be filled
      */
     var fillReaction = function($parent, targetReaction) {
-        likeIcon = $parent.find('.reaction-like')[0];
-        dislikeIcon = $parent.find('.reaction-dislike')[0];
+        likeIcon = $parent.find('.reaction-like').eq(0)[0];
+        dislikeIcon = $parent.find('.reaction-dislike').eq(0)[0];
         var isLikeEmpty = containsClass(likeIcon.classList);
         var isDislikeEmpty = containsClass(dislikeIcon.classList);
         var addClass = "user-has-reacted";
@@ -272,8 +272,8 @@ $(function() {
      * @param {Number} dislikes - dislike count
      */
     var changeReactionCount = function($parent, likes, dislikes) {
-        $parent.find('.js-like-number')[0].textContent = likes;
-        $parent.find('.js-dislike-number')[0].textContent = dislikes;
+        $parent.find('.js-like-number').eq(0)[0].textContent = likes;
+        $parent.find('.js-dislike-number').eq(0)[0].textContent = dislikes;
     }
 
     /**
@@ -285,7 +285,7 @@ $(function() {
     var commentReact = function(e) {
         e.preventDefault();
         var $element = $(this);
-        var targetReaction = $element.find('.comment-reaction-icon')[0];
+        var targetReaction = $element.find('.comment-reaction-icon').eq(0)[0];
         var $parentReactionEle = $element.parent();
         var $thisURL = $element.attr('href');
         $.ajax({
@@ -293,14 +293,14 @@ $(function() {
             method: "POST",
             url: $thisURL,
             dataType: 'json',
-            success: function commentReactionDone(data, textStatus, $XHR) {
+            success: function commentReactionDone(data, textStatus, jqXHR) {
                 var status = data['status'];
                 if (status === 0) {
                     fillReaction($parentReactionEle, targetReaction);
                     changeReactionCount($parentReactionEle, data['likes'], data['dislikes']);
                 }
             },
-            error: function handleFormError($XHR, textStatus, errorThrown) {
+            error: function handleFormError(jqXHR, textStatus, errorThrown) {
                 alert("Reaction couldn't be processed!, please try again");
             },
         });
@@ -371,10 +371,10 @@ $(function() {
             url: url,
             data: data,
             dataType: 'json',
-            success: function commentFlagDone(data, textStatus, $XHR) {
+            success: function commentFlagDone(data, textStatus, jqXHR) {
                 var addClass = 'user-has-flagged';
                 var removeClass = 'user-has-not-flagged';
-                var flagIcon = $flag.find('.comment-flag-icon')[0]
+                var flagIcon = $flag.find('.comment-flag-icon').eq(0)[0];
                 if (data.flag === 1) {
                     toggleClass(flagIcon, addClass, removeClass, action = 'add');
                 } else {
@@ -385,10 +385,10 @@ $(function() {
                 $modal.modal('hide');
                 if (data) {
                     data = data.responseJSON;
-                    createResponse($flag.parents().find('.js-parent-comment')[0], data.status, data.msg);
+                    createResponse($flag.closest('.js-parent-comment')[0], data.status, data.msg);
                 }
             },
-            error: function handleFormError($XHR, textStatus, errorThrown) {
+            error: function handleFormError(jqXHR, textStatus, errorThrown) {
                 alert("The flag action couldn't be processed!, please try again");
             }
         });
@@ -401,7 +401,7 @@ $(function() {
     var handleFlagModal = function($flagEle) {
         var $modal = $flagEle.find('.flag-modal');
         $modal.modal('show');
-        form = $modal.find('.flag-modal-form')[0];
+        form = $modal.find('.flag-modal-form').eq(0)[0];
         var choice = form.querySelector('input[name="reason"]:checked');
         if (choice) {
             var reason = choice.value;
@@ -416,7 +416,7 @@ $(function() {
                 flagInfo.style.display = "none";
             }
         };
-        var submit = $modal.find('.flag-modal-submit')[0];
+        var submit = $modal.find('.flag-modal-submit').eq(0)[0];
         submit.onclick = function(e) {
             e.preventDefault();
             sendFlag($flagEle, 'create', reason, flagInfo.value);
@@ -429,7 +429,7 @@ $(function() {
      */
     var commentFlag = function(e) {
         var $parent = $(this);
-        var $flag = $parent.find('.comment-flag-icon')[0];
+        var $flag = $parent.find('.comment-flag-icon').eq(0)[0];
         if (containsClass($flag.classList, container = 'user-has-not-flagged')) {
             handleFlagModal($parent);
         } else {
