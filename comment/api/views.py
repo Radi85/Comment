@@ -66,7 +66,7 @@ class CommentDetailForReaction(generics.RetrieveAPIView):
         if not reaction_type:
             data = {'error': 'This is an invalid reaction type'}
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        reaction = SetReaction._get_reaction_object(comment)
+        reaction = SetReaction.get_reaction_object(comment)
         ReactionInstance.objects.set_reaction(
             user=request.user,
             reaction=comment.reaction,
@@ -90,7 +90,7 @@ class CommentDetailForFlag(generics.RetrieveAPIView):
     def post(self, request, *args, **kwargs):
         comment = get_object_or_404(Comment, id=kwargs.get('pk'))
         response = {}
-        flag = SetFlag._get_flag_object(comment)
+        flag = SetFlag.get_flag_object(comment)
         try:
             if FlagInstance.objects.set_flag(request.user, flag, data=request.POST):
                 response['msg'] = _('Comment flagged')

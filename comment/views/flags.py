@@ -12,7 +12,9 @@ from comment.models import Comment, Flag, FlagInstance
 
 @method_decorator(require_POST, name='dispatch')
 class SetFlag(LoginRequiredMixin, View):
-    def _get_flag_object(self, comment):
+
+    @staticmethod
+    def get_flag_object(comment):
         try:
             flag = comment.flag
         except ObjectDoesNotExist:
@@ -27,7 +29,7 @@ class SetFlag(LoginRequiredMixin, View):
         response = {
             'status': 1
         }
-        flag = self._get_flag_object(comment)
+        flag = self.get_flag_object(comment)
 
         try:
             if FlagInstance.objects.set_flag(request.user, flag, data=request.POST):

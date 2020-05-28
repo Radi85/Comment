@@ -13,7 +13,8 @@ from comment.models import Comment, Reaction, ReactionInstance
 @method_decorator(require_POST, name='dispatch')
 class SetReaction(LoginRequiredMixin, View):
 
-    def _get_reaction_object(self, comment):
+    @staticmethod
+    def get_reaction_object(comment):
         """Required for maintaining backward compatability"""
         try:
             reaction = comment.reaction
@@ -36,7 +37,7 @@ class SetReaction(LoginRequiredMixin, View):
         reaction_type = self._clean_reaction(reaction)
         if not reaction_type:
             return HttpResponseBadRequest(_('This is not a valid reaction'))
-        reaction = self._get_reaction_object(comment)
+        reaction = self.get_reaction_object(comment)
         ReactionInstance.objects.set_reaction(user=request.user, reaction=reaction, reaction_type=reaction_type)
         comment.reaction.refresh_from_db()
         response = {
