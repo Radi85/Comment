@@ -92,7 +92,7 @@ class CommentDetailForFlag(generics.RetrieveAPIView):
         response = {}
         flag = SetFlag.get_flag_object(comment)
         try:
-            if FlagInstance.objects.set_flag(request.user, flag, data=request.POST):
+            if FlagInstance.objects.set_flag(request.user, flag, **request.POST.dict()):
                 response['msg'] = _('Comment flagged')
                 response['flag'] = 1
             else:

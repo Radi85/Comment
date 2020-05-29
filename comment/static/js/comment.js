@@ -402,10 +402,6 @@ $(function() {
         var $modal = $flagEle.find('.flag-modal');
         $modal.modal('show');
         form = $modal.find('.flag-modal-form').eq(0)[0];
-        var choice = form.querySelector('input[name="reason"]:checked');
-        if (choice) {
-            var reason = choice.value;
-        }
         var lastReason = form.querySelector('.flag-last-reason');
         var flagInfo = form.querySelector('textarea');
         form.onchange = function(e) {
@@ -419,7 +415,11 @@ $(function() {
         var submit = $modal.find('.flag-modal-submit').eq(0)[0];
         submit.onclick = function(e) {
             e.preventDefault();
-            sendFlag($flagEle, 'create', reason, flagInfo.value);
+            var choice = form.querySelector('input[name="reason"]:checked');
+            if (choice) {
+                var reason = choice.value;
+                sendFlag($flagEle, 'create', reason, flagInfo.value);
+            }
         }
     };
 

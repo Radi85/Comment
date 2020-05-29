@@ -55,4 +55,5 @@ class Comment(models.Model):
 
     @property
     def is_flagged(self):
-        return self.flag.count > self.objects.ALLOWED_FLAGS
+        self.flag.refresh_from_db()
+        return self.flag.count > CommentManager.ALLOWED_FLAGS

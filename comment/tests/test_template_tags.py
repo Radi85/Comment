@@ -2,32 +2,19 @@ from unittest.mock import patch
 
 from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
-from django.test import RequestFactory
 from django.template import TemplateSyntaxError
 
 from comment.forms import CommentForm
+from comment.managers import FlagInstanceManager
 from comment.templatetags.comment_tags import (
     get_model_name, get_app_name, get_comment_count, get_img_path, get_profile_url, render_comments,
-    include_static_jquery, include_bootstrap, include_static, render_field, has_reacted
+    include_static_jquery, include_bootstrap, include_static, render_field, has_reacted, has_flagged,
+    render_flag_reasons
 )
-from comment.tests.base import BaseCommentTest
+from comment.tests.base import BaseTemplateTagsTest
 
 
-class TemplateTagsTest(BaseCommentTest):
-    def setUp(self):
-        super().setUp()
-        self.factory = RequestFactory()
-        settings.PROFILE_APP_NAME = 'user_profile'
-        self.parent_comment_1 = self.create_comment(self.content_object_1)
-        self.parent_comment_2 = self.create_comment(self.content_object_1)
-        self.parent_comment_3 = self.create_comment(self.content_object_1)
-        self.child_comment_1 = self.create_comment(self.content_object_1, parent=self.parent_comment_1)
-        self.child_comment_2 = self.create_comment(self.content_object_1, parent=self.parent_comment_2)
-        self.child_comment_3 = self.create_comment(self.content_object_1, parent=self.parent_comment_2)
-        self.reaction_1 = self.create_reaction_instance(self.user_1, self.parent_comment_1, 'like')
-        self.reaction_2 = self.create_reaction_instance(self.user_1, self.parent_comment_2, 'dislike')
-        self.reaction_3 = self.create_reaction_instance(self.user_1, self.parent_comment_3, 'like')
-
+class CommentTemplateTagsTest(BaseTemplateTagsTest):
     def test_get_model_name(self):
         model_name = get_model_name(self.post_1)
         self.assertEqual(model_name, 'Post')
@@ -118,26 +105,27 @@ class TemplateTagsTest(BaseCommentTest):
             field = render_field(field, placeholder='placeholder')
             self.assertEqual(field.field.widget.attrs.get('placeholder'), 'placeholder')
 
+
+class ReactionTemplateTagsTest(BaseTemplateTagsTest):
+    def setUp(self):
+        super().setUp()
+        self.comment = self.create_comment(self.content_object_1)
+        self.user = self.user_1
+        self.reaction = self.create_reaction_instance(self.user, self.comment, 'like')
+
     def test_has_reacted_for_unauthenticated_user(self):
         """Test whether the filter returns False for unauthenticated users"""
-        class MockUser:
-            """Mock unauthenticated user for template. The User instance always returns True for `is_authenticated`"""
-            is_authenticated = False
-
-        user = MockUser()
-        comment = self.parent_comment_1
-        self.assertEqual(False, has_reacted(comment, user, 'like'))
+        user = self.MockUser()
+        self.assertEqual(False, has_reacted(self.comment, user, 'like'))
 
     def test_has_reacted_on_incorrect_reaction(self):
         """Test whether this function raises an error when incorrect reaction is passed"""
-        comment = self.parent_comment_1
-        user = self.user_1
-        self.assertRaises(TemplateSyntaxError, has_reacted, comment, user, 'likes')
+        self.assertRaises(TemplateSyntaxError, has_reacted, self.comment, self.user, 'likes')
 
     def test_has_reacted_on_correct_reaction_for_authenticated_users(self):
         """Test whether this function returns an appropriate boolean when correct reaction is passed"""
-        comment = self.parent_comment_1
-        user = self.user_1
+        comment = self.comment
+        user = self.user
 
         self.assertEqual(True, has_reacted(comment, user, 'like'))
         self.assertEqual(False, has_reacted(comment, user, 'dislike'))
@@ -151,3 +139,24 @@ class TemplateTagsTest(BaseCommentTest):
         # check for other comments
         self.assertEqual(False, has_reacted(comment, user, 'like'))
         self.assertEqual(False, has_reacted(comment, user, 'dislike'))
+
+
+class CommentFlagTemplateTagsTest(BaseTemplateTagsTest):
+    def setUp(self):
+        super().setUp()
+        self.comment = self.create_comment(self.content_object_1)
+        self.user = self.user_1
+        self.flag = self.create_flag_instance(self.user, self.comment)
+
+    def test_has_flagged_for_unauthenticated_user(self):
+        user = self.MockUser()
+        self.assertEqual(False, has_flagged(user, self.parent_comment_1))
+
+    def test_has_flagged_for_unflagged_comment(self):
+        self.assertEqual(False, has_flagged(self.user_2, self.comment))
+
+    def test_has_flagged_for_flagged_comment(self):
+        self.assertEqual(True, has_flagged(self.user, self.comment))
+
+    def test_render_flag_reasons(self):
+        self.assertListEqual(FlagInstanceManager.reasons, render_flag_reasons())

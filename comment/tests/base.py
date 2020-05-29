@@ -1,8 +1,10 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
-from django.test import TestCase
+from django.core.exceptions import ValidationError
+from django.test import TestCase, RequestFactory
 
-from comment.models import Comment, Reaction, ReactionInstance
+from comment.models import Comment, FlagInstance, Reaction, ReactionInstance
 from test.example.post.models import Post
 
 
@@ -35,6 +37,7 @@ class BaseCommentTest(TestCase):
         self.content_object_2 = content_type.get_object_for_this_type(id=self.post_2.id)
         self.increment = 0
         self.reactions = 0
+        self.flags = 0
 
     def create_comment(self, ct_object, parent=None):
         self.increment += 1
@@ -62,3 +65,52 @@ class BaseCommentTest(TestCase):
     @staticmethod
     def set_reaction(user, comment, reaction):
         ReactionInstance.objects.set_reaction(user, comment.reaction, reaction)
+
+    @staticmethod
+    def set_flag(user, comment, **kwargs):
+        try:
+            return FlagInstance.objects.set_flag(user, comment.flag, **kwargs)
+        except ValidationError as e:
+            raise e
+
+    def create_flag_instance(self, user, comment, **kwargs):
+        try:
+            instance = FlagInstance.objects.create(
+                user=user,
+                flag=comment.flag,
+                **kwargs
+            )
+            self.flags += 1
+            return instance
+        except ValidationError as e:
+            raise e
+
+
+class BaseCommentFlagTest(BaseCommentTest):
+    def setUp(self):
+        super().setUp()
+        self.comment = self.create_comment(self.content_object_1)
+        self.user = self.user_1
+        self.flag_data = {
+            'reason': '1',
+            'info': None,
+        }
+        self.comment_2 = self.create_comment(self.content_object_2)
+        self.flag_instance = self.create_flag_instance(self.user_2, self.comment_2, **self.flag_data)
+
+
+class BaseTemplateTagsTest(BaseCommentTest):
+    class MockUser:
+        """Mock unauthenticated user for template. The User instance always returns True for `is_authenticated`"""
+        is_authenticated = False
+
+    def setUp(self):
+        super().setUp()
+        self.factory = RequestFactory()
+        settings.PROFILE_APP_NAME = 'user_profile'
+        self.parent_comment_1 = self.create_comment(self.content_object_1)
+        self.parent_comment_2 = self.create_comment(self.content_object_1)
+        self.parent_comment_3 = self.create_comment(self.content_object_1)
+        self.child_comment_1 = self.create_comment(self.content_object_1, parent=self.parent_comment_1)
+        self.child_comment_2 = self.create_comment(self.content_object_1, parent=self.parent_comment_2)
+        self.child_comment_3 = self.create_comment(self.content_object_1, parent=self.parent_comment_2)
