@@ -110,7 +110,7 @@ def render_comments(obj, request, oauth=False, comments_per_page=10):
     return context
 
 
-register.inclusion_tag('comment/base.html')(render_comments)
+register.inclusion_tag('comment/comments/base.html')(render_comments)
 
 
 def include_static():

@@ -2,7 +2,7 @@
 <div class="col-10 col-md-11">
     <form class="js-comment-edit-form" method="post" data-url="{% url 'comment:edit' pk=comment.id %}">
         {% csrf_token %}
-        {% include 'comment/comment_form.html' with placeholder=placeholder %}
+        {% include './comment_form.html' with placeholder=placeholder %}
         <footer class="blockquote-footer edit-comment mt-2">
             <small>
                 <input name="model_name" value="{% get_model_name model_object %}" hidden>

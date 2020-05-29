@@ -21,7 +21,7 @@ class CreateCommentTestCase(BaseCommentTest):
         }
         response = self.client.post(reverse('comment:create'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'comment/base.html')
+        self.assertTemplateUsed(response, 'comment/comments/base.html')
         parent_comment = Comment.objects.get(content='parent comment body', object_id=self.post_1.id)
         self.assertEqual(response.context.get('comment').id, parent_comment.id)
         self.assertTrue(response.context.get('comment').is_parent)
@@ -38,7 +38,7 @@ class CreateCommentTestCase(BaseCommentTest):
         }
         response = self.client.post(reverse('comment:create'), data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'comment/child_comment.html')
+        self.assertTemplateUsed(response, 'comment/comments/child_comment.html')
         child_comment = Comment.objects.get(content='child comment body', object_id=self.post_1.id)
         self.assertEqual(response.context.get('comment').id, child_comment.id)
         self.assertFalse(response.context.get('comment').is_parent)
@@ -81,12 +81,12 @@ class CreateCommentTestCase(BaseCommentTest):
         self.assertEqual(comment.content, 'comment 1')
         response = self.client.get(reverse('comment:edit', kwargs={'pk': comment.id}), data=data)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed('comment/update_comment.html')
+        self.assertTemplateUsed('comment/comments/update_comment.html')
         self.assertEqual(response.context['comment_form'].instance.id, comment.id)
 
         response = self.client.post(reverse('comment:edit', kwargs={'pk': comment.id}), data=data)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed('comment/content.html')
+        self.assertTemplateUsed('comment/comments/content.html')
         self.assertEqual(Comment.objects.all().first().content, data['content'])
 
         data['content'] = ''
@@ -126,12 +126,12 @@ class CreateCommentTestCase(BaseCommentTest):
         self.assertEqual(init_comments, 1)
         response = self.client.get(reverse('comment:delete', kwargs={'pk': comment.id}), data=data)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'comment/comment_modal.html')
+        self.assertTemplateUsed(response, 'comment/comments/comment_modal.html')
         self.assertContains(response, 'html_form')
 
         response = self.client.post(reverse('comment:delete', kwargs={'pk': comment.id}), data=data)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'comment/base.html')
+        self.assertTemplateUsed(response, 'comment/comments/base.html')
         self.assertNotContains(response, 'html_form')
         self.assertEqual(Comment.objects.all().count(), init_comments-1)
 
