@@ -1,6 +1,17 @@
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.utils.translation import gettext_lazy as _
 from django.db import models
+
+
+class ReactionManager(models.Manager):
+
+    def get_reaction_object(self, comment):
+        """Required for maintaining backward compatability"""
+        try:
+            reaction = comment.reaction
+        except ObjectDoesNotExist:
+            reaction = self.create(comment=comment)
+        return reaction
 
 
 class ReactionInstanceManager(models.Manager):

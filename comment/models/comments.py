@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -52,3 +53,12 @@ class Comment(models.Model):
     @property
     def dislikes(self):
         return self._get_reaction_count('dislikes')
+
+    @property
+    def is_flagged(self):
+        if hasattr(self, 'flag'):
+            self.flag.refresh_from_db()
+            allowed_flags = getattr(settings, 'COMMENT_FLAGS_ALLOWED', 0)
+            if allowed_flags:
+                return self.flag.count > allowed_flags
+        return False

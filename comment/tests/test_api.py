@@ -26,12 +26,6 @@ class APIBaseTest(BaseCommentTest):
         self.comment_8 = self.create_comment(self.content_object_2, parent=self.comment_5)
         self.reaction_2 = self.create_reaction_instance(self.user_1, self.comment_5, 'dislike')
 
-        self.flag = self.create_flag_instance(self.user_1, self.comment_1)
-        self.flag_data = {
-            'reason': 1,
-            'info': '',
-            'action': 'create'
-        }
         self.addCleanup(patch.stopall)
 
 
@@ -268,45 +262,86 @@ class APICommentViewTest(APIBaseTest):
         response = self.client.post(f'/api/comments/{self.comment_3.id}/react/invalid_type/')
         self.assertEqual(response.status_code, 400)
 
-    def test_flag_to_comment_success(self):
-        comment = self.comment_3
+
+class APICommentFlagViewTest(APIBaseTest):
+
+    def get_url(self, c_id=None):
+        if not c_id:
+            c_id = self.comment.id
+
+        return f'/api/comments/{c_id}/flag/'
+
+    def setUp(self):
+        super().setUp()
+        self.comment = self.comment_1
+        self.user = self.user_1
+        self.flag = self.create_flag_instance(self.user_2, self.comment_2)
+        self.flag_data = {
+            'reason': 1,
+            'info': '',
+            'action': 'create'
+        }
+
+    def test_flag_to_comment(self):
+        comment = self.comment
         data = self.flag_data
-        response_created = {
-            'msg': 'Comment flagged',
-            'flag': 1
-        }
-        response_deleted = {
-            'msg': 'Comment flag removed',
-        }
         # flag - comment has no flags
+        url = self.get_url()
         self.assertEqual(comment.flag.count, 0)
-        response = self.client.post(f'/api/comments/{comment.id}/flag/', data=data)
+        response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 200)
-        self.assertDictEqual(response.json(), response_created)
+        self.assertEqual(response.json()['is_flagged'], False)
         comment.flag.refresh_from_db()
         self.assertEqual(comment.flag.count, 1)
 
+    def test_unflag_to_comment(self):
+        comment = self.comment_2
+        user = self.user_2
+        self.client.force_login(user)
+        url = self.get_url(comment.id)
+        data = self.flag_data
         # unflag - comment is flagged by the user
         data.update({'action': 'delete'})
-        response = self.client.post(f'/api/comments/{comment.id}/flag/', data=data)
+        response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 200)
         comment.flag.refresh_from_db()
-        self.assertDictEqual(response.json(), response_deleted)
         self.assertEqual(comment.flag.count, 0)
 
-        # post flag - comment flag object is not present
+    def test_flag_to_previous_comments(self):
+        """Maintains backward compatibility"""
+        comment = self.comment
+        url = self.get_url()
+        data = self.flag_data
         comment.flag.delete()   # delete the flag object
-        data.update({'action': 'create'})
-        response = self.client.post(f'/api/comments/{comment.id}/flag/', data=data)
+        response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 200)
-        self.assertDictEqual(response.json(), response_created)
         comment.refresh_from_db()
         self.assertEqual(comment.flag.count, 1)
 
-    def test_react_to_comment_with_invalid_reason(self):
+    def test_is_flagged_value(self):
+        # test is_flagged property
+        comment = self.create_comment(self.content_object_1)
+        data = self.flag_data
+        url = self.get_url(comment.id)
+        settings.COMMENT_FLAGS_ALLOWED = 1
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['is_flagged'], False)
+        comment.flag.refresh_from_db()
+        self.assertEqual(comment.flag.count, 1)
+        self.client.force_login(self.user_2)
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['is_flagged'], True)
+        comment.flag.refresh_from_db()
+        self.assertEqual(comment.flag.count, 2)
+        # reset for other tests
+        settings.COMMENT_FLAGS_ALLOWED = 0
+
+    def test_flag_to_comment_with_invalid_reason(self):
         data = self.flag_data
         data.update({'reason': -1})
-        response = self.client.post(f'/api/comments/{self.comment_3.id}/flag/', data=data)
+        response = self.client.post(self.get_url(), data=data)
         self.assertEqual(response.status_code, 400)
 
 

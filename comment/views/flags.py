@@ -1,4 +1,4 @@
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404
@@ -13,14 +13,6 @@ from comment.models import Comment, Flag, FlagInstance
 @method_decorator(require_POST, name='dispatch')
 class SetFlag(LoginRequiredMixin, View):
 
-    @staticmethod
-    def get_flag_object(comment):
-        try:
-            flag = comment.flag
-        except ObjectDoesNotExist:
-            flag = Flag.objects.create(comment=comment)
-        return flag
-
     def post(self, request, *args, **kwargs):
         if not request.is_ajax():
             return HttpResponseBadRequest(_('Only AJAX request are allowed'))
@@ -29,7 +21,7 @@ class SetFlag(LoginRequiredMixin, View):
         response = {
             'status': 1
         }
-        flag = self.get_flag_object(comment)
+        flag = Flag.objects.get_flag_object(comment)
 
         try:
             if FlagInstance.objects.set_flag(request.user, flag, **request.POST.dict()):

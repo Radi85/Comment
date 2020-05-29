@@ -2,7 +2,7 @@ from collections import namedtuple
 
 from django.db import models
 from django.conf import settings
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.utils.translation import gettext_lazy as _
 
 
@@ -23,6 +23,14 @@ class FlagManager(models.Manager):
     states = []
     for state in STATES:
         states.append(State(*state))
+
+    def get_flag_object(self, comment):
+        try:
+            flag = comment.flag
+        except ObjectDoesNotExist:
+            flag = self.create(comment=comment)
+
+        return flag
 
 
 class FlagInstanceManager(models.Manager):
@@ -73,13 +81,6 @@ class FlagInstanceManager(models.Manager):
 
     def _clean(self, reason, info):
         reason = self._clean_reason(reason)
-        if not reason:
-            raise ValidationError(
-                _('Please supply a reason for flagging'),
-                params={'reason': reason},
-                code='required'
-                )
-
         if reason == self.reason_values[-1] and (not info):
             raise ValidationError(
                 _('Please supply some information as the reason for flagging'),
