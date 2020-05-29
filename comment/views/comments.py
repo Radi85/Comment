@@ -36,9 +36,9 @@ class CreateComment(BaseCommentView):
 
     def get_template_names(self):
         if self.created_comment.is_parent:
-            return ['comment/base.html']
+            return ['comment/comments/base.html']
         else:
-            return ['comment/child_comment.html']
+            return ['comment/comments/child_comment.html']
 
     def form_valid(self, form):
         model_object = get_model_obj(self.request)
@@ -67,7 +67,7 @@ class UpdateComment(BaseCommentView):
         context = self.get_context_data()
         context['comment_form'] = CommentForm(instance=self.updated_comment)
         context['comment'] = self.updated_comment
-        return render(request, 'comment/update_comment.html', context)
+        return render(request, 'comment/comments/update_comment.html', context)
 
     def post(self, request, *args, **kwargs):
         self.updated_comment = get_object_or_404(Comment, pk=self.kwargs.get('pk'))
@@ -78,7 +78,7 @@ class UpdateComment(BaseCommentView):
         if form.is_valid():
             form.save()
             context['comment'] = self.updated_comment
-            return render(request, 'comment/content.html', context)
+            return render(request, 'comment/comments/content.html', context)
 
 
 class DeleteComment(BaseCommentView):
@@ -89,7 +89,7 @@ class DeleteComment(BaseCommentView):
         data = dict()
         context = self.get_context_data()
         context["comment"] = comment
-        data['html_form'] = render_to_string('comment/comment_modal.html', context, request=request)
+        data['html_form'] = render_to_string('comment/comments/comment_modal.html', context, request=request)
         return JsonResponse(data)
 
     def post(self, request, *args, **kwargs):
@@ -98,4 +98,4 @@ class DeleteComment(BaseCommentView):
             raise PermissionDenied
         comment.delete()
         context = self.get_context_data()
-        return render(request, 'comment/base.html', context)
+        return render(request, 'comment/comments/base.html', context)

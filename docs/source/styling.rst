@@ -14,11 +14,11 @@ BS class used in the default template can be now customized from within your tem
 
 for example to override the BS classes of comment and reply btn do the following:
 
-create ``templates/comment/create_comment.html``
+create ``templates/comment/comments/create_comment.html``
 
 .. code:: python
 
-    {% extends "comment/create_comment.html" %}
+    {% extends "comment/comments/create_comment.html" %}
 
     {% block post_btn_cls %}
     btn btn-primary btn-block btn-sm
@@ -37,7 +37,7 @@ Templates and block tags names with default BS classes:
 .. code:: html
 
     {% block pagination %}
-    {% include 'comment/pagination.html' with active_btn='bg-success' text_style='text-success' li_cls='page-item rounded mx-1' %}
+    {% include 'comment/comments/pagination.html' with active_btn='bg-success' text_style='text-success' li_cls='page-item rounded mx-1' %}
     {% endblock pagination %}
 
 |

@@ -8,15 +8,14 @@ ALLOWED_FLAGS = getattr(settings, 'COMMENT_FLAGS_ALLOWED', 10)
 
 class CommentManager(models.Manager):
 
-    ALLOWED_FLAGS = getattr(settings, 'COMMENT_FLAGS_ALLOWED', 0)
-
     def get_queryset(self):
         """Filter out comments that have been flagged"""
-        if not self.ALLOWED_FLAGS:
+        allowed_flags = getattr(settings, 'COMMENT_FLAGS_ALLOWED', 0)
+        if not allowed_flags:
             return super().get_queryset()
 
-        return super().get_queryset().annotate(
-            flag_count=models.Count('flag')).filter(flag_count__lt=self.ALLOWED_FLAGS)
+        return super().get_queryset().select_related('flag').annotate(
+            flags=models.F('flag__count')).filter(flags__lte=allowed_flags)
 
     def all_parent_comments(self):
         return super().all().filter(parent=None)
