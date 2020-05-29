@@ -5,7 +5,6 @@ from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 
 from comment.models import Comment
-from comment.managers import CommentManager
 
 
 def get_profile_model():
@@ -93,7 +92,8 @@ class BaseCommentSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_is_flagged(obj):
         if hasattr(obj, 'flag'):
-            return obj.flag.count > CommentManager.ALLOWED_FLAGS
+            obj.flag.refresh_from_db()
+            return obj.flag.count > getattr(settings, 'COMMENT_FLAGS_ALLOWED', 0)
         return False
 
 

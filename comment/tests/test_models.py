@@ -45,10 +45,13 @@ class CommentModelTest(BaseCommentTest):
         self.assertEqual(Flag.objects.count(), 1)
 
     def test_is_flagged_property(self):
-        settings.COMMENT_FLAG_COUNT = 1
+        settings.COMMENT_FLAGS_ALLOWED = 1
         comment = self.create_comment(self.content_object_1)
         self.create_flag_instance(self.user_1, comment)
-        self.assertTrue(True, comment.is_flagged)
+        self.create_flag_instance(self.user_2, comment)
+        self.assertEqual(True, comment.is_flagged)
+        # reset this for other tests
+        settings.COMMENT_FLAGS_ALLOWED = 0
 
 
 class CommentModelManagerTest(BaseCommentTest):
@@ -72,6 +75,15 @@ class CommentModelManagerTest(BaseCommentTest):
         self.assertEqual(all_comments, 10)
         parent_comments = Comment.objects.all_parent_comments().count()
         self.assertEqual(parent_comments, 5)
+
+    def test_filtering_flagged_comment(self):
+        settings.COMMENT_FLAGS_ALLOWED = 1
+        comment = self.create_comment(self.content_object_1)
+        self.create_flag_instance(self.user_1, comment)
+        self.create_flag_instance(self.user_2, comment)
+        self.assertEqual(Comment.objects.all().count(), self.increment - 1)
+        # reset this for other tests
+        settings.COMMENT_FLAGS_ALLOWED = 0
 
     def test_filter_comments_by_object(self):
         # parent comment only
@@ -135,12 +147,6 @@ class CommentModelManagerTest(BaseCommentTest):
             user=self.user_1
         )
         self.assertIsNone(comment)
-
-    def test_filtering_flagged_comment(self):
-        settings.COMMENT_FLAGS_ALLOWED = 1
-        comment = self.parent_comment_1
-        self.create_flag_instance(self.user_1, comment)
-        self.assertTrue(Comment.objects.all(), self.increment - 1)
 
 
 class ReactionInstanceModelTest(CommentModelManagerTest):
@@ -290,7 +296,7 @@ class FlagInstanceModelTest(BaseCommentFlagTest):
         comment = self.comment
         self.create_flag_instance(self.user, comment)
         comment.refresh_from_db()
-        self.assertTrue(comment.flag.count, 1)
+        self.assertEqual(comment.flag.count, 1)
 
 
 class FlagInstanceManagerTest(BaseCommentFlagTest):
@@ -315,6 +321,7 @@ class FlagInstanceManagerTest(BaseCommentFlagTest):
 
     def test_clean_for_invalid_values(self):
         data = self.flag_data
+        # info can't be blank with the last reason(something else)
         data.update({'reason': FlagInstance.objects.reason_values[-1]})
         self.assertRaises(ValidationError, self.set_flag, self.user, self.comment, **data)
 
