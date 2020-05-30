@@ -1,6 +1,5 @@
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
-from django.utils.translation import gettext_lazy as _
 from rest_framework import generics, permissions, status
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -89,16 +88,12 @@ class CommentDetailForFlag(generics.RetrieveAPIView):
 
     def post(self, request, *args, **kwargs):
         comment = get_object_or_404(Comment, id=kwargs.get('pk'))
-        response = {}
         flag = SetFlag.get_flag_object(comment)
+        serializer = self.get_serializer(comment)
         try:
-            if FlagInstance.objects.set_flag(request.user, flag, **request.POST.dict()):
-                response['msg'] = _('Comment flagged')
-                response['flag'] = 1
-            else:
-                response['msg'] = _('Comment flag removed')
+            FlagInstance.objects.set_flag(request.user, flag, **request.POST.dict())
 
         except ValidationError as e:
             return Response({'error': e.messages}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(response, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)

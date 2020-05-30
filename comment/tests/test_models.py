@@ -47,9 +47,15 @@ class CommentModelTest(BaseCommentTest):
     def test_is_flagged_property(self):
         settings.COMMENT_FLAGS_ALLOWED = 1
         comment = self.create_comment(self.content_object_1)
+        self.assertEqual(False, comment.is_flagged)
         self.create_flag_instance(self.user_1, comment)
+        self.assertEqual(False, comment.is_flagged)
         self.create_flag_instance(self.user_2, comment)
         self.assertEqual(True, comment.is_flagged)
+        # test for previous comments
+        comment.flag.delete()
+        comment.refresh_from_db()
+        self.assertEqual(False, comment.is_flagged)
         # reset this for other tests
         settings.COMMENT_FLAGS_ALLOWED = 0
 

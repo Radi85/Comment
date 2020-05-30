@@ -93,7 +93,9 @@ class BaseCommentSerializer(serializers.ModelSerializer):
     def get_is_flagged(obj):
         if hasattr(obj, 'flag'):
             obj.flag.refresh_from_db()
-            return obj.flag.count > getattr(settings, 'COMMENT_FLAGS_ALLOWED', 0)
+            allowed_flags = getattr(settings, 'COMMENT_FLAGS_ALLOWED', 0)
+            if allowed_flags:
+                return obj.flag.count > allowed_flags
         return False
 
 

@@ -73,13 +73,6 @@ class FlagInstanceManager(models.Manager):
 
     def _clean(self, reason, info):
         reason = self._clean_reason(reason)
-        if not reason:
-            raise ValidationError(
-                _('Please supply a reason for flagging'),
-                params={'reason': reason},
-                code='required'
-                )
-
         if reason == self.reason_values[-1] and (not info):
             raise ValidationError(
                 _('Please supply some information as the reason for flagging'),

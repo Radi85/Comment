@@ -12,7 +12,7 @@ class CommentManager(models.Manager):
             return super().get_queryset()
 
         return super().get_queryset().select_related('flag').annotate(
-            flags=models.F('flag__count')).filter(flags__lt=allowed_flags)
+            flags=models.F('flag__count')).filter(flags__lte=allowed_flags)
 
     def all_parent_comments(self):
         return super().all().filter(parent=None)

@@ -56,5 +56,9 @@ class Comment(models.Model):
 
     @property
     def is_flagged(self):
-        self.flag.refresh_from_db()
-        return self.flag.count > getattr(settings, 'COMMENT_FLAGS_ALLOWED', 0)
+        if hasattr(self, 'flag'):
+            self.flag.refresh_from_db()
+            allowed_flags = getattr(settings, 'COMMENT_FLAGS_ALLOWED', 0)
+            if allowed_flags:
+                return self.flag.count > allowed_flags
+        return False
