@@ -6,8 +6,7 @@ from rest_framework.response import Response
 
 from comment.api.serializers import CommentSerializer, CommentCreateSerializer
 from comment.api.permissions import IsOwnerOrReadOnly, ContentTypePermission, ParentIdPermission
-from comment.models import Comment, ReactionInstance, FlagInstance
-from comment.views import SetFlag, SetReaction
+from comment.models import Comment, Reaction, ReactionInstance, Flag, FlagInstance
 
 
 class CommentCreate(generics.CreateAPIView):
@@ -47,12 +46,6 @@ class CommentDetailForReaction(generics.RetrieveAPIView):
     serializer_class = CommentSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
-    @staticmethod
-    def _clean_reaction(reaction):
-        if (not isinstance(reaction, str)) or (not getattr(ReactionInstance.ReactionType, reaction.upper(), None)):
-            return None
-        return reaction.lower()
-
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['reaction_update'] = True
@@ -60,17 +53,17 @@ class CommentDetailForReaction(generics.RetrieveAPIView):
 
     def post(self, request, *args, **kwargs):
         comment = get_object_or_404(Comment, id=kwargs.get('pk'))
-        reaction = kwargs.get('reaction', None)
-        reaction_type = self._clean_reaction(reaction)
-        if not reaction_type:
-            data = {'error': 'This is an invalid reaction type'}
-            return Response(data, status=status.HTTP_400_BAD_REQUEST)
-        reaction = SetReaction.get_reaction_object(comment)
-        ReactionInstance.objects.set_reaction(
-            user=request.user,
-            reaction=comment.reaction,
-            reaction_type=reaction_type
-        )
+        reaction_type = kwargs.get('reaction', None)
+        reaction_obj = Reaction.objects.get_reaction_object(comment)
+        try:
+            ReactionInstance.objects.set_reaction(
+                user=request.user,
+                reaction=reaction_obj,
+                reaction_type=reaction_type
+            )
+        except ValidationError as e:
+            return Response({'error': e.messages}, status=status.HTTP_400_BAD_REQUEST)
+
         comment.reaction.refresh_from_db()
         serializer = self.get_serializer(comment)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -88,12 +81,12 @@ class CommentDetailForFlag(generics.RetrieveAPIView):
 
     def post(self, request, *args, **kwargs):
         comment = get_object_or_404(Comment, id=kwargs.get('pk'))
-        flag = SetFlag.get_flag_object(comment)
-        serializer = self.get_serializer(comment)
+        flag = Flag.objects.get_flag_object(comment)
         try:
             FlagInstance.objects.set_flag(request.user, flag, **request.POST.dict())
 
         except ValidationError as e:
             return Response({'error': e.messages}, status=status.HTTP_400_BAD_REQUEST)
 
+        serializer = self.get_serializer(comment)
         return Response(serializer.data, status=status.HTTP_200_OK)

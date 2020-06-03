@@ -149,9 +149,8 @@ def has_reacted(comment, user, reaction):
     Returns whether a user has reacted with a particular reaction on a comment or not.
 
     Args:
-        comment_and_user : tuple
-            arg1(comment:comment): comment to be queried about.
-            arg2(user:User): user to be queried about.
+        comment (Comment): comment to be queried about.
+        user (User): user to be queried about.
         reaction (str): reaction to be queried about.
 
     Returns:

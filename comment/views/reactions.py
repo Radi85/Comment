@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
@@ -13,32 +13,18 @@ from comment.models import Comment, Reaction, ReactionInstance
 @method_decorator(require_POST, name='dispatch')
 class SetReaction(LoginRequiredMixin, View):
 
-    @staticmethod
-    def get_reaction_object(comment):
-        """Required for maintaining backward compatability"""
-        try:
-            reaction = comment.reaction
-        except ObjectDoesNotExist:
-            reaction = Reaction.objects.create(comment=comment)
-        return reaction
-
-    @staticmethod
-    def _clean_reaction(reaction):
-        if (not isinstance(reaction, str)) or (not getattr(ReactionInstance.ReactionType, reaction.upper(), None)):
-            return None
-        return reaction.lower()
-
     def post(self, request, *args, **kwargs):
         comment = get_object_or_404(Comment, id=kwargs.get('pk'))
         if not request.is_ajax():
             return HttpResponseBadRequest(_('Only AJAX request are allowed'))
 
-        reaction = kwargs.get('reaction', None)
-        reaction_type = self._clean_reaction(reaction)
-        if not reaction_type:
-            return HttpResponseBadRequest(_('This is not a valid reaction'))
-        reaction = self.get_reaction_object(comment)
-        ReactionInstance.objects.set_reaction(user=request.user, reaction=reaction, reaction_type=reaction_type)
+        reaction_type = kwargs.get('reaction', None)
+        reaction_obj = Reaction.objects.get_reaction_object(comment)
+        try:
+            ReactionInstance.objects.set_reaction(user=request.user, reaction=reaction_obj, reaction_type=reaction_type)
+        except ValidationError as e:
+            return HttpResponseBadRequest(e.messages)
+
         comment.reaction.refresh_from_db()
         response = {
             'status': 0,

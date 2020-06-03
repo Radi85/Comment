@@ -7,13 +7,14 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 from comment.models import Comment
-from comment.managers import ReactionInstanceManager
+from comment.managers import ReactionManager, ReactionInstanceManager
 
 
 class Reaction(models.Model):
     comment = models.OneToOneField(Comment, on_delete=models.CASCADE)
     likes = models.PositiveIntegerField(default=0)
     dislikes = models.PositiveIntegerField(default=0)
+    objects = ReactionManager()
 
     def _increase_likes(self):
         self.likes = models.F('likes') + 1
