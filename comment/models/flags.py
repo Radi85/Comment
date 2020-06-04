@@ -22,15 +22,16 @@ class Flag(models.Model):
     def increase_count(self):
         """Increase flag count and save the model """
         self.refresh_from_db()
-        self.count = models.F('count') + 1
-        self.save()
+        field = 'count'
+        self.count = models.F(field) + 1
+        self.save(update_fields=[field])
 
     def decrease_count(self):
         """Decrease flag count and save the model """
         self.refresh_from_db()
-        if self.count > 0:
-            self.count = models.F('count') - 1
-            self.save()
+        field = 'count'
+        self.count = models.F(field) - 1
+        self.save(update_fields=[field])
 
     @property
     def comment_author(self):
@@ -51,14 +52,15 @@ class FlagInstance(models.Model):
         unique_together = ('flag', 'user')
         ordering = ('date_flagged',)
 
-    def save(self, *args, **kwargs):
-        """Increase reaction count in the reaction model after saving an instance"""
-        super().save(*args, **kwargs)
-        self.flag.increase_count()
+
+@receiver(post_save, sender=FlagInstance)
+def increase_count(sender, instance, created, raw, using, update_fields, **kwargs):
+    if created:
+        instance.flag.increase_count()
 
 
 @receiver(post_delete, sender=FlagInstance)
-def delete_flag_instance(sender, instance, using, **kwargs):
+def decrease_count(sender, instance, using, **kwargs):
     """Decrease flag count in the flag model before deleting an instance"""
     instance.flag.decrease_count()
 

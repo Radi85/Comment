@@ -80,13 +80,18 @@ class FlagInstanceManager(models.Manager):
                 )
 
     def _clean(self, reason, info):
-        reason = self._clean_reason(reason)
-        if reason == self.reason_values[-1] and (not info):
-            raise ValidationError(
-                _('Please supply some information as the reason for flagging'),
-                params={'info': info},
-                code='required'
-                )
+        cleaned_reason = self._clean_reason(reason)
+        cleaned_info = None
+
+        if cleaned_reason == self.reason_values[-1]:
+            cleaned_info = info
+            if (not cleaned_info):
+                raise ValidationError(
+                    _('Please supply some information as the reason for flagging'),
+                    params={'info': info},
+                    code='required'
+                    )
+        return cleaned_reason, cleaned_info
 
     def set_flag(self, user, flag, **kwargs):
         reason = kwargs.get('reason', None)
@@ -98,8 +103,8 @@ class FlagInstanceManager(models.Manager):
             instance.delete()
             created = False
         else:
-            self._clean(reason, info)
-            self.create(flag=flag, user=user, reason=reason, info=info)
+            cleaned_reason, cleaned_info = self._clean(reason, info)
+            self.create(flag=flag, user=user, reason=cleaned_reason, info=cleaned_info)
             created = True
 
         return created

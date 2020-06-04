@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 
 from comment.models import Comment, Flag, FlagInstance, Reaction, ReactionInstance
-from comment.tests.base import BaseCommentTest, BaseCommentFlagTest
+from comment.tests.base import BaseCommentManagerTest, BaseCommentTest, BaseCommentFlagTest
 
 
 class CommentModelTest(BaseCommentTest):
@@ -60,20 +60,7 @@ class CommentModelTest(BaseCommentTest):
         settings.COMMENT_FLAGS_ALLOWED = 0
 
 
-class CommentModelManagerTest(BaseCommentTest):
-    def setUp(self):
-        super().setUp()
-        self.parent_comment_1 = self.create_comment(self.content_object_1)
-        self.parent_comment_2 = self.create_comment(self.content_object_1)
-        self.parent_comment_3 = self.create_comment(self.content_object_1)
-        self.child_comment_1 = self.create_comment(self.content_object_1, parent=self.parent_comment_1)
-        self.child_comment_2 = self.create_comment(self.content_object_1, parent=self.parent_comment_2)
-        self.child_comment_3 = self.create_comment(self.content_object_1, parent=self.parent_comment_2)
-
-        self.parent_comment_4 = self.create_comment(self.content_object_2)
-        self.parent_comment_5 = self.create_comment(self.content_object_2)
-        self.child_comment_4 = self.create_comment(self.content_object_2, parent=self.parent_comment_1)
-        self.child_comment_5 = self.create_comment(self.content_object_2, parent=self.parent_comment_2)
+class CommentModelManagerTest(BaseCommentManagerTest):
 
     def test_retrieve_all_parent_comments(self):
         # for all objects of a content type
@@ -155,21 +142,36 @@ class CommentModelManagerTest(BaseCommentTest):
         self.assertIsNone(comment)
 
 
-class ReactionInstanceModelTest(CommentModelManagerTest):
+class ReactionInstanceModelTest(BaseCommentManagerTest):
+    def setUp(self):
+        super().setUp()
+        self.user = self.user_1
+        self.comment = self.child_comment_1
+        self.LIKE = ReactionInstance.ReactionType.LIKE.name
+        self.DISLIKE = ReactionInstance.ReactionType.DISLIKE.name
+
     def test_user_can_create_reaction(self):
         """Test whether reaction instance can be created"""
-        instance = self.create_reaction_instance(self.user_2, self.child_comment_1, 'like')
+        instance = self.create_reaction_instance(self.user, self.comment, self.LIKE)
         self.assertIsNotNone(instance)
 
     def test_unique_togetherness_of_user_and_reaction_type(self):
         """Test Integrity error is raised when one user is set to have more than 1 reaction type for the same comment"""
-        self.create_reaction_instance(self.user_2, self.child_comment_1, 'like')
-        self.assertRaises(IntegrityError, self.create_reaction_instance, self.user_2, self.child_comment_1, 'dislike')
+        self.create_reaction_instance(self.user, self.comment, self.LIKE)
+        self.assertRaises(IntegrityError, self.create_reaction_instance, self.user, self.comment, self.DISLIKE)
 
-    def test_post_delete_reaction_instance_signal(self):
+    def test_post_save_signal_increases_count_on_creation(self):
+        """Test reaction count is increased on creation"""
+        comment = self.comment
+        self.create_reaction_instance(self.user, self.comment, self.LIKE)
+        comment.refresh_from_db()
+        self.assertEqual(comment.likes, 1)
+        self.assertEqual(comment.dislikes, 0)
+
+    def test_post_delete_signal_decreases_count(self):
         """Test reaction count is decreased when an instance is deleted"""
-        comment = self.child_comment_1
-        instance = self.create_reaction_instance(self.user_2, self.child_comment_1, 'like')
+        comment = self.comment
+        instance = self.create_reaction_instance(self.user, self.comment, self.LIKE)
         comment.refresh_from_db()
         self.assertEqual(comment.likes, 1)
         instance.delete()
@@ -179,52 +181,52 @@ class ReactionInstanceModelTest(CommentModelManagerTest):
     def test_comment_property_likes_increase_and_decrease(self):
         """Test decrease and increase on likes property with subsequent request."""
         comment = self.child_comment_2
-        self.create_reaction_instance(self.user_2, comment, 'like')
+        self.create_reaction_instance(self.user, comment, self.LIKE)
         comment.refresh_from_db()
-        user = self.user_1
-        self.create_reaction_instance(user, comment, 'like')
+        user = self.user_2
+        self.create_reaction_instance(user, comment, self.LIKE)
         comment.refresh_from_db()
         self.assertEqual(comment.likes, 2)
 
-        self.set_reaction(user, comment, 'like')
+        self.set_reaction(user, comment, self.LIKE)
         comment.refresh_from_db()
         self.assertEqual(comment.likes, 1)
 
     def test_comment_property_dislikes_increase_and_decrease(self):
         """Test decrease and increase on dislikes property with subsequent request."""
         comment = self.child_comment_3
-        self.create_reaction_instance(self.user_1, comment, 'dislike')
+        self.create_reaction_instance(self.user, comment, self.DISLIKE)
         comment.refresh_from_db()
         user = self.user_2
-        self.create_reaction_instance(user, comment, 'dislike')
+        self.create_reaction_instance(user, comment, self.DISLIKE)
         comment.refresh_from_db()
         self.assertEqual(comment.dislikes, 2)
 
         # can't use create_reaction: one user can't create multiple reaction instances for a comment.
-        self.set_reaction(user, comment, 'dislike')
+        self.set_reaction(user, comment, self.DISLIKE)
         comment.refresh_from_db()
         self.assertEqual(comment.dislikes, 1)
 
     def test_set_reaction(self):
         """Test set reactions increments the likes and dislikes property appropriately for subsequent calls"""
-        comment = self.child_comment_4
-        user = self.user_1
-        self.set_reaction(user, comment, 'dislike')
+        comment = self.comment
+        user = self.user_2
+        self.set_reaction(user, comment, self.DISLIKE)
         comment.refresh_from_db()
         self.assertEqual(comment.dislikes, 1)
         self.assertEqual(comment.likes, 0)
 
-        self.set_reaction(user, comment, 'dislike')
+        self.set_reaction(user, comment, self.DISLIKE)
         comment.refresh_from_db()
         self.assertEqual(comment.dislikes, 0)
         self.assertEqual(comment.likes, 0)
 
-        self.set_reaction(user, comment, 'like')
+        self.set_reaction(user, comment, self.LIKE)
         comment.refresh_from_db()
         self.assertEqual(comment.dislikes, 0)
         self.assertEqual(comment.likes, 1)
 
-        self.set_reaction(user, comment, 'dislike')
+        self.set_reaction(user, comment, self.DISLIKE)
         comment.refresh_from_db()
         self.assertEqual(comment.dislikes, 1)
         self.assertEqual(comment.likes, 0)
@@ -243,33 +245,34 @@ class ReactionModelTest(BaseCommentTest):
     def test_reaction_count(self):
         self.assertEqual(self.comment_1.reaction.likes, 0)
         self.assertEqual(self.comment_1.reaction.dislikes, 0)
-        self.comment_1.reaction.decrease_reaction_count(ReactionInstance.ReactionType.LIKE.value)
-        self.comment_1.reaction.refresh_from_db()
-        self.assertEqual(self.comment_1.reaction.likes, 0)
-        self.comment_1.reaction.decrease_reaction_count(ReactionInstance.ReactionType.DISLIKE.value)
-        self.comment_1.reaction.refresh_from_db()
-        self.assertEqual(self.comment_1.reaction.dislikes, 0)
 
         self.comment_1.reaction.increase_reaction_count(ReactionInstance.ReactionType.LIKE.value)
         self.comment_1.reaction.refresh_from_db()
+
         self.assertEqual(self.comment_1.reaction.likes, 1)
+
         self.comment_1.reaction.increase_reaction_count(ReactionInstance.ReactionType.DISLIKE.value)
         self.comment_1.reaction.refresh_from_db()
+
         self.assertEqual(self.comment_1.reaction.dislikes, 1)
 
         self.comment_1.reaction.decrease_reaction_count(ReactionInstance.ReactionType.LIKE.value)
         self.comment_1.reaction.refresh_from_db()
+
         self.assertEqual(self.comment_1.reaction.likes, 0)
+
         self.comment_1.reaction.decrease_reaction_count(ReactionInstance.ReactionType.DISLIKE.value)
         self.comment_1.reaction.refresh_from_db()
+
         self.assertEqual(self.comment_1.reaction.dislikes, 0)
 
 
 class ReactionInstanceManagerTest(BaseCommentTest):
     def test_clean_reaction_type(self):
+        LIKE = ReactionInstance.ReactionType.LIKE
         # valid reaction type
-        reaction_type = ReactionInstance.objects.clean_reaction_type('like')
-        self.assertEqual(reaction_type, ReactionInstance.ReactionType.LIKE)
+        reaction_type = ReactionInstance.objects.clean_reaction_type(LIKE.name)
+        self.assertEqual(reaction_type, LIKE.value)
 
         # invalid reaction type
         self.assertRaises(ValidationError, ReactionInstance.objects.clean_reaction_type, 1)
@@ -287,7 +290,7 @@ class FlagInstanceModelTest(BaseCommentFlagTest):
         comment.refresh_from_db()
         self.assertEqual(comment.flag.count, 1)
 
-    def test_post_delete_flag_instance_signal(self):
+    def test_post_delete_signal_decreases_count(self):
         """Test flag count is decreased when an instance is deleted"""
         data = self.flag_data
         comment = self.comment
@@ -298,7 +301,7 @@ class FlagInstanceModelTest(BaseCommentFlagTest):
         comment.refresh_from_db()
         self.assertEqual(comment.flag.count, 0)
 
-    def test_increase_count_on_save(self):
+    def test_post_save_signal_increases_count_on_creation(self):
         comment = self.comment
         self.create_flag_instance(self.user, comment)
         comment.refresh_from_db()
@@ -327,12 +330,32 @@ class FlagInstanceManagerTest(BaseCommentFlagTest):
 
     def test_clean_for_invalid_values(self):
         data = self.flag_data
+        user = self.user
+        comment = self.comment
         # info can't be blank with the last reason(something else)
         data.update({'reason': FlagInstance.objects.reason_values[-1]})
-        self.assertRaises(ValidationError, self.set_flag, self.user, self.comment, **data)
+        self.assertRaises(ValidationError, self.set_flag, user, comment, **data)
 
         data.pop('reason')
-        self.assertRaises(ValidationError, self.set_flag, self.user, self.comment, **data)
+        self.assertRaises(ValidationError, self.set_flag, user, comment, **data)
+
+    def test_clean_ignores_info_for_all_reasons_except_last(self):
+        data = self.flag_data
+        info = 'Hi'
+        data['info'] = info
+        user = self.user
+        comment = self.comment
+        self.set_flag(user, comment, **data)
+        instance = FlagInstance.objects.get(user=user, flag=comment.flag)
+
+        self.assertIsNone(instance.info)
+
+        new_comment = self.create_comment(self.content_object_1)
+        data['reason'] = FlagInstance.objects.reason_values[-1]
+        self.set_flag(user, new_comment, **data)
+        instance = FlagInstance.objects.get(user=user, flag=new_comment.flag)
+
+        self.assertEqual(instance.info, info)
 
     def test_set_flag_for_create(self):
         self.assertEqual(True, self.set_flag(self.user, self.comment, **self.flag_data))

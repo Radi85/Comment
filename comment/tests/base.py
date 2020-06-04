@@ -86,13 +86,29 @@ class BaseCommentTest(TestCase):
             raise e
 
 
+class BaseCommentManagerTest(BaseCommentTest):
+    def setUp(self):
+        super().setUp()
+        self.parent_comment_1 = self.create_comment(self.content_object_1)
+        self.parent_comment_2 = self.create_comment(self.content_object_1)
+        self.parent_comment_3 = self.create_comment(self.content_object_1)
+        self.child_comment_1 = self.create_comment(self.content_object_1, parent=self.parent_comment_1)
+        self.child_comment_2 = self.create_comment(self.content_object_1, parent=self.parent_comment_2)
+        self.child_comment_3 = self.create_comment(self.content_object_1, parent=self.parent_comment_2)
+
+        self.parent_comment_4 = self.create_comment(self.content_object_2)
+        self.parent_comment_5 = self.create_comment(self.content_object_2)
+        self.child_comment_4 = self.create_comment(self.content_object_2, parent=self.parent_comment_1)
+        self.child_comment_5 = self.create_comment(self.content_object_2, parent=self.parent_comment_2)
+
+
 class BaseCommentFlagTest(BaseCommentTest):
     def setUp(self):
         super().setUp()
         self.comment = self.create_comment(self.content_object_1)
         self.user = self.user_1
         self.flag_data = {
-            'reason': '1',
+            'reason': str(FlagInstance.objects.reason_values[0]),
             'info': None,
         }
         self.comment_2 = self.create_comment(self.content_object_2)
