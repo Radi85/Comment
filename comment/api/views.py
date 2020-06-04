@@ -82,9 +82,10 @@ class CommentDetailForFlag(generics.RetrieveAPIView):
     def post(self, request, *args, **kwargs):
         comment = get_object_or_404(Comment, id=kwargs.get('pk'))
         flag = Flag.objects.get_flag_object(comment)
+        reason = request.data.get('reason') or request.POST.get('reason')
+        info = request.data.get('info') or request.POST.get('info')
         try:
-            FlagInstance.objects.set_flag(request.user, flag, **request.POST.dict())
-
+            FlagInstance.objects.set_flag(request.user, flag, reason=reason, info=info)
         except ValidationError as e:
             return Response({'error': e.messages}, status=status.HTTP_400_BAD_REQUEST)
 

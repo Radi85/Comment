@@ -6,7 +6,6 @@ from django.db import models
 class ReactionManager(models.Manager):
 
     def get_reaction_object(self, comment):
-        """Required for maintaining backward compatability"""
         try:
             reaction = comment.reaction
         except ObjectDoesNotExist:

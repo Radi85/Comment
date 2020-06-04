@@ -16,37 +16,27 @@ class Reaction(models.Model):
     dislikes = models.PositiveIntegerField(default=0)
     objects = ReactionManager()
 
-    def _increase_likes(self):
-        self.likes = models.F('likes') + 1
-        self.save()
-
-    def _increase_dislikes(self):
-        self.dislikes = models.F('dislikes') + 1
-        self.save()
-
-    def _decrease_likes(self):
+    def _increase_count(self, field):
         self.refresh_from_db()
-        if self.likes > 0:
-            self.likes = models.F('likes') - 1
-            self.save()
+        setattr(self, field, models.F(field) + 1)
+        self.save(update_fields=[field])
 
-    def _decrease_dislikes(self):
+    def _decrease_count(self, field):
         self.refresh_from_db()
-        if self.dislikes > 0:
-            self.dislikes = models.F('dislikes') - 1
-            self.save()
+        setattr(self, field, models.F(field) - 1)
+        self.save(update_fields=[field])
 
     def increase_reaction_count(self, reaction):
         if reaction == ReactionInstance.ReactionType.LIKE.value:
-            self._increase_likes()
+            self._increase_count('likes')
         else:
-            self._increase_dislikes()
+            self._increase_count('dislikes')
 
     def decrease_reaction_count(self, reaction):
         if reaction == ReactionInstance.ReactionType.LIKE.value:
-            self._decrease_likes()
+            self._decrease_count('likes')
         else:
-            self._decrease_dislikes()
+            self._decrease_count('dislikes')
 
 
 class ReactionInstance(models.Model):
@@ -67,14 +57,16 @@ class ReactionInstance(models.Model):
     class Meta:
         unique_together = ['user', 'reaction']
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        self.reaction.increase_reaction_count(self.reaction_type)
-
 
 @receiver(post_delete, sender=ReactionInstance)
 def delete_reaction_instance(sender, instance, using, **kwargs):
     instance.reaction.decrease_reaction_count(instance.reaction_type)
+
+
+@receiver(post_save, sender=ReactionInstance)
+def add_count(sender, instance, created, raw, using, update_fields, **kwargs):
+    if created:
+        instance.reaction.increase_reaction_count(instance.reaction_type)
 
 
 @receiver(post_save, sender=Comment)

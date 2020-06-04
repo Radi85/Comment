@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-from django.db import models
+from django.db import models, IntegrityError
 from django.conf import settings
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.utils.translation import gettext_lazy as _
@@ -16,13 +16,10 @@ class FlagManager(models.Manager):
         (5, _('content removed by owner'))
     ])
 
-    # Make a named tuple
     State = namedtuple('State', ['value', 'state'])
-
-    # Construct the list of named tuples(can't use list comprehension, scope issues)
-    states = []
-    for state in STATES:
-        states.append(State(*state))
+    states_list = []
+    for st in STATES:
+        states_list.append(State(*st))
 
     def get_flag_object(self, comment):
         try:
@@ -39,18 +36,14 @@ class FlagInstanceManager(models.Manager):
         (1, _('Spam | Exists only to promote a service')),
         (2, _('Abusive | Intended at promoting hatred')),
     ])
-    # add something else to the list
     REASONS.append((100, _('Something else')))
 
-    # Make a named tuple
     Reason = namedtuple('Reason', ['value', 'reason'])
+    reasons_list = []
+    for res in REASONS:
+        reasons_list.append(Reason(*res))
 
-    # Construct the list of named tuples
-    reasons = []
-    for reason in REASONS:
-        reasons.append(Reason(*reason))
-
-    reason_values = [reason.value for reason in reasons]
+    reason_values = [reason.value for reason in reasons_list]
 
     def _clean_reason(self, reason):
         err = ValidationError(
@@ -67,39 +60,51 @@ class FlagInstanceManager(models.Manager):
         except (ValueError, TypeError):
             raise err
 
-    def _clean_action(self, action):
-        if isinstance(action, str):
-            act = action.lower()
-            if act in ['create', 'delete']:
-                return act
-
-        raise ValidationError(
-                _('%(action)s is not a valid action'),
-                params={'action': action},
-                code='invalid'
-                )
-
     def _clean(self, reason, info):
-        reason = self._clean_reason(reason)
-        if reason == self.reason_values[-1] and (not info):
-            raise ValidationError(
-                _('Please supply some information as the reason for flagging'),
-                params={'info': info},
-                code='required'
+        cleaned_reason = self._clean_reason(reason)
+        cleaned_info = None
+
+        if cleaned_reason == self.reason_values[-1]:
+            cleaned_info = info
+            if not cleaned_info:
+                raise ValidationError(
+                    _('Please supply some information as the reason for flagging'),
+                    params={'info': info},
+                    code='required'
                 )
+        return cleaned_reason, cleaned_info
+
+    def create_flag(self, user, flag, reason, info):
+        err = ValidationError(
+            _('This comment is already flagged by this user (%(user)s)'),
+            params={'user': user},
+            code='invalid'
+        )
+        cleaned_reason, cleaned_info = self._clean(reason, info)
+        try:
+            self.create(flag=flag, user=user, reason=cleaned_reason, info=cleaned_info)
+        except IntegrityError:
+            raise err
+
+    def delete_flag(self, user, flag):
+        err = ValidationError(
+            _('This comment was not flagged by this user (%(user)s)'),
+            params={'user': user},
+            code='invalid'
+        )
+        try:
+            self.get(user=user, flag=flag).delete()
+        except self.model.DoesNotExist:
+            raise err
 
     def set_flag(self, user, flag, **kwargs):
         reason = kwargs.get('reason', None)
         info = kwargs.get('info', None)
-        action = kwargs.get('action', None)
-        self._clean_action(action)
-        if action == 'delete':
-            instance = self.get(flag=flag, user=user)
-            instance.delete()
-            created = False
-        else:
-            self._clean(reason, info)
-            self.create(flag=flag, user=user, reason=reason, info=info)
+        if reason:
+            self.create_flag(user, flag, reason, info)
             created = True
+        else:
+            self.delete_flag(user, flag)
+            created = False
 
         return created
