@@ -159,4 +159,4 @@ class CommentFlagTemplateTagsTest(BaseTemplateTagsTest):
         self.assertEqual(True, has_flagged(self.user, self.comment))
 
     def test_render_flag_reasons(self):
-        self.assertListEqual(FlagInstanceManager.reasons, render_flag_reasons())
+        self.assertListEqual(FlagInstanceManager.reasons_list, render_flag_reasons())

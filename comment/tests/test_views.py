@@ -345,9 +345,9 @@ class SetFlagTest(BaseCommentFlagTest):
         self.assertDictEqual(response.json(), response_data)
 
     def test_set_flag_for_unflagging(self):
+        # un-flag => no reason is passed and the comment must be already flagged by the user
         url = self.get_url(self.comment_2.id)
-        data = self.flag_data
-        data.update({'action': 'delete'})
+        data = {}
         self.client.force_login(self.user_2)
         response = self.request(url, **data)
         response_data = {

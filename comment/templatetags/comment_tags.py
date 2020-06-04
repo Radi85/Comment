@@ -181,4 +181,4 @@ def has_flagged(user, comment):
 
 @register.simple_tag(name='render_flag_reasons')
 def render_flag_reasons():
-    return FlagInstanceManager.reasons
+    return FlagInstanceManager.reasons_list

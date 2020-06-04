@@ -299,10 +299,8 @@ class APICommentFlagViewTest(APIBaseTest):
         user = self.user_2
         self.client.force_login(user)
         url = self.get_url(comment.id)
-        data = self.flag_data
-        # unflag - comment is flagged by the user
-        data.update({'action': 'delete'})
-        response = self.client.post(url, data=data)
+        # un-flag - comment is flagged by the user and no reason is passed
+        response = self.client.post(url)
         self.assertEqual(response.status_code, 200)
         comment.flag.refresh_from_db()
         self.assertEqual(comment.flag.count, 0)
