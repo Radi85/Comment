@@ -36,7 +36,7 @@ class Comment(models.Model):
 
     @property
     def replies(self):
-        return Comment.objects.filter(parent=self).order_by('posted')
+        return Comment.objects.all_comments().filter(parent=self).order_by('posted')
 
     @property
     def is_parent(self):

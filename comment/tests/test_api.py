@@ -6,7 +6,7 @@ from django.test import RequestFactory
 from comment.models import Comment
 from comment.api.serializers import get_profile_model, get_user_fields, UserSerializer, CommentCreateSerializer, \
     CommentSerializer
-from comment.api.permissions import IsOwnerOrReadOnly, ContentTypePermission, ParentIdPermission
+from comment.api.permissions import IsOwnerOrReadOnly, ContentTypePermission, ParentIdPermission, FlagEnabledPermission
 from comment.api.views import CommentList
 from comment.tests.base import BaseCommentTest
 
@@ -35,6 +35,7 @@ class APIPermissionTest(APIBaseTest):
         self.owner_permission = IsOwnerOrReadOnly()
         self.content_type_permission = ContentTypePermission()
         self.parent_permission = ParentIdPermission()
+        self.flag_enabled_permission = FlagEnabledPermission()
         self.factory = RequestFactory()
         self.view = CommentList()
 
@@ -118,6 +119,13 @@ class APIPermissionTest(APIBaseTest):
         # parent id = 0
         request = self.factory.get('/api/comments/create/?type=post&id=2&parent_id=0')
         self.assertTrue(self.parent_permission.has_permission(request, self.view))
+
+    def test_flag_enabled_permission(self):
+        request = self.factory.get('/')
+        settings.COMMENT_FLAGS_ALLOWED = 0
+        self.assertFalse(self.flag_enabled_permission.has_permission(request, self.view))
+        settings.COMMENT_FLAGS_ALLOWED = 1
+        self.assertTrue(self.flag_enabled_permission.has_permission(request, self.view))
 
 
 class APICommentViewTest(APIBaseTest):
@@ -279,7 +287,6 @@ class APICommentFlagViewTest(APIBaseTest):
         self.flag_data = {
             'reason': 1,
             'info': '',
-            'action': 'create'
         }
 
     def test_flag_to_comment(self):
@@ -290,9 +297,19 @@ class APICommentFlagViewTest(APIBaseTest):
         self.assertEqual(comment.flag.count, 0)
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()['is_flagged'], False)
+        self.assertFalse(response.json()['is_flagged'])
         comment.flag.refresh_from_db()
         self.assertEqual(comment.flag.count, 1)
+
+    def test_flag_comment_when_flagging_not_enabled(self):
+        settings.COMMENT_FLAGS_ALLOWED = 0
+        comment = self.comment
+        data = self.flag_data
+        url = self.get_url()
+        self.assertEqual(comment.flag.count, 0)
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, 403)
+        settings.COMMENT_FLAGS_ALLOWED = 1
 
     def test_unflag_to_comment(self):
         comment = self.comment_2
@@ -324,17 +341,15 @@ class APICommentFlagViewTest(APIBaseTest):
         settings.COMMENT_FLAGS_ALLOWED = 1
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()['is_flagged'], False)
+        self.assertFalse(response.json()['is_flagged'])
         comment.flag.refresh_from_db()
         self.assertEqual(comment.flag.count, 1)
         self.client.force_login(self.user_2)
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()['is_flagged'], True)
+        self.assertTrue(response.json()['is_flagged'])
         comment.flag.refresh_from_db()
         self.assertEqual(comment.flag.count, 2)
-        # reset for other tests
-        settings.COMMENT_FLAGS_ALLOWED = 0
 
     def test_flag_to_comment_with_invalid_reason(self):
         data = self.flag_data

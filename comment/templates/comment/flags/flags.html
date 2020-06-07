@@ -2,12 +2,12 @@
 {% url 'comment:flag' pk=comment.id  as flag_url %}
 {% if user.is_authenticated %}
 <span class="ml-4 js-comment-flag" data-url="{{ flag_url }}">
-    {% include "./flag_icon.html" %}
-    {% include "./flag_modal.html" %}
+    {% include "comment/flags/flag_icon.html" %}
+    {% include "comment/flags/flag_modal.html" %}
 </span>
 {% else %}
-<a class="ml-4 js-comment-flag {% block flag_link_cls %}{% endblock flag_link_cls %}>" href="{{ login_url }}/?next={{ request.build_absolute_uri }}" title="{% trans "like" %}"> 
-    {% include "./flag_icon.html" %}
+<a class="ml-4 js-comment-flag {% block flag_link_cls %}{% endblock flag_link_cls %}>" href="{{ login_url }}/?next={{ request.build_absolute_uri }}" title="{% trans "flag" %}">
+    {% include "comment/flags/flag_icon.html" %}
 </a>
 {% endif %}
 

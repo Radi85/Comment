@@ -1,11 +1,11 @@
 {% load comment_tags %}
 <div class="js-parent-comment blockquote text-wrap">
-    {% include './image.html' with comment=comment %}
+    {% include 'comment/comments/image.html' with comment=comment %}
     <div class="js-replies ml-5 my-4 d-none">
         {% for comment in comment.replies %}
-            {% include './child_comment.html' %}
+            {% include 'comment/comments/child_comment.html' %}
         {% endfor %}
-        {% include './create_comment.html' with placeholder=placeholder %}
+        {% include 'comment/comments/create_comment.html' with placeholder=placeholder %}
     </div>
     <hr/>
 </div>

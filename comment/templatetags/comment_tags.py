@@ -97,6 +97,7 @@ def render_comments(obj, request, oauth=False, comments_per_page=10):
     if not login_url.startswith('/'):
         login_url = '/' + login_url
 
+    allowed_flags = getattr(settings, 'COMMENT_FLAGS_ALLOWED', 0)
     context = {
         'comment_form': CommentForm(),
         'model_object': obj,
@@ -105,6 +106,7 @@ def render_comments(obj, request, oauth=False, comments_per_page=10):
         'oauth': oauth,
         'login_url': login_url,
         'has_valid_profile': has_valid_profile(),
+        'allowed_flags': allowed_flags,
         'comments_per_page': comments_per_page
     }
     return context
