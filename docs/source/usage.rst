@@ -47,8 +47,8 @@ These tags need to be included in the end of your base template.
 2. Advanced usage:
 ------------------
 
-1. Customize or remove the pagination:
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1. Pagination:
+^^^^^^^^^^^^^^^
 
     By default the comments will be paginated, 10 comments per page.
     To disabled the pagination pass ``comments_per_page=None``
@@ -64,8 +64,8 @@ These tags need to be included in the end of your base template.
 
 
 
-2. Integrate existing profile app with comments app:
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2. Integrate user profile:
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     If you have a profile model for the user and you would like to show the
     profile image next to each comment, do the following steps:
@@ -96,4 +96,35 @@ These tags need to be included in the end of your base template.
                 # this method must be defined for appropriate url mapping in comments section
                 def get_absolute_url(self):
                     return reverse('your_profile_url_name')
+
+.. _Enable Flagging:
+
+3. Enable flagging:
+^^^^^^^^^^^^^^^^^^^
+
+    The comment can be reported by the users.
+    This feature can be enabled by adding the ``COMMENT_FLAGS_ALLOWED`` to ``settings.py`` and its value must be greater than 0 (the default).
+
+    The comment that has been reported more than the ``COMMENT_FLAGS_ALLOWED`` value, will be hidden from the view.
+
+    The default report reasons are:
+
+        1. Spam | Exists only to promote a service.
+        2. Abusive | Intended at promoting hatred.
+        3. Something else. With a message info, this option will be always appended reasons list.
+
+    The reasons can be customized by adding ``COMMENT_FLAG_REASONS`` list of tuples to ``settings.py``. E.g.
+
+    ``settings.py``
+
+    .. code:: python
+
+        COMMENT_FLAG_REASONS = [
+            (1, _('Spam | Exists only to promote a service')),
+            (2, _('Abusive | Intended at promoting hatred')),
+            (3, _('Racist | Sick mentality')),
+            (4, _('Whatever | Your reason')),
+            ...
+        ]
+
 

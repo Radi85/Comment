@@ -6,7 +6,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
 
 setup(
     name='django-comments-dab',
-    version='1.5.0',
+    version='1.6.0',
     packages=find_packages(exclude=['docs', 'test*']),
     include_package_data=True,
     author=u'Radico',
@@ -38,6 +38,6 @@ setup(
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
-    keywords='comment comment development',
+    keywords='django comment development ajax',
     zip_safe=False,
 )

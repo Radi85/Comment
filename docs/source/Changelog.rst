@@ -1,6 +1,11 @@
 Changelog
 =========
 
+1.6.0
+-----
+
+- Add flagging system - Report a comment
+
 1.5.0
 -----
 
