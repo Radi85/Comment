@@ -17,7 +17,9 @@ There are 5 methods available to perform the following actions:
 
     5. React to a comment. (Authenticated)
 
-    6. Retrieve the list of comments and associated replies to a given content type and object ID.
+    6. Report a comment. (Authenticated) Flagging system should be enabled
+
+    7. Retrieve the list of comments and associated replies to a given content type and object ID.
 
 These actions are explained below.
 
@@ -145,5 +147,38 @@ Comment API actions:
 
 
     PS: As in the UI, clicking the **liked** button will remove the reaction => unlike the comment. This behaviour is performed when repeating the same post request.
-        .
+
+
+**6- Report a comment**
+
+    Flagging system must be enabled by adding the attribute ``COMMENT_FLAGS_ALLOWED`` to ``settings.py``. See :ref:`Enable Flagging`.
+
+    ``POST`` is the allowed method to report a comment.
+
+    Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
+
+    This action requires the ``comment.id``.
+
+    1. Set a flag:
+
+    .. code:: python
+
+        payload = {
+            'reason': REASON,  # number of the reason
+            'info': ''  # this is required if the reason is 100 ``Something else``
+        }
+
+    ::
+
+       $ curl -X POST -u USERNAME:PASSWORD -H "Content-Type: application/json" -d '{"reason":1, "info":""}' http://localhost:8000/api/comments/ID/flag/
+
+
+    2. Un-flag a comment:
+
+        To un-flag a FLAGGED comment, set reason value to `0` or remove the payload from the request.
+
+    ::
+
+    $ curl -X POST -u USERNAME:PASSWORD http://localhost:8000/api/comments/ID/flag/
+
 

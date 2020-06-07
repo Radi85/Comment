@@ -1,10 +1,10 @@
 .. image:: https://badge.fury.io/py/django-comments-dab.svg
-    :target: https://badge.fury.io/py/django-comments-dab
+    :target: https://pypi.org/project/django-comments-dab/
 
 .. image:: https://badge.fury.io/gh/radi85%2FComment.svg
-    :target: https://badge.fury.io/gh/radi85%2FComment
+    :target: https://github.com/Radi85/Comment/releases
 
-.. image:: https://travis-ci.org/Radi85/Comment.svg
+.. image:: https://travis-ci.org/Radi85/Comment.svg?branch=master
     :target: https://travis-ci.org/Radi85/Comment
 
 .. image:: https://coveralls.io/repos/github/Radi85/Comment/badge.svg
@@ -18,14 +18,23 @@
 
 .. image:: https://readthedocs.org/projects/django-comment-dab/badge/?version=latest
     :target: https://django-comment-dab.readthedocs.io/?badge=latest
-    :alt: Documentation Status
 
-.. image:: https://img.shields.io/github/license/radi85/Comment
-   :alt: GitHub
+.. image:: https://img.shields.io/github/contributors/radi85/Comment
+    :target: https://github.com/Radi85/Comment/graphs/contributors
+
+.. image:: https://img.shields.io/github/license/radi85/Comment?color=gr
+    :target: https://github.com/Radi85/Comment/blob/master/LICENSE
+
+.. image:: https://img.shields.io/pypi/dm/django-comments-dab
+
 
 ===================
 django-comments-dab
 ===================
+
+
+    .. image:: /docs/_static/img/comment.gif
+
 
     Content:
 
@@ -230,8 +239,8 @@ These tags need to be included in the end of your base template.
 2. Advanced usage:
 ------------------
 
-1. Customize or remove the pagination:
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1. Pagination:
+^^^^^^^^^^^^^^^
 
     By default the comments will be paginated, 10 comments per page.
     To disabled the pagination pass ``comments_per_page=None``
@@ -247,8 +256,8 @@ These tags need to be included in the end of your base template.
 
 
 
-2. Integrate existing profile app with comments app:
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2. Integrate user profile:
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     If you have a profile model for the user and you would like to show the
     profile image next to each comment, do the following steps:
@@ -280,6 +289,36 @@ These tags need to be included in the end of your base template.
                 def get_absolute_url(self):
                     return reverse('your_profile_url_name')
 
+.. _Enable Flagging:
+
+3. Enable flagging:
+^^^^^^^^^^^^^^^^^^^
+
+    The comment can be reported by the users.
+    This feature can be enabled by adding the ``COMMENT_FLAGS_ALLOWED`` to ``settings.py`` and its value must be greater than 0 (the default).
+
+    The comment that has been reported more than the ``COMMENT_FLAGS_ALLOWED`` value, will be hidden from the view.
+
+    The default report reasons are:
+
+        1. Spam | Exists only to promote a service.
+        2. Abusive | Intended at promoting hatred.
+        3. Something else. With a message info, this option will be always appended reasons list.
+
+    The reasons can be customized by adding ``COMMENT_FLAG_REASONS`` list of tuples to ``settings.py``. E.g.
+
+    ``settings.py``
+
+    .. code:: python
+
+        COMMENT_FLAG_REASONS = [
+            (1, _('Spam | Exists only to promote a service')),
+            (2, _('Abusive | Intended at promoting hatred')),
+            (3, _('Racist | Sick mentality')),
+            (4, _('Whatever | Your reason')),
+            ...
+        ]
+
 
 .. _`Web API`:
 
@@ -302,7 +341,9 @@ There are 5 methods available to perform the following actions:
 
     5. React to a comment. (Authenticated)
 
-    6. Retrieve the list of comments and associated replies to a given content type and object ID.
+    6. Report a comment. (Authenticated) Flagging system should be enabled
+
+    7. Retrieve the list of comments and associated replies to a given content type and object ID.
 
 These actions are explained below.
 
@@ -432,6 +473,39 @@ Comment API actions:
     PS: As in the UI, clicking the **liked** button will remove the reaction => unlike the comment. This behaviour is performed when repeating the same post request.
 
 
+**6- Report a comment**
+
+    Flagging system must be enabled by adding the attribute ``COMMENT_FLAGS_ALLOWED`` to ``settings.py``. See `Enable Flagging`_
+
+    ``POST`` is the allowed method to report a comment.
+
+    Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
+
+    This action requires the ``comment.id``.
+
+    1. Set a flag:
+
+    .. code:: python
+
+        payload = {
+            'reason': REASON,  # number of the reason
+            'info': ''  # this is required if the reason is 100 ``Something else``
+        }
+
+    ::
+
+       $ curl -X POST -u USERNAME:PASSWORD -H "Content-Type: application/json" -d '{"reason":1, "info":""}' http://localhost:8000/api/comments/ID/flag/
+
+
+    2. Un-flag a comment:
+
+        To un-flag a FLAGGED comment, set reason value to `0` or remove the payload from the request.
+
+    ::
+
+    $ curl -X POST -u USERNAME:PASSWORD http://localhost:8000/api/comments/ID/flag/
+
+
 .. _`Style Customization`:
 
 Style Customize
@@ -494,9 +568,6 @@ Login with:
     username: ``test``
 
     password: ``django-comments``
-
-.. image:: /docs/_static/img/img_1.png
-
 
 The icons are picked from `Feather`_. Many thanks for the good work.
 

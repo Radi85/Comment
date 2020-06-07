@@ -1,14 +1,13 @@
 django-comments-dab
 ===================
 
-
 .. image:: https://badge.fury.io/py/django-comments-dab.svg
-    :target: https://badge.fury.io/py/django-comments-dab
+    :target: https://pypi.org/project/django-comments-dab/
 
 .. image:: https://badge.fury.io/gh/radi85%2FComment.svg
-    :target: https://badge.fury.io/gh/radi85%2FComment
+    :target: https://github.com/Radi85/Comment/releases
 
-.. image:: https://travis-ci.org/Radi85/Comment.svg
+.. image:: https://travis-ci.org/Radi85/Comment.svg?branch=master
     :target: https://travis-ci.org/Radi85/Comment
 
 .. image:: https://coveralls.io/repos/github/Radi85/Comment/badge.svg
@@ -20,8 +19,19 @@ django-comments-dab
 .. image:: https://img.shields.io/pypi/djversions/django-comments-dab.svg
    :target: https://pypi.python.org/pypi/django-comments-dab/
 
-.. image:: https://img.shields.io/github/license/radi85/Comment
-   :alt: GitHub
+.. image:: https://readthedocs.org/projects/django-comment-dab/badge/?version=latest
+    :target: https://django-comment-dab.readthedocs.io/?badge=latest
+
+.. image:: https://img.shields.io/github/contributors/radi85/Comment
+    :target: https://github.com/Radi85/Comment/graphs/contributors
+
+.. image:: https://img.shields.io/github/license/radi85/Comment?color=gr
+    :target: https://github.com/Radi85/Comment/blob/master/LICENSE
+
+.. image:: https://img.shields.io/pypi/dm/django-comments-dab
+
+
+.. image:: ../_static/img/comment.gif
 
 Introduction
 ============
