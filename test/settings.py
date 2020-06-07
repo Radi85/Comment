@@ -76,3 +76,4 @@ PROFILE_APP_NAME = 'user_profile'
 PROFILE_MODEL_NAME = 'UserProfile'
 
 LOGIN_URL = 'login'
+COMMENT_FLAGS_ALLOWED = 10

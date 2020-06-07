@@ -136,3 +136,4 @@ PROFILE_APP_NAME = 'user_profile'
 PROFILE_MODEL_NAME = 'userprofile'
 #
 COMMENT_PROFILE_API_FIELDS = ('display_name', 'birth_date', 'image')
+COMMENT_FLAGS_ALLOWED = 2

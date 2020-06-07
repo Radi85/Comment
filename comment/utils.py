@@ -60,6 +60,8 @@ def get_comment_context_data(request):
     if not login_url.startswith('/'):
         login_url = '/' + login_url
 
+    allowed_flags = getattr(settings, 'COMMENT_FLAGS_ALLOWED', 0)
+
     context = {
         'model_object': model_object,
         'model_name': model_name,
@@ -70,6 +72,7 @@ def get_comment_context_data(request):
         'login_url': login_url,
         'comments_per_page': comments_per_page,
         'has_valid_profile': has_valid_profile(),
+        'allowed_flags': allowed_flags,
         'oauth': oauth
     }
 

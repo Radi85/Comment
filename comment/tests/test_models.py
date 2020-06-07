@@ -47,17 +47,19 @@ class CommentModelTest(BaseCommentTest):
     def test_is_flagged_property(self):
         settings.COMMENT_FLAGS_ALLOWED = 1
         comment = self.create_comment(self.content_object_1)
-        self.assertEqual(False, comment.is_flagged)
+        self.assertFalse(comment.is_flagged)
         self.create_flag_instance(self.user_1, comment)
-        self.assertEqual(False, comment.is_flagged)
+        self.assertFalse(comment.is_flagged)
         self.create_flag_instance(self.user_2, comment)
-        self.assertEqual(True, comment.is_flagged)
+        self.assertTrue(comment.is_flagged)
+        # test if the flag is not enabled
+        settings.COMMENT_FLAGS_ALLOWED = 0
+        self.assertFalse(comment.is_flagged)
         # test for previous comments
+        settings.COMMENT_FLAGS_ALLOWED = 1
         comment.flag.delete()
         comment.refresh_from_db()
         self.assertEqual(False, comment.is_flagged)
-        # reset this for other tests
-        settings.COMMENT_FLAGS_ALLOWED = 0
 
 
 class CommentModelManagerTest(BaseCommentManagerTest):
@@ -66,17 +68,26 @@ class CommentModelManagerTest(BaseCommentManagerTest):
         # for all objects of a content type
         all_comments = Comment.objects.all().count()
         self.assertEqual(all_comments, 10)
-        parent_comments = Comment.objects.all_parent_comments().count()
+        parent_comments = Comment.objects.all_parents().count()
         self.assertEqual(parent_comments, 5)
 
     def test_filtering_flagged_comment(self):
         settings.COMMENT_FLAGS_ALLOWED = 1
         comment = self.create_comment(self.content_object_1)
+        self.assertEqual(Comment.objects.all_comments().count(), self.increment)
         self.create_flag_instance(self.user_1, comment)
         self.create_flag_instance(self.user_2, comment)
-        self.assertEqual(Comment.objects.all().count(), self.increment - 1)
-        # reset this for other tests
+        self.assertEqual(Comment.objects.all_comments().count(), self.increment - 1)
+
+    def test_filtering_comment_when_flag_not_enabled(self):
         settings.COMMENT_FLAGS_ALLOWED = 0
+        comment = self.create_comment(self.content_object_1)
+        self.assertEqual(Comment.objects.all_comments().count(), self.increment)
+        self.create_flag_instance(self.user_1, comment)
+        self.create_flag_instance(self.user_2, comment)
+        comment.flag.refresh_from_db()
+        self.assertEqual(comment.flag.count, 2)
+        self.assertEqual(Comment.objects.all_comments().count(), self.increment)
 
     def test_filter_comments_by_object(self):
         # parent comment only

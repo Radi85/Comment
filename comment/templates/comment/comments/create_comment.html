@@ -4,7 +4,7 @@
         {% csrf_token %}
         <div class="row">
             <div class="{% block c_form_space %}col-sm-9 col-md-10 px-2 m-2 m-sm-0{% endblock c_form_space %}">
-                {% include './comment_form.html' with placeholder=placeholder %}
+                {% include 'comment/comments/comment_form.html' with placeholder=placeholder %}
             </div>
             <div class="{% block post_btn_space %}col-sm-3 col-md-2 px-2 m-3 m-sm-0{% endblock post_btn_space %}">
                 <input name="model_name" value="{% get_model_name model_object %}" hidden>

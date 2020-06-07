@@ -5,7 +5,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from comment.api.serializers import CommentSerializer, CommentCreateSerializer
-from comment.api.permissions import IsOwnerOrReadOnly, ContentTypePermission, ParentIdPermission
+from comment.api.permissions import IsOwnerOrReadOnly, ContentTypePermission, ParentIdPermission, FlagEnabledPermission
 from comment.models import Comment, Reaction, ReactionInstance, Flag, FlagInstance
 
 
@@ -72,7 +72,7 @@ class CommentDetailForReaction(generics.RetrieveAPIView):
 class CommentDetailForFlag(generics.RetrieveAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, FlagEnabledPermission)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

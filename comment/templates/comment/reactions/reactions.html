@@ -9,7 +9,7 @@
         " href="{{ login_url }}/?next={{ request.build_absolute_uri }}"
         {% endif %}
     >
-        {% include "./like_icon.html" %}
+        {% include "comment/reactions/like_icon.html" %}
     </a>
     <span class="ml-4 js-dislike-number text-dark">{{ comment.dislikes }}</span>
     {% url 'comment:react' pk=comment.id reaction='dislike' as dislike_url %}
@@ -20,7 +20,7 @@
         " href="{{ login_url }}/?next={{ request.build_absolute_uri }}"
         {% endif %}
     >
-        {% include "./dislike_icon.html" %}
+        {% include "comment/reactions/dislike_icon.html" %}
     </a>
-    {% include "comment/flags/flags.html" %}
+    {% if allowed_flags %}{% include "comment/flags/flags.html" %}{% endif %}
     </div>

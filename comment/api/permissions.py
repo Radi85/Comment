@@ -1,4 +1,5 @@
 from django.contrib.contenttypes.models import ContentType
+from django.conf import settings
 
 from rest_framework import permissions
 
@@ -70,3 +71,11 @@ class ParentIdPermission(permissions.BasePermission):
             self.message = "the parent id must be an integer"
             return False
         return True
+
+
+class FlagEnabledPermission(permissions.BasePermission):
+    """
+    This will check if the COMMENT_FLAGS_ALLOWED is enabled
+    """
+    def has_permission(self, request, view):
+        return bool(getattr(settings, 'COMMENT_FLAGS_ALLOWED', 0))

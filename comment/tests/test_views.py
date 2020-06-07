@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.urls import reverse
 from rest_framework import status
 
@@ -9,7 +10,7 @@ class CreateCommentTestCase(BaseCommentTest):
 
     def test_create_comment(self):
         all_comments = Comment.objects.all().count()
-        parent_comments = Comment.objects.all_parent_comments().count()
+        parent_comments = Comment.objects.all_parents().count()
         self.assertEqual(all_comments, 0)
         self.assertEqual(parent_comments, 0)
         # parent comment
@@ -25,7 +26,7 @@ class CreateCommentTestCase(BaseCommentTest):
         parent_comment = Comment.objects.get(content='parent comment body', object_id=self.post_1.id)
         self.assertEqual(response.context.get('comment').id, parent_comment.id)
         self.assertTrue(response.context.get('comment').is_parent)
-        self.assertEqual(Comment.objects.all_parent_comments().count(), parent_comments + 1)
+        self.assertEqual(Comment.objects.all_parents().count(), parent_comments + 1)
         self.assertEqual(Comment.objects.all().count(), all_comments + 1)
 
         # create child comment
@@ -42,7 +43,7 @@ class CreateCommentTestCase(BaseCommentTest):
         child_comment = Comment.objects.get(content='child comment body', object_id=self.post_1.id)
         self.assertEqual(response.context.get('comment').id, child_comment.id)
         self.assertFalse(response.context.get('comment').is_parent)
-        self.assertEqual(Comment.objects.all_parent_comments().count(), parent_comments + 1)
+        self.assertEqual(Comment.objects.all_parents().count(), parent_comments + 1)
         self.assertEqual(Comment.objects.all().count(), all_comments + 2)
 
         # create child comment with wrong content type => parent comment
@@ -273,7 +274,6 @@ class SetFlagTest(BaseCommentFlagTest):
     def setUp(self):
         super().setUp()
         self.flag_data.update({
-            'action': 'create',
             'info': ''
             })
         self.response_data = {
@@ -328,6 +328,14 @@ class SetFlagTest(BaseCommentFlagTest):
         }
         self.assertEqual(response.status_code, 200)
         self.assertDictEqual(response.json(), response_data)
+
+    def test_set_flag_when_flagging_not_enabled(self):
+        settings.COMMENT_FLAGS_ALLOWED = 0
+        url = self.get_url()
+        data = self.flag_data
+        response = self.request(url, **data)
+        self.assertEqual(response.status_code, 403)
+        settings.COMMENT_FLAGS_ALLOWED = 1
 
     def test_set_flag_for_flagging_old_comments(self):
         """Test backward compatibility for this update"""
