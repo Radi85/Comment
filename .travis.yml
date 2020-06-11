@@ -1,17 +1,27 @@
 dist: bionic
-sudo: false
+os: linux
 language: python
 cache: pip
 python:
   - 3.6
   - 3.7
   - 3.8
+
 env:
   - DJANGO=2.2
   - DJANGO=3.0
   - DJANGO=master
   - REPO_TOKEN=${REPO_TOKEN}
+
 install: pip install tox-travis coveralls
 script:
   - tox
+
 after_success: coveralls
+
+deploy:
+  provider: pypi
+  username: "__token__"
+  password: ${PYPITOKEN}
+  on:
+    tags: true
