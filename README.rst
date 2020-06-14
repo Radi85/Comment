@@ -1,31 +1,41 @@
 .. image:: https://badge.fury.io/py/django-comments-dab.svg
     :target: https://pypi.org/project/django-comments-dab/
+    :alt: pypi
 
 .. image:: https://badge.fury.io/gh/radi85%2FComment.svg
     :target: https://github.com/Radi85/Comment/releases
+    :alt: tag
 
 .. image:: https://travis-ci.org/Radi85/Comment.svg?branch=master
     :target: https://travis-ci.org/Radi85/Comment
+    :alt: build
 
 .. image:: https://coveralls.io/repos/github/Radi85/Comment/badge.svg
     :target: https://coveralls.io/github/Radi85/Comment
+    :alt: coverage
 
 .. image:: https://img.shields.io/pypi/pyversions/django-comments-dab.svg
-   :target: https://pypi.python.org/pypi/django-comments-dab/
+    :target: https://pypi.python.org/pypi/django-comments-dab/
+    :alt: python
 
 .. image:: https://img.shields.io/pypi/djversions/django-comments-dab.svg
-   :target: https://pypi.python.org/pypi/django-comments-dab/
+    :target: https://pypi.python.org/pypi/django-comments-dab/
+    :alt: django
 
 .. image:: https://readthedocs.org/projects/django-comment-dab/badge/?version=latest
     :target: https://django-comment-dab.readthedocs.io/?badge=latest
+    :alt: docs
 
 .. image:: https://img.shields.io/github/contributors/radi85/Comment
     :target: https://github.com/Radi85/Comment/graphs/contributors
+    :alt: contributors
 
 .. image:: https://img.shields.io/github/license/radi85/Comment?color=gr
     :target: https://github.com/Radi85/Comment/blob/master/LICENSE
+    :alt: licence
 
 .. image:: https://img.shields.io/pypi/dm/django-comments-dab
+    :alt: downloads
 
 
 ===================
@@ -298,6 +308,7 @@ These tags need to be included in the end of your base template.
     This feature can be enabled by adding the ``COMMENT_FLAGS_ALLOWED`` to ``settings.py`` and its value must be greater than 0 (the default).
 
     The comment that has been reported more than the ``COMMENT_FLAGS_ALLOWED`` value, will be hidden from the view.
+    To keep displaying the flagged comments to all users add ``COMMENT_SHOW_FLAGGED=True`` to ``settings.py``
 
     The default report reasons are:
 
@@ -319,6 +330,22 @@ These tags need to be included in the end of your base template.
             ...
         ]
 
+Groups and Permissions:
+"""""""""""""""""""""""
+For flagging purpose, the following groups and permissions will be created on the next migrate:
+
+**permissions:**
+    1. delete_comment  (default)
+    2. delete_flagged_comment
+
+**groups:**
+    1. comment_admin => has both mentioned permissions (edit permission might be added in the future)
+    2. comment_moderator => has delete_flagged_comment permission
+
+* Comment admin can delete any comment.
+* Comment moderator can delete FLAGGED comment only.
+
+PS: If the groups or the permissions don't exist, just run migrate. ``./manage.py migrate``
 
 .. _`Web API`:
 

@@ -8,27 +8,38 @@ from comment.models import Comment, Flag, FlagInstance, Reaction, ReactionInstan
 from comment.tests.base import BaseCommentManagerTest, BaseCommentTest, BaseCommentFlagTest
 
 
-class CommentModelTest(BaseCommentTest):
+class CommentModelTest(BaseCommentManagerTest):
     def test_can_create_comment(self):
         parent_comment = self.create_comment(self.content_object_1)
         self.assertIsNotNone(parent_comment)
         self.assertEqual(str(parent_comment), f'comment by {parent_comment.user}: {parent_comment.content[:20]}')
         self.assertEqual(repr(parent_comment), f'comment by {parent_comment.user}: {parent_comment.content[:20]}')
         self.assertTrue(parent_comment.is_parent)
-        self.assertEqual(parent_comment.replies.count(), 0)
+        self.assertEqual(parent_comment.replies().count(), 0)
 
         child_comment = self.create_comment(self.content_object_1, parent=parent_comment)
         self.assertIsNotNone(child_comment)
         self.assertEqual(str(child_comment), f'reply by {child_comment.user}: {child_comment.content[:20]}')
         self.assertEqual(repr(child_comment), f'reply by {child_comment.user}: {child_comment.content[:20]}')
         self.assertFalse(child_comment.is_parent)
-        self.assertEqual(parent_comment.replies.count(), 1)
+        self.assertEqual(parent_comment.replies().count(), 1)
 
         self.assertFalse(parent_comment.is_edited)
         parent_comment.content = 'updated'
         sleep(1)
         parent_comment.save()
         self.assertTrue(parent_comment.is_edited)
+
+    def test_replies_method(self):
+        self.assertEqual(self.parent_comment_2.replies().count(), 3)
+
+        settings.COMMENT_FLAGS_ALLOWED = 1
+        reply = self.parent_comment_2.replies().first()
+        self.create_flag_instance(self.user_1, reply)
+        self.create_flag_instance(self.user_2, reply)
+        # default replies hide flagged comment
+        self.assertEqual(self.parent_comment_2.replies().count(), 2)
+        self.assertEqual(self.parent_comment_2.replies(include_flagged=True).count(), 3)
 
     def test_reaction_signal(self):
         """Test reaction model instance is created when a comment is created"""
@@ -39,10 +50,11 @@ class CommentModelTest(BaseCommentTest):
 
     def test_flag_signal(self):
         """Test flag model instance is created when a comment is created"""
+        current_count = Flag.objects.count()
         parent_comment = self.create_comment(self.content_object_1)
         self.assertIsNotNone(Flag.objects.get(comment=parent_comment))
         # 1 flag instance is created for every comment
-        self.assertEqual(Flag.objects.count(), 1)
+        self.assertEqual(Flag.objects.count(), current_count + 1)
 
     def test_is_flagged_property(self):
         settings.COMMENT_FLAGS_ALLOWED = 1
@@ -74,33 +86,61 @@ class CommentModelManagerTest(BaseCommentManagerTest):
     def test_filtering_flagged_comment(self):
         settings.COMMENT_FLAGS_ALLOWED = 1
         comment = self.create_comment(self.content_object_1)
-        self.assertEqual(Comment.objects.all_comments().count(), self.increment)
+        self.assertEqual(Comment.objects.all_exclude_flagged().count(), self.increment)
         self.create_flag_instance(self.user_1, comment)
         self.create_flag_instance(self.user_2, comment)
-        self.assertEqual(Comment.objects.all_comments().count(), self.increment - 1)
+        self.assertEqual(Comment.objects.all_exclude_flagged().count(), self.increment - 1)
+
+        # if COMMENT_SHOW_FLAGGED is enabled
+        settings.COMMENT_SHOW_FLAGGED = True
+        self.assertEqual(Comment.objects.all_exclude_flagged().count(), self.increment)
+        settings.COMMENT_SHOW_FLAGGED = False
 
     def test_filtering_comment_when_flag_not_enabled(self):
         settings.COMMENT_FLAGS_ALLOWED = 0
         comment = self.create_comment(self.content_object_1)
-        self.assertEqual(Comment.objects.all_comments().count(), self.increment)
+        self.assertEqual(Comment.objects.all_exclude_flagged().count(), self.increment)
         self.create_flag_instance(self.user_1, comment)
         self.create_flag_instance(self.user_2, comment)
         comment.flag.refresh_from_db()
         self.assertEqual(comment.flag.count, 2)
-        self.assertEqual(Comment.objects.all_comments().count(), self.increment)
+        self.assertEqual(Comment.objects.all_exclude_flagged().count(), self.increment)
 
-    def test_filter_comments_by_object(self):
-        # parent comment only
-        comments = Comment.objects.filter_parents_by_object(self.post_2).count()
-        self.assertEqual(comments, 2)
-
-    def test_all_comments(self):
+    def test_all_comments_by_object(self):
         # all comment for a particular content type
-        comments = Comment.objects.all_comments_by_objects(self.post_1).count()
-        self.assertEqual(comments, 6)
+        init_count = self.post_1.comments.count()
+        self.assertEqual(init_count, 6)
+
+        settings.COMMENT_FLAGS_ALLOWED = 1
+        comment = self.post_1.comments.first()
+        self.create_flag_instance(self.user_1, comment)
+        self.create_flag_instance(self.user_2, comment)
+        # comments without flagged
+        count = Comment.objects.all_comments_by_object(self.post_1).count()
+        self.assertEqual(count, init_count - 1)
+
+        # comments with flagged
+        count = Comment.objects.all_comments_by_object(self.post_1, include_flagged=True).count()
+        self.assertEqual(count, init_count)
+
+    def test_filter_parents_by_object(self):
+        # parent comment only
+        init_count = self.post_2.comments.filter(parent=None).count()
+        self.assertEqual(init_count, 2)
+        settings.COMMENT_FLAGS_ALLOWED = 1
+        comment = Comment.objects.filter_parents_by_object(self.post_2).first()
+        self.create_flag_instance(self.user_1, comment)
+        self.create_flag_instance(self.user_2, comment)
+        # comments without flagged
+        count = Comment.objects.filter_parents_by_object(self.post_2).count()
+        self.assertEqual(count, init_count - 1)
+
+        # comments with flagged
+        count = Comment.objects.filter_parents_by_object(self.post_2, include_flagged=True).count()
+        self.assertEqual(count, init_count)
 
     def test_create_comment_by_model_type(self):
-        comments = Comment.objects.all_comments_by_objects(self.post_1).count()
+        comments = Comment.objects.all_comments_by_object(self.post_1).count()
         self.assertEqual(comments, 6)
         parent_comment = Comment.objects.create_by_model_type(
             model_type='post',
@@ -109,7 +149,7 @@ class CommentModelManagerTest(BaseCommentManagerTest):
             user=self.user_1
         )
         self.assertIsNotNone(parent_comment)
-        comments = Comment.objects.all_comments_by_objects(self.post_1).count()
+        comments = Comment.objects.all_comments_by_object(self.post_1).count()
         self.assertEqual(comments, 7)
 
         child_comment = Comment.objects.create_by_model_type(
@@ -120,7 +160,7 @@ class CommentModelManagerTest(BaseCommentManagerTest):
             parent_obj=parent_comment
         )
         self.assertIsNotNone(child_comment)
-        comments = Comment.objects.all_comments_by_objects(self.post_1).count()
+        comments = Comment.objects.all_comments_by_object(self.post_1).count()
         self.assertEqual(comments, 8)
 
         # fail on wrong content_type

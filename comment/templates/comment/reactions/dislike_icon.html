@@ -1,7 +1,9 @@
 {% load comment_tags %}
 {% has_reacted user=user comment=comment reaction="dislike" as has_user_disliked %}
 {% block dislike_img_icon %}
-<svg class="comment-reaction-icon reaction-dislike {% if has_user_disliked %}user-has-reacted{% else %}user-has-not-reacted{% endif %}" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="{% if has_user_disliked %}#ffc966{% else %}none{% endif %}" stroke="#427297" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+<svg class="comment-reaction-icon reaction-dislike {% if has_user_disliked %}user-has-reacted{% else %}user-has-not-reacted{% endif %}"
+     xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+     stroke="{% block dislike_icon_color %}#427297{% endblock dislike_icon_color %}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
     <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path>
 </svg>
 {% endblock dislike_img_icon %}

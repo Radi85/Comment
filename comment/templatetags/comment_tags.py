@@ -1,12 +1,8 @@
 from django import template
-from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.contrib.contenttypes.models import ContentType
 
-from comment.models import Comment, ReactionInstance, FlagInstance
+from comment.models import ReactionInstance, FlagInstance
 from comment.forms import CommentForm
-from comment.utils import has_valid_profile
+from comment.utils import get_comment_context_data, get_profile_content_type, is_comment_moderator, is_comment_admin
 from comment.managers import FlagInstanceManager
 
 register = template.Library()
@@ -24,44 +20,22 @@ def get_app_name(obj):
     return type(obj)._meta.app_label
 
 
-@register.simple_tag(name='get_comment_count')
-def get_comment_count(obj):
-    """ returns the count of comment of an object """
-    model_object = type(obj).objects.get(id=obj.id)
-    return model_object.comments.all().count()
-
-
 @register.simple_tag(name='get_profile_url')
 def get_profile_url(obj):
     """ returns profile url of user """
-    profile_app_name = getattr(settings, 'PROFILE_APP_NAME', None)
-    profile_model_name = getattr(settings, 'PROFILE_MODEL_NAME', None)
-    if not profile_app_name or not profile_model_name:
+    content_type = get_profile_content_type()
+    if not content_type:
         return ''
-    try:
-        content_type = ContentType.objects.get(
-            app_label=profile_app_name,
-            model=profile_model_name.lower()
-        )
-        profile = content_type.get_object_for_this_type(user=obj.user)
-        return profile.get_absolute_url()
-    except ContentType.DoesNotExist:
-        return ''
+
+    profile = content_type.get_object_for_this_type(user=obj.user)
+    return profile.get_absolute_url()
 
 
 @register.simple_tag(name='get_img_path')
 def get_img_path(obj):
     """ returns url of profile image of a user """
-    profile_app_name = getattr(settings, 'PROFILE_APP_NAME', None)
-    profile_model_name = getattr(settings, 'PROFILE_MODEL_NAME', None)
-    if not profile_app_name or not profile_model_name:
-        return ''
-    try:
-        content_type = ContentType.objects.get(
-            app_label=profile_app_name,
-            model=profile_model_name.lower()
-        )
-    except ContentType.DoesNotExist:
+    content_type = get_profile_content_type()
+    if not content_type:
         return ''
 
     profile_model = content_type.model_class()
@@ -73,46 +47,58 @@ def get_img_path(obj):
     return ''
 
 
+@register.simple_tag(name='get_comments_count')
+def get_comments_count(obj, user):
+    return obj.comments.all_comments_by_object(obj, include_flagged=is_comment_moderator(user)).count()
+
+
+@register.simple_tag(name='get_comment_replies')
+def get_comment_replies(comment, user):
+    return comment.replies(include_flagged=is_comment_moderator(user))
+
+
+@register.simple_tag(name='get_replies_count')
+def get_replies_count(comment, user):
+    return comment.replies(include_flagged=is_comment_moderator(user)).count()
+
+
 def render_comments(obj, request, oauth=False, comments_per_page=10):
     """
     Retrieves list of comment related to a certain object and renders the appropriate template
     """
-    model_object = type(obj).objects.get(id=obj.id)
-    comments = Comment.objects.filter_parents_by_object(model_object)
-
-    if comments_per_page:
-        paginator = Paginator(comments, comments_per_page)
-        page = request.GET.get('page')
-        try:
-            comments = paginator.page(page)
-        except PageNotAnInteger:
-            comments = paginator.page(1)
-        except EmptyPage:
-            comments = paginator.page(paginator.num_pages)
-
-    login_url = getattr(settings, 'LOGIN_URL', None)
-    if not login_url:
-        raise ImproperlyConfigured('Comment App: LOGIN_URL is not in the settings')
-
-    if not login_url.startswith('/'):
-        login_url = '/' + login_url
-
-    allowed_flags = getattr(settings, 'COMMENT_FLAGS_ALLOWED', 0)
-    context = {
+    context = get_comment_context_data(request, model_object=obj, comments_per_page=comments_per_page)
+    context.update({
         'comment_form': CommentForm(),
-        'model_object': obj,
-        'user': request.user,
-        'comments': comments,
-        'oauth': oauth,
-        'login_url': login_url,
-        'has_valid_profile': has_valid_profile(),
-        'allowed_flags': allowed_flags,
-        'comments_per_page': comments_per_page
-    }
+        'oauth': oauth
+    })
     return context
 
 
 register.inclusion_tag('comment/comments/base.html')(render_comments)
+
+
+def render_content(content, number):
+    number = int(number)
+    content_words = content.split(' ')
+    if not number or len(content_words) <= number:
+        text_1 = content
+        text_2 = None
+    else:
+        text_1 = ' '.join(content_words[:number])
+        text_2 = ' '.join(content_words[number:])
+
+    return {
+        'text_1': text_1,
+        'text_2': text_2
+    }
+
+
+@register.simple_tag(name='can_delete_comment')
+def can_delete_comment(comment, user):
+    return is_comment_admin(user) or (comment.is_flagged and is_comment_moderator(user))
+
+
+register.inclusion_tag('comment/comments/content.html')(render_content)
 
 
 def include_static():
@@ -149,14 +135,6 @@ def render_field(field, **kwargs):
 def has_reacted(comment, user, reaction):
     """
     Returns whether a user has reacted with a particular reaction on a comment or not.
-
-    Args:
-        comment (Comment): comment to be queried about.
-        user (User): user to be queried about.
-        reaction (str): reaction to be queried about.
-
-    Returns:
-        bool
     """
     if user.is_authenticated:
         reaction_type = getattr(ReactionInstance.ReactionType, reaction.upper(), None)

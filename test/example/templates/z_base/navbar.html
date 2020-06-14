@@ -1,5 +1,5 @@
 <nav class="js-navbar navbar navbar-expand-md {% if current_view == 'home' %}navbar-stick{% else %}fixed-top{% endif %} navbar-light px-4 px-md-3">
-    <a class="navbar-brand" href="">Radico</a>    
+    <a class="navbar-brand" href="">{{ user.username|capfirst }}</a>
     <div class="collapse navbar-collapse" id="navbarText">
         
         <ul class="nav navbar-nav navbar mb-3 mb-md-auto">

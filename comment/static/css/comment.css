@@ -1,3 +1,7 @@
+.js-comment-content {
+    font-family: sans-serif, serif;
+    font-size: 1.1rem;
+}
 #comments .border-bottom {
     border-bottom: 3px solid #00bc8c !important;
 }
@@ -65,4 +69,8 @@ input#search-input:focus::placeholder {
 }
 .flag-modal textarea {
     display: none;
+}
+
+.flagged-comment {
+    color: #999;
 }

@@ -1,8 +1,9 @@
 {% load comment_tags %}
 <div class="js-parent-comment blockquote text-wrap">
-    {% include 'comment/comments/image.html' with comment=comment %}
+    {% include 'comment/comments/comment_body.html' with comment=comment %}
     <div class="js-replies ml-5 my-4 d-none">
-        {% for comment in comment.replies %}
+        {% get_comment_replies comment user as replies %}
+        {% for comment in replies %}
             {% include 'comment/comments/child_comment.html' %}
         {% endfor %}
         {% include 'comment/comments/create_comment.html' with placeholder=placeholder %}

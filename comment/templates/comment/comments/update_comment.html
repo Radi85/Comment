@@ -11,8 +11,8 @@
                 <input name="comments_per_page" value="{{comments_per_page}}" hidden>
                 <input name="oauth" value="{{oauth}}" hidden>
 
-                <button class="btn btn-link" type="submit" name="form_type">modify</button>
-                <a class="js-comment-cancel btn btn-link" href="#">cancel</a>
+                {% include 'comment/comments/apply_icon.html' %}
+                {% include 'comment/comments/cancel_icon.html' %}
             </small>
         </footer>
     </form>

@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError
 from django.test import TestCase, RequestFactory
 
 from comment.models import Comment, FlagInstance, Reaction, ReactionInstance
@@ -21,6 +21,21 @@ class BaseCommentTest(TestCase):
             email="test-2@acme.edu",
             password="1234"
         )
+        self.moderator = user_model.objects.create_user(
+            username="moderator",
+            email="test-2@acme.edu",
+            password="1234"
+        )
+        moderator_group = Group.objects.filter(name='comment_moderator').first()
+        moderator_group.user_set.add(self.moderator)
+        self.admin = user_model.objects.create_user(
+            username="admin",
+            email="test-2@acme.edu",
+            password="1234"
+        )
+        admin_group = Group.objects.filter(name='comment_admin').first()
+        admin_group.user_set.add(self.admin)
+
         self.client.login(username='test-1', password='1234')
         self.post_1 = Post.objects.create(
             author=self.user_1,
@@ -68,22 +83,16 @@ class BaseCommentTest(TestCase):
 
     @staticmethod
     def set_flag(user, comment, **kwargs):
-        try:
-            return FlagInstance.objects.set_flag(user, comment.flag, **kwargs)
-        except ValidationError as e:
-            raise e
+        return FlagInstance.objects.set_flag(user, comment.flag, **kwargs)
 
     def create_flag_instance(self, user, comment, **kwargs):
-        try:
-            instance = FlagInstance.objects.create(
-                user=user,
-                flag=comment.flag,
-                **kwargs
-            )
-            self.flags += 1
-            return instance
-        except ValidationError as e:
-            raise e
+        instance = FlagInstance.objects.create(
+            user=user,
+            flag=comment.flag,
+            **kwargs
+        )
+        self.flags += 1
+        return instance
 
 
 class BaseCommentManagerTest(BaseCommentTest):

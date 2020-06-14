@@ -6,7 +6,7 @@
     {% include "comment/flags/flag_modal.html" %}
 </span>
 {% else %}
-<a class="ml-4 js-comment-flag {% block flag_link_cls %}{% endblock flag_link_cls %}>" href="{{ login_url }}/?next={{ request.build_absolute_uri }}" title="{% trans "flag" %}">
+<a class="ml-4 js-comment-flag>" href="{{ login_url }}/?next={{ request.build_absolute_uri }}" title="{% trans "flag" %}">
     {% include "comment/flags/flag_icon.html" %}
 </a>
 {% endif %}

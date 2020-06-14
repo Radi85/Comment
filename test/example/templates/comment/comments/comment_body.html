@@ -1,0 +1,5 @@
+{% extends 'comment/comments/comment_body.html' %}
+{% load comment_tags %}
+{% block comment_content %}
+    {% render_content comment.content 20 %}
+{% endblock comment_content %}

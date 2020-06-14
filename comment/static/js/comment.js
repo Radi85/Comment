@@ -37,7 +37,7 @@ $(function() {
 
     // resize the input field according to typed text
     var commentInput = function() {
-        var disabledButton = $(this).parent().next().find(".js-comment-btn");
+        var disabledButton = $(this).parent().parent().find(".js-comment-btn");
         // check if the input has an empty value
         if ($(this).val().replace(/^\s+|\s+$/g, "").length === 0) {
             $(this).attr("style", "height: 31px;")
@@ -177,7 +177,7 @@ $(function() {
         });
 
         // send page number to BE
-        $formData.push({ name: 'currentPage', value: pageNumber });
+        $formData.push({ name: 'page', value: pageNumber });
 
         $.ajax({
             method: "POST",
@@ -437,6 +437,15 @@ $(function() {
         }
     };
 
+    const toggleText = function (event) {
+        event.target.previousElementSibling.classList.toggle('d-none');
+        if (event.target.previousElementSibling.classList.contains('d-none')) {
+           event.target.innerHTML = "read more ...";
+        } else {
+           event.target.innerHTML = "read less";
+        }
+    };
+
     $(document).on("submit", '.js-comment-form', commentFormSubmit);
     $(document).on("click", ".js-reply-link", replyLink);
     $(document).on("input keyup keypress focus", ".js-comment-input", commentInput);
@@ -447,4 +456,5 @@ $(function() {
     $(document).on("submit", ".js-comment-delete-form", deleteComment);
     $(document).on("click", ".js-comment-reaction", commentReact);
     $(document).on("click", ".js-comment-flag", commentFlag);
+    $(document).on("click", ".js-read-more-btn", toggleText);
 });

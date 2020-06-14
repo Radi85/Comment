@@ -6,7 +6,7 @@ from comment.models import Comment
 from comment.tests.base import BaseCommentTest, BaseCommentFlagTest
 
 
-class CreateCommentTestCase(BaseCommentTest):
+class CommentViewTestCase(BaseCommentTest):
 
     def test_create_comment(self):
         all_comments = Comment.objects.all().count()
@@ -87,7 +87,7 @@ class CreateCommentTestCase(BaseCommentTest):
 
         response = self.client.post(reverse('comment:edit', kwargs={'pk': comment.id}), data=data)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed('comment/comments/content.html')
+        self.assertTemplateUsed('comment/comments/comment_content.html')
         self.assertEqual(Comment.objects.all().first().content, data['content'])
 
         data['content'] = ''
@@ -136,6 +136,51 @@ class CreateCommentTestCase(BaseCommentTest):
         self.assertNotContains(response, 'html_form')
         self.assertEqual(Comment.objects.all().count(), init_comments-1)
 
+    def test_delete_comment_by_moderator(self):
+        data = {
+            'content': 'parent comment was edited',
+            'app_name': 'post',
+            'model_name': 'post',
+            'model_id': self.post_1.id,
+        }
+        comment = self.create_comment(self.content_object_1)
+        self.client.force_login(self.moderator)
+        self.assertEqual(int(self.client.session['_auth_user_id']), self.moderator.id)
+        self.assertTrue(self.moderator.has_perm('comment.delete_flagged_comment'))
+        self.assertEqual(comment.user, self.user_1)
+        init_count = Comment.objects.count()
+        self.assertEqual(init_count, 1)
+        # moderator cannot delete un-flagged comment
+        response = self.client.post(reverse('comment:delete', kwargs={'pk': comment.id}), data=data)
+        self.assertEqual(response.status_code, 403)
+
+        # moderator can delete flagged comment
+        settings.COMMENT_FLAGS_ALLOWED = 1
+        self.create_flag_instance(self.user_1, comment)
+        self.create_flag_instance(self.user_2, comment)
+        response = self.client.post(reverse('comment:delete', kwargs={'pk': comment.id}), data=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Comment.objects.count(), init_count - 1)
+
+    def test_delete_comment_by_admin(self):
+        data = {
+            'content': 'parent comment was edited',
+            'app_name': 'post',
+            'model_name': 'post',
+            'model_id': self.post_1.id,
+        }
+        comment = self.create_comment(self.content_object_1)
+        self.client.force_login(self.admin)
+        self.assertEqual(int(self.client.session['_auth_user_id']), self.admin.id)
+        self.assertTrue(self.admin.groups.filter(name='comment_admin').exists())
+        self.assertEqual(comment.user, self.user_1)
+        init_count = Comment.objects.count()
+        self.assertEqual(init_count, 1)
+        # admin can delete any comment
+        response = self.client.post(reverse('comment:delete', kwargs={'pk': comment.id}), data=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Comment.objects.count(), init_count - 1)
+
     def test_cannot_delete_comment_by_different_user(self):
         comment = self.create_comment(self.content_object_1)
         self.client.logout()
@@ -165,17 +210,8 @@ class SetReactionTest(BaseCommentTest):
         super().setUp()
         self.comment = self.create_comment(self.content_object_1)
 
-    def get_url(self, obj_id, action):
-        """
-        A utility function to construct url.
-
-        Args:
-            obj_id (int): comment id
-            action (str): reaction(like/dislike)
-
-        Returns:
-            str
-        """
+    @staticmethod
+    def get_url(obj_id, action):
         return reverse('comment:react', kwargs={
             'pk': obj_id,
             'reaction': action
@@ -398,7 +434,4 @@ class SetFlagTest(BaseCommentFlagTest):
         reason = -1
         data.update({'reason': reason})
         response = self.request(url, **data)
-        response_data = self.response_data
-        response_data['msg'] = [f'{reason} is an invalid reason']
         self.assertEqual(response.status_code, 200)
-        self.assertDictEqual(response.json(), response_data)
