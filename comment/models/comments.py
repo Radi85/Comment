@@ -34,9 +34,10 @@ class Comment(models.Model):
     def _get_reaction_count(self, reaction_type):
         return getattr(self.reaction, reaction_type, None)
 
-    @property
-    def replies(self):
-        return Comment.objects.all_comments().filter(parent=self).order_by('posted')
+    def replies(self, include_flagged=False):
+        if include_flagged:
+            return self.__class__.objects.filter(parent=self).order_by('posted')
+        return self.__class__.objects.all_exclude_flagged().filter(parent=self).order_by('posted')
 
     @property
     def is_parent(self):

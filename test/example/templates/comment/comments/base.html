@@ -1,0 +1,5 @@
+{% extends "comment/comments/base.html" %}
+
+{% block pagination %}
+{% include 'comment/comments/pagination.html' with active_btn='bg-primary' text_style='text-primary' li_cls='page-item rounded mx-1' %}
+{% endblock pagination %}

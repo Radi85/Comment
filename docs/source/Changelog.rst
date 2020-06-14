@@ -1,6 +1,18 @@
 Changelog
 =========
 
+1.6.5
+------
+
+- Add groups and permissions
+- Update styling
+- Make the style more customizable
+
+1.6.1
+-----
+
+- Fix bugs
+
 1.6.0
 -----
 

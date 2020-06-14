@@ -237,7 +237,7 @@ class APICommentViewTest(APIBaseTest):
         count = Comment.objects.all().count()
         self.assertEqual(count, 7)
         comment = Comment.objects.get(id=1)
-        self.assertEqual(comment.replies.count(), 1)
+        self.assertEqual(comment.replies().count(), 1)
         response = self.client.delete('/api/comments/1/')
         self.assertEqual(response.status_code, 204)
         self.assertEqual(Comment.objects.all().count(), count - 2)

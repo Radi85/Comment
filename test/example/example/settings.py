@@ -130,10 +130,9 @@ STATICFILES_DIRS = (
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'root/media_root/')
 
-USE_COMMENT_REACTION = True
-
 PROFILE_APP_NAME = 'user_profile'
 PROFILE_MODEL_NAME = 'userprofile'
 #
 COMMENT_PROFILE_API_FIELDS = ('display_name', 'birth_date', 'image')
 COMMENT_FLAGS_ALLOWED = 2
+COMMENT_SHOW_FLAGGED = True

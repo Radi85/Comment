@@ -1,0 +1,17 @@
+{% load comment_tags %}
+<div class="row">
+    {% if has_valid_profile %}
+        <div class="{% block image_wrapper_cls %}col-2 col-md-1{% endblock image_wrapper_cls %}">
+            <a href="{% get_profile_url comment %}">
+                <img class="{% block image_cls %}w-100{% endblock image_cls %}"
+                     src="{% get_img_path comment %}" alt="{{comment.user.username}}">
+            </a>
+        </div>
+    {% endif %}
+    {% include 'comment/comments/comment_content.html' with comment=comment %}
+    {% if allowed_flags and comment.user != user %}
+        <div class="col-1">
+            {% include "comment/flags/flags.html" %}
+        </div>
+    {% endif %}
+</div>

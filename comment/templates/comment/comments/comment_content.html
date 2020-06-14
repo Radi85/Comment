@@ -1,0 +1,34 @@
+{% load comment_tags %}
+{% load i18n %}
+
+
+<div class="{% if comment.is_flagged %}flagged-comment {% endif %}{% block content_wrapper_cls %}{% if has_valid_profile %}col-9 col-md-10{% else %}co-11 mx-3{% endif %}{% endblock content_wrapper_cls %}">
+    {% block comment_content %}
+    {% render_content comment.content 30 %}
+    {% endblock comment_content %}
+    <footer class="blockquote-footer">
+        <small>
+            <a class="{% block username_cls %}{% endblock username_cls %}" href="{% get_profile_url comment %}" title="View {{ comment.user }} profile">{{ comment.user }}</a> |
+            {% if comment.is_edited %}
+            <span class="font-italic" title="{% trans 'Edited' %}">{% blocktrans with edited_time=comment.edited|timesince %}Edited: {{ edited_time }} ago{% endblocktrans %}</span>
+            {% else %}
+            <span class="font-italic" title="{% trans 'Posted' %}">{% blocktrans with posted_time=comment.posted|timesince %}{{ posted_time }} ago{% endblocktrans %}</span>
+            {% endif %}
+            {% can_delete_comment comment user as can_delete %}
+            {% if comment.user == user %}
+                | {% include 'comment/comments/edit_icon.html' %}
+                {% include 'comment/comments/delete_icon.html' %}
+            {% elif can_delete %}
+                | {% include 'comment/comments/delete_icon.html' %}
+            {% endif %}
+            {% if comment.is_parent %}
+                {% get_replies_count comment user as reply_count %}
+                | <span class="js-reply-number text-dark">{{ reply_count }}</span>
+                <a class="js-reply-link {% block reply_link_cls %}btn btn-link ml-1{% endblock reply_link_cls %}" href="#">
+                    {% blocktrans with plural_str=reply_count|pluralize:"y,ies" %} Repl{{ plural_str }} {% endblocktrans %}
+                </a>
+            {% endif %}
+        </small>
+        {% include "comment/reactions/reactions.html" with comment=comment %}
+    </footer>
+</div>

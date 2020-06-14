@@ -106,6 +106,7 @@ These tags need to be included in the end of your base template.
     This feature can be enabled by adding the ``COMMENT_FLAGS_ALLOWED`` to ``settings.py`` and its value must be greater than 0 (the default).
 
     The comment that has been reported more than the ``COMMENT_FLAGS_ALLOWED`` value, will be hidden from the view.
+    To keep displaying the flagged comments to all users add ``COMMENT_SHOW_FLAGGED=True`` to ``settings.py``
 
     The default report reasons are:
 
@@ -127,4 +128,20 @@ These tags need to be included in the end of your base template.
             ...
         ]
 
+Groups and Permissions:
+"""""""""""""""""""""""
+For flagging purpose, the following groups and permissions will be created on the next migrate:
+
+**permissions:**
+    1. delete_comment  (default)
+    2. delete_flagged_comment
+
+**groups:**
+    1. comment_admin => has both mentioned permissions (edit permission might be added in the future)
+    2. comment_moderator => has delete_flagged_comment permission
+
+* Comment admin can delete any comment.
+* Comment moderator can delete FLAGGED comment only.
+
+PS: If the groups or the permissions don't exist, just run migrate. ``./manage.py migrate``
 

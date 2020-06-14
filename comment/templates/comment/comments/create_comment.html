@@ -3,19 +3,20 @@
     <form class="js-comment-form" method="post" data-url="{% url 'comment:create' %}">
         {% csrf_token %}
         <div class="row">
-            <div class="{% block c_form_space %}col-sm-9 col-md-10 px-2 m-2 m-sm-0{% endblock c_form_space %}">
+            <div class="{% block text_area_wrapper_cls %}col-sm-9 col-md-10 px-2 m-2 m-sm-0{% endblock text_area_wrapper_cls %}">
                 {% include 'comment/comments/comment_form.html' with placeholder=placeholder %}
             </div>
-            <div class="{% block post_btn_space %}col-sm-3 col-md-2 px-2 m-3 m-sm-0{% endblock post_btn_space %}">
-                <input name="model_name" value="{% get_model_name model_object %}" hidden>
-                <input name="model_id" value="{{ model_object.id }}" hidden>
-                <input name="app_name" value="{% get_app_name model_object %}" hidden>
-                <input name="comments_per_page" value="{{comments_per_page}}" hidden>
-                <input name="oauth" value="{{oauth}}" hidden>
-                {% if comment %}
-                <input name="parent_id" value="{{ comment.id }}" type="hidden"/>
-                {% endif %}
-                <button disabled class="js-comment-btn {% block post_btn_cls %}btn btn-outline-success btn-block btn-sm{% endblock post_btn_cls %}" type="submit" name="form_type" data-type="{% if comment %}child{% else %}parent{% endif %}">
+            <input name="model_name" value="{% get_model_name model_object %}" hidden>
+            <input name="model_id" value="{{ model_object.id }}" hidden>
+            <input name="app_name" value="{% get_app_name model_object %}" hidden>
+            <input name="comments_per_page" value="{{comments_per_page}}" hidden>
+            <input name="oauth" value="{{oauth}}" hidden>
+            {% if comment %}
+            <input name="parent_id" value="{{ comment.id }}" type="hidden"/>
+            {% endif %}
+            <div class="{% block submit_button_wrapper_cls %}col-sm-3 col-md-2 px-2 m-3 m-sm-0{% endblock submit_button_wrapper_cls %}">
+                <button disabled class="js-comment-btn {% block submit_button_cls %}btn btn-outline-success btn-block btn-sm{% endblock submit_button_cls %}"
+                        type="submit" name="form_type" data-type="{% if comment %}child{% else %}parent{% endif %}">
                     {% if comment %}Reply{% else %}Comment{% endif %}
                 </button>
             </div>
@@ -25,13 +26,13 @@
     <div class="d-flex mb-3">
         <p class="text-danger {% if comment %}h7 my-auto {% endif %}"><em>Join discussion:</em></p>
         <a class="mx-2 text-success {% if comment %}h7 my-auto {% endif %}" href="{{login_url}}?next={{request.path}}">Login</a>
-        {% block oauth %}
         {% if oauth %}
-        <a class="mx-1 my-0 h4 github-color" href="{% url 'social:begin' 'github' %}?next={{request.path}}"><i class="fa fa-github-square"></i></a>
-        <a class="mx-1 my-0 h4 facebook-color" href="{% url 'social:begin' 'facebook' %}?next={{request.path}}"><i class="fa fa-facebook-square"></i></a>
-        <a class="mx-1 my-0 h4 twitter-color" href="{% url 'social:begin' 'twitter' %}?next={{request.path}}"><i class="fa fa-twitter-square"></i></a>
-        <a class="mx-1 my-0 h4 google-color" href="{% url 'social:begin' 'google-oauth2' %}?next={{request.path}}"><i class="fa fa-google-plus-square"></i></a>
+            {% block oauth %}
+            <a class="mx-1 my-0 h4 github-color" href="{% url 'social:begin' 'github' %}?next={{request.path}}"><i class="fa fa-github-square"></i></a>
+            <a class="mx-1 my-0 h4 facebook-color" href="{% url 'social:begin' 'facebook' %}?next={{request.path}}"><i class="fa fa-facebook-square"></i></a>
+            <a class="mx-1 my-0 h4 twitter-color" href="{% url 'social:begin' 'twitter' %}?next={{request.path}}"><i class="fa fa-twitter-square"></i></a>
+            <a class="mx-1 my-0 h4 google-color" href="{% url 'social:begin' 'google-oauth2' %}?next={{request.path}}"><i class="fa fa-google-plus-square"></i></a>
+            {% endblock oauth %}
         {% endif %}
-        {% endblock oauth %}
     </div>
 {% endif %}

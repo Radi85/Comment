@@ -21,8 +21,7 @@ class UtilsTest(BaseCommentTest):
             'model_name': 'Post',
             'model_id': self.post_1.id
         }
-        request = self.factory.post('/', data=data)
-        model_object = get_model_obj(request)
+        model_object = get_model_obj(**data)
         self.assertIsNotNone(model_object)
         self.assertIsInstance(model_object, self.post_1.__class__)
 
@@ -58,7 +57,7 @@ class UtilsTest(BaseCommentTest):
             'app_name': 'post',
             'user': self.post_1.author,
             'comments_per_page': '',
-            'currentPage': 10
+            'page': 10
         }
         request = self.factory.post('/', data=data)
         request.user = self.post_1.author
@@ -76,7 +75,7 @@ class UtilsTest(BaseCommentTest):
         self.assertEqual(comment_context_data['login_url'], settings.LOGIN_URL)
 
         data['comments_per_page'] = 2
-        data['currentPage'] = 'not integer'
+        data['page'] = 'not integer'
         request = self.factory.post('/', data=data)
         request.user = self.post_1.author
         comment_context_data = get_comment_context_data(request)

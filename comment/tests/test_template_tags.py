@@ -7,10 +7,10 @@ from django.template import TemplateSyntaxError
 from comment.forms import CommentForm
 from comment.managers import FlagInstanceManager
 from comment.templatetags.comment_tags import (
-    get_model_name, get_app_name, get_comment_count, get_img_path, get_profile_url, render_comments,
+    get_model_name, get_app_name, get_comments_count, get_img_path, get_profile_url, render_comments,
     include_static_jquery, include_bootstrap, include_static, render_field, has_reacted, has_flagged,
-    render_flag_reasons
-)
+    render_flag_reasons,
+    render_content)
 from comment.tests.base import BaseTemplateTagsTest
 
 
@@ -23,8 +23,8 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         app_name = get_app_name(self.post_1)
         self.assertEqual(app_name, 'post')
 
-    def test_comment_count(self):
-        counts = get_comment_count(self.post_1)
+    def test_comments_count(self):
+        counts = get_comments_count(self.post_1, self.user_1)
         self.assertEqual(counts, 6)
 
     def test_profile_url(self):
@@ -104,6 +104,21 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
             self.assertIsNone(field.field.widget.attrs.get('placeholder'))
             field = render_field(field, placeholder='placeholder')
             self.assertEqual(field.field.widget.attrs.get('placeholder'), 'placeholder')
+
+    def test_render_content(self):
+        comment = self.parent_comment_1
+        comment.content = "Any long text just for testing render content function"
+        comment.save()
+        content_words = comment.content.split(' ')
+        self.assertEqual(len(content_words), 9)
+        # truncate number is bigger than content words
+        result = render_content(comment.content, 10)
+        self.assertEqual(result['text_1'], comment.content)
+        self.assertIsNone(result['text_2'])
+        # truncate number is smaller than content words
+        result = render_content(comment.content, 5)
+        self.assertEqual(result['text_1'], ' '.join(content_words[:5]))
+        self.assertEqual(result['text_2'], ' '.join(content_words[5:]))
 
 
 class ReactionTemplateTagsTest(BaseTemplateTagsTest):
