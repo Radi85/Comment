@@ -1,11 +1,11 @@
-Style Customize:
-================
+Style Customization:
+=====================
 
 
-1- Bootstrap classes:
+1- Default blocks:
 ---------------------
 
-BS classes used in the default template can be now customized from within your templates directory as follows:
+BS classes, pagination and some other template values can be now customized from within your templates directory as follows:
 
     1. Create ``comment`` folder inside your templates directory.
 
@@ -44,7 +44,7 @@ BS classes used in the default template can be now customized from within your t
 
 
 
-for example to override the BS classes of submit button do the following:
+for example to override the BS classes of submit buttons and pagination style do the following:
 
     create ``templates/comment/comments/create_comment.html``
 

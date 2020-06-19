@@ -535,44 +535,80 @@ Comment API actions:
 
 .. _`Style Customization`:
 
-Style Customize
-===============
+Style Customization
+====================
 
-1- Bootstrap classes:
+1- Default blocks:
 ---------------------
 
-BS class used in the default template can be now customized from within your templates directory as follows:
+BS classes, pagination and some other template values can be now customized from within your templates directory as follows:
 
     1. Create ``comment`` folder inside your templates directory.
 
-    2. Create new template file ``.html`` with the same name of the default template you wish to override BS classes in it.
+    2. Create new template file ``.html`` with the same name of the default template you wish to override and put it in the right directory.
+
+    **Templates tree:**
+
+    .. code:: bash
+
+        templates
+        └── comment
+            ├── comments
+            │   ├── apply_icon.html
+            │   ├── base.html
+            │   ├── cancel_icon.html
+            │   ├── child_comment.html
+            │   ├── comment_body.html
+            │   ├── comment_content.html
+            │   ├── comment_form.html
+            │   ├── comment_modal.html
+            │   ├── content.html
+            │   ├── create_comment.html
+            │   ├── delete_icon.html
+            │   ├── edit_icon.html
+            │   ├── pagination.html
+            │   ├── parent_comment.html
+            │   └── update_comment.html
+            ├── flags
+            │   ├── flag_icon.html
+            │   ├── flag_modal.html
+            │   └── flags.html
+            └── reactions
+                ├── dislike_icon.html
+                ├── like_icon.html
+                └── reactions.html
 
 
-for example to override the BS classes of comment and reply btn do the following:
 
-create ``templates/comment/create_comment.html``
+for example to override the BS classes of submit buttons and pagination style do the following:
 
-.. code:: python
+    create ``templates/comment/comments/create_comment.html``
 
-    {% extends "comment/create_comment.html" %}
+    .. code:: jinja
 
-    {% block post_btn_cls %}
-    btn btn-primary btn-block btn-sm
-    {% endblock post_btn_cls %}
+        {% extends "comment/comments/create_comment.html" %}
 
-`Read the Doc`_ for more info about template names and block tags name.
+        {% block submit_button_cls %}
+        btn btn-primary btn-block btn-sm
+        {% endblock submit_button_cls %}
 
-.. _`Read the Doc`: https://django-comment-dab.readthedocs.io/
+        {# override pagination style: #}
+        {% block pagination %}
+        {% include 'comment/comments/pagination.html' with active_btn='bg-danger' text_style='text-dark' li_cls='page-item rounded mx-1' %}
+        {% endblock pagination %}
+
+
+For full guide on the default templates and block tags name `Read the Doc`_
+
+.. _`Read the Doc`: https://django-comment-dab.readthedocs.io/styling.html/
 
 
 2- CSS file:
 ------------
 
-If you want to customize the default style of comments app , you can do the following steps:
+To customize the default style of comments app , you can create a ``comment.css`` file inside your ``static/css`` directory.
 
-    1. Create a ``comment.css`` file inside your ``static/css`` directory.
-
-    2. The new created file will override the original file used in the app.
+The new created file will override the original file used in the app.
 
 
 .. _Example`:
