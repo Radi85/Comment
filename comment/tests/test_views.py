@@ -204,7 +204,7 @@ class CommentViewTestCase(BaseCommentTest):
         self.assertEqual(response.reason_phrase, 'Forbidden')
 
 
-class SetReactionTest(BaseCommentTest):
+class SetReactionViewTest(BaseCommentTest):
 
     def setUp(self):
         super().setUp()
@@ -306,7 +306,7 @@ class SetReactionTest(BaseCommentTest):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-class SetFlagTest(BaseCommentFlagTest):
+class SetFlagViewTest(BaseCommentFlagTest):
     def setUp(self):
         super().setUp()
         self.flag_data.update({
@@ -435,3 +435,63 @@ class SetFlagTest(BaseCommentFlagTest):
         data.update({'reason': reason})
         response = self.request(url, **data)
         self.assertEqual(response.status_code, 200)
+
+
+class ChangeFlagStateViewTest(BaseCommentFlagTest):
+    def setUp(self):
+        super().setUp()
+        self.data = {
+            'state': self.comment.flag.REJECTED
+        }
+        settings.COMMENT_FLAGS_ALLOWED = 1
+        self.create_flag_instance(self.user_1, self.comment, **self.flag_data)
+        self.create_flag_instance(self.user_2, self.comment, **self.flag_data)
+
+    def get_url(self, comment=None):
+        if not comment:
+            return reverse('comment:flag-change-state', kwargs={'pk': self.comment.id})
+        return reverse('comment:flag-change-state', kwargs={'pk': comment.id})
+
+    def test_change_flag_state_for_unflagged_comment(self):
+        settings.COMMENT_FLAGS_ALLOWED = 10
+        self.comment.flag.toggle_flagged_state()
+        self.assertFalse(self.comment.is_flagged)
+        self.client.force_login(self.moderator)
+        self.assertEqual(int(self.client.session['_auth_user_id']), self.moderator.id)
+        response = self.client.post(self.get_url(), data=self.data, **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_change_flag_state_by_not_permitted_user(self):
+        self.assertTrue(self.comment.is_flagged)
+        self.client.force_login(self.user_1)
+        self.assertEqual(int(self.client.session['_auth_user_id']), self.user_1.id)
+        response = self.client.post(self.get_url(), data=self.data, **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_change_flag_state_with_wrong_state_value(self):
+        self.assertTrue(self.comment.is_flagged)
+        self.client.force_login(self.moderator)
+        self.assertEqual(int(self.client.session['_auth_user_id']), self.moderator.id)
+        self.assertEqual(self.comment.flag.state, self.comment.flag.FLAGGED)
+
+        # valid state is REJECTED and RESOLVED
+        self.data['state'] = self.comment.flag.UNFLAGGED
+        response = self.client.post(self.get_url(), data=self.data, **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['state'], 0)
+        self.assertEqual(self.comment.flag.state, self.comment.flag.FLAGGED)
+
+    def test_change_flag_state_success(self):
+        self.assertTrue(self.comment.is_flagged)
+        self.client.force_login(self.moderator)
+        self.assertEqual(int(self.client.session['_auth_user_id']), self.moderator.id)
+        self.assertEqual(self.comment.flag.state, self.comment.flag.FLAGGED)
+
+        # valid state is REJECTED and RESOLVED
+        self.data['state'] = self.comment.flag.REJECTED
+        response = self.client.post(self.get_url(), data=self.data, **{'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['state'], self.comment.flag.REJECTED)
+        self.comment.flag.refresh_from_db()
+        self.assertEqual(self.comment.flag.moderator, self.moderator)
+        self.assertEqual(self.comment.flag.state, self.comment.flag.REJECTED)

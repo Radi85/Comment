@@ -4,6 +4,7 @@ from django.conf import settings
 from rest_framework import permissions
 
 from comment.models import Comment
+from comment.utils import is_comment_admin, is_comment_moderator
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
@@ -15,6 +16,8 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         # PUT and DELETE permissions are allowed to the owner of the comment.
+        if request.method == 'DELETE':  # comment admin can delete other users comments
+            return is_comment_admin(request.user) or obj.user == request.user
         return obj.user == request.user
 
 
@@ -79,3 +82,11 @@ class FlagEnabledPermission(permissions.BasePermission):
     """
     def has_permission(self, request, view):
         return bool(getattr(settings, 'COMMENT_FLAGS_ALLOWED', 0))
+
+
+class CanChangeFlaggedCommentState(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return is_comment_admin(request.user) or is_comment_moderator(request.user)
+
+    def has_object_permission(self, request, view, obj):
+        return obj.is_flagged and (is_comment_admin(request.user) or is_comment_moderator(request.user))

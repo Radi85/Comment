@@ -1,6 +1,9 @@
-Style Customization:
-=====================
+Style Customization
+====================
 
+Some actual customizations has been done in the example_ project
+
+.. _example: https://github.com/Radi85/Comment/tree/master/test/example
 
 1- Default blocks:
 ---------------------
@@ -65,6 +68,8 @@ for example to override the BS classes of submit buttons and pagination style do
 Templates and block tags names with default values:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+This style customization is compatible with version >= **1.6.5**
+Some block tags may not work on old versions.
 
 **base.html**
 
@@ -130,6 +135,8 @@ Templates and block tags names with default values:
 
     {% block edit_link_cls %}btn btn-link{% endblock edit_link_cls %}
     {% block edit_img_icon %}Here comes your favorite icon{% endblock edit_img_icon %}
+
+    {# use this tag for overriding the default icon color, this tag won't have effect in case of using the above one #}
     {% block edit_icon_color %}#00bc8c{% endblock edit_icon_color %}
 
 
@@ -141,6 +148,8 @@ Templates and block tags names with default values:
 
     {% block delete_btn_cls %}btn btn-link{% endblock delete_btn_cls %}
     {% block delete_img_icon %}Here comes your favorite icon{% endblock delete_img_icon %}
+
+    {# use this tag for overriding the default icon color, this tag won't have effect in case of using the above one #}
     {% block delete_icon_color %}#E74C3C{% endblock delete_icon_color %}
 
 
@@ -152,6 +161,8 @@ Templates and block tags names with default values:
 
     {% block apply_btn_cls %}btn btn-link{% endblock apply_btn_cls %}
     {% block apply_img_icon %}Here comes your favorite icon{% endblock apply_img_icon %}
+
+    {# use this tag for overriding the default icon color, this tag won't have effect in case of using the above one #}
     {% block apply_icon_color %}#00bc8c{% endblock apply_icon_color %}
 
 
@@ -163,6 +174,8 @@ Templates and block tags names with default values:
 
     {% block cancel_btn_cls %}btn btn-link{% endblock cancel_btn_cls %}
     {% block cancel_img_icon %}Here comes your favorite icon{% endblock cancel_img_icon %}
+
+    {# use this tag for overriding the default icon color, this tag won't have effect in case of using the above one #}
     {% block cancel_icon_color %}#E74C3C{% endblock cancel_icon_color %}
 
 
@@ -172,7 +185,15 @@ Templates and block tags names with default values:
 
     {% extends "comment/flags/flag_icon.html" %}
 
-    {% block flag_img_icon %}Here comes your favorite icon{% endblock flag_img_icon %}
+    {% block flag_img_icon %}
+        {#
+        IMPORTANT: please consider adding these classes to your icon element as they are used in JS
+        class="comment-flag-icon {% if user|has_flagged:comment %}user-has-flagged{% else %}user-has-not-flagged{% endif %}"
+        #}
+        Here comes your favorite icon
+    {% endblock flag_img_icon %}
+
+    {# use this tag for overriding the default icon color, this tag won't have effect in case of using the above one #}
     {% block flag_icon_color %}#427297{% endblock flag_icon_color %}
 
 
@@ -182,7 +203,17 @@ Templates and block tags names with default values:
 
     {% extends "comment/actions/like_icon.html" %}
 
-    {% block like_img_icon %}Here comes your favorite icon{% endblock like_img_icon %}
+    {% block like_img_icon %}
+        {% load comment_tags %}
+        {% has_reacted user=user comment=comment reaction="like" as has_user_liked %}
+        {#
+        IMPORTANT: please consider adding these classes to your icon element as they are used in JS
+        class="comment-reaction-icon reaction-like {% if has_user_liked %}user-has-reacted{% else %}user-has-not-reacted{% endif %}"
+        #}
+        Here comes your favorite icon
+    {% endblock like_img_icon %}
+
+    {# use this tag for overriding the default icon color, this tag won't have effect in case of using the above one #}
     {% block like_icon_color %}#427297{% endblock like_icon_color %}
 
 
@@ -190,10 +221,56 @@ Templates and block tags names with default values:
 
 .. code:: jinja
 
-    {% extends "comment/actions/dislike_icon.html" %}
+    {% extends "comment/comments/reject_icon.html" %}
 
-    {% block dislike_img_icon %}Here comes your favorite icon{% endblock dislike_img_icon %}
+    {% block dislike_img_icon %}
+        {% load comment_tags %}
+        {% has_reacted user=user comment=comment reaction="dislike" as has_user_disliked %}
+        {#
+        IMPORTANT: please consider adding these classes to your icon element as they are used in JS
+        class="comment-reaction-icon reaction-dislike {% if has_user_disliked %}user-has-reacted{% else %}user-has-not-reacted{% endif %}"
+        #}
+        Here comes your favorite icon
+    {% endblock dislike_img_icon %}
+
+    {# use this tag for overriding the default icon color, this tag won't have effect in case of using the above one #}
     {% block dislike_icon_color %}#427297{% endblock dislike_icon_color %}
+
+
+**reject_icon.html**
+
+.. code:: jinja
+
+    {% extends "comment/comments/reject_icon.html" %}
+
+    {% block reject_img_icon %}}
+        {#
+        IMPORTANT: please consider adding this class to your icon element as it is used in JS
+        class="{% if comment.has_rejected_state %}flag-rejected{% endif %}"
+        #}
+        Here comes your favorite icon
+    {% block reject_img_icon %}
+
+    {# use this tag for overriding the default icon color, this tag won't have effect in case of using the above one #}
+    {% block reject_icon_color %}#427297{% endblock reject_icon_color %}
+
+
+**resolve_icon.html**
+
+.. code:: jinja
+
+    {% extends "comment/comments/resolve_icon.html" %}
+
+    {% block resolved_img_icon %}}
+        {#
+        IMPORTANT: please consider adding this class to your icon element as it is used in JS
+        class="{% if comment.has_resolved_state %}flag-resolved{% endif %}"
+        #}
+        Here comes your favorite icon
+    {% block resolved_img_icon %}
+
+    {# use this tag for overriding the default icon color, this tag won't have effect in case of using the above one #}
+    {% block resolved_icon_color %}#427297{% endblock resolved_icon_color %}
 
 
 **comment_modal.html**

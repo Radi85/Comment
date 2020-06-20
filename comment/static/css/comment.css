@@ -74,3 +74,7 @@ input#search-input:focus::placeholder {
 .flagged-comment {
     color: #999;
 }
+
+.flag-rejected, .flag-resolved {
+    stroke: #00bc8c;
+}

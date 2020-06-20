@@ -2,7 +2,7 @@
 {% load i18n %}
 
 
-<div class="{% if comment.is_flagged %}flagged-comment {% endif %}{% block content_wrapper_cls %}{% if has_valid_profile %}col-9 col-md-10{% else %}co-11 mx-3{% endif %}{% endblock content_wrapper_cls %}">
+<div class="{% if comment.has_flagged_state %}flagged-comment {% endif %}{% block content_wrapper_cls %}{% if has_valid_profile %}col-9 col-md-10{% else %}co-11 mx-3{% endif %}{% endblock content_wrapper_cls %}">
     {% block comment_content %}
     {% render_content comment.content 30 %}
     {% endblock comment_content %}
@@ -20,6 +20,12 @@
                 {% include 'comment/comments/delete_icon.html' %}
             {% elif can_delete %}
                 | {% include 'comment/comments/delete_icon.html' %}
+                {% if comment.is_flagged %}
+                    {% include 'comment/comments/reject_icon.html' %}
+                    {% if comment.is_edited %}
+                        {% include 'comment/comments/resolve_icon.html' %}
+                    {% endif %}
+                {% endif %}
             {% endif %}
             {% if comment.is_parent %}
                 {% get_replies_count comment user as reply_count %}

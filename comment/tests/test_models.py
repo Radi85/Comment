@@ -1,4 +1,5 @@
 from time import sleep
+from unittest.mock import patch
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -56,22 +57,58 @@ class CommentModelTest(BaseCommentManagerTest):
         # 1 flag instance is created for every comment
         self.assertEqual(Flag.objects.count(), current_count + 1)
 
-    def test_is_flagged_property(self):
-        settings.COMMENT_FLAGS_ALLOWED = 1
-        comment = self.create_comment(self.content_object_1)
+    @patch('comment.models.comments.hasattr')
+    def test_is_flagged_property(self, mocked_hasattr):
+        comment = self.create_comment(self.content_object_2)
+        self.assertEqual(comment.flag.state, comment.flag.UNFLAGGED)
         self.assertFalse(comment.is_flagged)
-        self.create_flag_instance(self.user_1, comment)
-        self.assertFalse(comment.is_flagged)
-        self.create_flag_instance(self.user_2, comment)
+
+        comment.flag.state = comment.flag.FLAGGED
         self.assertTrue(comment.is_flagged)
-        # test if the flag is not enabled
+
         settings.COMMENT_FLAGS_ALLOWED = 0
         self.assertFalse(comment.is_flagged)
-        # test for previous comments
-        settings.COMMENT_FLAGS_ALLOWED = 1
-        comment.flag.delete()
-        comment.refresh_from_db()
-        self.assertEqual(False, comment.is_flagged)
+
+        mocked_hasattr.return_value = False
+        self.assertFalse(comment.is_flagged)
+
+    @patch('comment.models.comments.hasattr')
+    def test_has_flagged_state(self, mocked_hasattr):
+        comment = self.create_comment(self.content_object_2)
+        self.assertEqual(comment.flag.state, comment.flag.UNFLAGGED)
+        self.assertFalse(comment.has_flagged_state)
+
+        comment.flag.state = comment.flag.FLAGGED
+        self.assertTrue(comment.has_flagged_state)
+
+        mocked_hasattr.return_value = False
+        self.assertFalse(comment.has_flagged_state)
+
+    @patch('comment.models.comments.hasattr')
+    def test_has_rejected_state(self, mocked_hasattr):
+        comment = self.create_comment(self.content_object_2)
+        self.assertEqual(comment.flag.state, comment.flag.UNFLAGGED)
+        self.assertFalse(comment.has_rejected_state)
+
+        comment.flag.state = comment.flag.REJECTED
+        comment.flag.save()
+        self.assertTrue(comment.has_rejected_state)
+
+        mocked_hasattr.return_value = False
+        self.assertFalse(comment.has_rejected_state)
+
+    @patch('comment.models.comments.hasattr')
+    def test_has_resolved_state(self, mocked_hasattr):
+        comment = self.create_comment(self.content_object_2)
+        self.assertEqual(comment.flag.state, comment.flag.UNFLAGGED)
+        self.assertFalse(comment.has_resolved_state)
+
+        comment.flag.state = comment.flag.RESOLVED
+        comment.flag.save()
+        self.assertTrue(comment.has_resolved_state)
+
+        mocked_hasattr.return_value = False
+        self.assertFalse(comment.has_resolved_state)
 
 
 class CommentModelManagerTest(BaseCommentManagerTest):
@@ -459,3 +496,81 @@ class FlagModelTest(BaseCommentFlagTest):
         flag_instance.save()
         self.comment.flag.refresh_from_db()
         self.assertEqual(self.comment.flag.count, 1)
+
+    def test_is_flagged_enabled(self):
+        flag = self.create_comment(self.content_object_1).flag
+        settings.COMMENT_FLAGS_ALLOWED = 1
+        self.assertTrue(flag.is_flag_enabled)
+
+        settings.COMMENT_FLAGS_ALLOWED = 0
+        self.assertFalse(flag.is_flag_enabled)
+
+    @patch('comment.models.flags.Flag.get_clean_state')
+    def test_get_verbose_state(self, mocked_get_clean_state):
+        flag = self.create_comment(self.content_object_1).flag
+        mocked_get_clean_state.return_value = flag.FLAGGED
+        self.assertEqual(flag.get_verbose_state(flag.FLAGGED), flag.STATES_CHOICES[flag.FLAGGED-1][1])
+        mocked_get_clean_state.return_value = 100
+        self.assertIsNone(flag.get_verbose_state(100))
+
+    def test_get_clean_state(self):
+        flag = self.create_comment(self.content_object_1).flag
+        state = flag.get_clean_state(flag.FLAGGED)
+        self.assertEqual(state, 2)
+
+        # int not in existing states
+        self.assertRaises(ValidationError, flag.get_clean_state, 100)
+
+        # not int
+        self.assertRaises(ValidationError, flag.get_clean_state, 'Not int')
+
+        # None
+        self.assertRaises(ValidationError, flag.get_clean_state, None)
+
+    def test_toggle_state(self):
+        flag = self.create_comment(self.content_object_1).flag
+        self.assertIsNone(flag.moderator)
+        self.assertEqual(flag.state, flag.UNFLAGGED)
+
+        # toggle states occurs between rejected and resolved only
+        self.assertRaises(ValidationError, flag.toggle_state, flag.FLAGGED, self.moderator)
+
+        flag.toggle_state(flag.REJECTED, self.moderator)
+        self.assertEqual(flag.state, flag.REJECTED)
+        self.assertEqual(flag.moderator, self.moderator)
+
+        # passing RESOLVED state value for the first time
+        flag.toggle_state(flag.RESOLVED, self.moderator)
+        self.assertEqual(flag.state, flag.RESOLVED)
+
+        # passing RESOLVED state value for the second time
+        flag.toggle_state(flag.RESOLVED, self.moderator)
+        # state reset to FLAGGED
+        self.assertEqual(flag.state, flag.FLAGGED)
+
+    def test_toggle_flagged_state(self):
+        comment = self.create_comment(self.content_object_1)
+        flag = comment.flag
+        flag.toggle_flagged_state()
+        self.assertEqual(flag.state, flag.UNFLAGGED)
+
+        self.create_flag_instance(self.user_1, comment)
+        self.create_flag_instance(self.user_2, comment)
+        flag.refresh_from_db()
+        self.assertEqual(flag.count, 2)
+
+        # flagging is disabled => state won't change
+        settings.COMMENT_FLAGS_ALLOWED = 0
+        flag.toggle_flagged_state()
+        self.assertEqual(flag.state, flag.UNFLAGGED)
+
+        # flagging is enabled => state changes
+        settings.COMMENT_FLAGS_ALLOWED = 1
+        flag.toggle_flagged_state()
+        self.assertEqual(flag.state, flag.FLAGGED)
+
+        # increase allowed flags count => change the state to UNFLAGGED
+        settings.COMMENT_FLAGS_ALLOWED = 10
+        self.assertEqual(flag.count, 2)
+        flag.toggle_flagged_state()
+        self.assertEqual(flag.state, flag.UNFLAGGED)

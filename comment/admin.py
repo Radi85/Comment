@@ -31,7 +31,7 @@ class InlineFlagInstance(admin.TabularInline):
 
 
 class FlagModelAdmin(admin.ModelAdmin):
-    list_display = ('comment', 'count', 'comment_author')
+    list_display = ('comment', 'moderator', 'state', 'count', 'comment_author')
     readonly_fields = list_display
     search_fields = ('comment__content',)
     inlines = [InlineFlagInstance]

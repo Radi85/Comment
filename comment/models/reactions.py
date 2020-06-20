@@ -14,6 +14,7 @@ class Reaction(models.Model):
     comment = models.OneToOneField(Comment, on_delete=models.CASCADE)
     likes = models.PositiveIntegerField(default=0)
     dislikes = models.PositiveIntegerField(default=0)
+
     objects = ReactionManager()
 
     def _increase_count(self, field):

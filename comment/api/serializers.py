@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from rest_framework import serializers
 
-from comment.models import Comment
+from comment.models import Comment, Flag, Reaction
 
 
 def get_profile_model():
@@ -58,6 +58,11 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class BaseCommentSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    parent = serializers.SerializerMethodField()
+    replies = serializers.SerializerMethodField()
+    reply_count = serializers.SerializerMethodField()
+
     @staticmethod
     def get_parent(obj):
         if obj.parent:
@@ -67,48 +72,36 @@ class BaseCommentSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_replies(obj):
-        if not obj.parent:
+        if obj.is_parent:
             return CommentSerializer(obj.replies(), many=True).data
         else:
-            return None
+            return []
 
     @staticmethod
     def get_reply_count(obj):
-        if not obj.parent:
+        if obj.is_parent:
             return obj.replies().count()
         else:
-            return None
-
-    @staticmethod
-    def get_likes(obj):
-        if hasattr(obj, 'likes'):
-            return obj.likes
-
-    @staticmethod
-    def get_dislikes(obj):
-        if hasattr(obj, 'dislikes'):
-            return obj.dislikes
+            return 0
 
     @staticmethod
     def get_is_flagged(obj):
         return obj.is_flagged
 
+    @staticmethod
+    def get_flags(obj):
+        return FlagSerializer(obj.flag).data
+
+    @staticmethod
+    def get_reactions(obj):
+        return ReactionSerializer(obj.reaction).data
+
 
 class CommentCreateSerializer(BaseCommentSerializer):
-    user = UserSerializer(read_only=True)
-    parent = serializers.SerializerMethodField()
-    replies = serializers.SerializerMethodField()
-    reply_count = serializers.SerializerMethodField()
-    likes = serializers.SerializerMethodField()
-    dislikes = serializers.SerializerMethodField()
-    is_flagged = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
-        fields = (
-            'id', 'user', 'content', 'parent', 'posted', 'edited', 'reply_count', 'replies', 'likes', 'dislikes',
-            'is_flagged'
-        )
+        fields = ('id', 'user', 'content', 'parent', 'posted', 'edited', 'reply_count', 'replies')
 
     def __init__(self, *args, **kwargs):
         self.model_type = kwargs['context'].get('model_type')
@@ -134,19 +127,15 @@ class CommentCreateSerializer(BaseCommentSerializer):
 
 
 class CommentSerializer(BaseCommentSerializer):
-    user = UserSerializer(read_only=True)
-    parent = serializers.SerializerMethodField()
-    replies = serializers.SerializerMethodField()
-    reply_count = serializers.SerializerMethodField()
-    likes = serializers.SerializerMethodField()
-    dislikes = serializers.SerializerMethodField()
     is_flagged = serializers.SerializerMethodField()
+    flags = serializers.SerializerMethodField()
+    reactions = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
         fields = (
-            'id', 'user', 'content', 'parent', 'posted', 'edited', 'reply_count', 'replies', 'likes', 'dislikes',
-            'is_flagged'
+            'id', 'user', 'content', 'parent', 'posted', 'edited', 'reply_count', 'replies', 'reactions',
+            'is_flagged', 'flags'
         )
 
     def __init__(self, *args, **kwargs):
@@ -159,3 +148,40 @@ class CommentSerializer(BaseCommentSerializer):
             flag_update = context.get('flag_update')
         if reaction_update or flag_update:
             self.fields['content'].read_only = True
+
+
+class ReactionSerializer(serializers.ModelSerializer):
+    users = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Reaction
+        fields = ('likes', 'dislikes', 'users')
+
+    @staticmethod
+    def get_users(obj):
+        users = {'likes': [], 'dislikes': []}
+        for instance in obj.reactions.all():
+            if instance.reaction_type == instance.ReactionType.LIKE:
+                users['likes'].append({'id': instance.user.id, 'username': instance.user.username})
+            else:
+                users['dislikes'].append({'id': instance.user.id, 'username': instance.user.username})
+        return users
+
+
+class FlagSerializer(serializers.ModelSerializer):
+    reporters = serializers.SerializerMethodField()
+    verbose_state = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Flag
+        fields = ('count', 'moderator', 'state', 'verbose_state', 'reporters')
+
+    @staticmethod
+    def get_reporters(obj):
+        return [
+            {'id': flag_instance.user.id, 'username': flag_instance.user.username} for flag_instance in obj.flags.all()
+        ]
+
+    @staticmethod
+    def get_verbose_state(obj):
+        return obj.get_verbose_state(obj.state)

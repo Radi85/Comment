@@ -2,7 +2,7 @@
     :target: https://pypi.org/project/django-comments-dab/
     :alt: pypi
 
-.. image:: https://badge.fury.io/gh/radi85%2FComment.svg
+.. image:: https://img.shields.io/github/v/tag/radi85/Comment?color=gr
     :target: https://github.com/Radi85/Comment/releases
     :alt: tag
 
@@ -211,12 +211,12 @@ if you already use jquery please make sure it is not the slim version which does
 ``include_bootstrap`` tag is for bootstrap-4.1.1, if it’s already included
 in your project, get rid of this tag.
 
-In your template (e.g. post_detail.html) add the following template tags where ``obj`` is the instance of post model.
+In your template (e.g. post_detail.) add the following template tags where ``obj`` is the instance of post model.
 
-.. code:: python
+.. code:: jinja
 
-    {% load comment_tags %}  # Loading the template tag
-    {% render_comments obj request %}  # Render all the comments belonging to a passed object
+    {% load comment_tags %}  {# Loading the template tag #}
+    {% render_comments obj request %}  {# Render all the comments belonging to a passed object #}
 
 
 **Include static files:**
@@ -227,23 +227,23 @@ These tags need to be included in the end of your base template.
 
 - **Case 1:** You already have jQuery in your project then the following tags shall be included below jQuery file:
 
-.. code:: html
+.. code:: jinja
 
-    {% load comment_tags %}  <!-- Loading the template tag -->
+    {% load comment_tags %}  {# Loading the template tag #}
 
     <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
-    {% include_static %}  <!-- Include comment.js file only -->
-    {% include_bootstrap %}  <!-- Include bootstrap-4.1.1 - remove this line if it is already used in your project -->
+    {% include_static %}  {# Include comment.js file only #}
+    {% include_bootstrap %}  {# Include bootstrap-4.1.1 - remove this line if it is already used in your project #}
 
 
 - **Case 2:** You don't have jQuery in your project then the following tags shall be included:
 
-.. code:: html
+.. code:: jinja
 
-    {% load comment_tags %}  <!-- Loading the template tag -->
+    {% load comment_tags %}  {# Loading the template tag #}
 
-    {% include_static_jquery %}  <!-- Include mini jQuery 3.2.1 and required js file -->
-    {% include_bootstrap %}  <!-- Include bootstrap 4.1.1 - remove this line if BS 4.1.1 is already used in your project -->
+    {% include_static_jquery %}  {# Include mini jQuery 3.2.1 and required js file #}
+    {% include_bootstrap %}  {# Include bootstrap 4.1.1 - remove this line if BS 4.1.1 is already used in your project #}
 
 
 2. Advanced usage:
@@ -252,83 +252,91 @@ These tags need to be included in the end of your base template.
 1. Pagination:
 ^^^^^^^^^^^^^^^
 
-    By default the comments will be paginated, 10 comments per page.
-    To disabled the pagination pass ``comments_per_page=None``
-    To change the default number, pass ``comments_per_page=number`` to ``render_comments``.
+By default the comments will be paginated, 10 comments per page.
+To disabled the pagination pass ``comments_per_page=None``
+To change the default number, pass ``comments_per_page=number`` to ``render_comments``.
 
-    .. code:: html
+.. code:: jinja
 
-        {% load comment_tags %}  <!-- Loading the template tag -->
+    {% load comment_tags %}  {# Loading the template tag #}
 
-        {% render_comments obj request comments_per_page=5 %}  <!-- Include all the comments belonging to a certain object -->
-        {% include_bootstrap %} <!-- Include bootstrap 4.1.1 - remove this line if BS 4.1.1 is already used in your project -->
-        {% include_static %} <!-- Include jQuery 3.2.1 and required js file -->
+    {% render_comments obj request comments_per_page=5 %}  {# Include all the comments belonging to a certain object #}
+    {% include_bootstrap %} {# Include bootstrap 4.1.1 - remove this line if BS 4.1.1 is already used in your project #}
+    {% include_static %} {# Include jQuery 3.2.1 and required js file #}
 
 
 
 2. Integrate user profile:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    If you have a profile model for the user and you would like to show the
-    profile image next to each comment, do the following steps:
+If you have a profile model for the user and you would like to show the
+profile image next to each comment, do the following steps:
 
-    - Add ``PROFILE_APP_NAME`` and ``PROFILE_MODEL_NAME`` variables to your ``settings.py`` file.
-        e.g if user profile app is called ``accounts`` and profile model is called ``UserProfile``
+- Add ``PROFILE_APP_NAME`` and ``PROFILE_MODEL_NAME`` variables to your ``settings.py`` file.
+    e.g if user profile app is called ``accounts`` and profile model is called ``UserProfile``
 
-        ``settings.py``:
+``settings.py``:
 
-        .. code:: python
+.. code:: python
 
-            PROFILE_APP_NAME = 'accounts'
-            PROFILE_MODEL_NAME = 'UserProfile' # letter case insensitive
+    PROFILE_APP_NAME = 'accounts'
+    PROFILE_MODEL_NAME = 'UserProfile' # letter case insensitive
 
 
 
-    - Make sure that ``get_absolute_url`` method is defined in your profile model.
+- Make sure that ``get_absolute_url`` method is defined in your profile model.
 
-        .. code:: python
+.. code:: python
 
-            from django.urls import reverse
+    from django.urls import reverse
 
-            class UserProfile(models.Model):
-                user = models.OneToOneField(User, on_delete=models.CASCADE)
-                ...
-                ...
+    class UserProfile(models.Model):
+        user = models.OneToOneField(User, on_delete=models.CASCADE)
+        ...
+        ...
 
-                # this method must be defined for appropriate url mapping in comments section
-                def get_absolute_url(self):
-                    return reverse('your_profile_url_name')
+        # this method must be defined for appropriate url mapping in comments section
+        def get_absolute_url(self):
+            return reverse('your_profile_url_name')
 
-.. _Enable Flagging:
+.. _`Enable Flagging`:
 
 3. Enable flagging:
 ^^^^^^^^^^^^^^^^^^^
 
-    The comment can be reported by the users.
-    This feature can be enabled by adding the ``COMMENT_FLAGS_ALLOWED`` to ``settings.py`` and its value must be greater than 0 (the default).
+The comment can be reported by the users.
+This feature can be enabled by adding the ``COMMENT_FLAGS_ALLOWED`` to ``settings.py`` and its value must be greater than 0 (the default).
 
-    The comment that has been reported more than the ``COMMENT_FLAGS_ALLOWED`` value, will be hidden from the view.
-    To keep displaying the flagged comments to all users add ``COMMENT_SHOW_FLAGGED=True`` to ``settings.py``
+The comment that has been reported more than the ``COMMENT_FLAGS_ALLOWED`` value, will be hidden from the view.
+To keep displaying the flagged comments to all users add ``COMMENT_SHOW_FLAGGED=True`` to ``settings.py``
 
-    The default report reasons are:
+The default report reasons are:
 
-        1. Spam | Exists only to promote a service.
-        2. Abusive | Intended at promoting hatred.
-        3. Something else. With a message info, this option will be always appended reasons list.
+    1. Spam | Exists only to promote a service.
+    2. Abusive | Intended at promoting hatred.
+    3. Something else. With a message info, this option will be always appended reasons list.
 
-    The reasons can be customized by adding ``COMMENT_FLAG_REASONS`` list of tuples to ``settings.py``. E.g.
+The reasons can be customized by adding ``COMMENT_FLAG_REASONS`` list of tuples to ``settings.py``. E.g.
 
-    ``settings.py``
+``settings.py``
 
-    .. code:: python
+.. code:: python
 
-        COMMENT_FLAG_REASONS = [
-            (1, _('Spam | Exists only to promote a service')),
-            (2, _('Abusive | Intended at promoting hatred')),
-            (3, _('Racist | Sick mentality')),
-            (4, _('Whatever | Your reason')),
-            ...
-        ]
+    COMMENT_FLAG_REASONS = [
+        (1, _('Spam | Exists only to promote a service')),
+        (2, _('Abusive | Intended at promoting hatred')),
+        (3, _('Racist | Sick mentality')),
+        (4, _('Whatever | Your reason')),
+        ...
+    ]
+
+The flag model has currently 4 states: `v1.6.7`
+
+    1. UNFLAGGED
+    2. **FLAGGED** - this case only the comment will be hidden
+    3. REJECTED - flag reasons are rejected by the moderator
+    4. RESOLVED - the comment content has been changed and accepted by the moderator
+
 
 Groups and Permissions:
 """""""""""""""""""""""
@@ -342,10 +350,11 @@ For flagging purpose, the following groups and permissions will be created on th
     1. comment_admin => has both mentioned permissions (edit permission might be added in the future)
     2. comment_moderator => has delete_flagged_comment permission
 
-* Comment admin can delete any comment.
-* Comment moderator can delete FLAGGED comment only.
+* Comment admin can delete any comment and change the state of flagged comment.
+* Comment moderator can delete FLAGGED comment only and change their state.
 
 PS: If the groups or the permissions don't exist, just run migrate. ``./manage.py migrate``
+
 
 .. _`Web API`:
 
@@ -358,19 +367,21 @@ developers with access to the same functionality offered through the web user in
 There are 5 methods available to perform the following actions:
 
 
-    1. Post a new comment. (Authenticated)
+1. Post a new comment. (Authenticated)
 
-    2. Reply to an existing comment. (Authenticated)
+2. Reply to an existing comment. (Authenticated)
 
-    3. Edit a comment you posted. (Authenticated)
+3. Edit a comment you posted. (Authenticated)
 
-    4. Delete a comment you posted. (Authenticated)
+4. Delete a comment you posted. (Authenticated)
 
-    5. React to a comment. (Authenticated)
+5. React to a comment. (Authenticated)
 
-    6. Report a comment. (Authenticated) Flagging system should be enabled
+6. Report a comment. (Authenticated) Flagging system should be enabled
 
-    7. Retrieve the list of comments and associated replies to a given content type and object ID.
+7. Change the state of reported comment. (admin and moderator) Flagging system should be enabled `v1.6.7`
+
+8. Retrieve the list of comments and associated replies to a given content type and object ID.
 
 These actions are explained below.
 
@@ -425,112 +436,133 @@ Comment API actions:
 
 **1- Retrieve the list of comments and associated replies to a given content type and object ID:**
 
-    This action can be performed by providing the url with data queries related to the content type.
+This action can be performed by providing the url with data queries related to the content type.
 
-    Get request accepts 3 params:
-
-
-    - ``type``: is the model name of the content type that have comments associated with it.
-    - ``id``: is the id of an object of that model
+Get request accepts 3 params:
 
 
+- ``type``: is the model name of the content type that have comments associated with it.
+- ``id``: is the id of an object of that model
 
 
-    For example if you are using axios to retrieve the comment list of second object (id=2) of a model (content type) called post.
-    you can do the following:
 
-    ::
 
-        $ curl -H "Content-Type: application/json" 'http://localhost:8000/api/comments/?type=MODEL_NAME&id=ID'
+For example if you are using axios to retrieve the comment list of second object (id=2) of a model (content type) called post.
+you can do the following:
+
+::
+
+    $ curl -H "Content-Type: application/json" 'http://localhost:8000/api/comments/?type=MODEL_NAME&id=ID'
 
 
 **2- Create a comment or reply to an existing comment:**
 
-    Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
+Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
 
-    - ``type``: is the model name of the content type that have comments associated with it.
-    - ``id``: is the id of an object of that model
-    - ``parent_id``: is 0 or **NOT PROVIDED** for parent comments and for reply comments must be the id of parent comment
+- ``type``: is the model name of the content type that have comments associated with it.
+- ``id``: is the id of an object of that model
+- ``parent_id``: is 0 or **NOT PROVIDED** for parent comments and for reply comments must be the id of parent comment
 
 
-    Example: posting a parent comment
+Example: posting a parent comment
 
-    ::
+::
 
-        $ curl -X POST -u USERNAME:PASSWORD -d "content=CONTENT" -H "Content-Type: application/json" "http://localhost:8000/api/comments/create/?type=MODEL_NAME&id=ID&parent_id=0"
+    $ curl -X POST -u USERNAME:PASSWORD -d "content=CONTENT" -H "Content-Type: application/json" "http://localhost:8000/api/comments/create/?type=MODEL_NAME&id=ID&parent_id=0"
 
 
 **3- Update a comment:**
 
-    Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
+Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
 
-    This action requires the ``comment.id`` that you want to update:
+This action requires the ``comment.id`` that you want to update:
 
 
-    ::
+::
 
-        $ curl -X PUT -u USERNAME:PASSWORD -d "content=CONTENT" -H "Content-Type: application/json" "http://localhost:8000/api/comments/ID/
+    $ curl -X PUT -u USERNAME:PASSWORD -d "content=CONTENT" -H "Content-Type: application/json" "http://localhost:8000/api/comments/ID/
 
 
 **4- Delete a comment:**
 
-    Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
+Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
 
-    This action requires the ``comment.id`` that you want to delete:
+This action requires the ``comment.id`` that you want to delete:
 
-    ::
+::
 
-        $ curl -X DELETE -u USERNAME:PASSWORD -H "Content-Type: application/json" "http://localhost:8000/api/comments/ID/
+    $ curl -X DELETE -u USERNAME:PASSWORD -H "Content-Type: application/json" "http://localhost:8000/api/comments/ID/
 
 
 **5- React to a comment:**
 
-    ``POST`` is the allowed method to perform a reaction on a comment.
+``POST`` is the allowed method to perform a reaction on a comment.
 
-    Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
+Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
 
-    This action requires the ``comment.id``. and,
-    ``reaction_type``: one of ``like`` or ``dislike``
+This action requires the ``comment.id``. and,
+``reaction_type``: one of ``like`` or ``dislike``
 
-    ::
+::
 
-       $ curl -X POST -u USERNAME:PASSWORD -H "Content-Type: application/json" "http://localhost:8000/api/comments/ID/react/REACTION_TYPE/
+   $ curl -X POST -u USERNAME:PASSWORD -H "Content-Type: application/json" "http://localhost:8000/api/comments/ID/react/REACTION_TYPE/
 
 
-    PS: As in the UI, clicking the **liked** button will remove the reaction => unlike the comment. This behaviour is performed when repeating the same post request.
+PS: As in the UI, clicking the **liked** button will remove the reaction => unlike the comment. This behaviour is performed when repeating the same post request.
 
 
 **6- Report a comment**
 
-    Flagging system must be enabled by adding the attribute ``COMMENT_FLAGS_ALLOWED`` to ``settings.py``. See `Enable Flagging`_
+Flagging system must be enabled by adding the attribute ``COMMENT_FLAGS_ALLOWED`` to ``settings.py``. See `Enable Flagging`_
 
-    ``POST`` is the allowed method to report a comment.
+``POST`` is the allowed method to report a comment.
 
-    Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
+Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
 
-    This action requires the ``comment.id``.
+This action requires the ``comment.id``.
 
-    1. Set a flag:
+1. Set a flag:
 
-    .. code:: python
+.. code:: python
 
-        payload = {
-            'reason': REASON,  # number of the reason
-            'info': ''  # this is required if the reason is 100 ``Something else``
-        }
+    payload = {
+        'reason': REASON,  # number of the reason
+        'info': ''  # this is required if the reason is 100 ``Something else``
+    }
 
-    ::
+::
 
-       $ curl -X POST -u USERNAME:PASSWORD -H "Content-Type: application/json" -d '{"reason":1, "info":""}' http://localhost:8000/api/comments/ID/flag/
+   $ curl -X POST -u USERNAME:PASSWORD -H "Content-Type: application/json" -d '{"reason":1, "info":""}' http://localhost:8000/api/comments/ID/flag/
 
 
-    2. Un-flag a comment:
+2. Un-flag a comment:
 
-        To un-flag a FLAGGED comment, set reason value to `0` or remove the payload from the request.
+To un-flag a FLAGGED comment, set reason value to `0` or remove the payload from the request.
 
-    ::
+::
 
     $ curl -X POST -u USERNAME:PASSWORD http://localhost:8000/api/comments/ID/flag/
+
+
+**7- Change flagged comment state**
+
+``POST`` is the allowed method to report a comment.
+
+Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
+
+This action requires comment admin or moderator privilege.
+
+.. code:: python
+
+    payload = {
+        'state': 3  # accepted state is 3 (REJECTED) or 4 (RESOLVED) only
+    }
+
+::
+
+   $ curl -X POST -u USERNAME:PASSWORD -H "Content-Type: application/json" -d '{"state":3}' http://localhost:8000/api/comments/ID/flag/state/change/
+
+Repeating the same request and payload toggle the state to its original
 
 
 .. _`Style Customization`:
@@ -545,7 +577,7 @@ BS classes, pagination and some other template values can be now customized from
 
     1. Create ``comment`` folder inside your templates directory.
 
-    2. Create new template file ``.html`` with the same name of the default template you wish to override and put it in the right directory.
+    2. Create new template file ``.`` with the same name of the default template you wish to override and put it in the right directory.
 
     **Templates tree:**
 
@@ -554,39 +586,39 @@ BS classes, pagination and some other template values can be now customized from
         templates
         └── comment
             ├── comments
-            │   ├── apply_icon.html
-            │   ├── base.html
-            │   ├── cancel_icon.html
-            │   ├── child_comment.html
-            │   ├── comment_body.html
-            │   ├── comment_content.html
-            │   ├── comment_form.html
-            │   ├── comment_modal.html
-            │   ├── content.html
-            │   ├── create_comment.html
-            │   ├── delete_icon.html
-            │   ├── edit_icon.html
-            │   ├── pagination.html
-            │   ├── parent_comment.html
-            │   └── update_comment.html
+            │   ├── apply_icon.
+            │   ├── base.
+            │   ├── cancel_icon.
+            │   ├── child_comment.
+            │   ├── comment_body.
+            │   ├── comment_content.
+            │   ├── comment_form.
+            │   ├── comment_modal.
+            │   ├── content.
+            │   ├── create_comment.
+            │   ├── delete_icon.
+            │   ├── edit_icon.
+            │   ├── pagination.
+            │   ├── parent_comment.
+            │   └── update_comment.
             ├── flags
-            │   ├── flag_icon.html
-            │   ├── flag_modal.html
-            │   └── flags.html
+            │   ├── flag_icon.
+            │   ├── flag_modal.
+            │   └── flags.
             └── reactions
-                ├── dislike_icon.html
-                ├── like_icon.html
-                └── reactions.html
+                ├── dislike_icon.
+                ├── like_icon.
+                └── reactions.
 
 
 
 for example to override the BS classes of submit buttons and pagination style do the following:
 
-    create ``templates/comment/comments/create_comment.html``
+    create ``templates/comment/comments/create_comment.``
 
     .. code:: jinja
 
-        {% extends "comment/comments/create_comment.html" %}
+        {% extends "comment/comments/create_comment." %}
 
         {% block submit_button_cls %}
         btn btn-primary btn-block btn-sm
@@ -594,13 +626,13 @@ for example to override the BS classes of submit buttons and pagination style do
 
         {# override pagination style: #}
         {% block pagination %}
-        {% include 'comment/comments/pagination.html' with active_btn='bg-danger' text_style='text-dark' li_cls='page-item rounded mx-1' %}
+        {% include 'comment/comments/pagination.' with active_btn='bg-danger' text_style='text-dark' li_cls='page-item rounded mx-1' %}
         {% endblock pagination %}
 
 
 For full guide on the default templates and block tags name `Read the Doc`_
 
-.. _`Read the Doc`: https://django-comment-dab.readthedocs.io/styling.html/
+.. _`Read the Doc`: https://django-comment-dab.readthedocs.io/styling./
 
 
 2- CSS file:

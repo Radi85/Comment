@@ -12,8 +12,7 @@ class CommentManager(models.Manager):
         if not allowed_flags or show_flagged:
             return super().get_queryset()
 
-        return super().get_queryset().select_related('flag').annotate(
-            flags=models.F('flag__count')).filter(flags__lte=allowed_flags)
+        return super().get_queryset().exclude(flag__state__exact=2)
 
     def all_parents(self):
         return self.all_exclude_flagged().filter(parent=None)
