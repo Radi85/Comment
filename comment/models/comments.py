@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -58,8 +57,25 @@ class Comment(models.Model):
     @property
     def is_flagged(self):
         if hasattr(self, 'flag'):
-            self.flag.refresh_from_db()
-            allowed_flags = getattr(settings, 'COMMENT_FLAGS_ALLOWED', 0)
-            if allowed_flags:
-                return self.flag.count > allowed_flags
+            if not self.flag.is_flag_enabled:
+                return False
+            return self.flag.state != self.flag.UNFLAGGED
+        return False
+
+    @property
+    def has_flagged_state(self):
+        if hasattr(self, 'flag'):
+            return self.flag.state == self.flag.FLAGGED
+        return False
+
+    @property
+    def has_rejected_state(self):
+        if hasattr(self, 'flag'):
+            return self.flag.state == self.flag.REJECTED
+        return False
+
+    @property
+    def has_resolved_state(self):
+        if hasattr(self, 'flag'):
+            return self.flag.state == self.flag.RESOLVED
         return False

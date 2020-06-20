@@ -7,26 +7,11 @@ from django.utils.translation import gettext_lazy as _
 
 
 class FlagManager(models.Manager):
-
-    STATES = getattr(settings, 'COMMENT_FLAG_STATES', [
-        (1, _('flagged')),
-        (2, _('flag rejected by moderator')),
-        (3, _('creator notified')),
-        (4, _('content removed by creator')),
-        (5, _('content removed by owner'))
-    ])
-
-    State = namedtuple('State', ['value', 'state'])
-    states_list = []
-    for st in STATES:
-        states_list.append(State(*st))
-
-    def get_flag_object(self, comment):
+    def get_for_comment(self, comment):
         try:
             flag = comment.flag
         except ObjectDoesNotExist:
             flag = self.create(comment=comment)
-
         return flag
 
 

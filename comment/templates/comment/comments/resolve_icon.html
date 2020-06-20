@@ -1,0 +1,14 @@
+{% load comment_tags %}
+<button title="{% if comment.has_resolved_state %}Flag resolved{% else %}Resolve the flag{% endif %}" class="js-flag-resolve {% block resolved_btn_cls %}btn btn-link{% endblock resolved_btn_cls %}" data-state="{{ comment.flag.RESOLVED }}" data-url="{% url 'comment:flag-change-state' pk=comment.id %}">
+
+{% block resolved_img_icon %}
+<svg class="{% if comment.has_resolved_state %}flag-resolved{% endif %}"
+     xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+     fill="none" stroke="{% block resolved_icon_color %}#E74C3C{% endblock resolved_icon_color %}"
+     stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+     <path d="m11.939 20.395c-2.3228-3.8704-6.6445-2.2732-10.044-1.5539l0.10519-15.842h6c1.9144 0.42177 3.3887 1.4863 3.9187 3.1939"></path>
+     <path d="m7.2106 9.7002 3.6287 5.1401 8.115-13.216" stroke-width="2.5"></path>
+     <path d="m11.939 20.395c2.3228-3.8704 6.6445-2.2732 10.044-1.5539l-0.10519-15.841"></path>
+</svg>
+{% endblock resolved_img_icon %}
+</button>

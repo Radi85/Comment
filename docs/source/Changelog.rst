@@ -1,6 +1,13 @@
 Changelog
 =========
 
+1.6.7
+------
+
+- Add states to flag model
+- Add functionality to allow comment admin or moderator to change flag state
+- Extend the API to cover all GUI actions
+
 1.6.5
 ------
 

@@ -358,11 +358,11 @@ $(function() {
      * @param {string} info - any extra information to be passed when flagging, default=null.
      */
     var sendFlag = function($flag, action, reason = null, info = null) {
-        data = {
+        var data = {
             'reason': reason,
             'info': info,
             'action': action
-        }
+        };
         var url = $flag.attr('data-url');
         var $modal = $flag.find('.flag-modal');
         $.ajax({
@@ -446,6 +446,47 @@ $(function() {
         }
     };
 
+    const toggleFlagState = function() {
+        const $this = $(this);
+        const url = $this.data('url');
+        const state = $this.data('state');
+        const data = {
+            'state': state
+        };
+        $.ajax({
+            headers: { 'X-CSRFToken': csrfToken },
+            method: "POST",
+            url: url,
+            data: data,
+            dataType: 'json',
+            success: function (result) {
+                if (result.state === 0) return;
+                $this.parents().eq(2).addClass('flagged-comment');
+                var title = '';
+                if (state === 3) {
+                    $this.find(">:first-child").toggleClass("flag-rejected");
+                    title = $this.find(">:first-child").hasClass("flag-rejected") ? 'Flag rejected' : 'Reject the flag';
+                    const $contentModifiedBtn = $this.next();
+                    if (result.state === 3) {
+                        $contentModifiedBtn.find(">:first-child").removeClass("flag-resolved");
+                        $contentModifiedBtn.attr('title', 'Resolve the flag');
+                        $this.parents().eq(2).removeClass('flagged-comment');
+                    }
+                } else if (state === 4) {
+                    $this.find(">:first-child").toggleClass("flag-resolved");
+                    title = $this.find(">:first-child").hasClass("flag-resolved") ? 'Flag resolved' : 'Resolve the flag';
+                    const $rejectBtn = $this.prev();
+                    if (result.state === 4) {
+                        $rejectBtn.find(">:first-child").removeClass("flag-rejected");
+                        $rejectBtn.attr('title', 'Reject the flag');
+                        $this.parents().eq(2).removeClass('flagged-comment');
+                    }
+                }
+                $this.attr('title', title);
+            },
+        });
+    };
+
     $(document).on("submit", '.js-comment-form', commentFormSubmit);
     $(document).on("click", ".js-reply-link", replyLink);
     $(document).on("input keyup keypress focus", ".js-comment-input", commentInput);
@@ -457,4 +498,7 @@ $(function() {
     $(document).on("click", ".js-comment-reaction", commentReact);
     $(document).on("click", ".js-comment-flag", commentFlag);
     $(document).on("click", ".js-read-more-btn", toggleText);
+    $(document).on("click", ".js-flag-reject", toggleFlagState);
+    $(document).on("click", ".js-flag-resolve", toggleFlagState);
+
 });
