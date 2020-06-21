@@ -18,15 +18,24 @@
 
 
 # -- Project information -----------------------------------------------------
+import os
+
+
+def get_version():
+    version_file_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    with open(os.path.join(version_file_dir, 'VERSION')) as version_file:
+        ver = version_file.read().strip()
+    return ver
+
 
 project = 'django-comments-dab'
 copyright = '2018 Ⓒ, Radico'
 author = 'Radico'
 
 # The short X.Y version
-version = '1.6.0'
+version = get_version()
 # The full version, including alpha/beta/rc tags
-release = '1.6.0'
+release = get_version()
 
 
 # -- General configuration ---------------------------------------------------

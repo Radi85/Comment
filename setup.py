@@ -1,14 +1,10 @@
 import os
 from setuptools import find_packages, setup
-import subprocess as sp
 
 
 def get_version():
-    cp = sp.run(["git", "describe", "--abbrev=0", "--tags"], stdout=sp.PIPE, universal_newlines=True)
-    if cp.returncode:
-        raise ChildProcessError("Unable to retrieve tag value from Git")
-    version = cp.stdout.rstrip()
-    version = version[1:] if version.startswith('v') else version
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'VERSION')) as version_file:
+        version = version_file.read().strip()
     return version
 
 
