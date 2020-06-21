@@ -1,3 +1,4 @@
+include VERSION
 include README
 recursive-include comment *.py
 recursive-include comment/static *
