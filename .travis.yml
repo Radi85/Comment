@@ -2,11 +2,13 @@ dist: bionic
 os: linux
 language: python
 cache: pip
+
 python:
   - 3.6
   - 3.7
   - 3.8
 env:
+  - DJANGO=2.1
   - DJANGO=2.2
   - DJANGO=3.0
   - DJANGO=master
@@ -20,10 +22,20 @@ jobs:
   include:
     - stage: deploy
       python: 3.7
+      env: DJANGO=3.0
       deploy:
-        provider: pypi
-        username: "radico"
-        password:
-          secure: UX5gnwcP6MpSgxfcoYCj7rBiZMHvVjc0NTKgc5pAUZhACJL/iJ074NgtsntDQRn5hm4/ppRMTQfO4a1LJHLA4OiUAQj2cY0ejDijPPPY9zkbtcJnzIIg+gdo45ASGVdJYQOFTzWU1O0HqBRWXMtEDS34nljiESFJ5numPb34ExY+jmU1ZrCUjy6FwSD/WLNpdGQD6l2jS5GlcH7Wog8vnqHj6+BbTaYX8TeODwh9DJRKdHyGk7+hWAAQIYlI5J/XSkw36jDYvxO0UHZbYBX5cW9RUtFlvjwqRBZp0AAFJ6m8Y6isDHWSS0fzkCcvQ2krhrZ7ttY11QyV8vTiP3j4Z+aH8BlEw+yRcnM0KPexllDeHcwrxNzDNOA3R1p6UhfE+lAtJCPhNT3mn6gvuSXCQZbcWHoRW4KJZE/aIu2FNh6vE1r8UfqsipUUwV2MWJEDeAPaUMtiPisUmBdlJjGZ+EPB4VGzeefyNzlWlF0gkYfxq0cO93N4q6JokQuJ3b7gx6uYeM4i9QGueiR4XiIGRP+WYQX4XRyQ5rm3sGQ9R8oaq7lj7c7Vm7/VBEkj9BEXIVao5LIFBBocOUkOoe727JQIgz/oHRJZz+4HvVifVtR0w26w4mkvZeh8Cv8LNLsuiWJ6dpqBJS1xk53PLxRu/pRslC3e6HTV8I8rPQIXPMg=
-        on:
-          tags: true
+        - provider: pypi
+          server: https://test.pypi.org/legacy/
+          username: "radico"
+          password:
+            secure: l4o0G60jQ6vHoyO4xRWZ9xdNGHOyQxn9AuPXYsLHuDEFXn3CVukg4TPKNZhY6EHbIDKyMWEMqem2g8y6h8Z0oty5A2c54J1Lyf4gDly+qcxY2ToiXY0Cx2FXvIQQfNIKtfqsZdBJGczlPFLtWr9jUj/rNuGlyGK3G8GGDmzms775BgZzWHKVWn7wDaZRCp9qjzLY0IGaTyEJOfH22yWtK/4ZMqWDJmhEhsWOomUeqNM+56xGYW/AOetUyYyZ/x9qdhi1vmAT7Gcm8jJXOY3S69bANxNTJbZqr3HmLRHwro0twZSQ3OvyufTJHvvyvLJBPe5G6/HKqsc7ujSHL+LBmHgwQN71aPW7rkWmcLtfcNsq4eRa/ikRv27RHhejI+6h2trklVjP3BSqlWlY64f/9F7MWef20p4XKlQID6EC+bEY5ZxYAgJmmGSEVjMbtGu3nNwvMoW1J5iLk0QDtk2e4v4P5KZ53ezMtTN3DbbrxlY4VnfrxAAu+q+UvqhfThmuXhbP3LZs0vkEgMjUuRzMxehZ0E6s1F5iPbqGtD8SAQiNEh4Mbv2SIn39OzeXjvDVzCmCnYPKbd/gw54P8IIm0xK6ollWLtF1xABRohc6Zj/pRi60zsTMunmViSzVPH/fa9NsMyIpyO465EfIzZeaD+t+aBEMlJ6vAq/esXnL1cI=
+          distributions: "sdist bdist_wheel"
+          on:
+            branch: staging
+
+        - provider: pypi
+          username: "radico"
+          password:
+            secure: UX5gnwcP6MpSgxfcoYCj7rBiZMHvVjc0NTKgc5pAUZhACJL/iJ074NgtsntDQRn5hm4/ppRMTQfO4a1LJHLA4OiUAQj2cY0ejDijPPPY9zkbtcJnzIIg+gdo45ASGVdJYQOFTzWU1O0HqBRWXMtEDS34nljiESFJ5numPb34ExY+jmU1ZrCUjy6FwSD/WLNpdGQD6l2jS5GlcH7Wog8vnqHj6+BbTaYX8TeODwh9DJRKdHyGk7+hWAAQIYlI5J/XSkw36jDYvxO0UHZbYBX5cW9RUtFlvjwqRBZp0AAFJ6m8Y6isDHWSS0fzkCcvQ2krhrZ7ttY11QyV8vTiP3j4Z+aH8BlEw+yRcnM0KPexllDeHcwrxNzDNOA3R1p6UhfE+lAtJCPhNT3mn6gvuSXCQZbcWHoRW4KJZE/aIu2FNh6vE1r8UfqsipUUwV2MWJEDeAPaUMtiPisUmBdlJjGZ+EPB4VGzeefyNzlWlF0gkYfxq0cO93N4q6JokQuJ3b7gx6uYeM4i9QGueiR4XiIGRP+WYQX4XRyQ5rm3sGQ9R8oaq7lj7c7Vm7/VBEkj9BEXIVao5LIFBBocOUkOoe727JQIgz/oHRJZz+4HvVifVtR0w26w4mkvZeh8Cv8LNLsuiWJ6dpqBJS1xk53PLxRu/pRslC3e6HTV8I8rPQIXPMg=
+          on:
+            tags: true
