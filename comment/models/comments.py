@@ -56,9 +56,7 @@ class Comment(models.Model):
 
     @property
     def is_flagged(self):
-        if hasattr(self, 'flag'):
-            if not self.flag.is_flag_enabled:
-                return False
+        if hasattr(self, 'flag') and self.flag.is_flag_enabled:
             return self.flag.state != self.flag.UNFLAGGED
         return False
 

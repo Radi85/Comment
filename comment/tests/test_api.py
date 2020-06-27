@@ -1,9 +1,9 @@
 from time import sleep
 from unittest.mock import patch
 
-from django.conf import settings
 from django.test import RequestFactory
 
+from comment.conf import settings
 from comment.models import Comment
 from comment.api.serializers import get_profile_model, get_user_fields, UserSerializer, CommentCreateSerializer, \
     CommentSerializer

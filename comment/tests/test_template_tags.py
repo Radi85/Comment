@@ -1,9 +1,9 @@
 from unittest.mock import patch
 
 from django.core.exceptions import ImproperlyConfigured
-from django.conf import settings
 from django.template import TemplateSyntaxError
 
+from comment.conf import settings
 from comment.forms import CommentForm
 from comment.managers import FlagInstanceManager
 from comment.templatetags.comment_tags import (
@@ -63,7 +63,7 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         request.user = self.user_1
         data = render_comments(self.post_1, request, comments_per_page=None)
         self.assertEqual(data['comments'].count(), 3)  # parent comment only
-        self.assertEqual(data['login_url'], '/' + settings.LOGIN_URL)
+        self.assertEqual(data['login_url'], settings.LOGIN_URL)
 
         # LOGIN_URL is not provided
         setattr(settings, 'LOGIN_URL', None)
@@ -72,7 +72,7 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         self.assertIsInstance(error.exception, ImproperlyConfigured)
 
         # check pagination
-        setattr(settings, 'LOGIN_URL', '/login')
+        setattr(settings, 'LOGIN_URL', '/accounts/login')
         request = self.factory.get('/?page=2')
         request.user = self.user_1
         data = render_comments(self.post_1, request, comments_per_page=2)

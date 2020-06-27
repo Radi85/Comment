@@ -1,8 +1,8 @@
-from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+from comment.conf import settings
 from comment.models import Comment
 
 

@@ -1,10 +1,10 @@
 from time import sleep
 from unittest.mock import patch
 
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 
+from comment.conf import settings
 from comment.models import Comment, Flag, FlagInstance, Reaction, ReactionInstance
 from comment.tests.base import BaseCommentManagerTest, BaseCommentTest, BaseCommentFlagTest
 

@@ -28,8 +28,7 @@ def create_permission_groups(sender, **kwargs):
 def adjust_flagged_comments(sender, **kwargs):
     from comment.models import Comment
     for comment in Comment.objects.all():
-        if not comment.is_flagged:
-            comment.flag.toggle_flagged_state()
+        comment.flag.toggle_flagged_state()
 
 
 class CommentConfig(AppConfig):

@@ -1,5 +1,4 @@
-from django.conf import settings
-
+from comment.conf import settings
 from comment.apps import adjust_flagged_comments
 from comment.tests.base import BaseCommentTest
 

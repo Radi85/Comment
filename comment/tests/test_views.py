@@ -1,7 +1,7 @@
-from django.conf import settings
 from django.urls import reverse
 from rest_framework import status
 
+from comment.conf import settings
 from comment.models import Comment
 from comment.tests.base import BaseCommentTest, BaseCommentFlagTest
 
@@ -274,7 +274,7 @@ class SetReactionViewTest(BaseCommentTest):
         self.client.logout()
         response = self.request(url)
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
-        self.assertEqual(response.url, '/login?next={}'.format(url))
+        self.assertEqual(response.url, '{}?next={}'.format(settings.LOGIN_URL, url))
 
     def test_get_request(self):
         """Test whether GET requests are allowed or not"""
@@ -407,7 +407,7 @@ class SetFlagViewTest(BaseCommentFlagTest):
         self.client.logout()
         response = self.request(url, **self.flag_data)
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
-        self.assertEqual(response.url, '/login?next={}'.format(url))
+        self.assertEqual(response.url, '{}?next={}'.format(settings.LOGIN_URL, url))
 
     def test_get_request(self):
         """Test whether GET requests are allowed or not"""

@@ -1,8 +1,8 @@
 from django.contrib.contenttypes.models import ContentType
-from django.conf import settings
 
 from rest_framework import permissions
 
+from comment.conf import settings
 from comment.models import Comment
 from comment.utils import is_comment_admin, is_comment_moderator
 

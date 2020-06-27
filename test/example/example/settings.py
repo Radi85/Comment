@@ -135,4 +135,4 @@ PROFILE_MODEL_NAME = 'userprofile'
 #
 COMMENT_PROFILE_API_FIELDS = ('display_name', 'birth_date', 'image')
 COMMENT_FLAGS_ALLOWED = 2
-COMMENT_SHOW_FLAGGED = False
+COMMENT_SHOW_FLAGGED = True

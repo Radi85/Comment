@@ -1,9 +1,9 @@
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 
 from rest_framework import serializers
 
+from comment.conf import settings
 from comment.models import Comment, Flag, Reaction
 
 

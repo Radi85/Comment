@@ -1,9 +1,9 @@
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase, RequestFactory
 
+from comment.conf import settings
 from comment.models import Comment, FlagInstance, Reaction, ReactionInstance
 from test.example.post.models import Post
 

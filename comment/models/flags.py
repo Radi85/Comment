@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -7,6 +6,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from comment.conf import settings
 from comment.managers import FlagManager, FlagInstanceManager
 from comment.models import Comment
 
@@ -89,7 +89,7 @@ class Flag(models.Model):
         if not allowed_flags:
             return
         self.refresh_from_db()
-        if self.count > allowed_flags:
+        if self.count > allowed_flags and self.state == self.UNFLAGGED:
             self.state = self.FLAGGED
             self.save()
         else:
@@ -98,7 +98,6 @@ class Flag(models.Model):
 
 
 class FlagInstance(models.Model):
-
     flag = models.ForeignKey(Flag, on_delete=models.CASCADE, related_name='flags')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='flags')
     info = models.TextField(null=True, blank=True)

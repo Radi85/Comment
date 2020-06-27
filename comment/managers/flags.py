@@ -1,9 +1,10 @@
 from collections import namedtuple
 
 from django.db import models, IntegrityError
-from django.conf import settings
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.utils.translation import gettext_lazy as _
+
+from comment.conf import settings
 
 
 class FlagManager(models.Manager):
@@ -17,10 +18,7 @@ class FlagManager(models.Manager):
 
 class FlagInstanceManager(models.Manager):
 
-    REASONS = getattr(settings, 'COMMENT_FLAG_REASONS', [
-        (1, _('Spam | Exists only to promote a service')),
-        (2, _('Abusive | Intended at promoting hatred')),
-    ])
+    REASONS = getattr(settings, 'COMMENT_FLAG_REASONS')
     REASONS.append((100, _('Something else')))
 
     Reason = namedtuple('Reason', ['value', 'reason'])

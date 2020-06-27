@@ -1,8 +1,8 @@
 from unittest.mock import patch
 
-from django.conf import settings
 from django.test import RequestFactory
 
+from comment.conf import settings
 from comment.utils import get_model_obj, has_valid_profile, get_comment_context_data
 from comment.tests.base import BaseCommentTest
 
@@ -49,7 +49,7 @@ class UtilsTest(BaseCommentTest):
         self.assertFalse(has_profile)
 
     def test_get_comment_context_data(self):
-        setattr(settings, 'LOGIN_URL', 'login')
+        setattr(settings, 'LOGIN_URL', 'accounts/login')
         data = {
             'model_object': self.post_1,
             'model_name': 'post',
@@ -63,10 +63,10 @@ class UtilsTest(BaseCommentTest):
         request.user = self.post_1.author
         comment_context_data = get_comment_context_data(request)
         self.assertEqual(comment_context_data['comments'].count(), 3)
-        self.assertEqual(comment_context_data['login_url'], '/'+settings.LOGIN_URL)
+        self.assertEqual(comment_context_data['login_url'], '/' + settings.LOGIN_URL)
 
         data['comments_per_page'] = 2
-        setattr(settings, 'LOGIN_URL', '/login')
+        setattr(settings, 'LOGIN_URL', '/accounts/login/')
         request = self.factory.post('/', data=data)
         request.user = self.post_1.author
         comment_context_data = get_comment_context_data(request)

@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseBadRequest, JsonResponse, HttpResponseForbidden
@@ -6,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 
+from comment.conf import settings
 from comment.models import Comment, Flag, FlagInstance
 from comment.utils import is_comment_admin, is_comment_moderator
 
