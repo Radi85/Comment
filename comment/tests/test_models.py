@@ -125,17 +125,16 @@ class CommentModelTest(BaseCommentManagerTest):
         request = factory.get('/')
         request.user = self.user_1
         attr = 'COMMENT_PER_PAGE'
-        init_value = getattr(settings, attr)
         comment = self.parent_comment_3
 
         # no pagination(parent comment 3, 2, 1 belong to the same content_object_1)
-        setattr(settings, attr, 0)
+        patch.object(settings, attr, 0).start()
         comment_url = comment.content_object.get_absolute_url() + '#' + comment.urlhash
 
         self.assertEqual(comment_url, comment.get_url(request))
 
         # with pagination
-        setattr(settings, attr, 3)
+        patch.object(settings, attr, 3).start()
         # comment on first page
         self.assertEqual(comment_url, comment.get_url(request))
 
@@ -143,8 +142,6 @@ class CommentModelTest(BaseCommentManagerTest):
         comment = self.parent_comment_1
         comment_url = comment.content_object.get_absolute_url() + '?page=2' + '#' + comment.urlhash
         self.assertEqual(comment_url, comment.get_url(request))
-
-        setattr(settings, attr, init_value)
 
 
 class CommentModelManagerTest(BaseCommentManagerTest):

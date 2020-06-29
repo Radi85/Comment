@@ -1,6 +1,7 @@
 import random
 import string
 from enum import IntEnum, unique
+import hashlib
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
@@ -25,8 +26,18 @@ class CommentFailReason(IntEnum):
 def get_model_obj(app_name, model_name, model_id):
     content_type = ContentType.objects.get(app_label=app_name, model=model_name.lower())
     model_object = content_type.get_object_for_this_type(id=model_id)
-
     return model_object
+
+
+def is_gravatar_enabled():
+    return getattr(settings, 'COMMENT_USE_GRAVATAR')
+
+
+def get_gravatar_img(email):
+    if not is_gravatar_enabled() or not email:
+        return '/static/img/default.png'
+    hashed_email = hashlib.md5(email.lower().encode('utf-8')).hexdigest()
+    return f'https://www.gravatar.com/avatar/{hashed_email}'
 
 
 def get_profile_content_type():
@@ -46,6 +57,9 @@ def get_profile_content_type():
 
 
 def has_valid_profile():
+    if getattr(settings, 'COMMENT_USE_GRAVATAR'):
+        return True
+
     content_type = get_profile_content_type()
     if not content_type:
         return False
