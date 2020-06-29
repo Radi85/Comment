@@ -26,6 +26,7 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         counts = get_comments_count(self.post_1, self.user_1)
         self.assertEqual(counts, self.increment)
 
+    @patch.object(settings, 'COMMENT_USE_GRAVATAR', False)
     def test_profile_url(self):
         # success
         settings.PROFILE_APP_NAME = 'user_profile'
@@ -34,12 +35,13 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         # fail
         settings.PROFILE_APP_NAME = 'app not exist'
         url = get_profile_url(self.parent_comment_1)
-        self.assertEqual(url, '')
+        self.assertEqual(url, '/static/img/default.png')
 
         settings.PROFILE_APP_NAME = None
         url = get_profile_url(self.parent_comment_1)
-        self.assertEqual(url, '')
+        self.assertEqual(url, '/static/img/default.png')
 
+    @patch.object(settings, 'COMMENT_USE_GRAVATAR', False)
     def test_img_url(self):
         url = get_img_path(self.parent_comment_1)
         self.assertNotEqual(url, '')
@@ -53,19 +55,19 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         self.assertEqual(url, '/static/img/default.png')
 
     @patch.object(settings, 'PROFILE_APP_NAME', 'user_profile')
+    @patch.object(settings, 'COMMENT_USE_GRAVATAR', False)
     def test_profile_has_no_image_field(self):
         mocked_hasattr = patch('comment.templatetags.comment_tags.hasattr').start()
         mocked_hasattr.return_value = False
         url = get_img_path(self.parent_comment_1)
-        self.assertEqual(url, '')
+        self.assertEqual(url, '/static/img/default.png')
 
     def test_render_comments(self):
         current_login_url = getattr(settings, 'LOGIN_URL', '/profile/login/')
         request = self.factory.get('/')
         request.user = self.user_1
         comments_per_page = 'COMMENT_PER_PAGE'
-        init_comment_per_page = getattr(settings, comments_per_page)
-        setattr(settings, comments_per_page, 0)
+        patch.object(settings, comments_per_page, 0).start()
         count = self.post_1.comments.filter_parents_by_object(self.post_1).count()
         data = render_comments(self.post_1, request)
 
@@ -74,14 +76,14 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         self.assertEqual(data['login_url'], settings.LOGIN_URL)
 
         # LOGIN_URL is not provided
-        setattr(settings, 'LOGIN_URL', None)
+        patch.object(settings, 'LOGIN_URL', None).start()
         with self.assertRaises(ImproperlyConfigured) as error:
             render_comments(self.post_1, request)
         self.assertIsInstance(error.exception, ImproperlyConfigured)
 
         # check pagination
-        setattr(settings, comments_per_page, 2)
-        setattr(settings, 'LOGIN_URL', current_login_url)
+        patch.object(settings, comments_per_page, 2).start()
+        patch.object(settings, 'LOGIN_URL', current_login_url).start()
         request = self.factory.get('/?page=2')
         request.user = self.user_1
         data = render_comments(self.post_1, request)
@@ -102,8 +104,6 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         request.user = self.user_1
         data = render_comments(self.post_1, request)
         self.assertTrue(data['comments'].has_previous())
-
-        setattr(settings, comments_per_page, init_comment_per_page)
 
     def test_static_functions(self):
         self.assertIsNone(include_static())
@@ -144,7 +144,7 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         self.assertEqual(get_username_for_comment(comment), comment.user.username)
         self.assertEqual(get_username_for_comment(anonymous_comment), settings.COMMENT_ANONYMOUS_USERNAME)
 
-        setattr(settings, 'COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME', True)
+        patch.object(settings, 'COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME', True).start()
         self.assertEqual(get_username_for_comment(anonymous_comment), anonymous_comment.email.split('@')[0])
 
 

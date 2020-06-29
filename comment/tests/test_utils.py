@@ -10,8 +10,8 @@ from django.shortcuts import reverse
 from comment.conf import settings
 from comment.utils import (
     get_model_obj, has_valid_profile, get_comment_context_data, id_generator, get_comment_from_key,
-    get_user_for_request, send_email_confirmation_request, process_anonymous_commenting, CommentFailReason
-)
+    get_user_for_request, send_email_confirmation_request, process_anonymous_commenting, CommentFailReason,
+    get_gravatar_img)
 from comment.tests.base import BaseCommentUtilsTest, Comment, RequestFactory
 
 
@@ -26,28 +26,40 @@ class CommentUtilsTest(BaseCommentUtilsTest):
         self.assertIsNotNone(model_object)
         self.assertIsInstance(model_object, self.post_1.__class__)
 
+    @patch.object(settings, 'COMMENT_USE_GRAVATAR', True)
+    def test_get_gravatar_img(self):
+        # email is not provided
+        self.assertEqual(get_gravatar_img(''), '/static/img/default.png')
+
+        # email is provided
+        self.assertTrue(get_gravatar_img('test').startswith('https://www.gravatar.com/avatar/'))
+
+        # gravatar is disabled
+        patch.object(settings, 'COMMENT_USE_GRAVATAR', True).start()
+        self.assertEqual(get_gravatar_img(''), '/static/img/default.png')
+
+    @patch.object(settings, 'COMMENT_USE_GRAVATAR', False)
     def test_has_valid_profile(self):
-        setattr(settings, 'PROFILE_APP_NAME', 'user_profile')
-        setattr(settings, 'PROFILE_MODEL_NAME', 'userprofile')
-        has_profile = has_valid_profile()
-        self.assertTrue(has_profile)
+        patch.object(settings, 'PROFILE_APP_NAME', 'user_profile').start()
+        patch.object(settings, 'PROFILE_MODEL_NAME', 'userprofile').start()
+        self.assertTrue(has_valid_profile())
 
         # one of settings attribute is missing
-        setattr(settings, 'PROFILE_MODEL_NAME', '')
-        has_profile = has_valid_profile()
-        self.assertFalse(has_profile)
+        patch.object(settings, 'PROFILE_MODEL_NAME', '').start()
+        self.assertFalse(has_valid_profile())
 
         # settings attr provided with wrong value
-        setattr(settings, 'PROFILE_MODEL_NAME', 'wrong_value')
-        has_profile = has_valid_profile()
-        self.assertFalse(has_profile)
+        patch.object(settings, 'PROFILE_MODEL_NAME', 'wrong_value').start()
+        self.assertFalse(has_valid_profile())
 
         # settings attr provided, profile model has no image
-        setattr(settings, 'PROFILE_MODEL_NAME', 'userprofile')
+        patch.object(settings, 'PROFILE_MODEL_NAME', 'userprofile').start()
         mocked_hasattr = patch('comment.utils.hasattr').start()
         mocked_hasattr.return_value = False
-        has_profile = has_valid_profile()
-        self.assertFalse(has_profile)
+        self.assertFalse(has_valid_profile())
+
+        patch.object(settings, 'COMMENT_USE_GRAVATAR', True).start()
+        self.assertTrue(has_valid_profile())
 
     def test_get_comment_context_data(self):
         comment_per_page = 'COMMENT_PER_PAGE'
@@ -56,10 +68,10 @@ class CommentUtilsTest(BaseCommentUtilsTest):
         comment_allow_anonymous = 'COMMENT_ALLOW_ANONYMOUS'
         oauth = 'oauth'
 
-        init_comment_per_page = getattr(settings, comment_per_page)
-        setattr(settings, login_url, current_login_url)
-        setattr(settings, comment_allow_anonymous, False)
-        setattr(settings, comment_per_page, 0)
+        patch.object(settings, login_url, current_login_url).start()
+        patch.object(settings, comment_allow_anonymous, False).start()
+        patch.object(settings, comment_per_page, 0).start()
+
         data = {
             'model_object': self.post_1,
             'model_name': 'post',
@@ -72,7 +84,7 @@ class CommentUtilsTest(BaseCommentUtilsTest):
         request = self.factory.post('/', data=data)
         request.user = self.post_1.author
         if current_login_url.startswith('/'):
-            setattr(settings, login_url, current_login_url[1:])
+            patch.object(settings, login_url, current_login_url[1:]).start()
         comment_context_data = get_comment_context_data(request)
 
         self.assertEqual(comment_context_data['comments'].count(), self.increment)
@@ -81,9 +93,9 @@ class CommentUtilsTest(BaseCommentUtilsTest):
         self.assertEqual(comment_context_data['is_anonymous_allowed'], settings.COMMENT_ALLOW_ANONYMOUS)
         self.assertEqual(comment_context_data['oauth'], True)
 
-        setattr(settings, login_url, current_login_url)
-        setattr(settings, comment_per_page, 2)
-        setattr(settings, comment_allow_anonymous, True)
+        patch.object(settings, login_url, current_login_url).start()
+        patch.object(settings, comment_allow_anonymous, True).start()
+        patch.object(settings, comment_per_page, 2).start()
         request = self.factory.post('/', data=data)
         request.user = self.post_1.author
         comment_context_data = get_comment_context_data(request)
@@ -101,10 +113,6 @@ class CommentUtilsTest(BaseCommentUtilsTest):
         self.assertEqual(comment_context_data['comments'].paginator.per_page, 2)
         self.assertTrue(comment_context_data['comments'].has_next())
         self.assertEqual(comment_context_data[oauth], False)
-
-        setattr(settings, comment_allow_anonymous, False)
-        # set back to the default value
-        setattr(settings, comment_per_page, init_comment_per_page)
 
     def test_user_for_request(self):
         request = self.factory.get('/')

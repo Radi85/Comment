@@ -603,21 +603,21 @@ class APICommentSerializers(APIBaseTest):
 
     def test_get_profile_model(self):
         # missing settings attrs
-        delattr(settings, 'PROFILE_APP_NAME')
+        patch.object(settings, 'PROFILE_APP_NAME', None).start()
         profile = get_profile_model()
         self.assertIsNone(profile)
 
         # providing wrong attribute value, an exception is raised
-        setattr(settings, 'PROFILE_APP_NAME', 'wrong')
+        patch.object(settings, 'PROFILE_APP_NAME', 'wrong').start()
         self.assertRaises(LookupError, get_profile_model)
 
         # attribute value is None
-        setattr(settings, 'PROFILE_APP_NAME', None)
+        patch.object(settings, 'PROFILE_APP_NAME', None).start()
         profile = get_profile_model()
         self.assertIsNone(profile)
 
         # success
-        setattr(settings, 'PROFILE_APP_NAME', 'user_profile')
+        patch.object(settings, 'PROFILE_APP_NAME', 'user_profile').start()
         profile = get_profile_model()
         self.assertIsNotNone(profile)
 
@@ -632,16 +632,16 @@ class APICommentSerializers(APIBaseTest):
 
     def test_user_serializer(self):
         # PROFILE_MODEL_NAME not provided
-        delattr(settings, 'PROFILE_MODEL_NAME')
+        patch.object(settings, 'PROFILE_MODEL_NAME', None).start()
         profile = UserSerializer.get_profile(self.user_1)
         self.assertIsNone(profile)
 
         # PROFILE_MODEL_NAME is wrong
-        setattr(settings, 'PROFILE_MODEL_NAME', 'wrong')
+        patch.object(settings, 'PROFILE_MODEL_NAME', 'wrong').start()
         self.assertRaises(LookupError, UserSerializer.get_profile, self.user_1)
 
         # success
-        setattr(settings, 'PROFILE_MODEL_NAME', 'userprofile')
+        patch.object(settings, 'PROFILE_MODEL_NAME', 'userprofile').start()
         profile = UserSerializer.get_profile(self.user_1)
         self.assertIsNotNone(profile)
 

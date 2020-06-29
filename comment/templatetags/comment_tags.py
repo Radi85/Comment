@@ -2,7 +2,9 @@ from django import template
 
 from comment.models import ReactionInstance, FlagInstance
 from comment.forms import CommentForm
-from comment.utils import get_comment_context_data, get_profile_content_type, is_comment_moderator, is_comment_admin
+from comment.utils import (
+    get_comment_context_data, get_profile_content_type, is_comment_moderator, is_comment_admin, get_gravatar_img
+)
 from comment.managers import FlagInstanceManager
 from comment.conf import settings
 
@@ -35,7 +37,8 @@ def get_profile_url(obj):
     """ returns profile url of user """
     content_type = get_profile_content_type()
     if not content_type or not obj.user:
-        return ''
+        return get_gravatar_img(obj.email)
+
     profile = content_type.get_object_for_this_type(user=obj.user)
     return profile.get_absolute_url()
 
@@ -45,7 +48,7 @@ def get_img_path(obj):
     """ returns url of profile image of a user """
     content_type = get_profile_content_type()
     if not content_type or not obj.user:
-        return '/static/img/default.png'
+        return get_gravatar_img(obj.email)
 
     profile_model = content_type.model_class()
     fields = profile_model._meta.get_fields()
@@ -53,7 +56,7 @@ def get_img_path(obj):
     for field in fields:
         if hasattr(field, 'upload_to'):
             return field.value_from_object(profile).url
-    return ''
+    return get_gravatar_img(obj.email)
 
 
 @register.simple_tag(name='get_comments_count')
