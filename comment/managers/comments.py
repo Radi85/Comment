@@ -2,6 +2,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
 from comment.conf import settings
+from comment.utils import id_generator
 
 
 class CommentManager(models.Manager):
@@ -45,3 +46,10 @@ class CommentManager(models.Manager):
                 instance.save()
                 return instance
         return None
+
+    def generate_urlhash(self):
+        return id_generator(
+            prefix=settings.COMMENT_URL_PREFIX,
+            len_id=settings.COMMENT_URL_ID_LENGTH,
+            suffix=settings.COMMENT_URL_SUFFIX
+            )

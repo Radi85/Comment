@@ -1,13 +1,14 @@
+from unittest import TestCase
 from unittest.mock import patch
 
 from django.test import RequestFactory
 
 from comment.conf import settings
-from comment.utils import get_model_obj, has_valid_profile, get_comment_context_data
+from comment.utils import get_model_obj, has_valid_profile, get_comment_context_data, id_generator
 from comment.tests.base import BaseCommentTest
 
 
-class UtilsTest(BaseCommentTest):
+class CommentUtilsTest(BaseCommentTest):
     def setUp(self):
         super().setUp()
         self.factory = RequestFactory()
@@ -81,3 +82,38 @@ class UtilsTest(BaseCommentTest):
         comment_context_data = get_comment_context_data(request)
         self.assertEqual(comment_context_data['comments'].paginator.per_page, 2)
         self.assertTrue(comment_context_data['comments'].has_next())
+
+
+class UtilsTest(TestCase):
+    """Test general purpose utilities that aren't necessarily related to a comment"""
+
+    def setUp(self):
+        self.len_id = 6
+
+    def test_id_generator_length(self):
+        self.assertEqual(self.len_id, len(id_generator()))
+
+    def test_id_generator_generates_different_ids(self):
+        self.assertNotEqual(id_generator(), id_generator())
+
+    def test_id_generator_prefix(self):
+        prefix = 'comment'
+        output = id_generator(prefix=prefix)
+        self.assertEqual(True, output.startswith(prefix))
+        self.assertEqual(self.len_id + len(prefix), len(output))
+
+    def test_id_generator_suffix(self):
+        suffix = 'comment'
+        output = id_generator(suffix=suffix)
+        self.assertEqual(True, output.endswith(suffix))
+        self.assertEqual(self.len_id + len(suffix), len(output))
+
+    def test_id_generator_chars(self):
+        import string   # flake8:no qa
+        chars = string.ascii_uppercase
+        output = id_generator(chars=chars)
+        self.assertEqual(output, output.upper())
+
+    def test_id_generator_len(self):
+        len_id = 8
+        self.assertEqual(len_id, len(id_generator(len_id=len_id)))

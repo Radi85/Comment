@@ -4,7 +4,7 @@
 
 <div class="{% if comment.has_flagged_state %}flagged-comment {% endif %}{% block content_wrapper_cls %}{% if has_valid_profile %}col-9 col-md-10{% else %}co-11 mx-3{% endif %}{% endblock content_wrapper_cls %}">
     {% block comment_content %}
-    {% render_content comment.content 30 %}
+    {% render_content comment 30 %}
     {% endblock comment_content %}
     <footer class="blockquote-footer">
         <small>

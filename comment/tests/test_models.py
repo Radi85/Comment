@@ -17,6 +17,7 @@ class CommentModelTest(BaseCommentManagerTest):
         self.assertEqual(repr(parent_comment), f'comment by {parent_comment.user}: {parent_comment.content[:20]}')
         self.assertTrue(parent_comment.is_parent)
         self.assertEqual(parent_comment.replies().count(), 0)
+        self.assertIsNotNone(parent_comment.urlhash)
 
         child_comment = self.create_comment(self.content_object_1, parent=parent_comment)
         self.assertIsNotNone(child_comment)
@@ -24,6 +25,7 @@ class CommentModelTest(BaseCommentManagerTest):
         self.assertEqual(repr(child_comment), f'reply by {child_comment.user}: {child_comment.content[:20]}')
         self.assertFalse(child_comment.is_parent)
         self.assertEqual(parent_comment.replies().count(), 1)
+        self.assertIsNotNone(child_comment.urlhash)
 
         self.assertFalse(parent_comment.is_edited)
         parent_comment.content = 'updated'
@@ -109,6 +111,16 @@ class CommentModelTest(BaseCommentManagerTest):
 
         mocked_hasattr.return_value = False
         self.assertFalse(comment.has_resolved_state)
+
+    @patch('comment.managers.CommentManager.generate_urlhash')
+    def test_urlhash_is_unique(self, mocked_generate_urlhash):
+        mocked_generate_urlhash.side_effect = ['first_urlhash', 'first_urlhash', 'second_urlhash']
+        first_comment = self.create_comment(self.content_object_1)
+        self.assertEqual(first_comment.urlhash, 'first_urlhash')
+        mocked_generate_urlhash.assert_called_once()
+        second_comment = self.create_comment(self.content_object_1)
+        self.assertEqual(second_comment.urlhash, 'second_urlhash')
+        self.assertEqual(mocked_generate_urlhash.call_count, 3)
 
 
 class CommentModelManagerTest(BaseCommentManagerTest):

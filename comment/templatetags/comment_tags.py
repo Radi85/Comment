@@ -77,11 +77,11 @@ def render_comments(obj, request, oauth=False, comments_per_page=10):
 register.inclusion_tag('comment/comments/base.html')(render_comments)
 
 
-def render_content(content, number):
+def render_content(comment, number):
     number = int(number)
-    content_words = content.split(' ')
+    content_words = comment.content.split()
     if not number or len(content_words) <= number:
-        text_1 = content
+        text_1 = comment.content
         text_2 = None
     else:
         text_1 = ' '.join(content_words[:number])
@@ -89,7 +89,8 @@ def render_content(content, number):
 
     return {
         'text_1': text_1,
-        'text_2': text_2
+        'text_2': text_2,
+        'urlhash': comment.urlhash
     }
 
 

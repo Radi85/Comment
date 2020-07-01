@@ -4,7 +4,7 @@ from comment.models import Comment, Flag, FlagInstance, Reaction, ReactionInstan
 
 
 class CommentModelAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'posted', 'edited', 'content_type', 'user')
+    list_display = ('__str__', 'posted', 'edited', 'content_type', 'user', 'urlhash')
     search_fields = ('content',)
 
     class Meta:
