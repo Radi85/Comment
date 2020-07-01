@@ -1,4 +1,7 @@
-<p class="js-comment-content {% block c_text_cls %}mb-0{% endblock c_text_cls %}">
+<p class="js-comment-content {% block c_text_cls %}mb-0{% endblock c_text_cls %}" id="{{ urlhash }}">
+    {% block comment_urlhash %}
+    {% include "comment/comments/urlhash.html" with urlhash=urlhash %}
+    {% endblock comment_urlhash %}
     {% if text_2 %}
         {{ text_1 }}
         <span class="d-none">{{ text_2 }}</span>

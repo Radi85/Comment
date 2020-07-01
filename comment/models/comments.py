@@ -13,6 +13,11 @@ class Comment(models.Model):
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
     content = models.TextField()
+    urlhash = models.CharField(
+        max_length=50,
+        unique=True,
+        editable=False
+        )
     posted = models.DateTimeField(auto_now_add=True)
     edited = models.DateTimeField(auto_now=True)
 
@@ -37,6 +42,16 @@ class Comment(models.Model):
         if include_flagged:
             return self.__class__.objects.filter(parent=self).order_by('posted')
         return self.__class__.objects.all_exclude_flagged().filter(parent=self).order_by('posted')
+
+    def _set_unique_urlhash(self):
+        if not self.urlhash:
+            self.urlhash = self.__class__.objects.generate_urlhash()
+            while self.__class__.objects.filter(urlhash=self.urlhash).exists():
+                self.urlhash = self.__class__.objects.generate_urlhash()
+
+    def save(self, *args, **kwargs):
+        self._set_unique_urlhash()
+        super(Comment, self).save(*args, **kwargs)
 
     @property
     def is_parent(self):

@@ -1,9 +1,11 @@
+import random
+import string
+
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from comment.conf import settings
-from comment.models import Comment
 
 
 def get_model_obj(app_name, model_name, model_id):
@@ -70,10 +72,9 @@ def get_comment_context_data(request, model_object=None, comments_per_page=0):
     if not comments_per_page:
         comments_per_page = request.POST.get('comments_per_page') or request.GET.get('comments_per_page')
 
-    comments = Comment.objects.filter_parents_by_object(
+    comments = model_object.comments.filter_parents_by_object(
         model_object, include_flagged=is_comment_moderator(request.user)
     )
-
     if comments_per_page:
         page = request.GET.get('page') or request.POST.get('page')
         comments = paginate_comments(comments, comments_per_page, page)
@@ -101,3 +102,7 @@ def get_comment_context_data(request, model_object=None, comments_per_page=0):
         'allowed_flags': allowed_flags,
         'oauth': oauth
     }
+
+
+def id_generator(prefix='', chars=string.ascii_lowercase, len_id=6, suffix=''):
+    return prefix + ''.join(random.choice(chars) for _ in range(len_id)) + suffix

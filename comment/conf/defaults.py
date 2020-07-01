@@ -10,3 +10,6 @@ COMMENT_FLAG_REASONS = [
     (1, _('Spam | Exists only to promote a service')),
     (2, _('Abusive | Intended at promoting hatred')),
 ]
+COMMENT_URL_PREFIX = 'comment-'
+COMMENT_URL_SUFFIX = ''
+COMMENT_URL_ID_LENGTH = 8

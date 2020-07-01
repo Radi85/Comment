@@ -2,6 +2,13 @@
     font-family: sans-serif, serif;
     font-size: 1.1rem;
 }
+.js-comment-content>.js-comment-urlhash {
+    opacity: 1;
+    padding-left: 10px;
+    font-size: 0.9em;
+    text-decoration: none;
+    transition: opacity 200ms ease-in-out;
+}
 #comments .border-bottom {
     border-bottom: 3px solid #00bc8c !important;
 }
@@ -70,11 +77,10 @@ input#search-input:focus::placeholder {
 .flag-modal textarea {
     display: none;
 }
-
 .flagged-comment {
     color: #999;
 }
-
-.flag-rejected, .flag-resolved {
+.flag-rejected,
+.flag-resolved {
     stroke: #00bc8c;
 }

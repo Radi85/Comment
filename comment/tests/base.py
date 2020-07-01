@@ -1,34 +1,39 @@
+from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
-from django.test import TestCase, RequestFactory
+from django.db import connection
+from django.db.migrations.executor import MigrationExecutor
+from django.test import TestCase, RequestFactory, TransactionTestCase
 
 from comment.conf import settings
 from comment.models import Comment, FlagInstance, Reaction, ReactionInstance
 from test.example.post.models import Post
 
 
+User = get_user_model()
+
+
 class BaseCommentTest(TestCase):
     def setUp(self):
-        user_model = get_user_model()
-        self.user_1 = user_model.objects.create_user(
+        self.user_1 = User.objects.create_user(
                     username="test-1",
                     email="test-1@acme.edu",
                     password="1234"
         )
-        self.user_2 = user_model.objects.create_user(
+        self.user_2 = User.objects.create_user(
             username="test-2",
             email="test-2@acme.edu",
             password="1234"
         )
-        self.moderator = user_model.objects.create_user(
+        self.moderator = User.objects.create_user(
             username="moderator",
             email="test-2@acme.edu",
             password="1234"
         )
         moderator_group = Group.objects.filter(name='comment_moderator').first()
         moderator_group.user_set.add(self.moderator)
-        self.admin = user_model.objects.create_user(
+        self.admin = User.objects.create_user(
             username="admin",
             email="test-2@acme.edu",
             password="1234"
@@ -139,3 +144,58 @@ class BaseTemplateTagsTest(BaseCommentTest):
         self.child_comment_1 = self.create_comment(self.content_object_1, parent=self.parent_comment_1)
         self.child_comment_2 = self.create_comment(self.content_object_1, parent=self.parent_comment_2)
         self.child_comment_3 = self.create_comment(self.content_object_1, parent=self.parent_comment_2)
+
+
+class BaseCommentMigrationTest(TransactionTestCase):
+    """
+    Test specific migrations
+        Make sure that `self.migrate_from` and `self.migrate_to` are defined.
+    """
+
+    @property
+    def app(self):
+        return apps.get_containing_app_config(type(self).__module__).name
+
+    migrate_from = None
+    migrate_to = None
+
+    def setUp(self):
+        assert self.migrate_to and self.migrate_from, \
+            f'TestCase {type(self).__name} must define migrate_to and migrate_from properties'
+        self.migrate_from = [(self.app, self.migrate_from)]
+        self.migrate_to = [(self.app, self.migrate_to)]
+        executor = MigrationExecutor(connection)
+        old_apps = executor.loader.project_state(self.migrate_from).apps
+
+        self.user = User.objects.create_user(username="tester-1")
+        self.post = Post.objects.create(
+            author=self.user,
+            title="post 3",
+            body="third post body"
+        )
+        content_type = ContentType.objects.get(model='post')
+        self.ct_object = content_type.get_object_for_this_type(id=self.post.id)
+
+        # revert to the original migration
+        executor.migrate(self.migrate_from)
+        # ensure return to the latest migration, even if the test fails
+        self.addCleanup(self.force_migrate)
+
+        self.setUpBeforeMigration(old_apps)
+
+        executor = MigrationExecutor(connection)
+        executor.loader.build_graph()
+        executor.migrate(self.migrate_to)
+
+        self.apps = executor.loader.project_state(self.migrate_to).apps
+
+    def setUpBeforeMigration(self, apps):
+        pass
+
+    def force_migrate(self, migrate_to=None):
+        executor = MigrationExecutor(connection)
+        executor.loader.build_graph()  # reload.
+        if migrate_to is None:
+            # get latest migration of current app
+            migrate_to = [key for key in executor.loader.graph.leaf_nodes() if key[0] == self.app]
+        executor.migrate(migrate_to)
