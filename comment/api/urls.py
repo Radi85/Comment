@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 from rest_framework.urlpatterns import format_suffix_patterns
 
 from comment.api import views
@@ -14,6 +14,7 @@ urlpatterns = [
         views.CommentDetailForFlagStateChange.as_view(),
         name='comments-flag-state-change'
     ),
+    re_path(r'^comments/confirm/(?P<key>[^/]+)/$', views.ConfirmComment.as_view(), name='confirm-comment'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

@@ -1,0 +1,18 @@
+{% load comment_tags %}
+{% load i18n %}
+{% include_static %}
+{% include_bootstrap %}
+<html lang="en">
+  <head>
+    <title>{% block title %}{% trans "Comment discarded" %}.{% endblock %}</title>
+  </head>
+  <body class="container-fluid text-center">
+    {% include "comment/comments/messages.html" %}
+    <div class="pl-3 pr-3">
+      {% block content %}
+      <h3 class="">{% trans "Comment can't be verified." %}</h3>
+      <p><i>{% trans "Sorry, your comment has been automatically discarded." %}</i></p>
+      {% endblock content %}
+    </div>
+  </body>
+</html>

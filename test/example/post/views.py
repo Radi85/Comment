@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
 from django.views.generic import ListView, DetailView, UpdateView
 from django.contrib.auth.decorators import login_required
-from post.models import Post
-from post.forms import PostForm
+
+from .models import Post
+from .forms import PostForm
 
 
 class PostListView(ListView):

@@ -1,20 +1,23 @@
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import gettext_lazy as _
 from rest_framework import generics, permissions, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from comment.api.serializers import CommentSerializer, CommentCreateSerializer
 from comment.api.permissions import (
     IsOwnerOrReadOnly, ContentTypePermission, ParentIdPermission, FlagEnabledPermission, CanChangeFlaggedCommentState
 )
 from comment.models import Comment, Reaction, ReactionInstance, Flag, FlagInstance
+from comment.utils import get_comment_from_key, CommentFailReason
 
 
 class CommentCreate(generics.CreateAPIView):
     serializer_class = CommentCreateSerializer
-    permission_classes = (permissions.IsAuthenticated, ContentTypePermission, ParentIdPermission)
+    permission_classes = (ContentTypePermission, ParentIdPermission)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -23,6 +26,7 @@ class CommentCreate(generics.CreateAPIView):
         context['app_name'] = self.request.GET.get("app_name")
         context['model_id'] = self.request.GET.get("model_id")
         context['parent_id'] = self.request.GET.get("parent_id")
+        context['email'] = self.request.GET.get('email', None)
         return context
 
 
@@ -111,13 +115,13 @@ class CommentDetailForFlagStateChange(generics.RetrieveAPIView):
         comment = get_object_or_404(Comment, id=kwargs.get('pk'))
         flag = Flag.objects.get_for_comment(comment)
         if not comment.is_flagged:
-            raise PermissionDenied(detail='You do not have permission to perform this action.')
+            raise PermissionDenied(detail=_('You do not have permission to perform this action.'))
         state = request.data.get('state') or request.POST.get('state')
         try:
             state = flag.get_clean_state(state)
             if not comment.is_edited and state == flag.RESOLVED:
                 return Response(
-                    {'error': 'The comment must be edited before resolving the flag'},
+                    {'error': _('The comment must be edited before resolving the flag')},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             flag.toggle_state(state, request.user)
@@ -126,3 +130,17 @@ class CommentDetailForFlagStateChange(generics.RetrieveAPIView):
 
         serializer = self.get_serializer(comment)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ConfirmComment(APIView):
+    def get(self, request, *args, **kwargs):
+        key = kwargs.get('key', None)
+        comment = get_comment_from_key(key)
+
+        if comment.why_invalid == CommentFailReason.BAD:
+            return Response({'error': _('Bad Signature, Comment discarded')}, status=status.HTTP_400_BAD_REQUEST)
+
+        if comment.why_invalid == CommentFailReason.EXISTS:
+            return Response({'error': _('Comment already verified')}, status=status.HTTP_200_OK)
+
+        return Response(CommentSerializer(comment.obj).data, status=status.HTTP_201_CREATED)

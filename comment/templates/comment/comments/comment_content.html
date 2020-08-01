@@ -2,13 +2,19 @@
 {% load i18n %}
 
 
-<div class="js-updated-content {% if comment.has_flagged_state %}flagged-comment {% endif %}{% block content_wrapper_cls %}{% if has_valid_profile %}col-9 col-md-10{% else %}co-11 mx-3{% endif %}{% endblock content_wrapper_cls %}">
+<div class="js-updated-comment {% if comment.has_flagged_state %}flagged-comment {% endif %}{% block content_wrapper_cls %}{% if has_valid_profile %}col-9 col-md-10{% else %}co-11 mx-3{% endif %}{% endblock content_wrapper_cls %}" id="{{ comment.urlhash }}">
     {% block comment_content %}
     {% render_content comment 30 %}
     {% endblock comment_content %}
     <div class="blockquote-footer">
         <small>
-            <a class="{% block username_cls %}{% endblock username_cls %}" href="{% get_profile_url comment %}" title="View {{ comment.user }} profile">{{ comment.user }}</a> |
+            {% get_profile_url comment as profile_url %}
+            <{% if comment.user %}a{% else %}span{% endif %}
+                class="{% block username_cls %}{% endblock username_cls %}" {% if profile_url %}href="{{ profile_url }}"{% endif %}
+                title="{% if comment.user %}{% blocktrans %}view {{ comment.user }} profile{% endblocktrans %}{% else %}{% trans 'comment by anonymous user' %}{% endif %}"
+            >
+                {% get_username_for_comment comment %}
+            </{% if comment.user %}a{% else %}span{% endif %}> |
             {% if comment.is_edited %}
             <span class="font-italic" title="{% trans 'Edited' %}">{% blocktrans with edited_time=comment.edited|timesince %}Edited: {{ edited_time }} ago{% endblocktrans %}</span>
             {% else %}

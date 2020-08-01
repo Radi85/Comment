@@ -1,5 +1,6 @@
 {% load comment_tags %}
-{% if user.is_authenticated %}
+{% load i18n %}
+{% if is_anonymous_allowed or user.is_authenticated %}
     <form class="js-comment-form" method="post" data-url="{% url 'comment:create' %}">
         {% csrf_token %}
         <div class="row">
@@ -22,10 +23,15 @@
             </div>
         </div>
     </form>
-{% else %}
+{% endif %}
+{% if user.is_anonymous %}
     <div class="d-flex mb-3">
-        <p class="text-danger {% if comment %}h7 my-auto {% endif %}"><em>Join discussion:</em></p>
-        <a class="mx-2 text-success {% if comment %}h7 my-auto {% endif %}" href="{{login_url}}?next={{request.path}}">Login</a>
+        {% if is_anonymous_allowed %}
+            <p class="text-danger {% if comment %}h7 my-auto {% endif %}"><em>{% trans "Comment Anonymously or:" %}</em></p>
+            <a class="mx-2 text-success {% if comment %}h7 my-auto {% endif %}" href="{{login_url}}?next={{request.path}}">{% trans "Login to keep your conversations intact" %}</a>
+        {% else %}
+            <a class="mx-2 text-success {% if comment %}h7 my-auto {% endif %}" href="{{login_url}}?next={{request.path}}">{% trans "Login to join the discussion" %}</a>
+        {% endif %}
         {% if oauth %}
             {% block oauth %}
             <a class="mx-1 my-0 h4 github-color" href="{% url 'social:begin' 'github' %}?next={{request.path}}"><i class="fa fa-github-square"></i></a>

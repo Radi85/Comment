@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.utils import timezone
 
 from comment.conf import settings
 from comment.models import Comment, Flag, FlagInstance, Reaction, ReactionInstance
@@ -27,11 +28,17 @@ class CommentModelTest(BaseCommentManagerTest):
         self.assertEqual(parent_comment.replies().count(), 1)
         self.assertIsNotNone(child_comment.urlhash)
 
-        self.assertFalse(parent_comment.is_edited)
-        parent_comment.content = 'updated'
+    def test_is_edited(self):
+        comment = self.create_comment(self.content_object_1)
+        self.assertFalse(comment.is_edited)
+        comment.content = 'updated'
         sleep(1)
-        parent_comment.save()
-        self.assertTrue(parent_comment.is_edited)
+        comment.save()
+        self.assertTrue(comment.is_edited)
+
+    def test_is_edited_for_anonymous_comment(self):
+        comment = self.create_anonymous_comment(posted=timezone.now() - timezone.timedelta(days=1))
+        self.assertFalse(comment.is_edited)
 
     def test_replies_method(self):
         self.assertEqual(self.parent_comment_2.replies().count(), 3)
@@ -121,6 +128,38 @@ class CommentModelTest(BaseCommentManagerTest):
         second_comment = self.create_comment(self.content_object_1)
         self.assertEqual(second_comment.urlhash, 'second_urlhash')
         self.assertEqual(mocked_generate_urlhash.call_count, 3)
+
+    def test_comment_email(self):
+        comment = self.parent_comment_1
+        self.assertEqual(comment.email, comment.user.email)
+
+    def test_get_url(self):
+        from comment.tests.base import RequestFactory
+
+        factory = RequestFactory()
+        request = factory.get('/')
+        request.user = self.user_1
+        attr = 'COMMENT_PER_PAGE'
+        init_value = getattr(settings, attr)
+        comment = self.parent_comment_3
+
+        # no pagination(parent comment 3, 2, 1 belong to the same content_object_1)
+        setattr(settings, attr, 0)
+        comment_url = comment.content_object.get_absolute_url() + '#' + comment.urlhash
+
+        self.assertEqual(comment_url, comment.get_url(request))
+
+        # with pagination
+        setattr(settings, attr, 3)
+        # comment on first page
+        self.assertEqual(comment_url, comment.get_url(request))
+
+        # comment on the second page
+        comment = self.parent_comment_1
+        comment_url = comment.content_object.get_absolute_url() + '?page=2' + '#' + comment.urlhash
+        self.assertEqual(comment_url, comment.get_url(request))
+
+        setattr(settings, attr, init_value)
 
 
 class CommentModelManagerTest(BaseCommentManagerTest):

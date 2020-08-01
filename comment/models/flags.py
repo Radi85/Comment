@@ -20,10 +20,10 @@ class Flag(models.Model):
     REJECTED = 3
     RESOLVED = 4
     STATES_CHOICES = [
-        (UNFLAGGED, 'Unflagged'),
-        (FLAGGED, 'Flagged'),
-        (REJECTED, 'Flag rejected by the moderator'),
-        (RESOLVED, 'Comment modified by the author'),
+        (UNFLAGGED, _('Unflagged')),
+        (FLAGGED, _('Flagged')),
+        (REJECTED, _('Flag rejected by the moderator')),
+        (RESOLVED, _('Comment modified by the author')),
     ]
 
     comment = models.OneToOneField(Comment, on_delete=models.CASCADE)

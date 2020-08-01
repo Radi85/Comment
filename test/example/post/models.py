@@ -34,7 +34,7 @@ class Post(models.Model):
                 _title = _title[:45]
             unique_slug = self.slug = slugify(_title)
             count = 1
-            while Post.objects.filter(slug=unique_slug).exists():
+            while self.__class__.objects.filter(slug=unique_slug).exists():
                 unique_slug = "{0}-{1}".format(self.slug, count)
                 count += 1
             self.slug = unique_slug

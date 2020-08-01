@@ -1,7 +1,5 @@
 from unittest.mock import patch
 
-from django.apps import apps
-
 from comment.conf import settings
 from comment.apps import adjust_flagged_comments
 from comment.tests.base import BaseCommentTest, BaseCommentMigrationTest
@@ -41,29 +39,25 @@ class MigrationTest(BaseCommentTest):
         self.assertTrue(comment_1.is_flagged)
 
 
-class CommentURLHashMigrationTest(BaseCommentMigrationTest):
+class CommentMigrationTest(BaseCommentMigrationTest):
     migrate_from = '0007_auto_20200620_1259'
-    migrate_to = '0008_comment_urlhash'
-
-    def setUp(self):
-        super().setUp()
-        self.current_model = apps.get_model('comment', 'Comment')
+    migrate_to = '0009_auto_20200811_1945'
 
     def create_comment(self):
         self.instance += 1
-        return self.previous_model.objects.create(
+        return self.old_model.objects.create(
             content_type_id=self.ct_object.id,
             object_id=self.instance,
-            content=f'test urlhash - {self.instance}',
-            user_id=self.user.id
+            content=f'test migration - {self.instance}',
+            user_id=self.user.id,
         )
 
     def setUpBeforeMigration(self, apps):
         self.instance = 0
-        self.previous_model = apps.get_model('comment', 'Comment')
         self.comment = self.create_comment()
 
-    def test_urlhash_migrated(self):
-        comment = self.current_model.objects.get(id=self.comment.id)
-        
-        self.assertIsNotNone(comment.urlhash)
+    def test_email_and_urlhash_migrated(self):
+        comment = self.new_model.objects.get(id=self.comment.id)
+
+        self.assertEqual(hasattr(comment, 'urlhash'), True)
+        self.assertEqual(comment.email, comment.user.email)

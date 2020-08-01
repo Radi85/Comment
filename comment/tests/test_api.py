@@ -2,6 +2,8 @@ from time import sleep
 from unittest.mock import patch
 
 from django.test import RequestFactory
+from django.core import signing
+from rest_framework import status
 
 from comment.conf import settings
 from comment.models import Comment
@@ -11,7 +13,8 @@ from comment.api.permissions import (
     IsOwnerOrReadOnly, ContentTypePermission, ParentIdPermission, FlagEnabledPermission, CanChangeFlaggedCommentState
 )
 from comment.api.views import CommentList
-from comment.tests.base import BaseCommentTest
+from comment.tests.base import BaseCommentTest, timezone
+from comment.tests.test_utils import BaseAnonymousCommentTest
 
 
 class APIBaseTest(BaseCommentTest):
@@ -186,6 +189,8 @@ class APICommentViewsTest(APIBaseTest):
             'app_name': 'post',
             'model_id': 1
         }
+        self.comment_count = Comment.objects.filter_parents_by_object(self.post_1).count()
+        self.all_comments = Comment.objects.all().count()
 
     def get_url(self, base_url=None, **kwargs):
         if not base_url:
@@ -195,6 +200,15 @@ class APICommentViewsTest(APIBaseTest):
             for (key, val) in kwargs.items():
                 base_url += str(key) + '=' + str(val) + '&'
         return base_url.rstrip('&')
+
+    def increase_count(self, parent=False):
+        if parent:
+            self.comment_count += 1
+        self.all_comments += 1
+
+    def comment_count_test(self):
+        self.assertEqual(Comment.objects.filter_parents_by_object(self.post_1).count(), self.comment_count)
+        self.assertEqual(Comment.objects.all().count(), self.all_comments)
 
     def test_can_retrieve_comments_list(self):
         response = self.client.get(self.get_url(**self.url_data))
@@ -253,10 +267,8 @@ class APICommentViewsTest(APIBaseTest):
 
     def test_create_comment(self):
         # create parent comment
-        comments_count = Comment.objects.filter_parents_by_object(self.post_1).count()
-        all_comments = Comment.objects.all().count()
-        self.assertEqual(comments_count, 3)
-        self.assertEqual(all_comments, 8)
+        self.assertEqual(self.comment_count, 3)
+        self.assertEqual(self.all_comments, 8)
 
         base_url = '/api/comments/create/'
         data = {'content': 'new parent comment from api'}
@@ -264,8 +276,11 @@ class APICommentViewsTest(APIBaseTest):
 
         response = self.client.post(self.get_url(base_url, **url_data), data=data)
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(Comment.objects.filter_parents_by_object(self.post_1).count(), comments_count + 1)
-        self.assertEqual(Comment.objects.all().count(), all_comments + 1)
+        comment_id = response.json()['id']
+        # test email in database for authenticated user
+        self.assertEqual(Comment.objects.get(id=comment_id).email, response.wsgi_request.user.email)
+        self.increase_count(parent=True)
+        self.comment_count_test()
 
         # create child comment
         url_data['parent_id'] = 1
@@ -273,16 +288,34 @@ class APICommentViewsTest(APIBaseTest):
 
         response = self.client.post(self.get_url(base_url, **url_data), data=data)
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(Comment.objects.filter_parents_by_object(self.post_1).count(), comments_count + 1)
-        self.assertEqual(Comment.objects.all().count(), all_comments + 2)
+        self.increase_count()
+        self.comment_count_test()
 
         # create comment with parent value = 0
         url_data['parent_id'] = 0
         data = {'content': 'new comment from api'}
         response = self.client.post(self.get_url(base_url, **url_data), data=data)
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(Comment.objects.filter_parents_by_object(self.post_1).count(), comments_count + 2)
-        self.assertEqual(Comment.objects.all().count(), all_comments + 3)
+        self.increase_count(parent=True)
+        self.comment_count_test()
+
+        # test anonymous commenting
+        self.client.logout()
+
+        # test invalid data
+        data = {'content': 'new anonymous comment from api', 'email': ''}
+        url = self.get_url(base_url, **url_data)
+        response = self.client.post(url, data=data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json()['email'], ['Email is required for posting anonymous comments.'])
+        # test valid data
+        data = {'content': 'new anonymous comment from api', 'email': 'a@a.com'}
+
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        # no count should change
+        self.comment_count_test()
 
     def test_cannot_create_child_comment(self):
         # parent id not integer
@@ -556,7 +589,63 @@ class APICommentDetailForFlagStateChangeTest(APIBaseTest):
         self.assertEqual(self.comment_1.flag.state, self.comment_1.flag.FLAGGED)
 
 
+class APIConfirmCommentViewTest(BaseAnonymousCommentTest, APIBaseTest):
+    def setUp(self):
+        super().setUp()
+        self.client.logout()
+        self.init_count = Comment.objects.all().count()
+
+    def get_url(self, key=None):
+        if not key:
+            key = self.key
+
+        return f'/api/comments/confirm/{key}/'
+
+    def test_bad_signature(self):
+        key = self.key + 'invalid'
+        response = self.client.get(self.get_url(key))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json()['error'], 'Bad Signature, Comment discarded')
+        self.assertEqual(Comment.objects.all().count(), self.init_count)
+
+    def test_comment_exists(self):
+        comment_dict = self.comment_dict.copy()
+        comment = self.create_anonymous_comment(posted=timezone.now(), email='a@a.com')
+        init_count = self.init_count + 1
+        comment_dict.update({
+            'posted': str(comment.posted),
+            'email': comment.email
+        })
+        key = signing.dumps(comment_dict)
+
+        response = self.client.get(self.get_url(key))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()['error'], 'Comment already verified')
+        self.assertEqual(Comment.objects.all().count(), init_count)
+
+    def test_success(self):
+        response = self.client.get(self.get_url())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        comment = Comment.objects.get(email=self.comment_obj.email, posted=self.time_posted)
+        self.assertEqual(response.data, CommentSerializer(comment).data)
+        self.assertEqual(Comment.objects.all().count(), self.init_count + 1)
+
+
 class APICommentSerializers(APIBaseTest):
+    def setUp(self):
+        super().setUp()
+        self.parent_count = Comment.objects.filter_parents_by_object(self.post_1).count()
+        self.all_count = Comment.objects.all().count()
+
+    def increase_count(self, parent=False):
+        if parent:
+            self.parent_count += 1
+        self.all_count += 1
+
+    def comment_count_test(self):
+        self.assertEqual(Comment.objects.filter_parents_by_object(self.post_1).count(), self.parent_count)
+        self.assertEqual(Comment.objects.all().count(), self.all_count)
+
     def test_get_profile_model(self):
         # missing settings attrs
         delattr(settings, 'PROFILE_APP_NAME')
@@ -610,28 +699,34 @@ class APICommentSerializers(APIBaseTest):
         self.assertIsNone(profile)
 
     def test_comment_create_serializer(self):
-        parent_count = Comment.objects.filter_parents_by_object(self.post_1).count()
-        self.assertEqual(parent_count, 3)
-        all_count = Comment.objects.all().count()
-        self.assertEqual(all_count, 8)
+        self.assertEqual(self.parent_count, 3)
+        self.assertEqual(self.all_count, 8)
+
+        factory = RequestFactory()
+        request = factory.get('/')
+        request.user = self.user_1
         data = {
             'model_name': 'post',
             'app_name': 'post',
             'model_id': self.post_1.id,
             'user': self.user_1,
             'parent_id': None,
+            'request': request
         }
+        settings.COMMENT_ALLOW_ANONYMOUS = False
+
         serializer = CommentCreateSerializer(context=data)
+        self.assertIsNone(serializer.fields.get('email'))
         comment = serializer.create(validated_data={'content': 'test'})
-        self.assertEqual(Comment.objects.filter_parents_by_object(self.post_1).count(), parent_count + 1)
-        self.assertEqual(Comment.objects.all().count(), all_count + 1)
+        self.increase_count(parent=True)
+        self.comment_count_test()
         self.assertIsNotNone(comment)
 
         data['parent_id'] = 0
         serializer = CommentCreateSerializer(context=data)
         comment = serializer.create(validated_data={'content': 'test'})
-        self.assertEqual(Comment.objects.filter_parents_by_object(self.post_1).count(), parent_count + 2)
-        self.assertEqual(Comment.objects.all().count(), all_count + 2)
+        self.increase_count(parent=True)
+        self.comment_count_test()
         self.assertIsNotNone(comment)
 
         # get parent
@@ -647,8 +742,8 @@ class APICommentSerializers(APIBaseTest):
         data['parent_id'] = 1
         serializer = CommentCreateSerializer(context=data)
         comment = serializer.create(validated_data={'content': 'test'})
-        self.assertEqual(Comment.objects.filter_parents_by_object(self.post_1).count(), parent_count + 2)
-        self.assertEqual(Comment.objects.all().count(), all_count + 3)
+        self.increase_count()
+        self.comment_count_test()
         self.assertIsNotNone(comment)
 
         # get parent
@@ -664,6 +759,21 @@ class APICommentSerializers(APIBaseTest):
         reply_count = serializer.get_reply_count(self.comment_4)
         self.assertEqual(replies, [])
         self.assertEqual(reply_count, 0)
+
+        # test anonymous commenting
+        from django.contrib.auth.models import AnonymousUser
+        request.user = AnonymousUser()
+        settings.COMMENT_ALLOW_ANONYMOUS = True
+        serializer = CommentCreateSerializer(context=data)
+
+        self.assertIsNotNone(serializer.fields['email'])
+        comment = serializer.create(validated_data={
+            'content': 'anonymous posting',
+            'email': 'abc@abc.com'
+        })
+        # no creation occurs until comment is verified
+        self.comment_count_test()
+        self.assertIsNotNone(comment)
 
     def test_passing_context_to_serializer(self):
         serializer = CommentSerializer(self.comment_1)

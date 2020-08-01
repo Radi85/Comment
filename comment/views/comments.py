@@ -1,16 +1,23 @@
-from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import JsonResponse
 from django.core.exceptions import PermissionDenied
 from django.template.loader import render_to_string
 from django.views.generic import FormView
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
+from django.views import View
+from django.contrib import messages
 
 from comment.models import Comment
 from comment.forms import CommentForm
-from comment.utils import get_comment_context_data, get_model_obj, is_comment_admin, is_comment_moderator
+from comment.utils import (
+    get_comment_context_data, get_model_obj, is_comment_admin, is_comment_moderator,
+    get_comment_from_key, process_anonymous_commenting, get_user_for_request, CommentFailReason)
+from comment.mixins import BaseCommentMixin, AJAXRequiredMixin
+from comment.conf import settings
 
 
-class BaseCommentView(LoginRequiredMixin, FormView):
+class BaseCommentView(AJAXRequiredMixin, FormView):
     form_class = CommentForm
 
     def get_context_data(self, **kwargs):
@@ -19,10 +26,10 @@ class BaseCommentView(LoginRequiredMixin, FormView):
         context.update(get_comment_context_data(self.request))
         return context
 
-    def post(self, request, *args, **kwargs):
-        if not request.is_ajax():
-            return HttpResponseBadRequest('Only AJAX request are allowed')
-        return super().post(request, *args, **kwargs)
+    def get_form_kwargs(self):
+        kw = super().get_form_kwargs()
+        kw['request'] = self.request
+        return kw
 
 
 class CreateComment(BaseCommentView):
@@ -34,7 +41,7 @@ class CreateComment(BaseCommentView):
         return context
 
     def get_template_names(self):
-        if self.comment.is_parent:
+        if self.request.user.is_anonymous or self.comment.is_parent:
             return ['comment/comments/base.html']
         else:
             return ['comment/comments/child_comment.html']
@@ -45,22 +52,42 @@ class CreateComment(BaseCommentView):
         model_id = self.request.POST.get('model_id')
         model_object = get_model_obj(app_name, model_name, model_id)
         parent_id = self.request.POST.get('parent_id')
-        parent_comment = None
-        if parent_id:
-            parent_qs = Comment.objects.filter(id=parent_id)
-            if parent_qs.exists():
-                parent_comment = parent_qs.first()
+        parent_comment = Comment.objects.get_parent_comment(parent_id)
+        user = get_user_for_request(self.request)
+
         comment_content = form.cleaned_data['content']
-        self.comment = Comment.objects.create(
+        email = form.cleaned_data.get('email', None) or user.email
+        time_posted = timezone.now()
+        comment = Comment(
             content_object=model_object,
             content=comment_content,
-            user=self.request.user,
+            user=user,
             parent=parent_comment,
-        )
+            email=email,
+            posted=time_posted
+            )
+        dict_comment = {
+            'user': user,
+            'content': comment_content,
+            'email': email,
+            'posted': str(time_posted),
+            'app_name': app_name,
+            'model_name': model_name,
+            'model_id': model_id,
+            'parent': parent_id
+        }
+        if settings.COMMENT_ALLOW_ANONYMOUS and (not user):
+            # send response, please verify your email to post this comment.
+            response_msg = process_anonymous_commenting(self.request, comment, dict_comment)
+            messages.info(self.request, response_msg)
+        else:
+            comment.save()
+            self.comment = comment
+
         return self.render_to_response(self.get_context_data())
 
 
-class UpdateComment(BaseCommentView):
+class UpdateComment(BaseCommentMixin, BaseCommentView):
     comment = None
 
     def dispatch(self, request, *args, **kwargs):
@@ -71,12 +98,12 @@ class UpdateComment(BaseCommentView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data()
-        context['comment_form'] = CommentForm(instance=self.comment)
+        context['comment_form'] = CommentForm(instance=self.comment, request=self.request)
         context['comment'] = self.comment
         return render(request, 'comment/comments/update_comment.html', context)
 
     def post(self, request, *args, **kwargs):
-        form = CommentForm(request.POST, instance=self.comment)
+        form = CommentForm(request.POST, instance=self.comment, request=self.request)
         context = self.get_context_data()
         if form.is_valid():
             form.save()
@@ -84,7 +111,7 @@ class UpdateComment(BaseCommentView):
             return render(request, 'comment/comments/comment_content.html', context)
 
 
-class DeleteComment(BaseCommentView):
+class DeleteComment(BaseCommentMixin, BaseCommentView):
     comment = None
 
     def dispatch(self, request, *args, **kwargs):
@@ -106,3 +133,19 @@ class DeleteComment(BaseCommentView):
         self.comment.delete()
         context = self.get_context_data()
         return render(request, 'comment/comments/base.html', context)
+
+
+class ConfirmComment(View):
+    def get(self, request, *args, **kwargs):
+        key = kwargs.get('key', None)
+        comment = get_comment_from_key(key)
+
+        if comment.why_invalid == CommentFailReason.BAD:
+            messages.error(request, _('The link seems to be broken.'))
+        elif comment.why_invalid == CommentFailReason.EXISTS:
+            messages.warning(request, _('The comment has already been verified.'))
+
+        if not comment.is_valid:
+            return render(request, template_name='comment/anonymous/discarded.html')
+
+        return redirect(comment.obj.get_url(request))

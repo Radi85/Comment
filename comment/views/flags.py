@@ -1,6 +1,5 @@
 from django.core.exceptions import ValidationError, PermissionDenied
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseBadRequest, JsonResponse, HttpResponseForbidden
+from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django.views import View
@@ -8,17 +7,16 @@ from django.views import View
 from comment.conf import settings
 from comment.models import Comment, Flag, FlagInstance
 from comment.utils import is_comment_admin, is_comment_moderator
+from comment.mixins import BaseCommentMixin, AJAXRequiredMixin
 
 
-class FlagViewMixin(LoginRequiredMixin, View):
+class FlagViewMixin(BaseCommentMixin, AJAXRequiredMixin, View):
     comment = None
 
     def dispatch(self, request, *args, **kwargs):
         if not getattr(settings, 'COMMENT_FLAGS_ALLOWED', 0):
             return HttpResponseForbidden(_('Flagging system must be enabled'))
 
-        if not request.is_ajax():
-            return HttpResponseBadRequest(_('Only AJAX request are allowed'))
         self.comment = get_object_or_404(Comment, pk=self.kwargs.get('pk'))
         return super().dispatch(request, *args, **kwargs)
 

@@ -1,3 +1,8 @@
+#comments :target {
+    border: 1px solid #2188ff;
+    border-radius: 6px;
+    box-shadow: 0 0 0 .2em #c8e1ff;
+}
 .js-comment-content {
     font-size: 1.1rem;
 }
@@ -62,15 +67,15 @@ input#search-input:focus::placeholder {
     font-weight: 400;
 }
 #comments .user-has-reacted,
-.user-has-flagged {
+#comments .user-has-flagged {
     fill: #ffc96c;
 }
 #comments .user-has-not-reacted,
-.user-has-not-flagged {
+#comments .user-has-not-flagged {
     fill: none;
 }
-.user-has-flagged,
-.user-has-not-flagged {
+#comments .user-has-flagged,
+#comments .user-has-not-flagged {
     cursor: pointer;
 }
 .flag-modal textarea {
@@ -83,8 +88,6 @@ input#search-input:focus::placeholder {
 .flag-resolved {
     stroke: #00bc8c;
 }
-
-
 .comment-modal {
     position: fixed;
     left: 0;
@@ -100,13 +103,11 @@ input#search-input:focus::placeholder {
     overflow-x: hidden;
     overflow-y: hidden;
 }
-
 .show-modal {
     opacity: 1;
     transform: scale(1.0);
     transition: opacity 0.25s 0s, transform 0.5s;
 }
-
 .comment-modal-dialog {
     position: relative;
     width: auto;
@@ -114,7 +115,6 @@ input#search-input:focus::placeholder {
     max-width: 500px;
     margin: 1.75rem auto;
 }
-
 .comment-modal-content {
     position: relative;
     display: flex;
@@ -145,4 +145,9 @@ input#search-input:focus::placeholder {
     color: #000;
     text-decoration: none;
     opacity: .75;
+}
+.alert-error {
+    color: #78281f;
+    background-color: #fadbd8;
+    border-color: #f8cdc8;
 }

@@ -136,3 +136,16 @@ PROFILE_MODEL_NAME = 'userprofile'
 COMMENT_PROFILE_API_FIELDS = ('display_name', 'birth_date', 'image')
 COMMENT_FLAGS_ALLOWED = 2
 COMMENT_SHOW_FLAGGED = True
+
+EMAIL_HOST_USER = 'user@domain'
+EMAIL_HOST_PASSWORD = 'password'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+COMMENT_ALLOW_ANONYMOUS = True
+COMMENT_FROM_EMAIL = 'user@doamin'
+COMMENT_CONTACT_EMAIL = 'contact@domain'
+COMMENT_SEND_HTML_EMAIL = True
+COMMENT_PER_PAGE = 4
