@@ -22,8 +22,8 @@ In the template (e.g. post_detail.) add the following template tags where ``obj`
 1. Pagination:
 ^^^^^^^^^^^^^^^
 
-By default the comments will be paginated, 10 comments per page.
-To disabled the pagination pass ``comments_per_page=None``
+By default, the comments will be paginated, 10 comments per page.
+To disable the pagination pass ``comments_per_page=None``
 To change the default number, pass ``comments_per_page=number`` to ``render_comments``.
 
 .. code:: jinja

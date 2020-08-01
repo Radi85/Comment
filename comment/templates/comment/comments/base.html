@@ -2,6 +2,9 @@
 <section id="comments" class="{% block comment_section_cls %}my-5 mx-3{% endblock comment_section_cls %}">
     <script>window.CSRF_TOKEN = "{{ csrf_token }}"</script>
     <strong class="border-bottom bb"><span class="js-comment-number">{% get_comments_count model_object user %}</span> Comments</strong>
+    {% block comment_messages %}
+    {% include "comment/comments/messages.html" %}
+    {% endblock comment_messages %}
     <hr class="hr"/>
     <div class="js-comment comment mb-5">
         {% include 'comment/comments/create_comment.html' with placeholder="comment on this post..." comment=None %}
@@ -11,12 +14,11 @@
           {% include 'comment/comments/parent_comment.html' with placeholder='reply to this comment...' %}
       {% endfor %}
     </div>
-
-    <div id="Modal" class="comment-modal">
-       <div class="comment-modal-dialog" role="document">
-            <div class="comment-modal-content">
-            </div>
-       </div>
+    <div class="modal fade" id="Modal">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        </div>
+      </div>
     </div>
     {% if allowed_flags %}
         {% include "comment/flags/flag_modal.html" %}

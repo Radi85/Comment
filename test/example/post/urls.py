@@ -1,5 +1,6 @@
 from django.urls import path, re_path
-from post.views import (
+
+from .views import (
     PostListView,
     createpost_view,
     PostDetailView,

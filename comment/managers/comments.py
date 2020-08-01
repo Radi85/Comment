@@ -36,3 +36,14 @@ class CommentManager(models.Manager):
             len_id=settings.COMMENT_URL_ID_LENGTH,
             suffix=settings.COMMENT_URL_SUFFIX
             )
+
+    def get_parent_comment(self, parent_id):
+        parent_comment = None
+        if parent_id or parent_id == '0':
+            parent_qs = self.filter(id=parent_id)
+            if parent_qs.exists():
+                parent_comment = parent_qs.first()
+        return parent_comment
+
+    def comment_exists(self, comment):
+        return self.model.objects.filter(email=comment.email, posted=comment.posted).count() > 0

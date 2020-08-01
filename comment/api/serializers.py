@@ -1,11 +1,13 @@
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 
 from rest_framework import serializers
 
 from comment.conf import settings
 from comment.models import Comment, Flag, Reaction
-from comment.utils import get_model_obj
+from comment.utils import get_model_obj, process_anonymous_commenting, get_user_for_request
 
 
 def get_profile_model():
@@ -99,10 +101,9 @@ class BaseCommentSerializer(serializers.ModelSerializer):
 
 
 class CommentCreateSerializer(BaseCommentSerializer):
-
     class Meta:
         model = Comment
-        fields = ('id', 'user', 'content', 'parent', 'posted', 'edited', 'reply_count', 'replies', 'urlhash')
+        fields = ('id', 'user', 'email', 'content', 'parent', 'posted', 'edited', 'reply_count', 'replies', 'urlhash')
 
     def __init__(self, *args, **kwargs):
         self.model_name = kwargs['context'].get('model_name')
@@ -110,20 +111,52 @@ class CommentCreateSerializer(BaseCommentSerializer):
         self.model_id = kwargs['context'].get('model_id')
         self.user = kwargs['context'].get('user')
         self.parent_id = kwargs['context'].get('parent_id')
+        if kwargs['context']['request'].user.is_authenticated or not settings.COMMENT_ALLOW_ANONYMOUS:
+            del self.fields['email']
+
         super().__init__(*args, **kwargs)
 
-    def get_parent_object(self):
-        if not self.parent_id or self.parent_id == '0':
-            return None
-        return Comment.objects.get(id=self.parent_id)
+    def validate_email(self, value):
+        if (not value):
+            raise serializers.ValidationError(
+                _('Email is required for posting anonymous comments.'),
+                code='required'
+                )
+        return value.strip().lower()
 
     def create(self, validated_data):
-        return Comment.objects.create(
-            user=self.user,
-            content_object=get_model_obj(self.app_name, self.model_name, self.model_id),
-            parent=self.get_parent_object(),
-            content=validated_data.get("content")
-        )
+        request = self.context['request']
+        user = get_user_for_request(request)
+        content = validated_data.get('content')
+        email = validated_data.get('email')
+        parent_id = self.parent_id
+        time_posted = timezone.now()
+        parent_comment = Comment.objects.get_parent_comment(parent_id)
+        model_object = get_model_obj(self.app_name, self.model_name, self.model_id)
+
+        comment = Comment(
+            content_object=model_object,
+            content=content,
+            user=user,
+            parent=parent_comment,
+            email=email,
+            posted=time_posted
+            )
+        dict_comment = {
+            'user': user,
+            'content': content,
+            'email': email,
+            'posted': str(time_posted),
+            'app_name': self.app_name,
+            'model_name': self.model_name,
+            'model_id': self.model_id,
+            'parent': parent_id
+        }
+        if settings.COMMENT_ALLOW_ANONYMOUS and (not user):
+            process_anonymous_commenting(request, comment, dict_comment, api=True)
+        else:
+            comment.save()
+        return comment
 
 
 class CommentSerializer(BaseCommentSerializer):
@@ -134,7 +167,7 @@ class CommentSerializer(BaseCommentSerializer):
     class Meta:
         model = Comment
         fields = (
-            'id', 'user', 'content', 'parent', 'posted', 'edited', 'reply_count', 'replies', 'reactions',
+            'id', 'user', 'email', 'content', 'parent', 'posted', 'edited', 'reply_count', 'replies', 'reactions',
             'is_flagged', 'flags', 'urlhash'
         )
 

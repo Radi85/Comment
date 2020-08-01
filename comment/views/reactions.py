@@ -1,4 +1,3 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404
@@ -8,16 +7,14 @@ from django.views import View
 from django.views.decorators.http import require_POST
 
 from comment.models import Comment, Reaction, ReactionInstance
+from comment.mixins import BaseCommentMixin, AJAXRequiredMixin
 
 
 @method_decorator(require_POST, name='dispatch')
-class SetReaction(LoginRequiredMixin, View):
+class SetReaction(BaseCommentMixin, AJAXRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         comment = get_object_or_404(Comment, id=kwargs.get('pk'))
-        if not request.is_ajax():
-            return HttpResponseBadRequest(_('Only AJAX request are allowed'))
-
         reaction_type = kwargs.get('reaction', None)
         reaction_obj = Reaction.objects.get_reaction_object(comment)
         try:

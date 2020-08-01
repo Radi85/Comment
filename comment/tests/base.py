@@ -4,7 +4,8 @@ from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
 from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
-from django.test import TestCase, RequestFactory, TransactionTestCase
+from django.test import TestCase, RequestFactory, TransactionTestCase, Client
+from django.utils import timezone
 
 from comment.conf import settings
 from comment.models import Comment, FlagInstance, Reaction, ReactionInstance
@@ -40,8 +41,7 @@ class BaseCommentTest(TestCase):
         )
         admin_group = Group.objects.filter(name='comment_admin').first()
         admin_group.user_set.add(self.admin)
-
-        self.client.login(username='test-1', password='1234')
+        self.client.force_login(self.user_1)
         self.post_1 = Post.objects.create(
             author=self.user_1,
             title="post 1",
@@ -59,13 +59,34 @@ class BaseCommentTest(TestCase):
         self.reactions = 0
         self.flags = 0
 
-    def create_comment(self, ct_object, parent=None):
+    def increase_comment_count(self):
         self.increment += 1
+
+    def create_comment(self, ct_object, user=None, email=None, posted=None, parent=None):
+        if not user:
+            user = self.user_1
+        self.increase_comment_count()
         return Comment.objects.create(
             content_object=ct_object,
             content='comment {}'.format(self.increment),
-            user=self.user_1,
+            user=user,
             parent=parent,
+        )
+
+    def create_anonymous_comment(self, ct_object=None, email=None, posted=None, parent=None):
+        if not ct_object:
+            ct_object = self.content_object_1
+        if not email:
+            email = self.user_1.email
+        if not posted:
+            posted = timezone.now()
+        self.increase_comment_count()
+        return Comment.objects.create(
+            content_object=ct_object,
+            content='anonymous comment {}'.format(self.increment),
+            parent=parent,
+            email=email,
+            posted=posted
         )
 
     def create_reaction_instance(self, user, comment, reaction):
@@ -116,7 +137,23 @@ class BaseCommentManagerTest(BaseCommentTest):
         self.child_comment_5 = self.create_comment(self.content_object_2, parent=self.parent_comment_2)
 
 
-class BaseCommentFlagTest(BaseCommentTest):
+class BaseCommentViewTest(BaseCommentTest):
+
+    def setUp(self):
+        super().setUp()
+        self.client = Client(HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.client_non_ajax = Client()
+        self.client.force_login(self.user_1)
+        self.client_non_ajax.force_login(self.user_1)
+        self.data = {
+            'content': 'parent comment was edited',
+            'app_name': 'post',
+            'model_name': 'post',
+            'model_id': self.post_1.id,
+        }
+
+
+class BaseCommentFlagTest(BaseCommentViewTest):
     def setUp(self):
         super().setUp()
         self.comment = self.create_comment(self.content_object_1)
@@ -138,12 +175,26 @@ class BaseTemplateTagsTest(BaseCommentTest):
         super().setUp()
         self.factory = RequestFactory()
         settings.PROFILE_APP_NAME = 'user_profile'
+        settings.COMMENT_ALLOW_ANONYMOUS = True
+        self.increment = 0
         self.parent_comment_1 = self.create_comment(self.content_object_1)
         self.parent_comment_2 = self.create_comment(self.content_object_1)
         self.parent_comment_3 = self.create_comment(self.content_object_1)
         self.child_comment_1 = self.create_comment(self.content_object_1, parent=self.parent_comment_1)
         self.child_comment_2 = self.create_comment(self.content_object_1, parent=self.parent_comment_2)
         self.child_comment_3 = self.create_comment(self.content_object_1, parent=self.parent_comment_2)
+        self.anonymous_parent_comment = self.create_anonymous_comment()
+        self.anonymous_child_comment = self.create_anonymous_comment(parent=self.parent_comment_1)
+
+
+class BaseCommentUtilsTest(BaseCommentTest):
+    def setUp(self):
+        super().setUp()
+        self.factory = RequestFactory()
+        self.comment_1 = self.create_comment(self.content_object_1)
+        self.comment_2 = self.create_comment(self.content_object_1)
+        self.comment_3 = self.create_comment(self.content_object_1)
+        self.anonymous_comment = self.create_anonymous_comment()
 
 
 class BaseCommentMigrationTest(TransactionTestCase):
@@ -160,12 +211,13 @@ class BaseCommentMigrationTest(TransactionTestCase):
     migrate_to = None
 
     def setUp(self):
+        super().setUp()
         assert self.migrate_to and self.migrate_from, \
             f'TestCase {type(self).__name} must define migrate_to and migrate_from properties'
         self.migrate_from = [(self.app, self.migrate_from)]
         self.migrate_to = [(self.app, self.migrate_to)]
-        executor = MigrationExecutor(connection)
-        old_apps = executor.loader.project_state(self.migrate_from).apps
+        self.executor = MigrationExecutor(connection)
+        self.old_apps = self.executor.loader.project_state(self.migrate_from).apps
 
         self.user = User.objects.create_user(username="tester-1")
         self.post = Post.objects.create(
@@ -177,25 +229,29 @@ class BaseCommentMigrationTest(TransactionTestCase):
         self.ct_object = content_type.get_object_for_this_type(id=self.post.id)
 
         # revert to the original migration
-        executor.migrate(self.migrate_from)
+        self.executor.migrate(self.migrate_from)
         # ensure return to the latest migration, even if the test fails
         self.addCleanup(self.force_migrate)
 
-        self.setUpBeforeMigration(old_apps)
-
-        executor = MigrationExecutor(connection)
-        executor.loader.build_graph()
-        executor.migrate(self.migrate_to)
-
-        self.apps = executor.loader.project_state(self.migrate_to).apps
+        self.setUpBeforeMigration(self.old_apps)
+        self.executor.loader.build_graph()
+        self.executor.migrate(self.migrate_to)
+        self.new_apps = self.executor.loader.project_state(self.migrate_to).apps
 
     def setUpBeforeMigration(self, apps):
         pass
 
+    @property
+    def new_model(self):
+        return self.new_apps.get_model(self.app, 'Comment')
+
+    @property
+    def old_model(self):
+        return self.old_apps.get_model(self.app, 'Comment')
+
     def force_migrate(self, migrate_to=None):
-        executor = MigrationExecutor(connection)
-        executor.loader.build_graph()  # reload.
+        self.executor.loader.build_graph()  # reload.
         if migrate_to is None:
             # get latest migration of current app
-            migrate_to = [key for key in executor.loader.graph.leaf_nodes() if key[0] == self.app]
-        executor.migrate(migrate_to)
+            migrate_to = [key for key in self.executor.loader.graph.leaf_nodes() if key[0] == self.app]
+        self.executor.migrate(migrate_to)

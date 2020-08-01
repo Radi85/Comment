@@ -1,13 +1,19 @@
+from math import ceil
+
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models
+from django.utils import timezone
 
 from comment.managers import CommentManager
+from comment.conf import settings
+from comment.utils import is_comment_moderator
 
 
 class Comment(models.Model):
-    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, default=None)
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, blank=True, null=True)
+    email = models.EmailField(blank=True)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
@@ -18,7 +24,7 @@ class Comment(models.Model):
         unique=True,
         editable=False
         )
-    posted = models.DateTimeField(auto_now_add=True)
+    posted = models.DateTimeField(default=timezone.now, editable=False)
     edited = models.DateTimeField(auto_now=True)
 
     objects = CommentManager()
@@ -49,9 +55,26 @@ class Comment(models.Model):
             while self.__class__.objects.filter(urlhash=self.urlhash).exists():
                 self.urlhash = self.__class__.objects.generate_urlhash()
 
+    def _set_email(self):
+        if self.user:
+            self.email = self.user.email
+
     def save(self, *args, **kwargs):
         self._set_unique_urlhash()
+        self._set_email()
         super(Comment, self).save(*args, **kwargs)
+
+    def get_url(self, request):
+        page_url = self.content_object.get_absolute_url()
+        comments_per_page = settings.COMMENT_PER_PAGE
+        if comments_per_page:
+            qs_all_parents = self.__class__.objects.filter_parents_by_object(
+                self.content_object, include_flagged=is_comment_moderator(request.user)
+                )
+            position = qs_all_parents.filter(posted__gte=self.posted).count() + 1
+            if position > comments_per_page:
+                page_url += '?page=' + str(ceil(position / comments_per_page))
+        return page_url + '#' + self.urlhash
 
     @property
     def is_parent(self):
@@ -59,7 +82,9 @@ class Comment(models.Model):
 
     @property
     def is_edited(self):
-        return self.posted.timestamp() + 1 < self.edited.timestamp()
+        if self.user:
+            return self.posted.timestamp() + 1 < self.edited.timestamp()
+        return False
 
     @property
     def likes(self):

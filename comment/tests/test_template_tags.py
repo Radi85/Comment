@@ -9,8 +9,7 @@ from comment.managers import FlagInstanceManager
 from comment.templatetags.comment_tags import (
     get_model_name, get_app_name, get_comments_count, get_img_path, get_profile_url, render_comments,
     include_bootstrap, include_static, render_field, has_reacted, has_flagged,
-    render_flag_reasons,
-    render_content)
+    render_flag_reasons, render_content, get_username_for_comment)
 from comment.tests.base import BaseTemplateTagsTest
 
 
@@ -25,7 +24,7 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
 
     def test_comments_count(self):
         counts = get_comments_count(self.post_1, self.user_1)
-        self.assertEqual(counts, 6)
+        self.assertEqual(counts, self.increment)
 
     def test_profile_url(self):
         # success
@@ -61,8 +60,14 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
     def test_render_comments(self):
         request = self.factory.get('/')
         request.user = self.user_1
-        data = render_comments(self.post_1, request, comments_per_page=None)
-        self.assertEqual(data['comments'].count(), 3)  # parent comment only
+        comments_per_page = 'COMMENT_PER_PAGE'
+        init_comment_per_page = getattr(settings, comments_per_page)
+        setattr(settings, comments_per_page, 0)
+        count = self.post_1.comments.filter_parents_by_object(self.post_1).count()
+        data = render_comments(self.post_1, request)
+
+        # no pagination
+        self.assertEqual(data['comments'].count(), count)  # parent comment only
         self.assertEqual(data['login_url'], settings.LOGIN_URL)
 
         # LOGIN_URL is not provided
@@ -72,10 +77,12 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         self.assertIsInstance(error.exception, ImproperlyConfigured)
 
         # check pagination
-        setattr(settings, 'LOGIN_URL', '/accounts/login')
+        setattr(settings, comments_per_page, 2)
+        setattr(settings, 'LOGIN_URL', '/accounts/login/')
         request = self.factory.get('/?page=2')
         request.user = self.user_1
-        data = render_comments(self.post_1, request, comments_per_page=2)
+        data = render_comments(self.post_1, request)
+
         self.assertTrue(data['comments'].has_previous())
         self.assertEqual(data['comments'].paginator.per_page, 2)  # 2 comment per page
         self.assertEqual(data['comments'].number, 2)  # 3 comment fit in 2 pages
@@ -84,21 +91,25 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         # check not integer page
         request = self.factory.get('/?page=string')
         request.user = self.user_1
-        data = render_comments(self.post_1, request, comments_per_page=2)
+        data = render_comments(self.post_1, request)
         self.assertFalse(data['comments'].has_previous())
 
         # check empty page
         request = self.factory.get('/?page=10')
         request.user = self.user_1
-        data = render_comments(self.post_1, request, comments_per_page=2)
+        data = render_comments(self.post_1, request)
         self.assertTrue(data['comments'].has_previous())
+
+        setattr(settings, comments_per_page, init_comment_per_page)
 
     def test_static_functions(self):
         self.assertIsNone(include_static())
         self.assertIsNone(include_bootstrap())
 
     def test_render_field(self):
-        form = CommentForm()
+        request = self.factory.get('/')
+        request.user = self.user_1
+        form = CommentForm(request=request)
         for field in form.visible_fields():
             self.assertIsNone(field.field.widget.attrs.get('placeholder'))
             field = render_field(field, placeholder='placeholder')
@@ -122,6 +133,13 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         result = render_content(comment, 5)
         self.assertEqual(result['text_1'], ' '.join(content_words[:5]))
         self.assertEqual(result['text_2'], ' '.join(content_words[5:]))
+
+    def test_get_username_for_comment(self):
+        comment = self.create_comment(self.content_object_1, user=self.user_1)
+        anonymous_comment = self.create_anonymous_comment()
+
+        self.assertEqual(get_username_for_comment(comment), comment.user.username)
+        self.assertEqual(get_username_for_comment(anonymous_comment), settings.COMMENT_ANONYMOUS_USERNAME)
 
 
 class ReactionTemplateTagsTest(BaseTemplateTagsTest):
