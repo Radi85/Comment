@@ -260,7 +260,7 @@ To change the default number, pass ``comments_per_page=number`` to ``render_comm
 
     {% load comment_tags %}  {# Loading the template tag #}
 
-    {% render_comments obj request comments_per_page=5 %}  {# Include all the comments belonging to a certain object #}
+    {% render_comments obj request comments_per_page=0 %}  {# Include all the comments belonging to a certain object #}
     {% include_bootstrap %} {# Include bootstrap 4.1.1 - remove this line if BS 4.1.1 is already used in your project #}
     {% include_static %} {# Include jQuery 3.2.1 and required js file #}
 
@@ -632,7 +632,7 @@ for example to override the BS classes of submit buttons and pagination style do
 
 For full guide on the default templates and block tags name `Read the Doc`_
 
-.. _`Read the Doc`: https://django-comment-dab.readthedocs.io/styling./
+.. _`Read the Doc`: https://django-comment-dab.readthedocs.io/styling.html/
 
 
 2- CSS file:

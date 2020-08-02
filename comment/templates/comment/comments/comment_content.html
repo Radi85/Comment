@@ -6,7 +6,7 @@
     {% block comment_content %}
     {% render_content comment 30 %}
     {% endblock comment_content %}
-    <footer class="blockquote-footer">
+    <div class="blockquote-footer">
         <small>
             <a class="{% block username_cls %}{% endblock username_cls %}" href="{% get_profile_url comment %}" title="View {{ comment.user }} profile">{{ comment.user }}</a> |
             {% if comment.is_edited %}
@@ -36,5 +36,5 @@
             {% endif %}
         </small>
         {% include "comment/reactions/reactions.html" with comment=comment %}
-    </footer>
+    </div>
 </div>
