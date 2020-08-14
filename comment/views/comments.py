@@ -98,6 +98,7 @@ class DeleteComment(BaseCommentView):
         data = dict()
         context = self.get_context_data()
         context["comment"] = self.comment
+        context['has_parent'] = not self.comment.is_parent
         data['html_form'] = render_to_string('comment/comments/comment_modal.html', context, request=request)
         return JsonResponse(data)
 

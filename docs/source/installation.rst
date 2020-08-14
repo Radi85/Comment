@@ -7,7 +7,6 @@ Requirements:
     1. **django>=2.1**
     2. **djangorestframework**  # only for API Framework
     3. **Bootstrap 4.1.1**
-    4. **jQuery 3.2.1**
 
 
 Installation:
@@ -33,10 +32,10 @@ or via source on github
 Comment Settings and urls:
 --------------------------
 
-    1. Add ``comment`` to your installed_apps in your ``settings.py`` file. It should be added after ``django.contrib.auth``.
+    1. Add ``comment`` to installed_apps in the ``settings.py`` file. It should be added after ``django.contrib.auth``.
     2. ``LOGIN_URL`` shall be defined in the settings.
 
-your ``settings.py`` should look like the following:
+``settings.py`` should look like this:
 
 .. code:: python
 
@@ -48,9 +47,9 @@ your ``settings.py`` should look like the following:
         ..
     )
 
-    LOGIN_URL = 'login'  # or your actual url
+    LOGIN_URL = 'login'  # or actual url
 
-In your ``urls.py``:
+In ``urls.py``:
 
 .. code:: python
 
@@ -58,7 +57,7 @@ In your ``urls.py``:
         path('admin/', admin.site.urls),
         path('comment/', include('comment.urls')),
         ...
-        path('api/', include('comment.api.urls')),  # only for API Framework
+        path('api/', include('comment.api.urls')),  # only required for API Framework
         ...
     )
 

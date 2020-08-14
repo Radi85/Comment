@@ -4,44 +4,16 @@ Usage
 1. Basics usage:
 ----------------
 
-``include_static`` this tag will include required jquery and javascript file,
-if you already use jquery please make sure it is not the slim version which doesn't support ajax.
-``include_bootstrap`` tag is for bootstrap-4.1.1, if it’s already included
-in your project, get rid of this tag.
+``include_static`` this tag will include CSS and javascript files,
 
-In your template (e.g. post_detail.) add the following template tags where ``obj`` is the instance of post model.
+``include_bootstrap`` tag is for bootstrap-4.1.1, if it’s already used in the project, get rid of this tag.
 
-.. code:: jinja
-
-    {% load comment_tags %}  {# Loading the template tag #}
-    {% render_comments obj request %}  {# Render all the comments belonging to a passed object #}
-
-
-**Include static files:**
-
-The ``comment`` app has three template tags for static files that the app requires.
-These tags need to be included in the end of your base template.
-
-
-- **Case 1:** You already have jQuery in your project then the following tags shall be included below jQuery file:
+In the template (e.g. post_detail.) add the following template tags where ``obj`` is the instance of post model.
 
 .. code:: jinja
 
     {% load comment_tags %}  {# Loading the template tag #}
-
-    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
-    {% include_static %}  {# Include comment.js file only #}
-    {% include_bootstrap %}  {# Include bootstrap-4.1.1 - remove this line if it is already used in your project #}
-
-
-- **Case 2:** You don't have jQuery in your project then the following tags shall be included:
-
-.. code:: jinja
-
-    {% load comment_tags %}  {# Loading the template tag #}
-
-    {% include_static_jquery %}  {# Include mini jQuery 3.2.1 and required js file #}
-    {% include_bootstrap %}  {# Include bootstrap 4.1.1 - remove this line if BS 4.1.1 is already used in your project #}
+    {% render_comments obj request %}  {# Render all the comments belong to the passed object "obj" #}
 
 
 2. Advanced usage:
@@ -58,9 +30,9 @@ To change the default number, pass ``comments_per_page=number`` to ``render_comm
 
     {% load comment_tags %}  {# Loading the template tag #}
 
-    {% render_comments obj request comments_per_page=5 %}  {# Include all the comments belonging to a certain object #}
+    {% render_comments obj request comments_per_page=0 %}  {# Include all the comments belonging to a certain object #}
     {% include_bootstrap %} {# Include bootstrap 4.1.1 - remove this line if BS 4.1.1 is already used in your project #}
-    {% include_static %} {# Include jQuery 3.2.1 and required js file #}
+    {% include_static %} {# Include comment CSS and JS files #}
 
 
 
@@ -97,7 +69,7 @@ profile image next to each comment, do the following steps:
         def get_absolute_url(self):
             return reverse('your_profile_url_name')
 
-.. _Enable Flagging:
+.. _`Enable Flagging`:
 
 3. Enable flagging:
 ^^^^^^^^^^^^^^^^^^^
@@ -128,7 +100,7 @@ The reasons can be customized by adding ``COMMENT_FLAG_REASONS`` list of tuples 
         ...
     ]
 
-The flag model has currently 4 states: `v1.6.7`
+The flag model has currently 4 states: `since v1.6.7`
 
     1. UNFLAGGED
     2. **FLAGGED** - this case only the comment will be hidden

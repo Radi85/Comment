@@ -1,18 +1,19 @@
 Setup
 =====
 
-Step 1 - Connecting comment model with the target model:
---------------------------------------------------------
+Step 1 - Connecting comment model with the target model
+-------------------------------------------------------
 
-In your models.py add the field ``comments`` as a ``GenericRelation`` field to the required model.
+In models.py add the field ``comments`` as a ``GenericRelation`` field to the required model.
 
-PS: Please note that field name must be ``comments`` **NOT** ``comment``.
+PS: Please note that the field name must be ``comments`` **NOT** ``comment``.
 
 E.g. ``Post`` model, as shown below:
 
 .. code:: python
 
     from django.contrib.contenttypes.fields import GenericRelation
+
     from comment.models import Comment
 
     class Post(models.Model):
@@ -25,10 +26,10 @@ E.g. ``Post`` model, as shown below:
 Step 2 - Adding template tags:
 ------------------------------
 
-``render_comments`` *tag uses 2 positional and 2 optional args*:
+``render_comments`` *tag uses 2 required and 2 optional args*:
 
-    1. Instance of the targeted model. (**positional**)
-    2. Request object. (**positional**)
+    1. Instance of the targeted model. (**Required**)
+    2. Request object. (**Required**)
     3. oauth. (optional - Default is false)
     4. comments_per_page (number of Comments Per Page - Default is 10)
 
