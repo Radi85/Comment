@@ -1,11 +1,11 @@
 {% load i18n %}
 {% load comment_tags %}
-<div class="flag-modal modal fade">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
+<div id="flagModal" class="comment-modal">
+    <div class="comment-modal-dialog" role="document">
+        <div class="comment-modal-content">
             <div class="flag-modal-header modal-header">
                 <h5 class="flag-modal-title">{% block title %}{% trans "Please select a reason for flagging" %}{% endblock title %}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="{% trans "Close" %}">
+                <button class="modal-close-btn" aria-label="{% trans "Close" %}">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -18,11 +18,11 @@
                     </label><br>
                     {% endfor %}
                     <textarea class="flag-modal-info" rows="10" cols="10" name="info"></textarea>
+                    <div class="flag-modal-footer modal-footer">
+                        {% trans "Flag" as flag %}
+                        <button type="submit" title="{{ flag }}" class="btn btn-sm btn-danger flag-modal-submit {% block flag_link_cls %}{% endblock flag_link_cls %}">{{ flag }}</button>
+                    </div>
                 </form>
-            </div>
-            <div class="flag-modal-footer modal-footer">
-                {% trans "Flag" as flag %}
-                <button title="{{ flag }}" class="btn btn-sm btn-danger flag-modal-submit {% block flag_link_cls %}{% endblock flag_link_cls %}">{{ flag }}</button>
             </div>
         </div>
     </div>

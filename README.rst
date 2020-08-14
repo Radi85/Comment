@@ -62,26 +62,31 @@ Introduction
 ============
 
 **dab stands for Django-Ajax-Bootstrap**
+PS: Ajax and JQuery are not used anymore since v2.0.0 Vanilla JS and fetch API is used instead.
 
-``django-comments-dab`` is a commenting application for Django-powered
-websites.
+``django-comments-dab`` is a commenting application for Django-powered websites.
 
 It allows you to integrate commenting functionality with any model you have e.g. blogs, pictures, video etc…
 
-*List of actions the authenticated user can do:*
+*List of actions that can be performed:*
 
-    1. Post a new comment.
+    1. Post a new comment. (v2.0.0 authenticated and anonymous users)
 
-    2. Reply to an existing comment.
+    2. Reply to an existing comment. (v2.0.0 authenticated and anonymous users)
 
-    3. Edit a comment.
+    3. Edit a comment. (authenticated user `comment owner`)
 
-    4. Delete a comment.
+    4. Delete a comment. (authenticated user `comment owner` and admins)
 
-    5. React to a comment. Available reactions are LIKE and DISLIKE  # open PR if you would like to have more reactions
+    5. React to a comment. (authenticated users) Available reactions are LIKE and DISLIKE  # open PR if you would like to have more reactions
 
+    6. Report (flag) a comment. (authenticated users)
 
-- All actions are done by AJAX calls - JQuery 3.2.1
+    7. Delete flagged comment. (admins and moderators)
+
+    8. Resolve or reject flag. This is used to revoke the flagged comment state (admins and moderators)
+
+- All actions are done by Fetch API since V2.0.0
 
 - Bootstrap 4.1.1 is used in comment templates for responsive design.
 
@@ -96,7 +101,6 @@ Requirements:
     1. **django>=2.1**
     2. **djangorestframework**  # only for the API Framework
     3. **Bootstrap 4.1.1**
-    4. **jQuery 3.2.1**
 
 
 Installation:
@@ -122,10 +126,10 @@ or via source on github
 Comment Settings and urls:
 --------------------------
 
-    1. Add ``comment`` to your installed_apps in your ``settings.py`` file. It should be added after ``django.contrib.auth``.
+    1. Add ``comment`` to installed_apps in the ``settings.py`` file. It should be added after ``django.contrib.auth``.
     2. ``LOGIN_URL`` shall be defined in the settings.
 
-your ``settings.py`` should look like the following:
+``settings.py`` should look like this:
 
 .. code:: python
 
@@ -137,9 +141,9 @@ your ``settings.py`` should look like the following:
         ..
     )
 
-    LOGIN_URL = 'login'  # or your actual url
+    LOGIN_URL = 'login'  # or actual url
 
-In your ``urls.py``:
+In ``urls.py``:
 
 .. code:: python
 
@@ -147,7 +151,7 @@ In your ``urls.py``:
         path('admin/', admin.site.urls),
         path('comment/', include('comment.urls')),
         ...
-        path('api/', include('comment.api.urls')),  # only for API Framework
+        path('api/', include('comment.api.urls')),  # only required for API Framework
         ...
     )
 
@@ -169,15 +173,16 @@ Setup
 Step 1 - Connecting comment model with the target model
 -------------------------------------------------------
 
-In your models.py add the field ``comments`` as a ``GenericRelation`` field to the required model.
+In models.py add the field ``comments`` as a ``GenericRelation`` field to the required model.
 
-PS: Please note that field name must be ``comments`` **NOT** ``comment``.
+PS: Please note that the field name must be ``comments`` **NOT** ``comment``.
 
 E.g. ``Post`` model, as shown below:
 
 .. code:: python
 
     from django.contrib.contenttypes.fields import GenericRelation
+
     from comment.models import Comment
 
     class Post(models.Model):
@@ -206,44 +211,16 @@ Usage
 1. Basics usage:
 ----------------
 
-``include_static`` this tag will include required jquery and javascript file,
-if you already use jquery please make sure it is not the slim version which doesn't support ajax.
-``include_bootstrap`` tag is for bootstrap-4.1.1, if it’s already included
-in your project, get rid of this tag.
+``include_static`` this tag will include CSS and javascript files,
 
-In your template (e.g. post_detail.) add the following template tags where ``obj`` is the instance of post model.
+``include_bootstrap`` tag is for bootstrap-4.1.1, if it’s already used in the project, get rid of this tag.
 
-.. code:: jinja
-
-    {% load comment_tags %}  {# Loading the template tag #}
-    {% render_comments obj request %}  {# Render all the comments belonging to a passed object #}
-
-
-**Include static files:**
-
-The ``comment`` app has three template tags for static files that the app requires.
-These tags need to be included in the end of your base template.
-
-
-- **Case 1:** You already have jQuery in your project then the following tags shall be included below jQuery file:
+In the template (e.g. post_detail.) add the following template tags where ``obj`` is the instance of post model.
 
 .. code:: jinja
 
     {% load comment_tags %}  {# Loading the template tag #}
-
-    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
-    {% include_static %}  {# Include comment.js file only #}
-    {% include_bootstrap %}  {# Include bootstrap-4.1.1 - remove this line if it is already used in your project #}
-
-
-- **Case 2:** You don't have jQuery in your project then the following tags shall be included:
-
-.. code:: jinja
-
-    {% load comment_tags %}  {# Loading the template tag #}
-
-    {% include_static_jquery %}  {# Include mini jQuery 3.2.1 and required js file #}
-    {% include_bootstrap %}  {# Include bootstrap 4.1.1 - remove this line if BS 4.1.1 is already used in your project #}
+    {% render_comments obj request %}  {# Render all the comments belong to the passed object "obj" #}
 
 
 2. Advanced usage:
@@ -262,7 +239,7 @@ To change the default number, pass ``comments_per_page=number`` to ``render_comm
 
     {% render_comments obj request comments_per_page=0 %}  {# Include all the comments belonging to a certain object #}
     {% include_bootstrap %} {# Include bootstrap 4.1.1 - remove this line if BS 4.1.1 is already used in your project #}
-    {% include_static %} {# Include jQuery 3.2.1 and required js file #}
+    {% include_static %} {# Include comment CSS and JS files #}
 
 
 
@@ -330,7 +307,7 @@ The reasons can be customized by adding ``COMMENT_FLAG_REASONS`` list of tuples 
         ...
     ]
 
-The flag model has currently 4 states: `v1.6.7`
+The flag model has currently 4 states: `since v1.6.7`
 
     1. UNFLAGGED
     2. **FLAGGED** - this case only the comment will be hidden
@@ -364,24 +341,25 @@ Web API
 django-comments-dab uses django-rest-framework to expose a Web API that provides
 developers with access to the same functionality offered through the web user interface.
 
-There are 5 methods available to perform the following actions:
+The available actions with permitted user as follows:
 
+    1. Post a new comment. (authenticated and anonymous users)
 
-1. Post a new comment. (Authenticated)
+    2. Reply to an existing comment. (authenticated and anonymous users)
 
-2. Reply to an existing comment. (Authenticated)
+    3. Edit a comment. (authenticated user `comment owner`)
 
-3. Edit a comment you posted. (Authenticated)
+    4. Delete a comment you posted. (authenticated user `comment owner` and admins)
 
-4. Delete a comment you posted. (Authenticated)
+    5. React to a comment. (authenticated users)
 
-5. React to a comment. (Authenticated)
+    6. Report a comment. (authenticated users) Flagging system should be enabled.
 
-6. Report a comment. (Authenticated) Flagging system should be enabled
+    7. Delete flagged comment. (admins and moderators)
 
-7. Change the state of reported comment. (admin and moderator) Flagging system should be enabled `v1.6.7`
+    8. Resolve or reject flag. This is used to revoke the flagged comment state (admins and moderators)
 
-8. Retrieve the list of comments and associated replies to a given content type and object ID.
+    9. Retrieve the list of comments and associated replies to a given content type and object ID.
 
 These actions are explained below.
 
@@ -576,9 +554,9 @@ Style Customization
 
 BS classes, pagination and some other template values can be now customized from within your templates directory as follows:
 
-    1. Create ``comment`` folder inside your templates directory.
+    1. Create ``comment`` folder inside templates directory.
 
-    2. Create new template file ``.`` with the same name of the default template you wish to override and put it in the right directory.
+    2. Create a new template file ``.html`` give it the same name of the default template needs to be overridden and put it in the right directory.
 
     **Templates tree:**
 
@@ -613,7 +591,7 @@ BS classes, pagination and some other template values can be now customized from
 
 
 
-for example to override the BS classes of submit buttons and pagination style do the following:
+for example to override the BS classes of `submit buttons` and pagination style do the following:
 
     create ``templates/comment/comments/create_comment.``
 
@@ -639,7 +617,7 @@ For full guide on the default templates and block tags name `Read the Doc`_
 2- CSS file:
 ------------
 
-To customize the default style of comments app , you can create a ``comment.css`` file inside your ``static/css`` directory.
+To customize the default style of comments app , you can create a ``comment.css`` file inside ``static/css`` directory.
 
 The new created file will override the original file used in the app.
 

@@ -3,7 +3,6 @@
 {% if user.is_authenticated %}
 <span class="ml-4 js-comment-flag" data-url="{{ flag_url }}">
     {% include "comment/flags/flag_icon.html" %}
-    {% include "comment/flags/flag_modal.html" %}
 </span>
 {% else %}
 <a class="ml-4 js-comment-flag>" href="{{ login_url }}/?next={{ request.build_absolute_uri }}" title="{% trans "flag" %}">

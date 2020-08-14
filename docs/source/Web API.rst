@@ -4,24 +4,25 @@ Web API
 django-comments-dab uses django-rest-framework to expose a Web API that provides
 developers with access to the same functionality offered through the web user interface.
 
-There are 5 methods available to perform the following actions:
+The available actions with permitted user as follows:
 
+    1. Post a new comment. (authenticated and anonymous users)
 
-1. Post a new comment. (Authenticated)
+    2. Reply to an existing comment. (authenticated and anonymous users)
 
-2. Reply to an existing comment. (Authenticated)
+    3. Edit a comment. (authenticated user `comment owner`)
 
-3. Edit a comment you posted. (Authenticated)
+    4. Delete a comment you posted. (authenticated user `comment owner` and admins)
 
-4. Delete a comment you posted. (Authenticated)
+    5. React to a comment. (authenticated users)
 
-5. React to a comment. (Authenticated)
+    6. Report a comment. (authenticated users) Flagging system should be enabled.
 
-6. Report a comment. (Authenticated) Flagging system should be enabled
+    7. Delete flagged comment. (admins and moderators)
 
-7. Change the state of reported comment. (admin and moderator) Flagging system should be enabled `v1.6.7`
+    8. Resolve or reject flag. This is used to revoke the flagged comment state (admins and moderators)
 
-8. Retrieve the list of comments and associated replies to a given content type and object ID.
+    9. Retrieve the list of comments and associated replies to a given content type and object ID.
 
 These actions are explained below.
 

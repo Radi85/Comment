@@ -8,7 +8,7 @@ from comment.forms import CommentForm
 from comment.managers import FlagInstanceManager
 from comment.templatetags.comment_tags import (
     get_model_name, get_app_name, get_comments_count, get_img_path, get_profile_url, render_comments,
-    include_static_jquery, include_bootstrap, include_static, render_field, has_reacted, has_flagged,
+    include_bootstrap, include_static, render_field, has_reacted, has_flagged,
     render_flag_reasons,
     render_content)
 from comment.tests.base import BaseTemplateTagsTest
@@ -96,7 +96,6 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
     def test_static_functions(self):
         self.assertIsNone(include_static())
         self.assertIsNone(include_bootstrap())
-        self.assertIsNone(include_static_jquery())
 
     def test_render_field(self):
         form = CommentForm()

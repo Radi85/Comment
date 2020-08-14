@@ -47,25 +47,30 @@ Introduction
 ============
 
 **dab stands for Django-Ajax-Bootstrap**
+PS: Ajax and JQuery are not used anymore since v2.0.0 Vanilla JS and fetch API is used instead.
 
-``django-comments-dab`` is a commenting application for Django-powered
-websites.
+``django-comments-dab`` is a commenting application for Django-powered websites.
 
 It allows you to integrate commenting functionality with any model you have e.g. blogs, pictures, video etc…
 
-*List of actions the authenticated user can do:*
+*List of actions that can be performed:*
 
-    1. Post a new comment.
+    1. Post a new comment. (v2.0.0 authenticated and anonymous users)
 
-    2. Reply to an existing comment.
+    2. Reply to an existing comment. (v2.0.0 authenticated and anonymous users)
 
-    3. Edit a comment.
+    3. Edit a comment. (authenticated user `comment owner`)
 
-    4. Delete a comment.
+    4. Delete a comment. (authenticated user `comment owner` and admins)
 
-    5. React to a comment. Available reactions are LIKE and DISLIKE  # open PR if you would like to have more reactions
+    5. React to a comment. (authenticated users) Available reactions are LIKE and DISLIKE  # open PR if you would like to have more reactions
 
+    6. Report (flag) a comment. (authenticated users)
 
-- All actions are done by AJAX calls - JQuery 3.2.1
+    7. Delete flagged comment. (admins and moderators)
+
+    8. Resolve or reject flag. This is used to revoke the flagged comment state (admins and moderators)
+
+- All actions are done by Fetch API since V2.0.0
 
 - Bootstrap 4.1.1 is used in comment templates for responsive design.

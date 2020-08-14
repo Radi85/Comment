@@ -10,9 +10,9 @@ Some actual customizations has been done in the example_ project
 
 BS classes, pagination and some other template values can be now customized from within your templates directory as follows:
 
-    1. Create ``comment`` folder inside your templates directory.
+    1. Create ``comment`` folder inside templates directory.
 
-    2. Create new template file ``.html`` with the same name of the default template you wish to override and put it in the right directory.
+    2. Create a new template file ``.html`` give it the same name of the default template needs to be overridden and put it in the right directory.
 
     **Templates tree:**
 
@@ -47,7 +47,7 @@ BS classes, pagination and some other template values can be now customized from
 
 
 
-for example to override the BS classes of submit buttons and pagination style do the following:
+for example to override the BS classes of `submit buttons` and pagination style do the following:
 
     create ``templates/comment/comments/create_comment.html``
 
@@ -313,6 +313,6 @@ Some block tags may not work on old versions.
 2- CSS file:
 ------------
 
-To customize the default style of comments app , you can create a ``comment.css`` file inside your ``static/css`` directory.
+To customize the default style of comments app , you can create a ``comment.css`` file inside ``static/css`` directory.
 
 The new created file will override the original file used in the app.

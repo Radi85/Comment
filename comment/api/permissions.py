@@ -18,7 +18,11 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
             return True
         # PUT and DELETE permissions are allowed to the owner of the comment.
         if request.method == 'DELETE':  # comment admin can delete other users comments
-            return is_comment_admin(request.user) or obj.user == request.user
+            return any([
+                is_comment_admin(request.user),
+                obj.user == request.user,
+                (obj.is_flagged and is_comment_moderator(request.user))
+            ])
         return obj.user == request.user
 
 

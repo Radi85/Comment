@@ -1,5 +1,5 @@
 {% load comment_tags %}
-<div class="col-10 col-md-11">
+<div class="js-comment-update-mode col-10 col-md-11">
     <form class="js-comment-edit-form" method="post" data-url="{% url 'comment:edit' pk=comment.id %}">
         {% csrf_token %}
         {% include 'comment/comments/comment_form.html' with placeholder=placeholder %}

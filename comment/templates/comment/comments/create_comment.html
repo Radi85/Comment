@@ -16,7 +16,7 @@
             {% endif %}
             <div class="{% block submit_button_wrapper_cls %}col-sm-3 col-md-2 px-2 m-3 m-sm-0{% endblock submit_button_wrapper_cls %}">
                 <button disabled class="js-comment-btn {% block submit_button_cls %}btn btn-outline-success btn-block btn-sm{% endblock submit_button_cls %}"
-                        type="submit" name="form_type" data-type="{% if comment %}child{% else %}parent{% endif %}">
+                        type="submit" name="form_type" value="{% if comment %}child{% else %}parent{% endif %}">
                     {% if comment %}Reply{% else %}Comment{% endif %}
                 </button>
             </div>
