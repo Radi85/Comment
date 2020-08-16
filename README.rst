@@ -441,26 +441,27 @@ This action can be performed by providing the url with data queries related to t
 Get request accepts 3 params:
 
 
-- ``type``: is the model name of the content type that have comments associated with it.
-- ``id``: is the id of an object of that model
+- ``model_name``: is the model name of the content type that have comments associated with it.
+- ``app_name``: is the name of the app inside which this model is defined.
+- ``model_id``: is the id of an object of that model
 
 
 
-
-For example if you are using axios to retrieve the comment list of second object (id=2) of a model (content type) called post.
+For example if you are using axios to retrieve the comment list of second object (id=2) of a model (content type) called post inside the app(django app) post.
 you can do the following:
 
 ::
 
-    $ curl -H "Content-Type: application/json" 'http://localhost:8000/api/comments/?type=MODEL_NAME&id=ID'
+    $ curl -H "Content-Type: application/json" 'http://localhost:8000/api/comments/?model_name=MODEL_NAME&model_id=ID&app_name=APP_NAME'
 
 
 **2- Create a comment or reply to an existing comment:**
 
 Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
 
-- ``type``: is the model name of the content type that have comments associated with it.
-- ``id``: is the id of an object of that model
+- ``model_name``: is the model name of the content type that have comments associated with it.
+- ``app_name``: the name of the app that contains that model.
+- ``model_id``: is the id of an object of that model
 - ``parent_id``: is 0 or **NOT PROVIDED** for parent comments and for reply comments must be the id of parent comment
 
 
@@ -468,7 +469,7 @@ Example: posting a parent comment
 
 ::
 
-    $ curl -X POST -u USERNAME:PASSWORD -d "content=CONTENT" -H "Content-Type: application/json" "http://localhost:8000/api/comments/create/?type=MODEL_NAME&id=ID&parent_id=0"
+    $ curl -X POST -u USERNAME:PASSWORD -d "content=CONTENT" -H "Content-Type: application/json" "http://localhost:8000/api/comments/create//?model_name=MODEL_NAME&model_id=ID&app_name=APP_NAME&parent_id=0"
 
 
 **3- Update a comment:**

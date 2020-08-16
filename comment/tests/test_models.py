@@ -188,59 +188,6 @@ class CommentModelManagerTest(BaseCommentManagerTest):
         count = Comment.objects.filter_parents_by_object(self.post_2, include_flagged=True).count()
         self.assertEqual(count, init_count)
 
-    def test_create_comment_by_model_type(self):
-        comments = Comment.objects.all_comments_by_object(self.post_1).count()
-        self.assertEqual(comments, 6)
-        parent_comment = Comment.objects.create_by_model_type(
-            model_type='post',
-            pk=self.post_1.id,
-            content='test',
-            user=self.user_1
-        )
-        self.assertIsNotNone(parent_comment)
-        comments = Comment.objects.all_comments_by_object(self.post_1).count()
-        self.assertEqual(comments, 7)
-
-        child_comment = Comment.objects.create_by_model_type(
-            model_type='post',
-            pk=self.post_1.id,
-            content='test',
-            user=self.user_1,
-            parent_obj=parent_comment
-        )
-        self.assertIsNotNone(child_comment)
-        comments = Comment.objects.all_comments_by_object(self.post_1).count()
-        self.assertEqual(comments, 8)
-
-        # fail on wrong content_type
-        comment = Comment.objects.create_by_model_type(
-            model_type='not exist',
-            pk=self.post_1.id,
-            content='test',
-            user=self.user_1,
-            parent_obj=parent_comment
-        )
-        self.assertIsNone(comment)
-
-        # model object not exist
-        comment = Comment.objects.create_by_model_type(
-            model_type='post',
-            pk=100,
-            content='test',
-            user=self.user_1,
-            parent_obj=parent_comment
-        )
-        self.assertIsNone(comment)
-
-    def test_create_comment_with_not_exist_model(self):
-        comment = Comment.objects.create_by_model_type(
-            model_type='not exist model',
-            pk=self.post_1.id,
-            content='test',
-            user=self.user_1
-        )
-        self.assertIsNone(comment)
-
 
 class ReactionInstanceModelTest(BaseCommentManagerTest):
     def setUp(self):
