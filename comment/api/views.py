@@ -19,8 +19,9 @@ class CommentCreate(generics.CreateAPIView):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['user'] = self.request.user
-        context['model_type'] = self.request.GET.get("type")
-        context['model_id'] = self.request.GET.get("id")
+        context['model_name'] = self.request.GET.get("model_name")
+        context['app_name'] = self.request.GET.get("app_name")
+        context['model_id'] = self.request.GET.get("model_id")
         context['parent_id'] = self.request.GET.get("parent_id")
         return context
 
@@ -30,9 +31,9 @@ class CommentList(generics.ListAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, ContentTypePermission)
 
     def get_queryset(self):
-        model_type = self.request.GET.get("type")
-        pk = self.request.GET.get("id")
-        content_type_model = ContentType.objects.get(model=model_type.lower())
+        model_name = self.request.GET.get("model_name")
+        pk = self.request.GET.get("model_id")
+        content_type_model = ContentType.objects.get(model=model_name.lower())
         model_class = content_type_model.model_class()
         model_obj = model_class.objects.filter(id=pk).first()
         return Comment.objects.filter_parents_by_object(model_obj)

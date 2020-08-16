@@ -87,12 +87,12 @@ Get request accepts 3 params:
 
 
 
-For example if you are using axios to retrieve the comment list of second object (id=2) of a model (content type) called post.
+For example if you are using axios to retrieve the comment list of second object (id=2) of a model (content type) called post inside the app(django app) post.
 you can do the following:
 
 ::
 
-    $ curl -H "Content-Type: application/json" 'http://localhost:8000/api/comments/?type=MODEL_NAME&id=ID'
+    $ curl -H "Content-Type: application/json" 'http://localhost:8000/api/comments/?model_name=MODEL_NAME&model_id=ID&app_name=APP_NAME'
 
 
 **2- Create a comment or reply to an existing comment:**
