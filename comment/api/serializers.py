@@ -5,6 +5,7 @@ from rest_framework import serializers
 
 from comment.conf import settings
 from comment.models import Comment, Flag, Reaction
+from comment.utils import get_model_obj
 
 
 def get_profile_model():
@@ -104,7 +105,8 @@ class CommentCreateSerializer(BaseCommentSerializer):
         fields = ('id', 'user', 'content', 'parent', 'posted', 'edited', 'reply_count', 'replies', 'urlhash')
 
     def __init__(self, *args, **kwargs):
-        self.model_type = kwargs['context'].get('model_type')
+        self.model_name = kwargs['context'].get('model_name')
+        self.app_name = kwargs['context'].get('app_name')
         self.model_id = kwargs['context'].get('model_id')
         self.user = kwargs['context'].get('user')
         self.parent_id = kwargs['context'].get('parent_id')
@@ -116,14 +118,12 @@ class CommentCreateSerializer(BaseCommentSerializer):
         return Comment.objects.get(id=self.parent_id)
 
     def create(self, validated_data):
-        comment = Comment.objects.create_by_model_type(
-            model_type=self.model_type,
-            pk=self.model_id,
+        return Comment.objects.create(
             user=self.user,
-            parent_obj=self.get_parent_object(),
+            content_object=get_model_obj(self.app_name, self.model_name, self.model_id),
+            parent=self.get_parent_object(),
             content=validated_data.get("content")
         )
-        return comment
 
 
 class CommentSerializer(BaseCommentSerializer):

@@ -1,4 +1,5 @@
 from django.contrib.contenttypes.models import ContentType
+from django.utils.translation import gettext_lazy as _
 
 from rest_framework import permissions
 
@@ -28,26 +29,37 @@ class ContentTypePermission(permissions.BasePermission):
     message = ""
 
     def has_permission(self, request, view):
-        model_type = request.GET.get("type")
-        if not model_type:
-            self.message = "model type must be provided"
+        model_name = request.GET.get("model_name")
+        if not model_name:
+            self.message = _("model name must be provided")
             return False
-        pk = request.GET.get("id")
-        if not pk:
-            self.message = "model id must be provided"
+        model_id = request.GET.get("model_id")
+        if not model_id:
+            self.message = _("model id must be provided")
             return False
+        app_name = request.GET.get('app_name')
+        if not app_name:
+            self.message = _('app name must be provided')
+            return False
+
         try:
-            model_type = model_type.lower()
-            ct = ContentType.objects.get(model=model_type).model_class()
-            model_class = ct.objects.filter(id=pk)
+            cause = 'app'  # used for identifying the cause in ContentType.DoesNotExist exception
+            ContentType.objects.get(app_label=app_name)
+            cause = 'model'
+            model_name = model_name.lower()
+            ct = ContentType.objects.get(model=model_name).model_class()
+            model_class = ct.objects.filter(id=model_id)
             if not model_class.exists() and model_class.count() != 1:
-                self.message = "this is not a valid id for this model"
+                self.message = _("this is not a valid model id for this model")
                 return False
         except ContentType.DoesNotExist:
-            self.message = "this is not a valid model type"
+            if cause == 'app':
+                self.message = _('this is not a valid app name')
+            else:
+                self.message = _("this is not a valid model name")
             return False
         except ValueError:
-            self.message = "type id must be an integer"
+            self.message = _("model id must be an integer")
             return False
 
         return True
@@ -60,18 +72,20 @@ class ParentIdPermission(permissions.BasePermission):
     message = ""
 
     def has_permission(self, request, view):
-        model_id = request.GET.get('id')
+        model_id = request.GET.get('model_id')
         parent_id = request.GET.get('parent_id')
         if not parent_id or parent_id == '0':
             return True
         try:
             Comment.objects.get(id=parent_id, object_id=model_id)
         except Comment.DoesNotExist:
-            self.message = ("this is not a valid id for a parent comment or "
-                            "the parent comment does NOT belong to this model object")
+            self.message = _(
+                'this is not a valid id for a parent comment or '
+                'the parent comment does NOT belong to this model object'
+                )
             return False
         except ValueError:
-            self.message = "the parent id must be an integer"
+            self.message = _("the parent id must be an integer")
             return False
         return True
 
