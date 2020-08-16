@@ -92,7 +92,7 @@ you can do the following:
 
 ::
 
-    $ curl -H "Content-Type: application/json" 'http://localhost:8000/api/comments/?model_name=MODEL_NAME&model_id=ID&app_name=APP_NAME'
+    $ curl -H "Content-Type: application/json" 'http://localhost:8000/api/comments/?model_name=MODEL_NAME&model_id=ID&app_name=APP_NAME''
 
 
 **2- Create a comment or reply to an existing comment:**
@@ -108,7 +108,7 @@ Example: posting a parent comment
 
 ::
 
-    $ curl -X POST -u USERNAME:PASSWORD -d "content=CONTENT" -H "Content-Type: application/json" "http://localhost:8000/api/comments/create/?type=MODEL_NAME&id=ID&parent_id=0"
+    $ curl -X POST -u USERNAME:PASSWORD -d "content=CONTENT" -H "Content-Type: application/json" "http://localhost:8000/api/comments/create/?model_name=MODEL_NAME&model_id=ID&app_name=APP_NAME&parent_id=0"
 
 
 **3- Update a comment:**
