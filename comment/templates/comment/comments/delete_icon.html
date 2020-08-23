@@ -1,5 +1,5 @@
 {% load comment_tags %}
-<button title="Delete comment" class="js-comment-delete {% block delete_btn_cls %}btn btn-link{% endblock delete_btn_cls %}" data-url="{% url 'comment:delete' pk=comment.id %}?comments_per_page={{comments_per_page}}&model_name={% get_model_name model_object %}&model_id={{ model_object.id }}&app_name={% get_app_name model_object %}&oauth={{oauth}}">
+<button title="Delete comment" class="js-comment-delete {% block delete_btn_cls %}btn btn-link{% endblock delete_btn_cls %}" data-url="{% url 'comment:delete' pk=comment.id %}?model_name={% get_model_name model_object %}&model_id={{ model_object.id }}&app_name={% get_app_name model_object %}&oauth={{oauth}}">
 {% block delete_img_icon %}
 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
      fill="none" stroke="{% block delete_icon_color %}#E74C3C{% endblock delete_icon_color %}"
