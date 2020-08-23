@@ -1,4 +1,6 @@
-Django
+django
+pillow
 djangorestframework
-Pillow
-django-comments-dab
+coverage
+flake8
+tox

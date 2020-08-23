@@ -1,7 +1,8 @@
 from django.contrib.auth import get_user_model
-from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+
+from django.apps import apps
 
 from rest_framework import serializers
 
@@ -11,18 +12,11 @@ from comment.utils import get_model_obj, process_anonymous_commenting, get_user_
 
 
 def get_profile_model():
-    try:
-        content_type = ContentType.objects.get(
-            app_label=settings.PROFILE_APP_NAME,
-            model=settings.PROFILE_MODEL_NAME.lower()
-        )
-    except ContentType.DoesNotExist:
+    profile_app_name = getattr(settings, 'PROFILE_APP_NAME', None)
+    profile_model_name = getattr(settings, 'PROFILE_MODEL_NAME', None)
+    if not profile_model_name or not profile_app_name:
         return None
-    except AttributeError:
-        return None
-
-    profile_class = content_type.model_class()
-    return profile_class
+    return apps.get_model(profile_app_name, profile_model_name)
 
 
 def get_user_fields():
@@ -117,7 +111,7 @@ class CommentCreateSerializer(BaseCommentSerializer):
         super().__init__(*args, **kwargs)
 
     def validate_email(self, value):
-        if (not value):
+        if not value:
             raise serializers.ValidationError(
                 _('Email is required for posting anonymous comments.'),
                 code='required'

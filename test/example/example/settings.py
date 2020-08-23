@@ -37,9 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'comment',
     'user_profile',
     'post',
-    'comment',
     'rest_framework',
 ]
 
@@ -79,8 +79,13 @@ WSGI_APPLICATION = 'example.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(os.path.dirname(BASE_DIR), 'db.sqlite3'),
+        'ENGINE': os.environ.get('DB_ENGINE', 'django.db.backends.sqlite3'),
+        'NAME': os.environ.get('DB_NAME', os.path.join(os.path.dirname(BASE_DIR), 'db.sqlite3')),
+        'USER': os.environ.get('DB_USER', ''),
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+        'HOST': os.environ.get('DB_HOST', None),
+        'PORT': os.environ.get('DB_PORT', None),
+        'CONN_MAX_AGE': 0,
     }
 }
 
@@ -123,16 +128,17 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/profile/login/'
 
 STATIC_URL = '/static/'
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'root/media_root/')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 PROFILE_APP_NAME = 'user_profile'
 PROFILE_MODEL_NAME = 'userprofile'
-#
+
 COMMENT_PROFILE_API_FIELDS = ('display_name', 'birth_date', 'image')
 COMMENT_FLAGS_ALLOWED = 2
 COMMENT_SHOW_FLAGGED = True

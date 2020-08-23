@@ -192,7 +192,8 @@ class APICommentViewsTest(APIBaseTest):
         self.comment_count = Comment.objects.filter_parents_by_object(self.post_1).count()
         self.all_comments = Comment.objects.all().count()
 
-    def get_url(self, base_url=None, **kwargs):
+    @staticmethod
+    def get_url(base_url=None, **kwargs):
         if not base_url:
             base_url = '/api/comments/'
         if kwargs:
@@ -652,10 +653,9 @@ class APICommentSerializers(APIBaseTest):
         profile = get_profile_model()
         self.assertIsNone(profile)
 
-        # wrong attribute value
+        # providing wrong attribute value, an exception is raised
         setattr(settings, 'PROFILE_APP_NAME', 'wrong')
-        profile = get_profile_model()
-        self.assertIsNone(profile)
+        self.assertRaises(LookupError, get_profile_model)
 
         # attribute value is None
         setattr(settings, 'PROFILE_APP_NAME', None)
@@ -684,8 +684,7 @@ class APICommentSerializers(APIBaseTest):
 
         # PROFILE_MODEL_NAME is wrong
         setattr(settings, 'PROFILE_MODEL_NAME', 'wrong')
-        profile = UserSerializer.get_profile(self.user_1)
-        self.assertIsNone(profile)
+        self.assertRaises(LookupError, UserSerializer.get_profile, self.user_1)
 
         # success
         setattr(settings, 'PROFILE_MODEL_NAME', 'userprofile')
@@ -694,7 +693,7 @@ class APICommentSerializers(APIBaseTest):
 
         # user doesn't have profile attribute
         mocked_getattr = patch('comment.api.serializers.getattr').start()
-        mocked_getattr.side_effect = [AttributeError]
+        mocked_getattr.side_effect = ['', '', AttributeError]
         profile = UserSerializer.get_profile(self.user_1)
         self.assertIsNone(profile)
 
