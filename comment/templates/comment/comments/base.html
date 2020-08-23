@@ -14,11 +14,13 @@
           {% include 'comment/comments/parent_comment.html' with placeholder='reply to this comment...' %}
       {% endfor %}
     </div>
-    <div class="modal fade" id="Modal">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
+
+    <div class="comment-modal" id="Modal">
+      <div class="comment-modal-dialog" role="document">
+        <div class="comment-modal-content">
         </div>
       </div>
+
     </div>
     {% if allowed_flags %}
         {% include "comment/flags/flag_modal.html" %}
