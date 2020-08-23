@@ -7,6 +7,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let csrfToken = window.CSRF_TOKEN;
     document.getElementsByClassName(".js-comment-input").value = '';
 
+    let removeTargetElement = e => {
+        let currentHeight = window.pageYOffset;
+        window.location.replace("#");
+        // slice off the remaining '#':
+        if (typeof window.history.replaceState == 'function') {
+            history.replaceState({}, '', window.location.href.slice(0, -1));
+        }
+            window.scrollTo(0, currentHeight);
+        }
+
     let showModal = modalElement => {
         modalElement.style.display = 'block';
         setTimeout(() => {
@@ -566,6 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     document.addEventListener('click', (event) => {
+        removeTargetElement(event);
         if (event.target && event.target !== event.currentTarget) {
             let modal = document.getElementById("Modal");
             let flagModal = document.getElementById('flagModal');
