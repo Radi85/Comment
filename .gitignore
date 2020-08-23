@@ -59,3 +59,7 @@ docs/_build/
 # env files
 Pipfile.lock
 Pipfile
+
+# db
+*/db.sqlite*
+*/*/db.sqlite*
