@@ -23,14 +23,14 @@ In the template (e.g. post_detail.) add the following template tags where ``obj`
 ^^^^^^^^^^^^^^^
 
 By default, the comments will be paginated, 10 comments per page.
-To disable the pagination pass ``comments_per_page=None``
-To change the default number, pass ``comments_per_page=number`` to ``render_comments``.
+To disable the pagination, set ``COMMENT_PER_PAGE=None`` in your settings file.
+To change the default number, set ``COMMENT_PER_PAGE=number``.
 
 .. code:: jinja
 
     {% load comment_tags %}  {# Loading the template tag #}
 
-    {% render_comments obj request comments_per_page=0 %}  {# Include all the comments belonging to a certain object #}
+    {% render_comments obj request %}  {# Include comments belonging to a certain object #}
     {% include_bootstrap %} {# Include bootstrap 4.1.1 - remove this line if BS 4.1.1 is already used in your project #}
     {% include_static %} {# Include comment CSS and JS files #}
 

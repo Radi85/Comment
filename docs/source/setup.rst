@@ -26,10 +26,9 @@ E.g. ``Post`` model, as shown below:
 Step 2 - Adding template tags:
 ------------------------------
 
-``render_comments`` *tag uses 2 required and 2 optional args*:
+``render_comments`` *tag uses 2 required and 1 optional arg*:
 
     1. Instance of the targeted model. (**Required**)
     2. Request object. (**Required**)
     3. oauth. (optional - Default is false)
-    4. comments_per_page (number of Comments Per Page - Default is 10)
 
