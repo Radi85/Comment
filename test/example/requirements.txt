@@ -1,5 +1,5 @@
 django
-pillow
+Pillow
 djangorestframework
 coverage
 flake8

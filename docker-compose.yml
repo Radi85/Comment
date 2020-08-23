@@ -1,0 +1,38 @@
+# vim: ts=2 sw=2 et :
+---
+version: '3.4'
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/code
+    networks:
+      - backend
+    depends_on:
+      - db
+    environment:
+      DEBUG: 'True'
+      SECRET_KEY: 'k&h$m@!js(n8^pv0pf15@kh90z+2pyey38jsikwvl43uh$fyog'
+      ALLOWED_HOSTS: '*'
+      DB_ENGINE: django.db.backends.postgresql
+      DB_HOST: db
+      DB_NAME: postgres
+      DB_PASSWORD: django-comments-dab
+      DB_PORT: 5432
+      DB_USER: postgres
+  db:
+    image: postgres:9.6
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: django-comments-dab
+    networks:
+      - backend
+networks:
+  backend: {}
+...

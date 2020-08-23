@@ -1,10 +1,12 @@
 import os
-
+import sys
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_DIR = os.path.join(BASE_DIR, 'test/example')
 
-DEBUG = True
-SECRET_KEY = 'a2_jwt*^9_)i3=r&)#(=e#3z6k361!5+%7f&do9do-c3ltc4@7khgkgm5'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'secret-key-is-unsafe')
+DEBUG = os.environ.get('DEBUG', True) == 'True'
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split()
 
 
 # Application definition
@@ -16,8 +18,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.messages',
     'comment',
-    'test.example.post',
-    'test.example.user_profile',
+    'post.apps.PostConfig',
+    'user_profile.apps.AccountsConfig',
 ]
 
 MIDDLEWARE = [
@@ -31,12 +33,12 @@ MIDDLEWARE = [
 ]
 
 
-ROOT_URLCONF = 'test.urls'
+ROOT_URLCONF = 'test.example.example.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'comment/templates')],
+        'DIRS': [os.path.join(PROJECT_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -51,8 +53,13 @@ TEMPLATES = [
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'test/db.sqlite3'),
+        'ENGINE': os.environ.get('DB_ENGINE', 'django.db.backends.sqlite3'),
+        'NAME': os.environ.get('DB_NAME', os.path.join(BASE_DIR, 'db.sqlite3')),
+        'USER': os.environ.get('DB_USER', ''),
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+        'HOST': os.environ.get('DB_HOST', None),
+        'PORT': os.environ.get('DB_PORT', None),
+        'CONN_MAX_AGE': 0,
     }
 }
 
@@ -67,17 +74,35 @@ USE_L10N = True
 
 USE_TZ = True
 
+LOGIN_URL = '/profile/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = LOGIN_URL
+
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(PROJECT_DIR, 'root/static')
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'comment/static'),
+    os.path.join(PROJECT_DIR, 'static'),
 )
 
-PROFILE_APP_NAME = 'user_profile'
-PROFILE_MODEL_NAME = 'UserProfile'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(PROJECT_DIR, 'root/media')
 
-COMMENT_FLAGS_ALLOWED = 10
+PROFILE_APP_NAME = 'user_profile'
+PROFILE_MODEL_NAME = 'userprofile'
+
+COMMENT_PROFILE_API_FIELDS = ('display_name', 'birth_date', 'image')
+COMMENT_FLAGS_ALLOWED = 2
+COMMENT_SHOW_FLAGGED = True
+
+EMAIL_HOST_USER = 'user@domain'
+EMAIL_HOST_PASSWORD = 'password'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
 
 COMMENT_ALLOW_ANONYMOUS = True
-EMAIL_HOST_USER = 'user@domain'
+COMMENT_FROM_EMAIL = 'user@doamin'
+COMMENT_CONTACT_EMAIL = 'contact@domain'
 COMMENT_SEND_HTML_EMAIL = True
-COMMENT_PER_PAGE = 5
+COMMENT_PER_PAGE = 4

@@ -60,11 +60,12 @@ docs/_build/
 Pipfile.lock
 Pipfile
 .env
-local_env/
-*env/
-*environment/
 
 # db
 db.sqlite*
 */db.sqlite*
 */*/db.sqlite*
+
+# git
+.git
+.github

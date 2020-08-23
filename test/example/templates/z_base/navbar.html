@@ -3,7 +3,7 @@
     <div class="collapse navbar-collapse" id="navbarText">
         
         <ul class="nav navbar-nav navbar mb-3 mb-md-auto">
-            <li class="active">
+            <li class="">
                 <a class="nav-link" href="{% url 'post:postlist'%}">
                     Post
                 </a>
@@ -13,21 +13,21 @@
                     Create Post
                 </a>
             </li>
-        </ul>
-        <ul class="nav navbar-nav navbar-right mb-3 mb-md-auto">
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Account</a>
-                <ul class="dropdown-menu dropdown-menu-right">
-                    {% if user.is_authenticated %}
-                    <a class="dropdown-item" href="{% url 'profile:profile' user.username %}">Profile</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="{% url 'profile:logout'%}">Logout</a>
-                    {% else %}
-                    <a class="dropdown-item" href="{% url 'profile:login'%}">Login</a>
-                    <a class="dropdown-item" href="{% url 'profile:signup'%}">Signup</a>
-                    {% endif %}
-                </ul>
-            </li>
+            {% if user.is_authenticated %}
+                <li class="">
+                    <a class="nav-link" href="{% url 'profile:profile' user.username %}">Profile</a>
+                </li>
+                <li class="">
+                    <a class="nav-link" href="{% url 'profile:logout'%}">Logout</a>
+                </li>
+            {% else %}
+                <li class="">
+                    <a class="nav-link" href="{% url 'profile:login'%}">Login</a>
+                </li>
+                <li class="">
+                    <a class="nav-link" href="{% url 'profile:signup'%}">Signup</a>
+                </li>
+            {% endif %}
         </ul>
     </div>
 </nav>
