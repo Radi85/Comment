@@ -5,6 +5,11 @@ document.addEventListener('DOMContentLoaded', () => {
     'use strict';
     let currentDeleteCommentButton, commentBeforeEdit;
     let csrfToken = window.CSRF_TOKEN;
+    let headers = {
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRFToken': csrfToken,
+        'Content-Type': 'application/x-www-form-urlencoded'
+    };
     document.getElementsByClassName(".js-comment-input").value = '';
 
     let showModal = modalElement => {
@@ -95,17 +100,12 @@ document.addEventListener('DOMContentLoaded', () => {
         let url = form.getAttribute('data-url') || window.location.href;
         let formData = serializeObject(form);
         // this step is needed to append the form data to request.POST
-       let formDataQuery = convertFormDataToURLQuery(formData);
-
-       fetch(url, {
+        let formDataQuery = convertFormDataToURLQuery(formData);
+        fetch(url, {
            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': csrfToken,
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
+            headers: headers,
             body: formDataQuery
-       }).then(response => {
+        }).then(response => {
             return response.text();
         }).then(data => {
            // parent comment
@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let commentContent = getNthParent(editButton, 3);
         commentBeforeEdit = commentContent; // store old comment
         let url = editButton.getAttribute('href');
-        fetch(url).then(response => {
+        fetch(url, {headers: headers}).then(response => {
             return response.text();
         }).then(data => {
             let editModeElement = stringToDom(data, '.js-comment-update-mode');
@@ -175,23 +175,18 @@ document.addEventListener('DOMContentLoaded', () => {
         let url = form.getAttribute('data-url');
 
         let formDataQuery = convertFormDataToURLQuery(formData);
-
-       fetch(url, {
+        fetch(url, {
            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': csrfToken,
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
+            headers: headers,
             body: formDataQuery
-       }).then(response => {
+        }).then(response => {
             return response.text();
         }).then(data => {
-           let updatedContentElement = stringToDom(data, '.js-updated-content');
+           let updatedContentElement = stringToDom(data, '.js-updated-comment');
            form.parentElement.replaceWith(updatedContentElement);
-       }).catch(error => {
+        }).catch(error => {
            alert("Modification didn't take effect!, please try again");
-       });
+        });
     };
 
     let getParents = element => {
@@ -227,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let loadForm = deleteBtn => {
         currentDeleteCommentButton = deleteBtn;
         let url = deleteBtn.getAttribute('data-url');
-        fetch(url).then(response => {
+        fetch(url, {headers: headers}).then(response => {
             return response.json()
         }).then(data => {
             let modal = document.getElementById("Modal");
@@ -250,16 +245,11 @@ document.addEventListener('DOMContentLoaded', () => {
         let isParent = formData.isParent === "True";
 
         let formDataQuery = convertFormDataToURLQuery(formData);
-
         fetch(url, {
            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': csrfToken,
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
+            headers: headers,
             body: formDataQuery
-       }).then(response => {
+        }).then(response => {
             return response.text();
         }).then(data => {
             if (isParent) {
@@ -330,14 +320,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let targetReaction = reactionButton.querySelector('.comment-reaction-icon');
         let parentReactionEle = reactionButton.parentElement;
         let url = reactionButton.getAttribute('href');
-
         fetch(url, {
            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': csrfToken,
-                'Content-Type': 'application/json'
-            }
+            headers: headers
            }).then(response => {
                 return response.json();
             }).then(data => {
@@ -434,16 +419,11 @@ document.addEventListener('DOMContentLoaded', () => {
         let url = flagButton.getAttribute('data-url');
 
         let formDataQuery = convertFormDataToURLQuery(formData);
-
         fetch(url, {
            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': csrfToken,
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
+            headers: headers,
             body: formDataQuery
-       }).then(response => {
+        }).then(response => {
             return response.json();
         }).then(data => {
             let addClass = 'user-has-flagged';
@@ -520,16 +500,11 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         let formDataQuery = convertFormDataToURLQuery(formData);
-
         fetch(url, {
            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': csrfToken,
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
+            headers: headers,
             body: formDataQuery
-       }).then(response => {
+        }).then(response => {
             return response.json();
         }).then(data => {
             if (data.state === 0) {
@@ -543,10 +518,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 title = changeStateButton.firstElementChild.classList.contains("flag-rejected")
                     ? 'Flag rejected'
                     : 'Reject the flag';
-                const contentModifiedBtn = changeStateButton.nextElementSibling;
+                const contentModifiedBtn = changeStateButton.parentElement.querySelector('.js-flag-resolve');
                 if (data.state === 3) {
-                    contentModifiedBtn.firstElementChild.classList.remove("flag-resolved");
-                    contentModifiedBtn.setAttribute('title', 'Resolve the flag');
+                    if (contentModifiedBtn) {
+                       contentModifiedBtn.firstElementChild.classList.remove("flag-resolved");
+                        contentModifiedBtn.setAttribute('title', 'Resolve the flag');
+                    }
                     commentBodyElement.classList.remove('flagged-comment');
                 }
             } else if (state === 4) {
@@ -554,10 +531,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 title = changeStateButton.firstElementChild.classList.contains("flag-resolved")
                     ? 'Flag resolved'
                     : 'Resolve the flag';
-                let rejectBtn = changeStateButton.previousElementSibling;
+                let rejectBtn = changeStateButton.parentElement.querySelector('.js-flag-reject');
                 if (data.state === 4) {
-                    rejectBtn.firstElementChild.classList.remove("flag-rejected");
-                    rejectBtn.setAttribute('title', 'Reject the flag');
+                    if (rejectBtn) {
+                        rejectBtn.firstElementChild.classList.remove("flag-rejected");
+                        rejectBtn.setAttribute('title', 'Reject the flag');
+                    }
                     commentBodyElement.classList.remove('flagged-comment');
                 }
             }
@@ -631,9 +610,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keyup', event => {
         if (event.target && event.target !== event.currentTarget && event.key === 'Enter' && event.ctrlKey) {
             event.preventDefault();
-            let form = event.target.closest('.js-comment-form');
-            if (form.querySelector('.js-comment-input').value.replace(/^\s+|\s+$/g, "").length !== 0) {
-                submitCommentCreateForm(form);
+            let createForm = event.target.closest('.js-comment-form');
+            let editForm = event.target.closest('.js-comment-edit-form');
+            if (createForm && createForm.querySelector('.js-comment-input').value.replace(/^\s+|\s+$/g, "").length !== 0) {
+                submitCommentCreateForm(createForm);
+            }
+            else if (editForm && editForm.querySelector('.js-comment-input').value.replace(/^\s+|\s+$/g, "").length !== 0) {
+                submitEditCommentForm(editForm);
             }
         }
     }, false);
