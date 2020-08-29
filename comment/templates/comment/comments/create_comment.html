@@ -26,10 +26,18 @@
 {% if user.is_anonymous %}
     <div class="d-flex mb-3">
         {% if is_anonymous_allowed %}
-            <p class="text-danger {% if comment %}h7 my-auto {% endif %}"><em>{% trans "Comment Anonymously or:" %}</em></p>
-            <a class="mx-2 text-success {% if comment %}h7 my-auto {% endif %}" href="{{login_url}}?next={{request.path}}">{% trans "Login to keep your conversations intact" %}</a>
+            <p class="text-muted {% if comment %}h7 my-auto {% endif %}">{% trans "Comment Anonymously or" %}
+            <a class="text-success {% if comment %}h7 my-auto {% endif %}" href="{{login_url}}?next={{request.path}}">
+                {% trans "Login" %}
+            </a>
+            {% trans "to keep your conversations intact" %}</p>
         {% else %}
-            <a class="mx-2 text-success {% if comment %}h7 my-auto {% endif %}" href="{{login_url}}?next={{request.path}}">{% trans "Login to join the discussion" %}</a>
+            <p class="text-muted">
+                <a class="text-success {% if comment %}h7 my-auto {% endif %}" href="{{login_url}}?next={{request.path}}">
+                    {% trans "Login" %}
+                </a>
+                {% trans "to join the discussion" %}
+            </p>
         {% endif %}
         {% if oauth %}
             {% block oauth %}

@@ -501,7 +501,7 @@ class ConfirmCommentViewTest(BaseAnonymousCommentTest, BaseCommentTest):
             self.assertEqual(r.message, 'The link seems to be broken.')
 
     def test_comment_exists(self):
-        comment_dict = self.comment_dict.copy()
+        comment_dict = self.comment_obj.to_dict().copy()
         comment = self.create_anonymous_comment(posted=timezone.now(), email='a@a.com')
         init_count = self.init_count + 1
         comment_dict.update({

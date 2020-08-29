@@ -124,3 +124,24 @@ For flagging purpose, the following groups and permissions will be created on th
 * Comment moderator can delete FLAGGED comment only and change their state.
 
 PS: If the groups or the permissions don't exist, just run migrate. ``./manage.py migrate``
+
+
+4. Allow commenting by anonymous:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Commenting by anonymous is disabled by default.
+When enabling this feature, the unauthenticated users will be able to post a comment and they have to provide their email
+for confirmation step, after confirming the email, the comment will be saved in the DB associated with the anonymous user's email.
+
+However, since these comment are created anonymously, they won't be editable nor deletable like a normal comments by authenticated users.
+
+To enable this feature, the flowing settings variables need to be set alongside with django email settings:
+
+.. code:: python
+
+    COMMENT_ALLOW_ANONYMOUS = True
+    COMMENT_FROM_EMAIL = no-reply@email.com   # used for sending confirmation emails
+    COMMENT_CONTACT_EMAIL = your@email.com    # used for contact address in confirmation emails
+    COMMENT_SEND_HTML_EMAIL = True  # enable html template (default True)
+    COMMENT_ANONYMOUS_USERNAME = 'Anonymous User'  # used as comment username in the template in case below attr is false
+    COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME = True  # show the email first part as a username (default False)

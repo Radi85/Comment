@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from comment.conf import settings
 from comment.models import Comment, FlagInstance, Reaction, ReactionInstance
-from test.example.post.models import Post
+from post.models import Post
 
 
 User = get_user_model()

@@ -24,6 +24,8 @@ def get_app_name(obj):
 @register.simple_tag(name='get_username_for_comment')
 def get_username_for_comment(comment):
     if not comment.user:
+        if settings.COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME:
+            return comment.email.split('@')[0]
         return settings.COMMENT_ANONYMOUS_USERNAME
     return comment.user.username
 
@@ -43,7 +45,7 @@ def get_img_path(obj):
     """ returns url of profile image of a user """
     content_type = get_profile_content_type()
     if not content_type or not obj.user:
-        return ''
+        return '/static/img/default.png'
 
     profile_model = content_type.model_class()
     fields = profile_model._meta.get_fields()

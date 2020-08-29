@@ -66,19 +66,10 @@ class CreateComment(BaseCommentView):
             email=email,
             posted=time_posted
             )
-        dict_comment = {
-            'user': user,
-            'content': comment_content,
-            'email': email,
-            'posted': str(time_posted),
-            'app_name': app_name,
-            'model_name': model_name,
-            'model_id': model_id,
-            'parent': parent_id
-        }
-        if settings.COMMENT_ALLOW_ANONYMOUS and (not user):
+
+        if settings.COMMENT_ALLOW_ANONYMOUS and not user:
             # send response, please verify your email to post this comment.
-            response_msg = process_anonymous_commenting(self.request, comment, dict_comment)
+            response_msg = process_anonymous_commenting(self.request, comment)
             messages.info(self.request, response_msg)
         else:
             comment.save()

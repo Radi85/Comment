@@ -42,14 +42,14 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
     def test_img_url(self):
         url = get_img_path(self.parent_comment_1)
         self.assertNotEqual(url, '')
-        # fail
+        # use default pic on fail
         settings.PROFILE_APP_NAME = 'app not exist'
         url = get_img_path(self.parent_comment_1)
-        self.assertEqual(url, '')
+        self.assertEqual(url, '/static/img/default.png')
 
         settings.PROFILE_APP_NAME = None
         url = get_img_path(self.parent_comment_1)
-        self.assertEqual(url, '')
+        self.assertEqual(url, '/static/img/default.png')
 
     def test_profile_has_no_image_field(self):
         mocked_hasattr = patch('comment.templatetags.comment_tags.hasattr').start()
@@ -58,6 +58,7 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         self.assertEqual(url, '')
 
     def test_render_comments(self):
+        current_login_url = getattr(settings, 'LOGIN_URL', '/profile/login/')
         request = self.factory.get('/')
         request.user = self.user_1
         comments_per_page = 'COMMENT_PER_PAGE'
@@ -78,7 +79,7 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
 
         # check pagination
         setattr(settings, comments_per_page, 2)
-        setattr(settings, 'LOGIN_URL', '/accounts/login/')
+        setattr(settings, 'LOGIN_URL', current_login_url)
         request = self.factory.get('/?page=2')
         request.user = self.user_1
         data = render_comments(self.post_1, request)
@@ -140,6 +141,9 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
 
         self.assertEqual(get_username_for_comment(comment), comment.user.username)
         self.assertEqual(get_username_for_comment(anonymous_comment), settings.COMMENT_ANONYMOUS_USERNAME)
+
+        setattr(settings, 'COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME', True)
+        self.assertEqual(get_username_for_comment(anonymous_comment), anonymous_comment.email.split('@')[0])
 
 
 class ReactionTemplateTagsTest(BaseTemplateTagsTest):
