@@ -51,11 +51,12 @@ class CommentUtilsTest(BaseCommentUtilsTest):
     def test_get_comment_context_data(self):
         comment_per_page = 'COMMENT_PER_PAGE'
         login_url = 'LOGIN_URL'
+        current_login_url = getattr(settings, login_url, '/profile/login/')
         comment_allow_anonymous = 'COMMENT_ALLOW_ANONYMOUS'
         oauth = 'oauth'
 
         init_comment_per_page = getattr(settings, comment_per_page)
-        setattr(settings, login_url, 'accounts/login')
+        setattr(settings, login_url, current_login_url)
         setattr(settings, comment_allow_anonymous, False)
         setattr(settings, comment_per_page, 0)
         data = {
@@ -69,15 +70,17 @@ class CommentUtilsTest(BaseCommentUtilsTest):
         }
         request = self.factory.post('/', data=data)
         request.user = self.post_1.author
+        if current_login_url.startswith('/'):
+            setattr(settings, login_url, current_login_url[1:])
         comment_context_data = get_comment_context_data(request)
 
         self.assertEqual(comment_context_data['comments'].count(), self.increment)
-        # test appending of '/' in login url
+        # test inserting '/' to the beginning of login url
         self.assertEqual(comment_context_data['login_url'], '/' + settings.LOGIN_URL)
         self.assertEqual(comment_context_data['is_anonymous_allowed'], settings.COMMENT_ALLOW_ANONYMOUS)
         self.assertEqual(comment_context_data['oauth'], True)
 
-        setattr(settings, login_url, '/accounts/login/')
+        setattr(settings, login_url, current_login_url)
         setattr(settings, comment_per_page, 2)
         setattr(settings, comment_allow_anonymous, True)
         request = self.factory.post('/', data=data)
@@ -112,38 +115,24 @@ class CommentUtilsTest(BaseCommentUtilsTest):
         self.assertEqual(get_user_for_request(request), self.user_1)
 
 
-class BaseAnonymousCommentTest:
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+class BaseAnonymousCommentTest(BaseCommentUtilsTest):
+    def setUp(self):
+        super().setUp()
         self.time_posted = timezone.now()
-        _user = None
         _email = 'test-1@acme.edu'
         _content = 'posting anonymous comment'
         _parent = None
-        _app_name = 'post'
-        _model_name = 'post'
-        _model_id = 1
-        _model_object = get_model_obj(_app_name, _model_name, _model_id)
         _factory = RequestFactory()
         self.comment_obj = Comment(
-            content_object=_model_object,
+            content_object=self.post_1,
             content=_content,
             user=None,
             parent=_parent,
             email=_email,
             posted=self.time_posted
         )
-        self.comment_dict = {
-            'user': _user,
-            'content': _content,
-            'email': _email,
-            'posted': str(self.time_posted),
-            'app_name': _app_name,
-            'model_name': _model_name,
-            'model_id': _model_id,
-            'parent': _parent
-        }
-        self.key = signing.dumps(self.comment_dict, compress=True)
+
+        self.key = signing.dumps(self.comment_obj.to_dict(), compress=True)
         self.request = _factory.get('/')
         self.site = get_current_site(self.request)
 
@@ -158,7 +147,7 @@ class TestGetCommentFromKey(BaseAnonymousCommentTest, BaseCommentUtilsTest):
         self.assertIsNone(response.obj)
 
     def test_key_error(self):
-        comment_dict = self.comment_dict.copy()
+        comment_dict = self.comment_obj.to_dict().copy()
         comment_dict.pop('model_name')
         key = signing.dumps(comment_dict)
         response = get_comment_from_key(key)
@@ -168,7 +157,7 @@ class TestGetCommentFromKey(BaseAnonymousCommentTest, BaseCommentUtilsTest):
         self.assertIsNone(response.obj)
 
     def test_attribute_error(self):
-        comment_dict = self.comment_dict.copy()
+        comment_dict = self.comment_obj.to_dict().copy()
         comment_dict['model_name'] = 1
         key = signing.dumps(comment_dict)
         response = get_comment_from_key(key)
@@ -178,7 +167,7 @@ class TestGetCommentFromKey(BaseAnonymousCommentTest, BaseCommentUtilsTest):
         self.assertIsNone(response.obj)
 
     def test_value_error(self):
-        comment_dict = self.comment_dict.copy()
+        comment_dict = self.comment_obj.to_dict().copy()
         comment_dict['user'] = 1
         key = signing.dumps(comment_dict)
         response = get_comment_from_key(key)
@@ -188,7 +177,7 @@ class TestGetCommentFromKey(BaseAnonymousCommentTest, BaseCommentUtilsTest):
         self.assertIsNone(response.obj)
 
     def test_comment_exists(self):
-        comment_dict = self.comment_dict.copy()
+        comment_dict = self.comment_obj.to_dict().copy()
         comment = self.create_anonymous_comment(posted=timezone.now(), email='a@a.com')
         comment_dict.update({
             'posted': str(comment.posted),
@@ -222,7 +211,7 @@ class TestSendEmailConfirmationRequest(BaseAnonymousCommentTest, BaseCommentUtil
         self.confirmation_url = reverse('comment:confirm-comment', args=[self.key])
         self.confirmation_url_drf = f'/api/comments/confirm/{self.key}/'
         self.contact_email = settings.COMMENT_CONTACT_EMAIL
-        self.receivers = [self.comment_dict['email']]
+        self.receivers = [self.comment_obj.to_dict()['email']]
         self.sender = settings.COMMENT_FROM_EMAIL
         self.subject = 'Comment Confirmation Request'
         self.content_object_url = f'http://{self.site.domain}{self.comment_obj.content_object.get_absolute_url()}'
@@ -252,7 +241,7 @@ class TestSendEmailConfirmationRequest(BaseAnonymousCommentTest, BaseCommentUtil
 
     @patch.object(settings, 'COMMENT_SEND_HTML_EMAIL', False)
     def test_sending_only_text_template_with_django(self):
-        receiver = self.comment_dict['email']
+        receiver = self.comment_obj.to_dict()['email']
         len_mailbox = self.len_mailbox
         response = send_email_confirmation_request(self.comment_obj, receiver, self.key, self.site)
         self.assertIsNone(response)
@@ -264,7 +253,7 @@ class TestSendEmailConfirmationRequest(BaseAnonymousCommentTest, BaseCommentUtil
 
     @patch.object(settings, 'COMMENT_SEND_HTML_EMAIL', False)
     def test_sending_only_text_template_with_drf(self):
-        receiver = self.comment_dict['email']
+        receiver = self.comment_obj.to_dict()['email']
         len_mailbox = self.len_mailbox
         response = send_email_confirmation_request(self.comment_obj, receiver, self.key, self.site, api=True)
         self.assertIsNone(response)
@@ -276,7 +265,7 @@ class TestSendEmailConfirmationRequest(BaseAnonymousCommentTest, BaseCommentUtil
 
     @patch.object(settings, 'COMMENT_SEND_HTML_EMAIL', True)
     def test_sending_both_text_and_html_template_with_django(self):
-        receiver = self.comment_dict['email']
+        receiver = self.comment_obj.to_dict()['email']
         len_mailbox = self.len_mailbox
         response = send_email_confirmation_request(self.comment_obj, receiver, self.key, self.site)
         self.assertIsNone(response)
@@ -288,7 +277,7 @@ class TestSendEmailConfirmationRequest(BaseAnonymousCommentTest, BaseCommentUtil
 
     @patch.object(settings, 'COMMENT_SEND_HTML_EMAIL', True)
     def test_sending_both_text_and_html_template_with_drf(self):
-        receiver = self.comment_dict['email']
+        receiver = self.comment_obj.to_dict()['email']
         len_mailbox = self.len_mailbox
         response = send_email_confirmation_request(self.comment_obj, receiver, self.key, self.site, api=True)
         self.assertIsNone(response)
@@ -309,11 +298,11 @@ class TestProcessAnonymousCommenting(BaseAnonymousCommentTest, BaseCommentUtilsT
         )
 
     def test_for_django(self):
-        response = process_anonymous_commenting(self.request, self.comment_obj, self.comment_dict)
+        response = process_anonymous_commenting(self.request, self.comment_obj)
         self.assertEqual(self.response_msg, response)
 
     def test_for_drf(self):
-        response = process_anonymous_commenting(self.request, self.comment_obj, self.comment_dict, api=True)
+        response = process_anonymous_commenting(self.request, self.comment_obj, api=True)
         self.assertEqual(self.response_msg, response)
 
 

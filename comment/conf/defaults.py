@@ -16,8 +16,8 @@ COMMENT_URL_SUFFIX = ''
 COMMENT_URL_ID_LENGTH = 8
 COMMENT_PER_PAGE = 10
 COMMENT_ALLOW_ANONYMOUS = False
-if getattr(settings, 'COMMENT_ALLOW_ANONYMOUS', COMMENT_ALLOW_ANONYMOUS):
-    COMMENT_FROM_EMAIL = settings.EMAIL_HOST_USER   # used for sending confirmation emails
-    COMMENT_CONTACT_EMAIL = COMMENT_FROM_EMAIL  # used for contact address in confirmation emails
-    COMMENT_SEND_HTML_EMAIL = True
-    COMMENT_ANONYMOUS_USERNAME = 'Anonymous User'
+COMMENT_FROM_EMAIL = getattr(settings, 'EMAIL_HOST_USER', None)   # used for sending confirmation emails
+COMMENT_CONTACT_EMAIL = COMMENT_FROM_EMAIL  # used for contact address in confirmation emails
+COMMENT_SEND_HTML_EMAIL = True
+COMMENT_ANONYMOUS_USERNAME = 'Anonymous User'
+COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME = False

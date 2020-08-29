@@ -41,6 +41,18 @@ class Comment(models.Model):
     def __repr__(self):
         return self.__str__()
 
+    def to_dict(self):
+        return {
+            'user': self.user,
+            'content': self.content,
+            'email': self.email,
+            'posted': str(self.posted),
+            'app_name': self.content_type.app_label,
+            'model_name': self.content_type.model,
+            'model_id': self.object_id,
+            'parent': getattr(self.parent, 'id', None)
+        }
+
     def _get_reaction_count(self, reaction_type):
         return getattr(self.reaction, reaction_type, None)
 

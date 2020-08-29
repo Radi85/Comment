@@ -199,10 +199,10 @@ def get_comment_from_key(key):
     return comment
 
 
-def process_anonymous_commenting(request, comment_obj, comment_dict, api=False):
-    key = signing.dumps(comment_dict, compress=True)
+def process_anonymous_commenting(request, comment, api=False):
+    key = signing.dumps(comment.to_dict(), compress=True)
     site = get_current_site(request)
-    send_email_confirmation_request(comment_obj, comment_dict['email'], key, site, api=api)
+    send_email_confirmation_request(comment, comment.to_dict()['email'], key, site, api=api)
     return _(
         'We have have sent a verification link to your email. The comment will be '
         'displayed after it is verified.'
@@ -212,3 +212,4 @@ def process_anonymous_commenting(request, comment_obj, comment_dict, api=False):
 def get_user_for_request(request):
     if request.user.is_authenticated:
         return request.user
+    return None

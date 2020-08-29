@@ -200,6 +200,7 @@ class CommentModelManagerTest(BaseCommentManagerTest):
         self.assertEqual(init_count, 6)
 
         settings.COMMENT_FLAGS_ALLOWED = 1
+        settings.COMMENT_SHOW_FLAGGED = False
         comment = self.post_1.comments.first()
         self.create_flag_instance(self.user_1, comment)
         self.create_flag_instance(self.user_2, comment)
@@ -216,6 +217,7 @@ class CommentModelManagerTest(BaseCommentManagerTest):
         init_count = self.post_2.comments.filter(parent=None).count()
         self.assertEqual(init_count, 2)
         settings.COMMENT_FLAGS_ALLOWED = 1
+        settings.COMMENT_SHOW_FLAGGED = False
         comment = Comment.objects.filter_parents_by_object(self.post_2).first()
         self.create_flag_instance(self.user_1, comment)
         self.create_flag_instance(self.user_2, comment)

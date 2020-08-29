@@ -110,7 +110,8 @@ class CommentCreateSerializer(BaseCommentSerializer):
 
         super().__init__(*args, **kwargs)
 
-    def validate_email(self, value):
+    @staticmethod
+    def validate_email(value):
         if not value:
             raise serializers.ValidationError(
                 _('Email is required for posting anonymous comments.'),
@@ -136,18 +137,8 @@ class CommentCreateSerializer(BaseCommentSerializer):
             email=email,
             posted=time_posted
             )
-        dict_comment = {
-            'user': user,
-            'content': content,
-            'email': email,
-            'posted': str(time_posted),
-            'app_name': self.app_name,
-            'model_name': self.model_name,
-            'model_id': self.model_id,
-            'parent': parent_id
-        }
-        if settings.COMMENT_ALLOW_ANONYMOUS and (not user):
-            process_anonymous_commenting(request, comment, dict_comment, api=True)
+        if settings.COMMENT_ALLOW_ANONYMOUS and not user:
+            process_anonymous_commenting(request, comment, api=True)
         else:
             comment.save()
         return comment
