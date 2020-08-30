@@ -46,10 +46,11 @@ class ContentTypePermission(permissions.BasePermission):
             self.message = _('app name must be provided')
             return False
 
+        if not ContentType.objects.filter(app_label=app_name).exists():
+            self.message = _('this is not a valid app name')
+            return False
+
         try:
-            cause = 'app'  # used for identifying the cause in ContentType.DoesNotExist exception
-            ContentType.objects.get(app_label=app_name)
-            cause = 'model'
             model_name = model_name.lower()
             ct = ContentType.objects.get(model=model_name).model_class()
             model_class = ct.objects.filter(id=model_id)
@@ -57,10 +58,7 @@ class ContentTypePermission(permissions.BasePermission):
                 self.message = _("this is not a valid model id for this model")
                 return False
         except ContentType.DoesNotExist:
-            if cause == 'app':
-                self.message = _('this is not a valid app name')
-            else:
-                self.message = _("this is not a valid model name")
+            self.message = _("this is not a valid model name")
             return False
         except ValueError:
             self.message = _("model id must be an integer")
