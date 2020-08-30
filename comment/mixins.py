@@ -10,6 +10,6 @@ class BaseCommentMixin(LoginRequiredMixin):
 
 class AJAXRequiredMixin:
     def dispatch(self, request, *args, **kwargs):
-        if not request.is_ajax():
+        if not request.META.get('HTTP_X_REQUESTED_WITH', None) == 'XMLHttpRequest':
             return HttpResponseBadRequest(_('Only AJAX request are allowed'))
         return super().dispatch(request, *args, **kwargs)
