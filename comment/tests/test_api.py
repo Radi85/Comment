@@ -10,7 +10,7 @@ from comment.models import Comment
 from comment.api.serializers import get_profile_model, get_user_fields, UserSerializer, CommentCreateSerializer, \
     CommentSerializer
 from comment.api.permissions import (
-    IsOwnerOrReadOnly, ContentTypePermission, ParentIdPermission, FlagEnabledPermission, CanChangeFlaggedCommentState
+    IsOwnerOrReadOnly, FlagEnabledPermission, CanChangeFlaggedCommentState
 )
 from comment.api.views import CommentList
 from comment.tests.base import BaseCommentTest, timezone
@@ -39,8 +39,6 @@ class APIPermissionsTest(APIBaseTest):
     def setUp(self):
         super().setUp()
         self.owner_permission = IsOwnerOrReadOnly()
-        self.content_type_permission = ContentTypePermission()
-        self.parent_permission = ParentIdPermission()
         self.flag_enabled_permission = FlagEnabledPermission()
         self.can_change_flagged_comment_state = CanChangeFlaggedCommentState()
         self.factory = RequestFactory()
@@ -69,79 +67,6 @@ class APIPermissionsTest(APIBaseTest):
         request.user = self.user_1
         self.assertEqual(self.comment_1.user, self.user_1)
         self.assertTrue(self.owner_permission.has_object_permission(request, self.view, self.comment_1))
-
-    def test_content_type_permission(self):
-        # missing model type
-        request = self.factory.get('/api/comments/')
-        self.assertFalse(self.content_type_permission.has_permission(request, self.view))
-        self.assertEqual(self.content_type_permission.message, 'model name must be provided')
-
-        # missing model id
-        request = self.factory.get('/api/comments/?model_name=post')
-        self.assertFalse(self.content_type_permission.has_permission(request, self.view))
-        self.assertEqual(self.content_type_permission.message, 'model id must be provided')
-
-        # missing app name
-        request = self.factory.get('/api/comments/?model_name=post&model_id=1')
-        self.assertFalse(self.content_type_permission.has_permission(request, self.view))
-        self.assertEqual(self.content_type_permission.message, 'app name must be provided')
-
-        # not exist model type
-        request = self.factory.get('/api/comments/?model_name=not_exist&model_id=1&app_name=post')
-        self.assertFalse(self.content_type_permission.has_permission(request, self.view))
-        self.assertEqual(self.content_type_permission.message, 'this is not a valid model name')
-
-        # app name doesn't exist
-        request = self.factory.get('/api/comments/?model_name=not_exist&model_id=1&app_name=not_exist')
-        self.assertFalse(self.content_type_permission.has_permission(request, self.view))
-        self.assertEqual(self.content_type_permission.message, 'this is not a valid app name')
-
-        # not exist model id
-        request = self.factory.get('/api/comments/?model_name=post&model_id=100&app_name=post')
-        self.assertFalse(self.content_type_permission.has_permission(request, self.view))
-        self.assertEqual(self.content_type_permission.message, 'this is not a valid model id for this model')
-
-        # not integer model id
-        request = self.factory.get('/api/comments/?model_name=post&model_id=c&app_name=post')
-        self.assertFalse(self.content_type_permission.has_permission(request, self.view))
-        self.assertEqual(self.content_type_permission.message, 'model id must be an integer')
-
-        # success
-        self.content_type_permission = ContentTypePermission()  # start fresh
-        request = self.factory.get('/api/comments/?model_name=post&app_name=post&model_id=1')
-        self.assertTrue(self.content_type_permission.has_permission(request, self.view))
-        self.assertEqual(self.content_type_permission.message, '')
-
-    def test_parent_id_permission(self):
-        # parent id not provided - user will be permitted and parent comment will be created
-        request = self.factory.get('/api/comments/create/?model_name=post&model_id=1')
-        self.assertTrue(self.parent_permission.has_permission(request, self.view))
-        self.assertEqual(self.parent_permission.message, '')
-
-        # parent id not int
-        request = self.factory.get('/api/comments/create/?model_name=post&model_id=1&parent_id=c')
-        self.assertFalse(self.parent_permission.has_permission(request, self.view))
-        self.assertEqual(self.parent_permission.message, 'the parent id must be an integer')
-
-        # parent id not exist
-        request = self.factory.get('/api/comments/create/?model_name=post&model_id=1&parent_id=100')
-        self.assertFalse(self.parent_permission.has_permission(request, self.view))
-        self.assertEqual(
-            self.parent_permission.message,
-            "this is not a valid id for a parent comment or the parent comment does NOT belong to this model object"
-        )
-
-        # parent id doesn't belong to the provided model type
-        request = self.factory.get('/api/comments/create/?model_name=post&id=2&parent_id=1')
-        self.assertFalse(self.parent_permission.has_permission(request, self.view))
-        self.assertEqual(
-            self.parent_permission.message,
-            "this is not a valid id for a parent comment or the parent comment does NOT belong to this model object"
-        )
-
-        # parent id = 0
-        request = self.factory.get('/api/comments/create/?model_name=post&id=2&parent_id=0')
-        self.assertTrue(self.parent_permission.has_permission(request, self.view))
 
     def test_flag_enabled_permission(self):
         request = self.factory.get('/')
@@ -220,51 +145,57 @@ class APICommentViewsTest(APIBaseTest):
         data = self.url_data.copy()
         data.pop('app_name')
         response = self.client.get(self.get_url(**data))
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data['detail'], 'app name must be provided')
 
     def test_retrieving_comment_list_without_model_name(self):
         data = self.url_data.copy()
         data.pop('model_name')
         response = self.client.get(self.get_url(**data))
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data['detail'], 'model name must be provided')
 
     def test_retrieving_comment_list_without_model_id(self):
         url_data = self.url_data.copy()
         url_data.pop('model_id')
         response = self.client.get(self.get_url(**url_data))
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data['detail'], 'model id must be provided')
 
     def test_retrieving_comment_list_with_invalid_app_name(self):
         data = self.url_data.copy()
-        data['app_name'] = 'invalid'
+        app_name = 'invalid'
+        data['app_name'] = app_name
         response = self.client.get(self.get_url(**data))
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.data['detail'], 'this is not a valid app name')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data['detail'], f'{app_name} is NOT a valid app name')
 
     def test_retrieving_comment_list_with_invalid_model_name(self):
         # not exist model type
         url_data = self.url_data.copy()
-        url_data['model_name'] = 'not_exist'
+        model_name = 'does_not_exists'
+        url_data['model_name'] = model_name
         response = self.client.get(self.get_url(**url_data))
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.data['detail'], 'this is not a valid model name')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data['detail'], f'{model_name} is NOT a valid model name')
 
     def test_retrieving_comment_list_with_invalid_model_id(self):
         # not exist model id
         url_data = self.url_data.copy()
-        url_data['model_id'] = 100
+        model_id = 100
+        url_data['model_id'] = model_id
         response = self.client.get(self.get_url(**url_data))
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.data['detail'], 'this is not a valid model id for this model')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.data['detail'],
+            f'{model_id} is NOT a valid model id for the model {url_data["model_name"]}')
 
         # not integer model id
-        url_data['model_id'] = 'c'
+        model_id = 'c'
+        url_data['model_id'] = model_id
         response = self.client.get(self.get_url(**url_data))
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.data['detail'], 'model id must be an integer')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data['detail'], f'model id must be an integer, {model_id} is NOT')
 
     def test_create_comment(self):
         # create parent comment
@@ -322,32 +253,37 @@ class APICommentViewsTest(APIBaseTest):
         # parent id not integer
         base_url = '/api/comments/create/'
         url_data = self.url_data.copy()
-        url_data['parent_id'] = 'c'
+        parent_id = 'c'
+        url_data['parent_id'] = parent_id
         data = {'content': 'new child comment from api'}
         response = self.client.post(self.get_url(base_url, **url_data), data=data)
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.data['detail'], 'the parent id must be an integer')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.data['detail'],
+            f'the parent id must be an integer, {parent_id} is NOT')
 
         # parent id not exist
-        url_data['parent_id'] = 100
+        parent_id = 100
+        url_data['parent_id'] = parent_id
         data = {'content': 'new child comment from api'}
         error_msg = (
-            'this is not a valid id for a parent comment or '
+            '{} is NOT a valid id for a parent comment or '
             'the parent comment does NOT belong to this model object'
             )
         response = self.client.post(self.get_url(base_url, **url_data), data=data)
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.data['detail'], error_msg)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data['detail'], error_msg.format(parent_id))
 
         # parent id doesn't belong to the model object
+        parent_id = 1
         url_data.update({
-            'parent_id': 1,
+            'parent_id': parent_id,
             'model_id': 2
         })
         data = {'content': 'new child comment from api'}
         response = self.client.post(self.get_url(base_url, **url_data), data=data)
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(response.data['detail'], error_msg)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data['detail'], error_msg.format(parent_id))
 
     def test_can_retrieve_update_delete_comment(self):
         count = Comment.objects.all().count()

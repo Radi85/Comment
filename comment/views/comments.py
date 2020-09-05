@@ -13,7 +13,7 @@ from comment.forms import CommentForm
 from comment.utils import (
     get_comment_context_data, get_model_obj, is_comment_admin, is_comment_moderator,
     get_comment_from_key, process_anonymous_commenting, get_user_for_request, CommentFailReason)
-from comment.mixins import BaseCommentMixin, AJAXRequiredMixin
+from comment.mixins import CommentUpdateMixin, AJAXRequiredMixin, ContentTypeMixin, ParentIdMixin
 from comment.conf import settings
 
 
@@ -32,7 +32,7 @@ class BaseCommentView(AJAXRequiredMixin, FormView):
         return kw
 
 
-class CreateComment(BaseCommentView):
+class CreateComment(ContentTypeMixin, ParentIdMixin, BaseCommentView):
     comment = None
 
     def get_context_data(self, **kwargs):
@@ -47,11 +47,11 @@ class CreateComment(BaseCommentView):
             return ['comment/comments/child_comment.html']
 
     def form_valid(self, form):
-        app_name = self.request.POST.get('app_name')
-        model_name = self.request.POST.get('model_name')
-        model_id = self.request.POST.get('model_id')
+        app_name = self.app_name
+        model_name = self.model_name
+        model_id = self.model_id
         model_object = get_model_obj(app_name, model_name, model_id)
-        parent_id = self.request.POST.get('parent_id')
+        parent_id = self.parent_id
         parent_comment = Comment.objects.get_parent_comment(parent_id)
         user = get_user_for_request(self.request)
 
@@ -78,7 +78,7 @@ class CreateComment(BaseCommentView):
         return self.render_to_response(self.get_context_data())
 
 
-class UpdateComment(BaseCommentMixin, BaseCommentView):
+class UpdateComment(CommentUpdateMixin, BaseCommentView):
     comment = None
 
     def dispatch(self, request, *args, **kwargs):
@@ -102,7 +102,7 @@ class UpdateComment(BaseCommentMixin, BaseCommentView):
             return render(request, 'comment/comments/comment_content.html', context)
 
 
-class DeleteComment(BaseCommentMixin, BaseCommentView):
+class DeleteComment(CommentUpdateMixin, BaseCommentView):
     comment = None
 
     def dispatch(self, request, *args, **kwargs):
