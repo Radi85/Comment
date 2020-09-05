@@ -255,3 +255,23 @@ class BaseCommentMigrationTest(TransactionTestCase):
             # get latest migration of current app
             migrate_to = [key for key in self.executor.loader.graph.leaf_nodes() if key[0] == self.app]
         self.executor.migrate(migrate_to)
+
+
+class BaseCommentMixinTest(BaseCommentTest):
+    def setUp(self):
+        super().setUp()
+        self.factory = RequestFactory()
+        self.url_data = {
+            'model_name': 'post',
+            'app_name': 'post',
+            'model_id': 1
+        }
+
+    def get_url(self, base_url=None, **kwargs):
+        if not base_url:
+            base_url = self.base_url
+        if kwargs:
+            base_url += '?'
+            for (key, val) in kwargs.items():
+                base_url += str(key) + '=' + str(val) + '&'
+        return base_url.rstrip('&')

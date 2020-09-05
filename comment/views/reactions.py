@@ -7,11 +7,11 @@ from django.views import View
 from django.views.decorators.http import require_POST
 
 from comment.models import Comment, Reaction, ReactionInstance
-from comment.mixins import BaseCommentMixin, AJAXRequiredMixin
+from comment.mixins import CommentUpdateMixin, AJAXRequiredMixin
 
 
 @method_decorator(require_POST, name='dispatch')
-class SetReaction(BaseCommentMixin, AJAXRequiredMixin, View):
+class SetReaction(CommentUpdateMixin, AJAXRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         comment = get_object_or_404(Comment, id=kwargs.get('pk'))

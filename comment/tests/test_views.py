@@ -63,15 +63,6 @@ class CommentViewTestCase(BaseCommentViewTest):
         self.increase_count()
         self.comment_count_test()
 
-        # create child comment with wrong id of parent comment
-        data['parent_id'] = 100
-        response = self.client.post(self.get_url(), data=data)
-        self.assertEqual(response.status_code, 200)
-        # this is the latest comment
-        child_comment = Comment.objects.filter(object_id=self.post_1.id).order_by('-posted').first()
-        self.assertTrue(child_comment.is_parent)
-        self.assertIsNone(child_comment.parent)
-
     def test_create_comment_non_ajax_request(self):
         response = self.client_non_ajax.post(self.get_url(), data=self.data)
         self.assertEqual(response.status_code, 400)

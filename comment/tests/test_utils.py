@@ -10,7 +10,8 @@ from django.shortcuts import reverse
 from comment.conf import settings
 from comment.utils import (
     get_model_obj, has_valid_profile, get_comment_context_data, id_generator, get_comment_from_key,
-    get_user_for_request, send_email_confirmation_request, process_anonymous_commenting, CommentFailReason)
+    get_user_for_request, send_email_confirmation_request, process_anonymous_commenting, CommentFailReason,
+    get_response_for_bad_request, get_data_for_request)
 from comment.tests.base import BaseCommentUtilsTest, Comment, RequestFactory
 
 
@@ -304,6 +305,42 @@ class TestProcessAnonymousCommenting(BaseAnonymousCommentTest, BaseCommentUtilsT
     def test_for_drf(self):
         response = process_anonymous_commenting(self.request, self.comment_obj, api=True)
         self.assertEqual(self.response_msg, response)
+
+
+class TestGetResponseForBadRequest(BaseCommentUtilsTest):
+
+    def test_for_django(self):
+        why = 'failed'
+        response = get_response_for_bad_request(why=why)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content.decode('utf-8'), why)
+
+    def test_for_drf(self):
+        why = 'failed'
+        response = get_response_for_bad_request(why=why, api=True)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data['detail'], why)
+
+
+class TestGetDataForRequest(BaseCommentUtilsTest):
+    """For django, POST requests are allowed. For DRF, GET requests are allowed"""
+    def test_for_django(self):
+        key = 'key'
+        val = 'val'
+        request = self.factory.post('/', data={key: val})
+        response = get_data_for_request(request)
+
+        self.assertEqual(response.get('key'), val)
+
+    def test_for_drf(self):
+        key = 'key'
+        val = 'val'
+        request = self.factory.get('/', data={key: val})
+        response = get_data_for_request(request, api=True)
+
+        self.assertEqual(response.get('key'), val)
 
 
 class UtilsTest(TestCase):

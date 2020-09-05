@@ -7,10 +7,10 @@ from django.views import View
 from comment.conf import settings
 from comment.models import Comment, Flag, FlagInstance
 from comment.utils import is_comment_admin, is_comment_moderator
-from comment.mixins import BaseCommentMixin, AJAXRequiredMixin
+from comment.mixins import CommentUpdateMixin, AJAXRequiredMixin
 
 
-class FlagViewMixin(BaseCommentMixin, AJAXRequiredMixin, View):
+class FlagViewMixin(CommentUpdateMixin, AJAXRequiredMixin, View):
     comment = None
 
     def dispatch(self, request, *args, **kwargs):

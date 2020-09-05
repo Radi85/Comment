@@ -9,34 +9,37 @@ from rest_framework.views import APIView
 
 from comment.api.serializers import CommentSerializer, CommentCreateSerializer
 from comment.api.permissions import (
-    IsOwnerOrReadOnly, ContentTypePermission, ParentIdPermission, FlagEnabledPermission, CanChangeFlaggedCommentState
+    IsOwnerOrReadOnly, FlagEnabledPermission, CanChangeFlaggedCommentState
 )
 from comment.models import Comment, Reaction, ReactionInstance, Flag, FlagInstance
 from comment.utils import get_comment_from_key, CommentFailReason
+from comment.mixins import ContentTypeMixin, ParentIdMixin
 
 
-class CommentCreate(generics.CreateAPIView):
+class CommentCreate(ContentTypeMixin, ParentIdMixin, generics.CreateAPIView):
     serializer_class = CommentCreateSerializer
-    permission_classes = (ContentTypePermission, ParentIdPermission)
+    permission_classes = ()
+    api = True
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['user'] = self.request.user
-        context['model_name'] = self.request.GET.get("model_name")
-        context['app_name'] = self.request.GET.get("app_name")
-        context['model_id'] = self.request.GET.get("model_id")
-        context['parent_id'] = self.request.GET.get("parent_id")
+        context['model_name'] = self.model_name
+        context['app_name'] = self.app_name
+        context['model_id'] = self.model_id
+        context['parent_id'] = self.parent_id
         context['email'] = self.request.GET.get('email', None)
         return context
 
 
-class CommentList(generics.ListAPIView):
+class CommentList(ContentTypeMixin, generics.ListAPIView):
     serializer_class = CommentSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, ContentTypePermission)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    api = True
 
     def get_queryset(self):
-        model_name = self.request.GET.get("model_name")
-        pk = self.request.GET.get("model_id")
+        model_name = self.model_name
+        pk = self.model_id
         content_type_model = ContentType.objects.get(model=model_name.lower())
         model_class = content_type_model.model_class()
         model_obj = model_class.objects.filter(id=pk).first()

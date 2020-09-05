@@ -229,6 +229,18 @@ class CommentModelManagerTest(BaseCommentManagerTest):
         count = Comment.objects.filter_parents_by_object(self.post_2, include_flagged=True).count()
         self.assertEqual(count, init_count)
 
+    def test_get_parent_comment(self):
+        # no parent_id passed from the url
+        self.assertIsNone(Comment.objects.get_parent_comment(''))
+        # no parent_id passed as 0
+        self.assertIsNone(Comment.objects.get_parent_comment('0'))
+        # no parent_id doesn't exist passed -> although this is highly unlikely as this will be handled by the mixin
+        # but is useful for admin interface if required
+        self.assertIsNone(Comment.objects.get_parent_comment(100))
+        parent_comment = Comment.objects.get_parent_comment(1)
+        self.assertIsNotNone(parent_comment)
+        self.assertEqual(parent_comment, self.parent_comment_1)
+
 
 class ReactionInstanceModelTest(BaseCommentManagerTest):
     def setUp(self):
