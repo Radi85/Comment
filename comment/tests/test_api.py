@@ -279,7 +279,7 @@ class APICommentViewsTest(APIBaseTest):
         data = {'content': 'new child comment from api'}
         error_msg = (
             '{} is NOT a valid id for a parent comment or '
-            'the parent comment does NOT belong to this model object'
+            'the parent comment does NOT belong to the provided model object'
             )
         response = self.client.post(self.get_url(base_url, **url_data), data=data)
         self.assertEqual(response.status_code, 400)
@@ -477,7 +477,7 @@ class APICommentDetailForFlagStateChangeTest(APIBaseTest):
         comment = self.comment_2
         self.assertFalse(comment.is_flagged)
         response = self.client.post(self.get_url(), data=self.data)
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 400)
 
     def test_change_state_by_not_permitted_user(self):
         comment = self.comment_1
@@ -561,7 +561,7 @@ class APIConfirmCommentViewTest(BaseAnonymousCommentTest, APIBaseTest):
         key = self.key + 'invalid'
         response = self.client.get(self.get_url(key))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json()['error'], 'Bad Signature, Comment discarded')
+        self.assertEqual(response.json()['detail'], 'Bad Signature, Comment discarded')
         self.assertEqual(Comment.objects.all().count(), self.init_count)
 
     def test_comment_exists(self):
@@ -575,7 +575,7 @@ class APIConfirmCommentViewTest(BaseAnonymousCommentTest, APIBaseTest):
 
         response = self.client.get(self.get_url(key))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json()['error'], 'Comment already verified')
+        self.assertEqual(response.json()['detail'], 'Comment already verified')
         self.assertEqual(Comment.objects.all().count(), init_count)
 
     def test_success(self):

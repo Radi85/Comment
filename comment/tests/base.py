@@ -1,3 +1,5 @@
+from urllib.parse import quote_plus
+
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
@@ -5,6 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
 from django.test import TestCase, RequestFactory, TransactionTestCase, Client
+from django.urls import reverse
 from django.utils import timezone
 
 from comment.conf import settings
@@ -16,6 +19,12 @@ User = get_user_model()
 
 
 class BaseCommentTest(TestCase):
+    flags = 0
+    reactions = 0
+    content_object_1 = None
+    increment = 0
+    user_1 = None
+
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -132,6 +141,8 @@ class BaseCommentTest(TestCase):
 
 
 class BaseCommentManagerTest(BaseCommentTest):
+    content_object_2 = None
+
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -154,8 +165,8 @@ class BaseCommentViewTest(BaseCommentTest):
         super().setUp()
         self.client = Client(HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.client_non_ajax = Client()
-        self.client.force_login(self.user_1)
-        self.client_non_ajax.force_login(self.user_1)
+        self.client.force_login(self.user_2)
+        self.client_non_ajax.force_login(self.user_2)
         self.data = {
             'content': 'parent comment was edited',
             'app_name': 'post',
@@ -163,8 +174,18 @@ class BaseCommentViewTest(BaseCommentTest):
             'model_id': self.post_1.id,
         }
 
+    @staticmethod
+    def get_url(reverse_name, pk, data=None):
+        if not data:
+            data = {}
+        query_string = '&'.join([f'{name}={quote_plus(str(value))}' for name, value in data.items()])
+        return reverse(reverse_name, args=[pk]) + f'?{query_string}'
+
 
 class BaseCommentFlagTest(BaseCommentViewTest):
+    user_2 = None
+    content_object_2 = None
+
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -272,15 +293,19 @@ class BaseCommentMigrationTest(TransactionTestCase):
 
 
 class BaseCommentMixinTest(BaseCommentTest):
+    base_url = None
+
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
         cls.factory = RequestFactory()
-        cls.url_data = {
+        cls.data = {
+            'content': 'test',
             'model_name': 'post',
             'app_name': 'post',
             'model_id': 1
         }
+        cls.comment = cls.create_comment(cls.post_1, cls.user_1)
 
     def get_url(self, base_url=None, **kwargs):
         if not base_url:

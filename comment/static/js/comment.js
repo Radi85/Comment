@@ -116,8 +116,19 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: headers,
             body: formDataQuery
         }).then(response => {
-            return response.text();
+            if (response.status === 200) {
+                return response.text();
+            }
+            else if (response.status === 400) {
+                return response.json();
+            }
+            return Promise.reject(response);
         }).then(data => {
+            if (data.type === 'error') {
+                console.log(data);
+                alert(data.detail);
+                return;
+            }
            // parent comment
             if (formButton.getAttribute('value') === 'parent') {
                 // reload all comments only when posting parent comment
