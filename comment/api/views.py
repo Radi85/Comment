@@ -2,26 +2,26 @@ from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 from rest_framework import generics, permissions, status
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from comment.validators import ValidatorMixin, ContentTypeValidator
 from comment.api.serializers import CommentSerializer, CommentCreateSerializer
 from comment.api.permissions import (
     IsOwnerOrReadOnly, FlagEnabledPermission, CanChangeFlaggedCommentState
 )
 from comment.models import Comment, Reaction, ReactionInstance, Flag, FlagInstance
 from comment.utils import get_comment_from_key, CommentFailReason
-from comment.mixins import ContentTypeMixin, ParentIdMixin
 
 
-class CommentCreate(ContentTypeMixin, ParentIdMixin, generics.CreateAPIView):
+class CommentCreate(ValidatorMixin, generics.CreateAPIView):
     serializer_class = CommentCreateSerializer
     permission_classes = ()
     api = True
 
     def get_serializer_context(self):
+        self.validate(self.request)
         context = super().get_serializer_context()
         context['user'] = self.request.user
         context['model_name'] = self.model_name
@@ -32,12 +32,13 @@ class CommentCreate(ContentTypeMixin, ParentIdMixin, generics.CreateAPIView):
         return context
 
 
-class CommentList(ContentTypeMixin, generics.ListAPIView):
+class CommentList(ContentTypeValidator, generics.ListAPIView):
     serializer_class = CommentSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     api = True
 
     def get_queryset(self):
+        self.validate(self.request)
         model_name = self.model_name
         pk = self.model_id
         content_type_model = ContentType.objects.get(model=model_name.lower())
@@ -73,7 +74,7 @@ class CommentDetailForReaction(generics.RetrieveAPIView):
                 reaction_type=reaction_type
             )
         except ValidationError as e:
-            return Response({'error': e.messages}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': e.messages}, status=status.HTTP_400_BAD_REQUEST)
 
         comment.reaction.refresh_from_db()
         serializer = self.get_serializer(comment)
@@ -98,7 +99,7 @@ class CommentDetailForFlag(generics.RetrieveAPIView):
         try:
             FlagInstance.objects.set_flag(request.user, flag, reason=reason, info=info)
         except ValidationError as e:
-            return Response({'error': e.messages}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': e.messages}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = self.get_serializer(comment)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -118,18 +119,21 @@ class CommentDetailForFlagStateChange(generics.RetrieveAPIView):
         comment = get_object_or_404(Comment, id=kwargs.get('pk'))
         flag = Flag.objects.get_for_comment(comment)
         if not comment.is_flagged:
-            raise PermissionDenied(detail=_('You do not have permission to perform this action.'))
+            return Response(
+                {'detail': _('This action cannot be applied on unflagged comments')},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         state = request.data.get('state') or request.POST.get('state')
         try:
             state = flag.get_clean_state(state)
             if not comment.is_edited and state == flag.RESOLVED:
                 return Response(
-                    {'error': _('The comment must be edited before resolving the flag')},
+                    {'detail': _('The comment must be edited before resolving the flag')},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             flag.toggle_state(state, request.user)
         except ValidationError as e:
-            return Response({'error': e.messages}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': e.messages}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = self.get_serializer(comment)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -141,9 +145,9 @@ class ConfirmComment(APIView):
         comment = get_comment_from_key(key)
 
         if comment.why_invalid == CommentFailReason.BAD:
-            return Response({'error': _('Bad Signature, Comment discarded')}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': _('Bad Signature, Comment discarded')}, status=status.HTTP_400_BAD_REQUEST)
 
         if comment.why_invalid == CommentFailReason.EXISTS:
-            return Response({'error': _('Comment already verified')}, status=status.HTTP_200_OK)
+            return Response({'detail': _('Comment already verified')}, status=status.HTTP_200_OK)
 
         return Response(CommentSerializer(comment.obj).data, status=status.HTTP_201_CREATED)

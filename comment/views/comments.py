@@ -1,6 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
-from django.core.exceptions import PermissionDenied
 from django.template.loader import render_to_string
 from django.views.generic import FormView
 from django.utils.translation import gettext_lazy as _
@@ -11,13 +10,14 @@ from django.contrib import messages
 from comment.models import Comment
 from comment.forms import CommentForm
 from comment.utils import (
-    get_comment_context_data, get_model_obj, is_comment_admin, is_comment_moderator,
-    get_comment_from_key, process_anonymous_commenting, get_user_for_request, CommentFailReason)
-from comment.mixins import CommentUpdateMixin, AJAXRequiredMixin, ContentTypeMixin, ParentIdMixin
+    get_comment_context_data, get_model_obj, get_comment_from_key, process_anonymous_commenting,
+    get_user_for_request, CommentFailReason
+)
+from comment.mixins import CanCreateMixin, CanEditMixin, CanDeleteMixin
 from comment.conf import settings
 
 
-class BaseCommentView(AJAXRequiredMixin, FormView):
+class BaseCommentView(FormView):
     form_class = CommentForm
 
     def get_context_data(self, **kwargs):
@@ -27,12 +27,12 @@ class BaseCommentView(AJAXRequiredMixin, FormView):
         return context
 
     def get_form_kwargs(self):
-        kw = super().get_form_kwargs()
-        kw['request'] = self.request
-        return kw
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
 
 
-class CreateComment(ContentTypeMixin, ParentIdMixin, BaseCommentView):
+class CreateComment(CanCreateMixin, BaseCommentView):
     comment = None
 
     def get_context_data(self, **kwargs):
@@ -58,7 +58,7 @@ class CreateComment(ContentTypeMixin, ParentIdMixin, BaseCommentView):
         comment_content = form.cleaned_data['content']
         email = form.cleaned_data.get('email', None) or user.email
         time_posted = timezone.now()
-        comment = Comment(
+        _comment = Comment(
             content_object=model_object,
             content=comment_content,
             user=user,
@@ -69,23 +69,21 @@ class CreateComment(ContentTypeMixin, ParentIdMixin, BaseCommentView):
 
         if settings.COMMENT_ALLOW_ANONYMOUS and not user:
             # send response, please verify your email to post this comment.
-            response_msg = process_anonymous_commenting(self.request, comment)
+            response_msg = process_anonymous_commenting(self.request, _comment)
             messages.info(self.request, response_msg)
         else:
-            comment.save()
-            self.comment = comment
+            _comment.save()
+            self.comment = _comment
 
         return self.render_to_response(self.get_context_data())
 
 
-class UpdateComment(CommentUpdateMixin, BaseCommentView):
+class UpdateComment(CanEditMixin, BaseCommentView):
     comment = None
 
-    def dispatch(self, request, *args, **kwargs):
+    def get_object(self):
         self.comment = get_object_or_404(Comment, pk=self.kwargs.get('pk'))
-        if request.user != self.comment.user:
-            raise PermissionDenied
-        return super().dispatch(request, *args, **kwargs)
+        return self.comment
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data()
@@ -102,15 +100,12 @@ class UpdateComment(CommentUpdateMixin, BaseCommentView):
             return render(request, 'comment/comments/comment_content.html', context)
 
 
-class DeleteComment(CommentUpdateMixin, BaseCommentView):
+class DeleteComment(CanDeleteMixin, BaseCommentView):
     comment = None
 
-    def dispatch(self, request, *args, **kwargs):
+    def get_object(self):
         self.comment = get_object_or_404(Comment, pk=self.kwargs.get('pk'))
-        if request.user != self.comment.user and not is_comment_admin(request.user) \
-                and not (self.comment.is_flagged and is_comment_moderator(request.user)):
-            raise PermissionDenied
-        return super().dispatch(request, *args, **kwargs)
+        return self.comment
 
     def get(self, request, *args, **kwargs):
         data = dict()
@@ -127,7 +122,8 @@ class DeleteComment(CommentUpdateMixin, BaseCommentView):
 
 
 class ConfirmComment(View):
-    def get(self, request, *args, **kwargs):
+    @staticmethod
+    def get(request, *args, **kwargs):
         key = kwargs.get('key', None)
         comment = get_comment_from_key(key)
 

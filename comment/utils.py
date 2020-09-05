@@ -12,7 +12,6 @@ from django.utils.translation import gettext_lazy as _
 from django.core import signing
 from django.apps import apps
 from django.contrib.sites.shortcuts import get_current_site
-from django.http import HttpResponseBadRequest
 
 from comment.conf import settings
 
@@ -214,30 +213,3 @@ def get_user_for_request(request):
     if request.user.is_authenticated:
         return request.user
     return None
-
-
-def get_data_for_request(request, api=False):
-    if api:
-        return request.GET
-    return request.POST
-
-
-def get_response_for_bad_request(*, why, api=False):
-    """Returns translated response for bad requests.
-    TODO: make this a `class CommentBadRequest`"""
-
-    def _get_api_response(why):
-        from rest_framework import status
-        from rest_framework.response import Response
-        from rest_framework.renderers import JSONRenderer
-        response = Response({'detail': why}, status=status.HTTP_400_BAD_REQUEST, content_type='application/json')
-        response.accepted_renderer = JSONRenderer()
-        response.accepted_media_type = "application/json"
-        response.renderer_context = {}
-        return response
-
-    why = _(why)
-    if api:
-        return _get_api_response(why)
-    else:
-        return HttpResponseBadRequest(why)

@@ -87,7 +87,7 @@ class Flag(models.Model):
         if not allowed_flags:
             return
         self.refresh_from_db()
-        if self.count > allowed_flags and self.state == self.UNFLAGGED:
+        if self.count > allowed_flags and self.state not in [self.RESOLVED, self.REJECTED]:
             self.state = self.FLAGGED
             self.save()
         else:

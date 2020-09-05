@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'comment',
     'post.apps.PostConfig',
     'user_profile.apps.AccountsConfig',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -74,7 +75,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-LOGIN_URL = '/profile/login/'
+LOGIN_URL = '/profile/login'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = LOGIN_URL
 
