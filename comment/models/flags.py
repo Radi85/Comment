@@ -1,8 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models.signals import post_delete, post_save
-from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -109,23 +107,3 @@ class FlagInstance(models.Model):
     class Meta:
         unique_together = ('flag', 'user')
         ordering = ('date_flagged',)
-
-
-@receiver(post_save, sender=FlagInstance)
-def increase_count(sender, instance, created, raw, using, update_fields, **kwargs):
-    if created:
-        instance.flag.increase_count()
-        instance.flag.toggle_flagged_state()
-
-
-@receiver(post_delete, sender=FlagInstance)
-def decrease_count(sender, instance, using, **kwargs):
-    """Decrease flag count in the flag model before deleting an instance"""
-    instance.flag.decrease_count()
-    instance.flag.toggle_flagged_state()
-
-
-@receiver(post_save, sender=Comment)
-def add_flag(sender, instance, created, raw, using, update_fields, **kwargs):
-    if created:
-        Flag.objects.create(comment=instance)
