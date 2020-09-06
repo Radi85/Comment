@@ -275,3 +275,16 @@ class BaseCommentMixinTest(BaseCommentTest):
             for (key, val) in kwargs.items():
                 base_url += str(key) + '=' + str(val) + '&'
         return base_url.rstrip('&')
+
+
+class BaseCommentSignalTest(BaseCommentManagerTest):
+    def setUp(self):
+        super().setUp()
+        self.user = self.user_1
+        self.comment = self.child_comment_1
+        self.LIKE = ReactionInstance.ReactionType.LIKE
+        self.DISLIKE = ReactionInstance.ReactionType.DISLIKE
+        self.flag_data = {
+            'reason': str(FlagInstance.objects.reason_values[0]),
+            'info': None,
+        }

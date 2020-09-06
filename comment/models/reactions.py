@@ -2,8 +2,6 @@ from enum import IntEnum, unique
 
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.db.models.signals import post_delete, post_save
-from django.dispatch import receiver
 from django.utils import timezone
 
 from comment.models import Comment
@@ -57,20 +55,3 @@ class ReactionInstance(models.Model):
 
     class Meta:
         unique_together = ['user', 'reaction']
-
-
-@receiver(post_delete, sender=ReactionInstance)
-def delete_reaction_instance(sender, instance, using, **kwargs):
-    instance.reaction.decrease_reaction_count(instance.reaction_type)
-
-
-@receiver(post_save, sender=ReactionInstance)
-def add_count(sender, instance, created, raw, using, update_fields, **kwargs):
-    if created:
-        instance.reaction.increase_reaction_count(instance.reaction_type)
-
-
-@receiver(post_save, sender=Comment)
-def add_reaction(sender, instance, created, raw, using, update_fields, **kwargs):
-    if created:
-        Reaction.objects.create(comment=instance)
