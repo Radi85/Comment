@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from django.urls import reverse
 from rest_framework import status
 from django.contrib import messages
@@ -91,8 +93,14 @@ class TestEditComment(BaseCommentViewTest):
     def get_url(self, pk):
         return reverse('comment:edit', args=[pk])
 
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.comment = cls.create_comment(cls.content_object_1)
+        cls.init_content = cls.comment.content
+
     def test_edit_comment(self):
-        comment = self.create_comment(self.content_object_1)
+        comment = self.comment
         self.assertEqual(Comment.objects.all().count(), 1)
         data = {
             'content': 'parent comment was edited',
@@ -100,7 +108,6 @@ class TestEditComment(BaseCommentViewTest):
             'model_name': 'post',
             'model_id': self.post_1.id
         }
-        self.assertEqual(comment.content, 'comment 1')
         response = self.client.get(self.get_url(comment.id), data=data)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('comment/comments/update_comment.html')
@@ -109,7 +116,8 @@ class TestEditComment(BaseCommentViewTest):
         response = self.client.post(self.get_url(comment.id), data=data)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('comment/comments/comment_content.html')
-        self.assertEqual(Comment.objects.all().first().content, data['content'])
+        comment.refresh_from_db()
+        self.assertEqual(comment.content, data['content'])
 
         data['content'] = ''
         with self.assertRaises(ValueError) as error:
@@ -117,7 +125,7 @@ class TestEditComment(BaseCommentViewTest):
         self.assertIsInstance(error.exception, ValueError)
 
     def test_cannot_edit_comment_by_different_user(self):
-        comment = self.create_comment(self.content_object_1)
+        comment = self.comment
         self.client.force_login(self.user_2)
         data = {
             'content': 'parent comment was edited',
@@ -125,7 +133,6 @@ class TestEditComment(BaseCommentViewTest):
             'model_name': 'post',
             'model_id': self.post_1.id
         }
-        self.assertEqual(comment.content, 'comment 1')
         self.assertEqual(comment.user.username, self.user_1.username)
         response = self.client.get(self.get_url(comment.id), data=data)
         self.assertEqual(response.status_code, 403)
@@ -316,7 +323,7 @@ class SetFlagViewTest(BaseCommentFlagTest):
 
     def test_set_flag_for_flagging(self):
         url = self.get_url()
-        data = self.flag_data
+        data = self.flag_data.copy()
         response = self.client.post(url, data=data)
         response_data = {
             'status': 0,
@@ -326,13 +333,12 @@ class SetFlagViewTest(BaseCommentFlagTest):
         self.assertEqual(response.status_code, 200)
         self.assertDictEqual(response.json(), response_data)
 
+    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 0)
     def test_set_flag_when_flagging_not_enabled(self):
-        settings.COMMENT_FLAGS_ALLOWED = 0
         url = self.get_url()
-        data = self.flag_data
+        data = self.flag_data.copy()
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 403)
-        settings.COMMENT_FLAGS_ALLOWED = 1
 
     def test_set_flag_for_flagging_old_comments(self):
         """Test backward compatibility for this update"""
@@ -391,7 +397,7 @@ class SetFlagViewTest(BaseCommentFlagTest):
     def test_incorrect_reason(self):
         """Test response when incorrect reason is passed"""
         url = self.get_url()
-        data = self.flag_data
+        data = self.flag_data.copy()
         reason = -1
         data.update({'reason': reason})
         response = self.client.post(url, data=data)
@@ -399,12 +405,12 @@ class SetFlagViewTest(BaseCommentFlagTest):
 
 
 class ChangeFlagStateViewTest(BaseCommentFlagTest):
+    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 1)
     def setUp(self):
         super().setUp()
         self.data = {
             'state': self.comment.flag.REJECTED
         }
-        settings.COMMENT_FLAGS_ALLOWED = 1
         self.create_flag_instance(self.user_1, self.comment, **self.flag_data)
         self.create_flag_instance(self.user_2, self.comment, **self.flag_data)
 
@@ -413,8 +419,8 @@ class ChangeFlagStateViewTest(BaseCommentFlagTest):
             comment = self.comment
         return reverse('comment:flag-change-state', kwargs={'pk': comment.id})
 
+    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 10)
     def test_change_flag_state_for_unflagged_comment(self):
-        settings.COMMENT_FLAGS_ALLOWED = 10
         self.comment.flag.toggle_flagged_state()
         self.assertFalse(self.comment.is_flagged)
         self.client.force_login(self.moderator)

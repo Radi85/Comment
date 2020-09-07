@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 from comment.signals import adjust_flagged_comments
 from comment.tests.base import BaseCommentSignalTest
-from comment.models import Flag, FlagInstance, Reaction, ReactionInstance
+from comment.models import Comment, Flag, FlagInstance, Reaction, ReactionInstance
 from comment.conf import settings
 
 
@@ -46,7 +46,7 @@ class TestPostSave(BaseCommentSignalTest):
         parent_comment = self.create_comment(self.content_object_1)
         self.assertIsNotNone(Reaction.objects.get(comment=parent_comment))
         # 1 reaction instance is created for every comment
-        self.assertEqual(Reaction.objects.count(), self.increment)
+        self.assertEqual(Reaction.objects.count(), Comment.objects.count())
 
     def test_flag_signal(self):
         """Test flag model instance is created when a comment is created"""

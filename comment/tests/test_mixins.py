@@ -92,13 +92,14 @@ class ContentTypeMixinTest(BaseCommentMixinTest):
 
 
 class TestParentIdMixin(BaseCommentMixinTest):
-    def setUp(self):
-        super().setUp()
-        self.create_comment(self.content_object_1)
-        self.create_comment(self.content_object_2)
-        self.mixin = ParentIdMixin()
-        self.mixin.api = True
-        self.base_url = '/api/comments/create/'
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.create_comment(cls.content_object_1)
+        cls.create_comment(cls.content_object_2)
+        cls.mixin = ParentIdMixin()
+        cls.mixin.api = True
+        cls.base_url = '/api/comments/create/'
 
     def test_parent_id_not_int(self):
         # parent id not int

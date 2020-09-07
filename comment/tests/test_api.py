@@ -6,7 +6,7 @@ from django.core import signing
 from rest_framework import status
 
 from comment.conf import settings
-from comment.models import Comment
+from comment.models import Comment, FlagInstanceManager
 from comment.api.serializers import get_profile_model, get_user_fields, UserSerializer, CommentCreateSerializer, \
     CommentSerializer
 from comment.api.permissions import (
@@ -18,20 +18,23 @@ from comment.tests.test_utils import BaseAnonymousCommentTest
 
 
 class APIBaseTest(BaseCommentTest):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.comment_1 = cls.create_comment(cls.content_object_1)
+        cls.comment_2 = cls.create_comment(cls.content_object_1)
+        cls.comment_3 = cls.create_comment(cls.content_object_1)
+        cls.comment_4 = cls.create_comment(cls.content_object_1, parent=cls.comment_1)
+        cls.reaction_1 = cls.create_reaction_instance(cls.user_1, cls.comment_1, 'like')
+
+        cls.comment_5 = cls.create_comment(cls.content_object_2)
+        cls.comment_6 = cls.create_comment(cls.content_object_2)
+        cls.comment_7 = cls.create_comment(cls.content_object_2, parent=cls.comment_5)
+        cls.comment_8 = cls.create_comment(cls.content_object_2, parent=cls.comment_5)
+        cls.reaction_2 = cls.create_reaction_instance(cls.user_1, cls.comment_5, 'dislike')
+
     def setUp(self):
         super().setUp()
-        self.comment_1 = self.create_comment(self.content_object_1)
-        self.comment_2 = self.create_comment(self.content_object_1)
-        self.comment_3 = self.create_comment(self.content_object_1)
-        self.comment_4 = self.create_comment(self.content_object_1, parent=self.comment_1)
-        self.reaction_1 = self.create_reaction_instance(self.user_1, self.comment_1, 'like')
-
-        self.comment_5 = self.create_comment(self.content_object_2)
-        self.comment_6 = self.create_comment(self.content_object_2)
-        self.comment_7 = self.create_comment(self.content_object_2, parent=self.comment_5)
-        self.comment_8 = self.create_comment(self.content_object_2, parent=self.comment_5)
-        self.reaction_2 = self.create_reaction_instance(self.user_1, self.comment_5, 'dislike')
-
         self.addCleanup(patch.stopall)
 
 
@@ -43,6 +46,16 @@ class APIPermissionsTest(APIBaseTest):
         self.can_change_flagged_comment_state = CanChangeFlaggedCommentState()
         self.factory = RequestFactory()
         self.view = CommentList()
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.flag_data = {
+            'reason': FlagInstanceManager.reason_values[0],
+            'info': '',
+        }
+        cls.create_flag_instance(cls.user_1, cls.comment_1, **cls.flag_data)
+        cls.create_flag_instance(cls.user_2, cls.comment_1, **cls.flag_data)
 
     def test_owner_permission(self):
         # self.client.login(username='test-2', password='1234')
@@ -77,32 +90,30 @@ class APIPermissionsTest(APIBaseTest):
 
     def test_can_change_flagged_comment_state(self):
         request = self.factory.get('/')
-        request.user = self.user_1  # not moderator user
+        user = self.user_1
+        request.user = user  # not moderator user
         self.assertFalse(self.can_change_flagged_comment_state.has_permission(request, self.view))
 
-        request.user = self.moderator
+        user = self.moderator
+        request.user = user
         self.assertTrue(self.can_change_flagged_comment_state.has_permission(request, self.view))
 
-        self.assertFalse(self.comment_1.is_flagged)
+        comment = self.comment_2
+        self.assertFalse(comment.is_flagged)
         self.assertFalse(
-            self.can_change_flagged_comment_state.has_object_permission(request, self.view, self.comment_1)
+            self.can_change_flagged_comment_state.has_object_permission(request, self.view, comment)
         )
-
-        flag_data = {
-            'reason': '1',
-            'info': None,
-        }
         settings.COMMENT_FLAGS_ALLOWED = 1
-        self.create_flag_instance(self.user_1, self.comment_1, **flag_data)
-        self.create_flag_instance(self.user_2, self.comment_1, **flag_data)
-        self.assertTrue(self.comment_1.is_flagged)
+        self.set_flag(self.user_1, comment, **self.flag_data)
+        self.set_flag(self.user_2, comment, **self.flag_data)
+        self.assertTrue(comment.is_flagged)
         self.assertTrue(
-            self.can_change_flagged_comment_state.has_object_permission(request, self.view, self.comment_1)
+            self.can_change_flagged_comment_state.has_object_permission(request, self.view, comment)
         )
 
         request.user = self.user_1
         self.assertFalse(
-            self.can_change_flagged_comment_state.has_object_permission(request, self.view, self.comment_1)
+            self.can_change_flagged_comment_state.has_object_permission(request, self.view, comment)
         )
 
 
@@ -357,11 +368,15 @@ class APICommentFlagViewTest(APIBaseTest):
         super().setUp()
         self.comment = self.comment_1
         self.user = self.user_1
-        self.flag = self.create_flag_instance(self.user_2, self.comment_2)
         self.flag_data = {
-            'reason': 1,
+            'reason': FlagInstanceManager.reason_values[0],
             'info': '',
         }
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.flag = cls.create_flag_instance(cls.user_2, cls.comment_2)
 
     def test_flag_to_comment(self):
         comment = self.comment
@@ -440,90 +455,89 @@ class APICommentDetailForFlagStateChangeTest(APIBaseTest):
             'state': self.comment_1.flag.REJECTED
         }
 
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.flag_data = {
+            'reason': FlagInstanceManager.reason_values[0],
+            'info': None,
+        }
+        settings.COMMENT_FLAGS_ALLOWED = 1
+        # flag comment_1
+        cls.create_flag_instance(cls.user_1, cls.comment_1, **cls.flag_data)
+        cls.create_flag_instance(cls.user_2, cls.comment_1, **cls.flag_data)
+
     def get_url(self, c_id=None):
         if not c_id:
             c_id = self.comment_1.id
         return f'/api/comments/{c_id}/flag/state/change/'
 
-    def test_change_state_for_unflagged_comment(self):
-        self.assertFalse(self.comment_1.is_flagged)
+    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 0)
+    def test_change_state_when_flagging_is_disabled(self):
+        comment = self.comment_2
+        self.assertFalse(comment.is_flagged)
         response = self.client.post(self.get_url(), data=self.data)
         self.assertEqual(response.status_code, 403)
 
     def test_change_state_by_not_permitted_user(self):
-        settings.COMMENT_FLAGS_ALLOWED = 1
-        flag_data = {
-            'reason': '1',
-            'info': None,
-        }
-        self.create_flag_instance(self.user_1, self.comment_1, **flag_data)
-        self.create_flag_instance(self.user_2, self.comment_1, **flag_data)
-        self.assertTrue(self.comment_1.is_flagged)
+        comment = self.comment_1
+        self.assertTrue(comment.is_flagged)
         self.client.force_login(self.user_1)
         response = self.client.post(self.get_url(), data=self.data)
         self.assertEqual(response.status_code, 403)
 
     def test_change_state_with_wrong_state_value(self):
-        settings.COMMENT_FLAGS_ALLOWED = 1
-        flag_data = {
-            'reason': '1',
-            'info': None,
-        }
-        self.create_flag_instance(self.user_1, self.comment_1, **flag_data)
-        self.create_flag_instance(self.user_2, self.comment_1, **flag_data)
-        self.assertTrue(self.comment_1.is_flagged)
+        data = self.data.copy()
+        comment = self.comment_1
+        self.assertTrue(comment.is_flagged)
 
-        self.data['state'] = 100
-        response = self.client.post(self.get_url(), data=self.data)
+        data['state'] = 100
+        response = self.client.post(self.get_url(), data=data)
         self.assertEqual(response.status_code, 400)
 
-        self.data['state'] = "Not Int"
-        response = self.client.post(self.get_url(), data=self.data)
+        data['state'] = "Not Int"
+        response = self.client.post(self.get_url(), data=data)
         self.assertEqual(response.status_code, 400)
 
         response = self.client.post(self.get_url(), data={})
         self.assertEqual(response.status_code, 400)
 
-        self.data['state'] = self.comment_1.flag.RESOLVED
-        self.assertFalse(self.comment_1.is_edited)
-        response = self.client.post(self.get_url(), data=self.data)
+        data['state'] = comment.flag.RESOLVED
+        comment.refresh_from_db()
+        self.assertFalse(comment.is_edited)
+        response = self.client.post(self.get_url(), data=data)
         self.assertEqual(response.status_code, 400)
 
     def test_change_state_success(self):
-        settings.COMMENT_FLAGS_ALLOWED = 1
-        flag_data = {
-            'reason': '1',
-            'info': None,
-        }
-        self.create_flag_instance(self.user_1, self.comment_1, **flag_data)
-        self.create_flag_instance(self.user_2, self.comment_1, **flag_data)
-        self.assertTrue(self.comment_1.is_flagged)
-        self.assertEqual(self.comment_1.flag.state, self.comment_1.flag.FLAGGED)
+        comment = self.comment_1
+        self.assertTrue(comment.is_flagged)
+        self.assertEqual(comment.flag.state, comment.flag.FLAGGED)
 
-        self.data['state'] = self.comment_1.flag.REJECTED
-        response = self.client.post(self.get_url(), data=self.data)
+        data = self.data.copy()
+        data['state'] = comment.flag.REJECTED
+        response = self.client.post(self.get_url(), data=data)
         self.assertEqual(response.status_code, 200)
-        self.comment_1.flag.refresh_from_db()
-        self.assertEqual(self.comment_1.flag.state, self.comment_1.flag.REJECTED)
+        comment.flag.refresh_from_db()
+        self.assertEqual(comment.flag.state, comment.flag.REJECTED)
 
         sleep(1)
-        self.comment_1.content = "new content"
-        self.comment_1.save()
-        self.assertTrue(self.comment_1.is_edited)
+        comment.content = "new content"
+        comment.save()
+        self.assertTrue(comment.is_edited)
 
         # First request
-        self.data['state'] = self.comment_1.flag.RESOLVED
-        response = self.client.post(self.get_url(), data=self.data)
+        data['state'] = comment.flag.RESOLVED
+        response = self.client.post(self.get_url(), data=data)
         self.assertEqual(response.status_code, 200)
-        self.comment_1.flag.refresh_from_db()
-        self.assertEqual(self.comment_1.flag.state, self.comment_1.flag.RESOLVED)
+        comment.flag.refresh_from_db()
+        self.assertEqual(comment.flag.state, comment.flag.RESOLVED)
 
         # Second request of same state changes state to FLAGGED
-        self.data['state'] = self.comment_1.flag.RESOLVED
-        response = self.client.post(self.get_url(), data=self.data)
+        data['state'] = comment.flag.RESOLVED
+        response = self.client.post(self.get_url(), data=data)
         self.assertEqual(response.status_code, 200)
-        self.comment_1.flag.refresh_from_db()
-        self.assertEqual(self.comment_1.flag.state, self.comment_1.flag.FLAGGED)
+        comment.flag.refresh_from_db()
+        self.assertEqual(comment.flag.state, comment.flag.FLAGGED)
 
 
 class APIConfirmCommentViewTest(BaseAnonymousCommentTest, APIBaseTest):
@@ -531,6 +545,11 @@ class APIConfirmCommentViewTest(BaseAnonymousCommentTest, APIBaseTest):
         super().setUp()
         self.client.logout()
         self.init_count = Comment.objects.all().count()
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.comment = cls.create_anonymous_comment(posted=timezone.now(), email='a@a.com')
 
     def get_url(self, key=None):
         if not key:
@@ -547,11 +566,10 @@ class APIConfirmCommentViewTest(BaseAnonymousCommentTest, APIBaseTest):
 
     def test_comment_exists(self):
         comment_dict = self.comment_obj.to_dict().copy()
-        comment = self.create_anonymous_comment(posted=timezone.now(), email='a@a.com')
-        init_count = self.init_count + 1
+        init_count = self.init_count
         comment_dict.update({
-            'posted': str(comment.posted),
-            'email': comment.email
+            'posted': str(self.comment.posted),
+            'email': self.comment.email
         })
         key = signing.dumps(comment_dict)
 

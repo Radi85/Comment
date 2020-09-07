@@ -1,9 +1,6 @@
 from comment.conf import settings
 from comment.signals import adjust_flagged_comments
-from comment.tests.base import BaseCommentTest, BaseCommentMigrationTest
-
-
-
+from comment.tests.base import BaseCommentMigrationTest
 
 
 class CommentMigrationTest(BaseCommentMigrationTest):
