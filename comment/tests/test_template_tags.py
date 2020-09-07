@@ -28,6 +28,7 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
 
     def test_profile_url(self):
         # success
+        settings.PROFILE_APP_NAME = 'user_profile'
         url = get_profile_url(self.parent_comment_1)
         self.assertEqual(url, '/profile/profile/test-1')
         # fail
@@ -51,6 +52,7 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         url = get_img_path(self.parent_comment_1)
         self.assertEqual(url, '/static/img/default.png')
 
+    @patch.object(settings, 'PROFILE_APP_NAME', 'user_profile')
     def test_profile_has_no_image_field(self):
         mocked_hasattr = patch('comment.templatetags.comment_tags.hasattr').start()
         mocked_hasattr.return_value = False

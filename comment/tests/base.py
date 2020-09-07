@@ -16,84 +16,93 @@ User = get_user_model()
 
 
 class BaseCommentTest(TestCase):
-    def setUp(self):
-        self.user_1 = User.objects.create_user(
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.user_1 = User.objects.create_user(
                     username="test-1",
                     email="test-1@acme.edu",
                     password="1234"
         )
-        self.user_2 = User.objects.create_user(
+        cls.user_2 = User.objects.create_user(
             username="test-2",
             email="test-2@acme.edu",
             password="1234"
         )
-        self.moderator = User.objects.create_user(
+        cls.moderator = User.objects.create_user(
             username="moderator",
             email="test-2@acme.edu",
             password="1234"
         )
         moderator_group = Group.objects.filter(name='comment_moderator').first()
-        moderator_group.user_set.add(self.moderator)
-        self.admin = User.objects.create_user(
+        moderator_group.user_set.add(cls.moderator)
+        cls.admin = User.objects.create_user(
             username="admin",
             email="test-2@acme.edu",
             password="1234"
         )
         admin_group = Group.objects.filter(name='comment_admin').first()
-        admin_group.user_set.add(self.admin)
-        self.client.force_login(self.user_1)
-        self.post_1 = Post.objects.create(
-            author=self.user_1,
+        admin_group.user_set.add(cls.admin)
+        cls.post_1 = Post.objects.create(
+            author=cls.user_1,
             title="post 1",
             body="first post body"
         )
-        self.post_2 = Post.objects.create(
-            author=self.user_1,
+        cls.post_2 = Post.objects.create(
+            author=cls.user_1,
             title="post 2",
             body="second post body"
         )
         content_type = ContentType.objects.get(model='post')
-        self.content_object_1 = content_type.get_object_for_this_type(id=self.post_1.id)
-        self.content_object_2 = content_type.get_object_for_this_type(id=self.post_2.id)
-        self.increment = 0
-        self.reactions = 0
-        self.flags = 0
+        cls.content_object_1 = content_type.get_object_for_this_type(id=cls.post_1.id)
+        cls.content_object_2 = content_type.get_object_for_this_type(id=cls.post_2.id)
+        cls.increment = 0
+        cls.reactions = 0
+        cls.flags = 0
 
-    def increase_comment_count(self):
-        self.increment += 1
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.user_1)
 
-    def create_comment(self, ct_object, user=None, email=None, posted=None, parent=None):
+    @classmethod
+    def increase_comment_count(cls):
+        cls.increment += 1
+
+    @classmethod
+    def create_comment(cls, ct_object, user=None, email=None, posted=None, parent=None):
         if not user:
-            user = self.user_1
-        self.increase_comment_count()
+            user = cls.user_1
+        cls.increase_comment_count()
         return Comment.objects.create(
             content_object=ct_object,
-            content='comment {}'.format(self.increment),
+            content='comment {}'.format(cls.increment),
             user=user,
             parent=parent,
         )
 
-    def create_anonymous_comment(self, ct_object=None, email=None, posted=None, parent=None):
+    @classmethod
+    def create_anonymous_comment(cls, ct_object=None, email=None, posted=None, parent=None):
         if not ct_object:
-            ct_object = self.content_object_1
+            ct_object = cls.content_object_1
         if not email:
-            email = self.user_1.email
+            email = cls.user_1.email
         if not posted:
             posted = timezone.now()
-        self.increase_comment_count()
+        cls.increase_comment_count()
         return Comment.objects.create(
             content_object=ct_object,
-            content='anonymous comment {}'.format(self.increment),
+            content='anonymous comment {}'.format(cls.increment),
             parent=parent,
             email=email,
             posted=posted
         )
 
-    def create_reaction_instance(self, user, comment, reaction):
+    @classmethod
+    def create_reaction_instance(cls, user, comment, reaction):
         reaction_type = getattr(ReactionInstance.ReactionType, reaction.upper(), None)
         if reaction_type:
             reaction_obj = Reaction.objects.get(comment=comment)
-            self.reactions += 1
+            cls.reactions += 1
             reaction_instance = ReactionInstance.objects.create(
                 user=user,
                 reaction_type=reaction_type.value,
@@ -111,30 +120,32 @@ class BaseCommentTest(TestCase):
     def set_flag(user, comment, **kwargs):
         return FlagInstance.objects.set_flag(user, comment.flag, **kwargs)
 
-    def create_flag_instance(self, user, comment, **kwargs):
+    @classmethod
+    def create_flag_instance(cls, user, comment, **kwargs):
         instance = FlagInstance.objects.create(
             user=user,
             flag=comment.flag,
             **kwargs
         )
-        self.flags += 1
+        cls.flags += 1
         return instance
 
 
 class BaseCommentManagerTest(BaseCommentTest):
-    def setUp(self):
-        super().setUp()
-        self.parent_comment_1 = self.create_comment(self.content_object_1)
-        self.parent_comment_2 = self.create_comment(self.content_object_1)
-        self.parent_comment_3 = self.create_comment(self.content_object_1)
-        self.child_comment_1 = self.create_comment(self.content_object_1, parent=self.parent_comment_1)
-        self.child_comment_2 = self.create_comment(self.content_object_1, parent=self.parent_comment_2)
-        self.child_comment_3 = self.create_comment(self.content_object_1, parent=self.parent_comment_2)
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.parent_comment_1 = cls.create_comment(cls.content_object_1)
+        cls.parent_comment_2 = cls.create_comment(cls.content_object_1)
+        cls.parent_comment_3 = cls.create_comment(cls.content_object_1)
+        cls.child_comment_1 = cls.create_comment(cls.content_object_1, parent=cls.parent_comment_1)
+        cls.child_comment_2 = cls.create_comment(cls.content_object_1, parent=cls.parent_comment_2)
+        cls.child_comment_3 = cls.create_comment(cls.content_object_1, parent=cls.parent_comment_2)
 
-        self.parent_comment_4 = self.create_comment(self.content_object_2)
-        self.parent_comment_5 = self.create_comment(self.content_object_2)
-        self.child_comment_4 = self.create_comment(self.content_object_2, parent=self.parent_comment_1)
-        self.child_comment_5 = self.create_comment(self.content_object_2, parent=self.parent_comment_2)
+        cls.parent_comment_4 = cls.create_comment(cls.content_object_2)
+        cls.parent_comment_5 = cls.create_comment(cls.content_object_2)
+        cls.child_comment_4 = cls.create_comment(cls.content_object_2, parent=cls.parent_comment_1)
+        cls.child_comment_5 = cls.create_comment(cls.content_object_2, parent=cls.parent_comment_2)
 
 
 class BaseCommentViewTest(BaseCommentTest):
@@ -154,16 +165,17 @@ class BaseCommentViewTest(BaseCommentTest):
 
 
 class BaseCommentFlagTest(BaseCommentViewTest):
-    def setUp(self):
-        super().setUp()
-        self.comment = self.create_comment(self.content_object_1)
-        self.user = self.user_1
-        self.flag_data = {
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.comment = cls.create_comment(cls.content_object_1)
+        cls.user = cls.user_1
+        cls.flag_data = {
             'reason': str(FlagInstance.objects.reason_values[0]),
             'info': None,
         }
-        self.comment_2 = self.create_comment(self.content_object_2)
-        self.flag_instance = self.create_flag_instance(self.user_2, self.comment_2, **self.flag_data)
+        cls.comment_2 = cls.create_comment(cls.content_object_2)
+        cls.flag_instance = cls.create_flag_instance(cls.user_2, cls.comment_2, **cls.flag_data)
 
 
 class BaseTemplateTagsTest(BaseCommentTest):
@@ -171,30 +183,32 @@ class BaseTemplateTagsTest(BaseCommentTest):
         """Mock unauthenticated user for template. The User instance always returns True for `is_authenticated`"""
         is_authenticated = False
 
-    def setUp(self):
-        super().setUp()
-        self.factory = RequestFactory()
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.factory = RequestFactory()
         settings.PROFILE_APP_NAME = 'user_profile'
         settings.COMMENT_ALLOW_ANONYMOUS = True
-        self.increment = 0
-        self.parent_comment_1 = self.create_comment(self.content_object_1)
-        self.parent_comment_2 = self.create_comment(self.content_object_1)
-        self.parent_comment_3 = self.create_comment(self.content_object_1)
-        self.child_comment_1 = self.create_comment(self.content_object_1, parent=self.parent_comment_1)
-        self.child_comment_2 = self.create_comment(self.content_object_1, parent=self.parent_comment_2)
-        self.child_comment_3 = self.create_comment(self.content_object_1, parent=self.parent_comment_2)
-        self.anonymous_parent_comment = self.create_anonymous_comment()
-        self.anonymous_child_comment = self.create_anonymous_comment(parent=self.parent_comment_1)
+        cls.increment = 0
+        cls.parent_comment_1 = cls.create_comment(cls.content_object_1)
+        cls.parent_comment_2 = cls.create_comment(cls.content_object_1)
+        cls.parent_comment_3 = cls.create_comment(cls.content_object_1)
+        cls.child_comment_1 = cls.create_comment(cls.content_object_1, parent=cls.parent_comment_1)
+        cls.child_comment_2 = cls.create_comment(cls.content_object_1, parent=cls.parent_comment_2)
+        cls.child_comment_3 = cls.create_comment(cls.content_object_1, parent=cls.parent_comment_2)
+        cls.anonymous_parent_comment = cls.create_anonymous_comment()
+        cls.anonymous_child_comment = cls.create_anonymous_comment(parent=cls.parent_comment_1)
 
 
 class BaseCommentUtilsTest(BaseCommentTest):
-    def setUp(self):
-        super().setUp()
-        self.factory = RequestFactory()
-        self.comment_1 = self.create_comment(self.content_object_1)
-        self.comment_2 = self.create_comment(self.content_object_1)
-        self.comment_3 = self.create_comment(self.content_object_1)
-        self.anonymous_comment = self.create_anonymous_comment()
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.factory = RequestFactory()
+        cls.comment_1 = cls.create_comment(cls.content_object_1)
+        cls.comment_2 = cls.create_comment(cls.content_object_1)
+        cls.comment_3 = cls.create_comment(cls.content_object_1)
+        cls.anonymous_comment = cls.create_anonymous_comment()
 
 
 class BaseCommentMigrationTest(TransactionTestCase):
@@ -258,10 +272,11 @@ class BaseCommentMigrationTest(TransactionTestCase):
 
 
 class BaseCommentMixinTest(BaseCommentTest):
-    def setUp(self):
-        super().setUp()
-        self.factory = RequestFactory()
-        self.url_data = {
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.factory = RequestFactory()
+        cls.url_data = {
             'model_name': 'post',
             'app_name': 'post',
             'model_id': 1

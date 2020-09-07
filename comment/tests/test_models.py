@@ -156,9 +156,9 @@ class CommentModelManagerTest(BaseCommentManagerTest):
         parent_comments = Comment.objects.all_parents().count()
         self.assertEqual(parent_comments, 5)
 
+    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 1)
     def test_filtering_flagged_comment(self):
-        settings.COMMENT_FLAGS_ALLOWED = 1
-        comment = self.create_comment(self.content_object_1)
+        comment = self.parent_comment_1
         self.assertEqual(Comment.objects.all_exclude_flagged().count(), self.increment)
         self.create_flag_instance(self.user_1, comment)
         self.create_flag_instance(self.user_2, comment)
@@ -169,9 +169,9 @@ class CommentModelManagerTest(BaseCommentManagerTest):
         self.assertEqual(Comment.objects.all_exclude_flagged().count(), self.increment)
         settings.COMMENT_SHOW_FLAGGED = False
 
+    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 0)
     def test_filtering_comment_when_flag_not_enabled(self):
-        settings.COMMENT_FLAGS_ALLOWED = 0
-        comment = self.create_comment(self.content_object_1)
+        comment = self.parent_comment_1
         self.assertEqual(Comment.objects.all_exclude_flagged().count(), self.increment)
         self.create_flag_instance(self.user_1, comment)
         self.create_flag_instance(self.user_2, comment)
@@ -360,7 +360,7 @@ class FlagInstanceModelTest(BaseCommentFlagTest):
 
 class FlagInstanceManagerTest(BaseCommentFlagTest):
     def test_clean_reason_for_invalid_value(self):
-        data = self.flag_data
+        data = self.flag_data.copy()
         data.update({'reason': -1})
         self.assertRaises(ValidationError, self.set_flag, self.user, self.comment, **data)
 
@@ -368,7 +368,7 @@ class FlagInstanceManagerTest(BaseCommentFlagTest):
         self.assertRaises(ValidationError, self.set_flag, self.user, self.comment, **data)
 
     def test_clean_for_invalid_values(self):
-        data = self.flag_data
+        data = self.flag_data.copy()
         user = self.user
         comment = self.comment
         # info can't be blank with the last reason(something else)
@@ -379,7 +379,7 @@ class FlagInstanceManagerTest(BaseCommentFlagTest):
         self.assertRaises(ValidationError, self.set_flag, user, comment, **data)
 
     def test_clean_ignores_info_for_all_reasons_except_last(self):
-        data = self.flag_data
+        data = self.flag_data.copy()
         info = 'Hi'
         data['info'] = info
         user = self.user
