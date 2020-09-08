@@ -154,7 +154,7 @@ PS: As in the UI, clicking the **liked** button will remove the reaction => unli
 
 **6- Report a comment**
 
-Flagging system must be enabled by adding the attribute ``COMMENT_FLAGS_ALLOWED`` to ``settings.py``.
+Flagging system must be enabled by adding the attribute ``COMMENT_FLAGS_ALLOWED`` to a number(other than zero e.g. 10) in ``settings.py``.
 
 ``POST`` is the allowed method to report a comment.
 

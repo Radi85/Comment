@@ -336,21 +336,49 @@ PS: If the groups or the permissions don't exist, just run migrate. ``./manage.p
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Commenting by anonymous is disabled by default.
-When enabling this feature, the unauthenticated users will be able to post a comment and they have to provide their email
-for confirmation step, after confirming the email, the comment will be saved in the DB associated with the anonymous user's email.
+After enabling this feature, unauthenticated users will be able to post a comment by providing their email address. An email will be sent to confirmation. Only after confirming their email address, the comment will be saved in the DB associated with the anonymous user's email.
+comment only hits the database, after it is verified.
 
-However, since these comment are created anonymously, they won't be editable nor deletable like a normal comments by authenticated users.
+However, since these comment are created anonymously, they won't be editable nor deletable like a normal comments(``comment_admins`` and ``comment_moderators`` can still delete them).
 
-To enable this feature, the flowing settings variables need to be set alongside with django email settings:
+Before enabling this feature, make sure you set the ``get_absolute_url`` method on the model object with which the Comment model has been associated.
+For e.g, if the ``Comment`` model has been associated with the ``Post`` model, make sure you have something like this set inside your ``models.py``
+
+.. code:: python
+
+    class Post(models.Model):
+    ...
+
+    slug = models.SlugField(unique=True)
+
+    ...
+
+    def get_absolute_url(self):
+        return reverse('post:postdetail', kwargs={'slug': self.slug})
+
+
+To enable this feature, the following settings variables need to be set alongside with django email settings:
 
 .. code:: python
 
     COMMENT_ALLOW_ANONYMOUS = True
-    COMMENT_FROM_EMAIL = no-reply@email.com   # used for sending confirmation emails
-    COMMENT_CONTACT_EMAIL = your@email.com    # used for contact address in confirmation emails
-    COMMENT_SEND_HTML_EMAIL = True  # enable html template (default True)
-    COMMENT_ANONYMOUS_USERNAME = 'Anonymous User'  # used as comment username in the template in case below attr is false
-    COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME = True  # show the email first part as a username (default False)
+    COMMENT_FROM_EMAIL = 'no-reply@email.com'   # used for sending confirmation emails, if not set `EMAIL_HOST_USER` will be used.
+
+Also, related to sending of email the following settings need to set.
+
+.. code:: python
+
+    EMAIL_HOST_USER = 'user@domain'
+    EMAIL_HOST_PASSWORD = 'password'
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'    # this backend won't send emails but will just print them to the console. For production use your own backend.
+
+    # e.g for if you are using gmail address, you may set:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.gmail.com'
+
+To further customize different attributes related to anonymous commenting, you may look into the `Settings`_ section for different configurations.
+
+.. _`Settings`: https://django-comment-dab.readthedocs.io/settings.html/
 
 
 .. _`Web API`:
@@ -582,32 +610,42 @@ BS classes, pagination and some other template values can be now customized from
 
     .. code:: bash
 
-        templates
-        └── comment
-            ├── comments
-            │   ├── apply_icon.
-            │   ├── base.
-            │   ├── cancel_icon.
-            │   ├── child_comment.
-            │   ├── comment_body.
-            │   ├── comment_content.
-            │   ├── comment_form.
-            │   ├── comment_modal.
-            │   ├── content.
-            │   ├── create_comment.
-            │   ├── delete_icon.
-            │   ├── edit_icon.
-            │   ├── pagination.
-            │   ├── parent_comment.
-            │   └── update_comment.
-            ├── flags
-            │   ├── flag_icon.
-            │   ├── flag_modal.
-            │   └── flags.
-            └── reactions
-                ├── dislike_icon.
-                ├── like_icon.
-                └── reactions.
+        ├── templates
+        │   └── comment
+        │       ├── anonymous
+        │       │   ├── confirmation_request.html
+        │       │   ├── confirmation_request.txt
+        │       │   └── discarded.html
+        │       ├── bootstrap.html
+        │       ├── comments
+        │       │   ├── apply_icon.html
+        │       │   ├── base.html
+        │       │   ├── cancel_icon.html
+        │       │   ├── child_comment.html
+        │       │   ├── comment_body.html
+        │       │   ├── comment_content.html
+        │       │   ├── comment_form.html
+        │       │   ├── comment_modal.html
+        │       │   ├── content.html
+        │       │   ├── create_comment.html
+        │       │   ├── delete_icon.html
+        │       │   ├── edit_icon.html
+        │       │   ├── messages.html
+        │       │   ├── pagination.html
+        │       │   ├── parent_comment.html
+        │       │   ├── reject_icon.html
+        │       │   ├── resolve_icon.html
+        │       │   ├── update_comment.html
+        │       │   └── urlhash.html
+        │       ├── flags
+        │       │   ├── flag_icon.html
+        │       │   ├── flag_modal.html
+        │       │   └── flags.html
+        │       ├── reactions
+        │       │   ├── dislike_icon.html
+        │       │   ├── like_icon.html
+        │       │   └── reactions.html
+        │       └── static.html
 
 
 

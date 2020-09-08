@@ -12,6 +12,7 @@ Welcome to django-comments-dab's documentation!
    Web API
    styling
    example
+   settings
    Changelog
    License
    help
