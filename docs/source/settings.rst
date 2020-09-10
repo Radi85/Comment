@@ -12,7 +12,7 @@ The django app that contains the model that has user profiles. This will be used
 PROFILE_MODEL_NAME
 ------------------
 
-The model that contains the user profiles. This will be used in display profile pictures alongside the comments. Defaults to `None`.
+The model that contains the user profiles. This will be used in display profile pictures alongside the comments. Defaults to ``None``.
 
 
 COMMENT_PROFILE_API_FIELDS
@@ -96,7 +96,7 @@ The email address to be used for sending email for comment confirmation. Default
 COMMENT_CONTACT_EMAIL
 ---------------------
 
-Used for contact address in confirmation emails. For e.g. `contact@domain`. Defaults to the value of ``COMMENT_FROM_EMAIL``.
+Used for contact address in confirmation emails. For e.g. ``contact@domain``. Defaults to the value of ``COMMENT_FROM_EMAIL``.
 
 COMMENT_SEND_HTML_EMAIL
 -----------------------
@@ -111,4 +111,4 @@ Username to be shown beside anonymous comment. Defaults to ``Anonymous User``.
 COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME
 ----------------------------------------
 
-Whether to use the first part of the email address as username for anonymous comments? For e.g. for user@domain, user will be used. Defaults to ``False``.
+Whether to use the first part of the email address as username for anonymous comments? For e.g. for ``user@domain``, ``user`` will be used. Defaults to ``False``.

@@ -24,6 +24,8 @@ The available actions with permitted user as follows:
 
     9. Retrieve the list of comments and associated replies to a given content type and object ID.
 
+    10. Confirm comment made by an anonymous users.
+
 These actions are explained below.
 
 Setup:
@@ -82,8 +84,9 @@ This action can be performed by providing the url with data queries related to t
 Get request accepts 3 params:
 
 
-- ``type``: is the model name of the content type that have comments associated with it.
-- ``id``: is the id of an object of that model
+- ``model_name``: is the model name of the content type that have comments associated with it.
+- ``model_id``: is the id of an object of that model
+- ``app_name``: is the name of the app that contains the model.
 
 
 
@@ -203,6 +206,24 @@ This action requires comment admin or moderator privilege.
 
    $ curl -X POST -u USERNAME:PASSWORD -H "Content-Type: application/json" -d '{"state":3}' http://localhost:8000/api/comments/ID/flag/state/change/
 
-Repeating the same request and payload toggle the state to its original
+Repeating the same request and payload toggle the state to its original.
+
+**8- Confirm comment made by an anonymous users**
+
+``GET`` is the allowed method to confirm an anonymous comment.
+
+Get request accepts 3 params:
+
+
+- ``key``: is the encrypted key that contains the comment.
+
+Example:
+
+::
+    $ curl -X GET -H "Content-Type: application/json" http://localhost:8000/api/comments/confirm/KEY/
+
+Since the key generated for each comment is unique, it can only be used once to verify. Any tampering with the key will result in a BAD HTTP request(400).
+
+
 
 
