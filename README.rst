@@ -336,8 +336,7 @@ PS: If the groups or the permissions don't exist, just run migrate. ``./manage.p
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Commenting by anonymous is disabled by default.
-After enabling this feature, unauthenticated users will be able to post a comment by providing their email address. An email will be sent to confirmation. Only after confirming their email address, the comment will be saved in the DB associated with the anonymous user's email.
-comment only hits the database, after it is verified.
+After enabling this feature, unauthenticated users will be able to post a comment by providing their email address. Comments only hits the database, after they are verified. An email will be sent for confirmation. Only after confirming their email address, the comment will be saved along with their email address in the DB.
 
 However, since these comment are created anonymously, they won't be editable nor deletable like a normal comments(``comment_admins`` and ``comment_moderators`` can still delete them).
 
@@ -347,14 +346,14 @@ For e.g, if the ``Comment`` model has been associated with the ``Post`` model, m
 .. code:: python
 
     class Post(models.Model):
-    ...
+        ...
 
-    slug = models.SlugField(unique=True)
+        slug = models.SlugField(unique=True)
 
-    ...
+        ...
 
-    def get_absolute_url(self):
-        return reverse('post:postdetail', kwargs={'slug': self.slug})
+        def get_absolute_url(self):
+            return reverse('post:postdetail', kwargs={'slug': self.slug})
 
 
 To enable this feature, the following settings variables need to be set alongside with django email settings:
@@ -372,8 +371,9 @@ Also, related to sending of email the following settings need to set.
     EMAIL_HOST_PASSWORD = 'password'
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'    # this backend won't send emails but will just print them to the console. For production use your own backend.
 
-    # e.g for if you are using gmail address, you may set:
+    # for production you may want to set this as backend
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    # e.g for if you are using gmail , you may set:
     EMAIL_HOST = 'smtp.gmail.com'
 
 To further customize different attributes related to anonymous commenting, you may look into the `Settings`_ section for different configurations.
@@ -408,6 +408,8 @@ The available actions with permitted user as follows:
     8. Resolve or reject flag. This is used to revoke the flagged comment state (admins and moderators)
 
     9. Retrieve the list of comments and associated replies to a given content type and object ID.
+
+    10. Confirm comment made by an anonymous users.
 
 These actions are explained below.
 
@@ -589,7 +591,23 @@ This action requires comment admin or moderator privilege.
 
    $ curl -X POST -u USERNAME:PASSWORD -H "Content-Type: application/json" -d '{"state":3}' http://localhost:8000/api/comments/ID/flag/state/change/
 
-Repeating the same request and payload toggle the state to its original
+Repeating the same request and payload toggle the state to its original.
+
+**8- Confirm comment made by an anonymous users**
+
+``GET`` is the allowed method to confirm an anonymous comment.
+
+Get request accepts 3 params:
+
+
+- ``key``: is the encrypted key that contains the comment.
+
+Example:
+
+::
+    $ curl -X GET -H "Content-Type: application/json" http://localhost:8000/api/comments/confirm/KEY/
+
+Since the key generated for each comment is unique, it can only be used once to verify. Any tampering with the key will result in a BAD HTTP request(400).
 
 
 .. _`Style Customization`:
