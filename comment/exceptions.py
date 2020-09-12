@@ -1,9 +1,11 @@
-from rest_framework.exceptions import APIException
-from rest_framework.status import HTTP_400_BAD_REQUEST
+try:
+    from rest_framework.exceptions import APIException
+except ModuleNotFoundError:
+    APIException = Exception
 
 
 class CommentBadRequest(APIException):
-    status_code = HTTP_400_BAD_REQUEST
+    status_code = 400
     default_detail = 'Bad Request'
 
     def __init__(self, detail=None, status_code=None):
