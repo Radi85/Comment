@@ -628,42 +628,42 @@ BS classes, pagination and some other template values can be now customized from
 
     .. code:: bash
 
-        ├── templates
-        │   └── comment
-        │       ├── anonymous
-        │       │   ├── confirmation_request.html
-        │       │   ├── confirmation_request.txt
-        │       │   └── discarded.html
-        │       ├── bootstrap.html
-        │       ├── comments
-        │       │   ├── apply_icon.html
-        │       │   ├── base.html
-        │       │   ├── cancel_icon.html
-        │       │   ├── child_comment.html
-        │       │   ├── comment_body.html
-        │       │   ├── comment_content.html
-        │       │   ├── comment_form.html
-        │       │   ├── comment_modal.html
-        │       │   ├── content.html
-        │       │   ├── create_comment.html
-        │       │   ├── delete_icon.html
-        │       │   ├── edit_icon.html
-        │       │   ├── messages.html
-        │       │   ├── pagination.html
-        │       │   ├── parent_comment.html
-        │       │   ├── reject_icon.html
-        │       │   ├── resolve_icon.html
-        │       │   ├── update_comment.html
-        │       │   └── urlhash.html
-        │       ├── flags
-        │       │   ├── flag_icon.html
-        │       │   ├── flag_modal.html
-        │       │   └── flags.html
-        │       ├── reactions
-        │       │   ├── dislike_icon.html
-        │       │   ├── like_icon.html
-        │       │   └── reactions.html
-        │       └── static.html
+        └── templates
+            └── comment
+                ├── anonymous
+                │   ├── confirmation_request.html
+                │   ├── confirmation_request.txt
+                │   └── discarded.html
+                ├── bootstrap.html
+                ├── comments
+                │   ├── apply_icon.html
+                │   ├── base.html
+                │   ├── cancel_icon.html
+                │   ├── child_comment.html
+                │   ├── comment_body.html
+                │   ├── comment_content.html
+                │   ├── comment_form.html
+                │   ├── comment_modal.html
+                │   ├── content.html
+                │   ├── create_comment.html
+                │   ├── delete_icon.html
+                │   ├── edit_icon.html
+                │   ├── messages.html
+                │   ├── pagination.html
+                │   ├── parent_comment.html
+                │   ├── reject_icon.html
+                │   ├── resolve_icon.html
+                │   ├── update_comment.html
+                │   └── urlhash.html
+                ├── flags
+                │   ├── flag_icon.html
+                │   ├── flag_modal.html
+                │   └── flags.html
+                ├── reactions
+                │   ├── dislike_icon.html
+                │   ├── like_icon.html
+                │   └── reactions.html
+                └── static.html
 
 
 
@@ -687,7 +687,7 @@ for example to override the BS classes of `submit buttons` and pagination style 
 
 For full guide on the default templates and block tags name `Read the Doc`_
 
-.. _`Read the Doc`: https://django-comment-dab.readthedocs.io/styling.html/
+.. _`Read the Doc`: https://django-comment-dab.readthedocs.io/styling.html
 
 
 2- CSS file:

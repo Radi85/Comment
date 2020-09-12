@@ -1,6 +1,15 @@
 Changelog
 =========
 
+2.0.0
+------
+
+- Allow commenting by unauthenticated users (Anonymous comment).
+- Add permalink to comments.
+- Remove JQuery from dependencies and replace it with Vanilla JS.
+- Update mixins and add content type and parent id validators.
+- Bug fixes.
+
 1.6.7
 ------
 
