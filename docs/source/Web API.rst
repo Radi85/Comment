@@ -219,7 +219,7 @@ Get request accepts 3 params:
 
 Example:
 
-::
+:: code:: bash
     $ curl -X GET -H "Content-Type: application/json" http://localhost:8000/api/comments/confirm/KEY/
 
 Since the key generated for each comment is unique, it can only be used once to verify. Any tampering with the key will result in a BAD HTTP request(400).
