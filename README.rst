@@ -42,19 +42,21 @@
 django-comments-dab
 ===================
 
+Full Documentations_
+
+.. _Documentations: https://django-comment-dab.readthedocs.io/
+
 
     .. image:: /docs/_static/img/comment.gif
 
 
-    Content:
+Content:
 
-    * Introduction_
-    * Installation_
-    * Setup_
-    * Usage_
-    * `Web API`_
-    * `Style Customization`_
-    * Example_
+* Introduction_
+* Installation_
+* Setup_
+* Usage_
+* Example_
 
 .. _Introduction:
 
@@ -225,9 +227,11 @@ In the template (e.g. post_detail.) add the following template tags where ``obj`
 2. Advanced usage:
 ------------------
 
-For advanced usage and other documentation, you may visit `Read the Doc`_ or look at the ``docs/`` directory in the repository.
+For advanced usage and other documentation, you may read the Documentations_ or look at the docs_ directory in the repository.
 
-.. _Example`:
+.. _docs: https://github.com/Radi85/Comment/tree/fix-readme/docs
+
+.. _Example:
 
 Example
 ========
@@ -262,14 +266,14 @@ Login with:
 
     password: ``test``
 
-The icons are picked from `Feather`_. Many thanks to them for the good work.
+The icons are picked from Feather_. Many thanks to them for the good work.
 
-.. _`Feather`: https://feathericons.com
+.. _Feather: https://feathericons.com
 
 
 Contributing
 ============
 
-For contributing, please see the instructions at `Contributing_`
+For contributing, please see the instructions at Contributing_
 
-.. _`Contributing`: './CONTRIBUTING.rst`
+.. _Contributing: https://github.com/Radi85/Comment/blob/master/CONTRIBUTING.rst
