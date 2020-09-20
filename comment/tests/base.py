@@ -1,4 +1,5 @@
 from urllib.parse import quote_plus
+from unittest.mock import patch
 
 from django.apps import apps
 from django.contrib.auth import get_user_model
@@ -72,6 +73,7 @@ class BaseCommentTest(TestCase):
     def setUp(self):
         super().setUp()
         self.client.force_login(self.user_1)
+        self.addCleanup(patch.stopall)
 
     @classmethod
     def increase_comment_count(cls):

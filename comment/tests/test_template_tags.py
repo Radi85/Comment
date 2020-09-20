@@ -27,30 +27,32 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         self.assertEqual(counts, self.increment)
 
     @patch.object(settings, 'COMMENT_USE_GRAVATAR', False)
-    def test_profile_url(self):
-        # success
-        settings.PROFILE_APP_NAME = 'user_profile'
+    def test_get_profile_url(self):
+        # profile exist
         url = get_profile_url(self.parent_comment_1)
         self.assertEqual(url, '/profile/profile/test-1')
-        # fail
-        settings.PROFILE_APP_NAME = 'app not exist'
-        url = get_profile_url(self.parent_comment_1)
+
+        # anonymous comment
+        url = get_profile_url(self.anonymous_parent_comment)
         self.assertEqual(url, '/static/img/default.png')
 
-        settings.PROFILE_APP_NAME = None
+        # missing profile
+        patch.object(settings, 'PROFILE_MODEL_NAME', None).start()
         url = get_profile_url(self.parent_comment_1)
         self.assertEqual(url, '/static/img/default.png')
 
     @patch.object(settings, 'COMMENT_USE_GRAVATAR', False)
-    def test_img_url(self):
+    def test_get_img_path(self):
         url = get_img_path(self.parent_comment_1)
-        self.assertNotEqual(url, '')
+        self.assertNotEqual(url, '/static/img/default.png')
+
         # use default pic on fail
-        settings.PROFILE_APP_NAME = 'app not exist'
+        patch.object(settings, 'PROFILE_MODEL_NAME', 'app not exist').start()
         url = get_img_path(self.parent_comment_1)
         self.assertEqual(url, '/static/img/default.png')
 
-        settings.PROFILE_APP_NAME = None
+        patch.object(settings, 'PROFILE_APP_NAME', 'user_profile').start()
+        patch('comment.templatetags.comment_tags.get_profile_instance', return_value=None).start()
         url = get_img_path(self.parent_comment_1)
         self.assertEqual(url, '/static/img/default.png')
 

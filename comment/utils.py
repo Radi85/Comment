@@ -56,6 +56,13 @@ def get_profile_content_type():
     return content_type
 
 
+def get_profile_instance(user):
+    try:
+        return getattr(user, settings.PROFILE_MODEL_NAME.lower(), None)
+    except AttributeError:
+        return None
+
+
 def has_valid_profile():
     if getattr(settings, 'COMMENT_USE_GRAVATAR'):
         return True

@@ -8,7 +8,7 @@ from rest_framework import serializers
 
 from comment.conf import settings
 from comment.models import Comment, Flag, Reaction
-from comment.utils import get_model_obj, process_anonymous_commenting, get_user_for_request
+from comment.utils import get_model_obj, process_anonymous_commenting, get_user_for_request, get_profile_instance
 
 
 def get_profile_model():
@@ -44,13 +44,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_profile(obj):
-        if not get_profile_model():
+        profile = get_profile_instance(obj)
+        if not profile:
             return None
-        try:
-            profile = getattr(obj, settings.PROFILE_MODEL_NAME.lower())
-        except AttributeError:
-            return None
-
         return ProfileSerializer(profile).data
 
 
