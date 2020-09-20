@@ -638,18 +638,13 @@ class APICommentSerializers(APIBaseTest):
 
         # PROFILE_MODEL_NAME is wrong
         patch.object(settings, 'PROFILE_MODEL_NAME', 'wrong').start()
-        self.assertRaises(LookupError, UserSerializer.get_profile, self.user_1)
+        profile = UserSerializer.get_profile(self.user_1)
+        self.assertIsNone(profile)
 
         # success
         patch.object(settings, 'PROFILE_MODEL_NAME', 'userprofile').start()
         profile = UserSerializer.get_profile(self.user_1)
         self.assertIsNotNone(profile)
-
-        # user doesn't have profile attribute
-        mocked_getattr = patch('comment.api.serializers.getattr').start()
-        mocked_getattr.side_effect = ['', '', AttributeError]
-        profile = UserSerializer.get_profile(self.user_1)
-        self.assertIsNone(profile)
 
     def test_comment_create_serializer(self):
         self.assertEqual(self.parent_count, 3)

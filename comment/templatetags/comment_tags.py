@@ -3,7 +3,7 @@ from django import template
 from comment.models import ReactionInstance, FlagInstance
 from comment.forms import CommentForm
 from comment.utils import (
-    get_comment_context_data, get_profile_content_type, is_comment_moderator, is_comment_admin, get_gravatar_img
+    get_comment_context_data, is_comment_moderator, is_comment_admin, get_gravatar_img, get_profile_instance
 )
 from comment.managers import FlagInstanceManager
 from comment.conf import settings
@@ -35,25 +35,21 @@ def get_username_for_comment(comment):
 @register.simple_tag(name='get_profile_url')
 def get_profile_url(obj):
     """ returns profile url of user """
-    content_type = get_profile_content_type()
-    if not content_type or not obj.user:
+    if not obj.user:
         return get_gravatar_img(obj.email)
-
-    profile = content_type.get_object_for_this_type(user=obj.user)
-    return profile.get_absolute_url()
+    profile = get_profile_instance(obj.user)
+    if profile:
+        return profile.get_absolute_url()
+    return get_gravatar_img(obj.email)
 
 
 @register.simple_tag(name='get_img_path')
 def get_img_path(obj):
     """ returns url of profile image of a user """
-    content_type = get_profile_content_type()
-    if not content_type or not obj.user:
+    profile = get_profile_instance(obj.user)
+    if not profile:
         return get_gravatar_img(obj.email)
-
-    profile_model = content_type.model_class()
-    fields = profile_model._meta.get_fields()
-    profile = content_type.model_class().objects.get(user=obj.user)
-    for field in fields:
+    for field in profile.__class__._meta.get_fields():
         if hasattr(field, 'upload_to'):
             return field.value_from_object(profile).url
     return get_gravatar_img(obj.email)

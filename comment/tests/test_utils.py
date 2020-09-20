@@ -11,7 +11,7 @@ from comment.conf import settings
 from comment.utils import (
     get_model_obj, has_valid_profile, get_comment_context_data, id_generator, get_comment_from_key,
     get_user_for_request, send_email_confirmation_request, process_anonymous_commenting, CommentFailReason,
-    get_gravatar_img)
+    get_gravatar_img, get_profile_instance)
 from comment.tests.base import BaseCommentUtilsTest, Comment, RequestFactory
 
 
@@ -37,6 +37,19 @@ class CommentUtilsTest(BaseCommentUtilsTest):
         # gravatar is disabled
         patch.object(settings, 'COMMENT_USE_GRAVATAR', True).start()
         self.assertEqual(get_gravatar_img(''), '/static/img/default.png')
+
+    def test_get_profile_instance(self):
+        # wrong content type
+        patch.object(settings, 'PROFILE_MODEL_NAME', 'wrong').start()
+        self.assertIsNone(get_profile_instance(self.user_1))
+
+        # correct data
+        patch.object(settings, 'PROFILE_MODEL_NAME', 'userprofile').start()
+        self.assertIsNotNone(get_profile_instance(self.user_1))
+
+        # profile model has no user related model
+        patch.object(settings, 'PROFILE_MODEL_NAME', None).start()
+        self.assertIsNone(get_profile_instance(self.user_1))
 
     @patch.object(settings, 'COMMENT_USE_GRAVATAR', False)
     def test_has_valid_profile(self):
