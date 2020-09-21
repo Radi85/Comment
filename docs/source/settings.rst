@@ -112,3 +112,10 @@ COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Whether to use the first part of the email address as username for anonymous comments? For e.g. for ``user@domain``, ``user`` will be used. Defaults to ``False``.
+
+COMMENT_USE_GRAVATAR
+^^^^^^^^^^^^^^^^^^^^^
+
+Whether to use gravatar_ for displaying profile pictures alongside comments. Defaults to ``False``.
+
+.. _gravatar: https://gravatar.com/

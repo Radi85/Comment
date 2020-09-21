@@ -42,12 +42,12 @@
 django-comments-dab
 ===================
 
-Full Documentations_
+Full Documentation_
 
-.. _Documentations: https://django-comment-dab.readthedocs.io/
+.. _Documentation: https://django-comment-dab.readthedocs.io/
 
 
-    .. image:: /docs/_static/img/comment.gif
+    .. image:: https://github.com/radi85/comment/blob/master/docs/_static/img/comment.gif
 
 
 Content:
@@ -226,9 +226,9 @@ In the template (e.g. post_detail.) add the following template tags where ``obj`
 2. Advanced usage:
 ------------------
 
-For advanced usage and other documentation, you may read the Documentations_ or look at the docs_ directory in the repository.
+For advanced usage and other documentation, you may read the Documentation_ or look at the docs_ directory in the repository.
 
-.. _docs: https://github.com/Radi85/Comment/tree/fix-readme/docs
+.. _docs: https://github.com/Radi85/Comment/tree/master/docs
 
 .. _Example:
 
