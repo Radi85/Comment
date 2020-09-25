@@ -4,6 +4,9 @@ Usage
 1. Basics usage:
 ----------------
 
+1. Rendering Comments:
+^^^^^^^^^^^^^^^^^^^^^^
+
 ``include_static`` this tag will include CSS and javascript files,
 
 ``include_bootstrap`` tag is for bootstrap-4.1.1, if it’s already used in the project, get rid of this tag.
@@ -14,6 +17,32 @@ In the template (e.g. post_detail.) add the following template tags where ``obj`
 
     {% load comment_tags %}  {# Loading the template tag #}
     {% render_comments obj request %}  {# Render all the comments belong to the passed object "obj" #}
+
+
+2. Displaying Comment Count in Post Page:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In `views.py` under the post view add the following line at the top of your page:
+
+.. code:: jinja
+    from comment.models import Comment
+    
+    ...
+    def post_detail(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    comments = Comment.objects.filter(content_type_id=1, object_id=post.id)
+
+Here, `content_type_id` refers to the model that your comments are related to. (e.g. you may have different ids if you have seperate models for posts or categorys of product etc)
+Check the `object id` under the comments app in the admin page for the correct id to a comment.
+
+
+In the template (e.g. post_detail.html), add the following tag
+
+.. code:: jinja
+
+    {{ comments.count }}  {# Loading the template tag #}
+
+
 
 
 2. Advanced usage:
@@ -33,7 +62,6 @@ To change the default number, set ``COMMENT_PER_PAGE=number``.
     {% render_comments obj request %}  {# Include comments belonging to a certain object #}
     {% include_bootstrap %} {# Include bootstrap 4.1.1 - remove this line if BS 4.1.1 is already used in your project #}
     {% include_static %} {# Include comment CSS and JS files #}
-
 
 
 2. Integrate user profile:
