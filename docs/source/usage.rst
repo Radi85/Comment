@@ -45,7 +45,19 @@ In the template (e.g. post_detail.html), add the following tag
 
 .. code:: jinja
 
-    {{ comments.count }}  {# Loading the template tag #}
+    {{ comments.count }}
+
+
+3. Get Comments Count on Post List Page
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In the post list template (e.g. index.html) use the following tag. 
+
+.. code:: jinja
+    
+    {% get_comments_count obj user %}
+
+Here, ``obj`` refers to the post object instance
 
 
 
