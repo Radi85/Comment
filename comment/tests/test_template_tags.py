@@ -108,7 +108,7 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         self.assertTrue(data['comments'].has_previous())
 
     def test_static_functions(self):
-        self.assertIsNone(include_static())
+        self.assertEqual(include_static(), '')
         self.assertIsNone(include_bootstrap())
 
     def test_render_field(self):
