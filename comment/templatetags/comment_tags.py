@@ -82,7 +82,7 @@ def render_comments(obj, request, oauth=False):
     return context
 
 
-register.inclusion_tag('comment/comments/base.html')(render_comments)
+register.inclusion_tag('comment/base.html')(render_comments)
 
 
 def render_content(comment, number):
@@ -111,12 +111,10 @@ def can_delete_comment(comment, user):
 register.inclusion_tag('comment/comments/content.html')(render_content)
 
 
+@register.simple_tag(name='include_static')
 def include_static():
-    """ include static files """
-    return None
-
-
-register.inclusion_tag('comment/static.html')(include_static)
+    """ This function shall be deprecated """
+    return ''
 
 
 def include_bootstrap():

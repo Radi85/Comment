@@ -4,8 +4,6 @@ Usage
 1. Basics usage:
 ----------------
 
-``include_static`` this tag will include CSS and javascript files,
-
 ``include_bootstrap`` tag is for bootstrap-4.1.1, if it’s already used in the project, get rid of this tag.
 
 In the template (e.g. post_detail.) add the following template tags where ``obj`` is the instance of post model.
@@ -14,6 +12,7 @@ In the template (e.g. post_detail.) add the following template tags where ``obj`
 
     {% load comment_tags %}  {# Loading the template tag #}
     {% render_comments obj request %}  {# Render all the comments belong to the passed object "obj" #}
+    {% include_bootstrap %} {# Include bootstrap 4.1.1 - remove this line if BS is already used in your project #}
 
 
 2. Advanced usage:
@@ -32,7 +31,6 @@ To change the default number, set ``COMMENT_PER_PAGE=number``.
 
     {% render_comments obj request %}  {# Include comments belonging to a certain object #}
     {% include_bootstrap %} {# Include bootstrap 4.1.1 - remove this line if BS 4.1.1 is already used in your project #}
-    {% include_static %} {# Include comment CSS and JS files #}
 
 
 
