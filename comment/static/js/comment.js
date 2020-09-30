@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // show and hide child comments
     let replyLink = replyLinkElement => {
-        getNthParent(replyLinkElement, 4).nextElementSibling.classList.toggle('d-none')
+        getNthParent(replyLinkElement, 4).nextElementSibling.classList.toggle('d-none');
     };
 
     // resize the input field according to typed text
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 });
                 return;
-            }
+            };
             if (['checkbox', 'radio'].indexOf(field.type) > -1 && !field.checked) return;
             arr.push({
                 name: field.name,
@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log(data);
                 alert(data.detail);
                 return;
-            }
+            };
            // parent comment
             if (formButton.getAttribute('value') === 'parent') {
                 // reload all comments only when posting parent comment
@@ -146,9 +146,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     reply.textContent = "Replies";
                 } else {
                     reply.textContent = "Reply";
-                }
+                };
                 commentCount(1);
-            }
+            };
             formButton.setAttribute('disabled', 'disabled');
             let elements = document.getElementsByClassName("js-comment-input");
             Array.prototype.forEach.call(elements, element => {
@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (uri.indexOf("?") > 0) {
                 let clean_uri = uri.substring(0, uri.indexOf("?"));
                 window.history.replaceState({}, document.title, clean_uri);
-            }
+            };
         }).catch(error => {
             alert("Unable to post your comment!, please try again");
         });
@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
             textAreaElement.focus();
             textAreaElement.value = '';
             textAreaElement.value = value;
-            textAreaElement.setAttribute("style", "height: " + textAreaElement.scrollHeight + "px;")
+            textAreaElement.setAttribute("style", "height: " + textAreaElement.scrollHeight + "px;");
         }).catch(error => {
             alert("you can't edit this comment");
         });
@@ -227,16 +227,16 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i=0; i<parents.length; i++) {
             if (parents[i].classList.contains(className)){
                 return parents[i];
-            }
-        }
+            };
+        };
         return null;
     };
 
     let getNthParent = (element, nth) => {
         let parents = getParents(element);
         if (parents.length >= nth){
-            return parents[nth-1]
-        }
+            return parents[nth-1];
+        };
     };
 
     // use modal dialog when deleting a item
@@ -287,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     replyLinkElement.textContent = "Replies";
                 } else {
                     replyLinkElement.textContent = "Reply";
-                }
+                };
                 // update total count of comments
                 commentCount(-1);
             }
@@ -311,7 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             element.classList.remove(addClass);
             element.classList.add(removeClass);
-        }
+        };
     };
 
     let fillReaction = (parent, targetReaction) => {
@@ -328,8 +328,8 @@ document.addEventListener('DOMContentLoaded', () => {
             toggleClass(currentReaction, addClass, removeClass, 'remove');
             if (targetReaction !== currentReaction) {
                 toggleClass(targetReaction, addClass, removeClass, 'add');
-            }
-        }
+            };
+        };
     };
 
     let changeReactionCount = (parent, likes, dislikes) => {
@@ -351,7 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (status === 0) {
                     fillReaction(parentReactionEle, targetReaction);
                     changeReactionCount(parentReactionEle, data.likes, data.dislikes);
-                }
+                };
             }).catch(error => {
                 alert("Reaction couldn't be processed!, please try again");
             });
@@ -365,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (opacity <= targetOpacity) {
                 opacity = targetOpacity;
                 clearInterval(timer);
-            }
+            };
             element.style.opacity = opacity;
             opacity -= 1.0/((1000/interval)*duration);
         }, interval);
@@ -420,22 +420,19 @@ document.addEventListener('DOMContentLoaded', () => {
         let isFixed = div.style.position === 'fixed';
         if (div.scrollTop > top && !isFixed){
            div.setAttribute('style', "{'position': 'fixed', 'top': '0px'}");
-        }
+        };
         if (div.scrollTop < top && isFixed) {
            div.setAttribute('style', "{'position': 'static', 'top': '0px'}");
-        }
-
+        };
     };
 
-    let submitFlagForm = (flagButton, action, reason=null, info=null) => {
-        let formData = {
-            'action': action
-        };
+    let submitFlagForm = (flagButton, reason=null, info=null) => {
+        let formData = {};
         if (reason){
-            formData['reason'] = reason
-        }
+            formData['reason'] = reason;
+        };
         if (info){
-            formData['info'] = info
+            formData['info'] = info;
         }
         let url = flagButton.getAttribute('data-url');
 
@@ -451,9 +448,11 @@ document.addEventListener('DOMContentLoaded', () => {
             let removeClass = 'user-has-not-flagged';
             let flagIcon = flagButton.querySelector('.comment-flag-icon');
             if (data.flag === 1) {
-                toggleClass(flagIcon, addClass, removeClass, action = 'add');
+                flagIcon.parentElement.title = 'Remove flag';
+                toggleClass(flagIcon, addClass, removeClass, 'add');
             } else {
-                toggleClass(flagIcon, addClass, removeClass, action = 'remove')
+                flagIcon.parentElement.title = 'Report Comment';
+                toggleClass(flagIcon, addClass, removeClass, 'remove');
             }
             let modal = document.getElementById('flagModal');
             hideModal(modal);
@@ -461,7 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 createInfoElement(flagButton.closest('.js-parent-comment'), data.status, data.msg);
             }
         }).catch(error => {
-            alert("Reaction couldn't be processed!, please try again");
+            alert("Flag couldn't be processed!, please try again");
         });
     };
 
@@ -491,7 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             let choice = form.querySelector('input[name="reason"]:checked');
             let reason = choice.value;
-            submitFlagForm(flagButton, 'create', reason, flagInfo.value);
+            submitFlagForm(flagButton, reason, flagInfo.value);
         };
     };
 
@@ -500,7 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (hasClass(flag.classList, 'user-has-not-flagged')) {
             handleFlagModal(flagButton);
         } else {
-            submitFlagForm(flagButton, 'delete');
+            submitFlagForm(flagButton);
         }
     };
 
@@ -510,7 +509,7 @@ document.addEventListener('DOMContentLoaded', () => {
            readMoreButton.innerHTML = "read more ...";
         } else {
            readMoreButton.innerHTML = "read less";
-        }
+        };
     };
 
     const toggleFlagState = changeStateButton => {
@@ -546,7 +545,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         contentModifiedBtn.setAttribute('title', 'Resolve the flag');
                     }
                     commentBodyElement.classList.remove('flagged-comment');
-                }
+                };
             } else if (state === 4) {
                 changeStateButton.firstElementChild.classList.toggle("flag-resolved");
                 title = changeStateButton.firstElementChild.classList.contains("flag-resolved")
@@ -559,8 +558,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         rejectBtn.setAttribute('title', 'Reject the flag');
                     }
                     commentBodyElement.classList.remove('flagged-comment');
-                }
-            }
+                };
+            };
             changeStateButton.setAttribute('title', title);
         });
     };
@@ -606,8 +605,8 @@ document.addEventListener('DOMContentLoaded', () => {
            else if (event.target.closest('.js-flag-reject') || event.target.closest('.js-flag-resolve')) {
                event.preventDefault();
                toggleFlagState(event.target.closest('.js-flag-reject') || event.target.closest('.js-flag-resolve'));
-           }
-        }
+           };
+        };
     }, false);
 
     document.addEventListener('submit', event => {
@@ -616,7 +615,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 event.preventDefault();
                 if (event.target.querySelector('.js-comment-input').value.replace(/^\s+|\s+$/g, "").length !== 0) {
                     submitCommentCreateForm(event.target);
-                }
+                };
             }
             else if (event.target.classList.contains('js-comment-edit-form')) {
                 event.preventDefault();
@@ -625,8 +624,8 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (event.target.classList.contains('js-comment-delete-form')) {
                 event.preventDefault();
                 submitDeleteCommentForm(event.target);
-            }
-        }
+            };
+        };
     }, false);
 
     document.addEventListener('keyup', event => {
@@ -639,8 +638,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             else if (editForm && editForm.querySelector('.js-comment-input').value.replace(/^\s+|\s+$/g, "").length !== 0) {
                 submitEditCommentForm(editForm);
-            }
-        }
+            };
+        };
     }, false);
 
     ['input', 'keyup', 'focus'].forEach(item => {
@@ -649,8 +648,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (event.target.classList.contains('js-comment-input')) {
                     event.preventDefault();
                     commentInput(event.target);
-                }
-            }
+                };
+            };
         }, false);
     });
 });
