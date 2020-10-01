@@ -80,6 +80,7 @@ class CommentUtilsTest(BaseCommentUtilsTest):
         login_url = 'LOGIN_URL'
         current_login_url = getattr(settings, login_url, '/profile/login/')
         comment_allow_anonymous = 'COMMENT_ALLOW_ANONYMOUS'
+        comment_allow_translation = 'COMMENT_ALLOW_TRANSLATION'
         oauth = 'oauth'
 
         patch.object(settings, login_url, current_login_url).start()
@@ -105,10 +106,12 @@ class CommentUtilsTest(BaseCommentUtilsTest):
         # test inserting '/' to the beginning of login url
         self.assertEqual(comment_context_data['login_url'], '/' + settings.LOGIN_URL)
         self.assertEqual(comment_context_data['is_anonymous_allowed'], settings.COMMENT_ALLOW_ANONYMOUS)
+        self.assertEqual(comment_context_data['is_translation_allowed'], settings.COMMENT_ALLOW_TRANSLATION)
         self.assertEqual(comment_context_data['oauth'], True)
 
         patch.object(settings, login_url, current_login_url).start()
         patch.object(settings, comment_allow_anonymous, True).start()
+        patch.object(settings, comment_allow_translation, False).start()
         patch.object(settings, comment_per_page, 2).start()
         request = self.factory.post('/', data=data)
         request.user = self.post_1.author
@@ -118,6 +121,7 @@ class CommentUtilsTest(BaseCommentUtilsTest):
         self.assertTrue(comment_context_data['comments'].has_previous())
         self.assertEqual(comment_context_data['login_url'], settings.LOGIN_URL)
         self.assertEqual(comment_context_data['is_anonymous_allowed'], settings.COMMENT_ALLOW_ANONYMOUS)
+        self.assertEqual(comment_context_data['is_translation_allowed'], settings.COMMENT_ALLOW_TRANSLATION)
 
         data.update({'page': 'not integer', oauth: 'False'})
         request = self.factory.post('/', data=data)

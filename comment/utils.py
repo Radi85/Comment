@@ -126,6 +126,7 @@ def get_comment_context_data(request, model_object=None):
     else:
         oauth = False
     is_anonymous_allowed = settings.COMMENT_ALLOW_ANONYMOUS
+    is_translation_allowed = settings.COMMENT_ALLOW_TRANSLATION
 
     return {
         'model_object': model_object,
@@ -138,6 +139,7 @@ def get_comment_context_data(request, model_object=None):
         'has_valid_profile': has_valid_profile(),
         'allowed_flags': allowed_flags,
         'is_anonymous_allowed': is_anonymous_allowed,
+        'is_translation_allowed': is_translation_allowed,
         'oauth': oauth
     }
 
