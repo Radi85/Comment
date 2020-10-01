@@ -1,6 +1,6 @@
 {% load i18n %}
 {% load comment_tags %}
-<span title="{% if user|has_flagged:comment %}Remove flag{% else %}Report comment{% endif %}">
+<span title="{% if user|has_flagged:comment %}{% trans "Remove flag" %}{% else %}{% trans "Report comment" %}{% endif %}">
 {% block flag_img_icon %}
 <svg class="comment-flag-icon {% if user|has_flagged:comment %}user-has-flagged{% else %}user-has-not-flagged{% endif %}"
      xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"

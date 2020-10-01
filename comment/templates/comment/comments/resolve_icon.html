@@ -1,5 +1,6 @@
 {% load comment_tags %}
-<button title="{% if comment.has_resolved_state %}Flag resolved{% else %}Resolve the flag{% endif %}" class="js-flag-resolve {% block resolved_btn_cls %}btn btn-link{% endblock resolved_btn_cls %}" data-state="{{ comment.flag.RESOLVED }}" data-url="{% url 'comment:flag-change-state' pk=comment.id %}">
+{% load i18n %}
+<button title="{% if comment.has_resolved_state %}{% trans "Flag resolved" %}{% else %}{% trans "Resolve the flag" %}{% endif %}" class="js-flag-resolve {% block resolved_btn_cls %}btn btn-link{% endblock resolved_btn_cls %}" data-state="{{ comment.flag.RESOLVED }}" data-url="{% url 'comment:flag-change-state' pk=comment.id %}">
 
 {% block resolved_img_icon %}
 <svg class="{% if comment.has_resolved_state %}flag-resolved{% endif %}"

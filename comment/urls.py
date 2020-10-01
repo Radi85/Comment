@@ -1,4 +1,5 @@
 from django.urls import path, re_path
+from django.views.i18n import JavaScriptCatalog
 
 from comment.views import (
     CreateComment, UpdateComment, DeleteComment, SetReaction, SetFlag, ChangeFlagState,
@@ -14,4 +15,6 @@ urlpatterns = [
     path('<int:pk>/flag/', SetFlag.as_view(), name='flag'),
     path('<int:pk>/flag/state/change/', ChangeFlagState.as_view(), name='flag-change-state'),
     re_path(r'^confirm/(?P<key>[^/]+)/$', ConfirmComment.as_view(), name='confirm-comment'),
+    # javascript translations
+    path('jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),
 ]

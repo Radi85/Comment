@@ -1,20 +1,25 @@
-<nav id="pagination-nav" aria-label="Page navigation" class="mt-3 mb-5">
+{% load i18n %}
+<nav id="pagination-nav" aria-label={% trans "Page navigation" %} class="mt-3 mb-5">
+    {% trans "first" as first %}
+    {% trans "last" as last %}
+    {% trans "Next" as Next %}
+    {% trans "Previous" as Previous %}
     <ul class="pagination justify-content-center pagination-sm">
         {% if comments.has_previous %}
             <li class="{{li_cls}}">
-                <a class="page-link {{text_style}}" href="?page=1#comments">first</a>
+                <a class="page-link {{text_style}}" href="?page=1#comments">{{ first }}</a>
             </li>
             <li class="{{li_cls}}">
-                <a class="page-link {{text_style}}" href="?page={{ comments.previous_page_number }}#comments" aria-label="Previous">
+                <a class="page-link {{text_style}}" href="?page={{ comments.previous_page_number }}#comments" aria-label={{ Previous }}>
                     &laquo;
                 </a>
             </li>
         {% else %}
             <li class="{{li_cls}} disabled">
-                <a class="page-link">first</a>
+                <a class="page-link">{{ first }}</a>
             </li>
             <li class="{{li_cls}} disabled">
-                <a class="page-link" aria-label="Previous"> &laquo; </a>
+                <a class="page-link" aria-label={{ Previous }}> &laquo; </a>
             </li>
         {% endif %}
         {% if comments.number > 3 %}
@@ -43,19 +48,19 @@
 
         {% if comments.has_next %}
             <li class="{{li_cls}}">
-                <a class="page-link {{text_style}}" href="?page={{ comments.next_page_number }}#comments" aria-label="Next">
+                <a class="page-link {{text_style}}" href="?page={{ comments.next_page_number }}#comments" aria-label={{ Next }}>
                     &raquo;
                 </a>
             </li class="{{li_cls}}">
             <li>
-                <a class="page-link {{text_style}}" href="?page={{ comments.paginator.num_pages }}#comments">last </a>
+                <a class="page-link {{text_style}}" href="?page={{ comments.paginator.num_pages }}#comments">{{ last }} </a>
             </li>
         {% else %}
             <li class="{{li_cls}} disabled">
-                <a class="page-link" aria-label="Next">&raquo;</a>
+                <a class="page-link" aria-label={{ Next }}>&raquo;</a>
             </li>
             <li class="{{li_cls}} disabled">
-                <a class="page-link">last </a>
+                <a class="page-link">{{ last }} </a>
             </li>
         {% endif %}
     </ul>
