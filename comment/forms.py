@@ -1,8 +1,8 @@
 from django import forms
-from django.utils.translation import gettext_lazy as _
 
 from comment.models import Comment
 from comment.conf import settings
+from comment.messages import EmailInfo
 
 
 class CommentForm(forms.ModelForm):
@@ -16,10 +16,10 @@ class CommentForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self.request.user.is_anonymous and settings.COMMENT_ALLOW_ANONYMOUS:
             self.fields['email'] = forms.EmailField(
-                label=_("email"),
+                label=EmailInfo.LABEL,
                 widget=forms.EmailInput(attrs={
-                    'placeholder': _('email address, this will be used for verification.'),
-                    'title': _("email address, it will be used for verification.")
+                    'placeholder': EmailInfo.INPUT_PLACEHOLDER,
+                    'title': EmailInfo.INPUT_TITLE
                     })
                 )
 

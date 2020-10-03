@@ -2,11 +2,11 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
 
 from comment.conf import settings
 from comment.managers import FlagManager, FlagInstanceManager
 from comment.models import Comment
+from comment.messages import FlagError, FlagState
 
 
 User = get_user_model()
@@ -18,10 +18,10 @@ class Flag(models.Model):
     REJECTED = 3
     RESOLVED = 4
     STATES_CHOICES = [
-        (UNFLAGGED, _('Unflagged')),
-        (FLAGGED, _('Flagged')),
-        (REJECTED, _('Flag rejected by the moderator')),
-        (RESOLVED, _('Comment modified by the author')),
+        (UNFLAGGED, FlagState.UNFLAGGED),
+        (FLAGGED, FlagState.FLAGGED),
+        (REJECTED, FlagState.REJECTED),
+        (RESOLVED, FlagState.RESOLVED),
     ]
 
     comment = models.OneToOneField(Comment, on_delete=models.CASCADE)
@@ -61,7 +61,7 @@ class Flag(models.Model):
         return bool(getattr(settings, 'COMMENT_FLAGS_ALLOWED', 0))
 
     def get_clean_state(self, state):
-        err = ValidationError(_('%(state)s is an invalid state'), code='invalid', params={'state': state})
+        err = ValidationError(FlagError.STATE_INVALID.format(state=state), code='invalid')
         try:
             state = int(state)
             if state not in [st[0] for st in self.STATES_CHOICES]:
@@ -74,7 +74,7 @@ class Flag(models.Model):
         state = self.get_clean_state(state)
         # toggle states occurs between rejected and resolved states only
         if state != self.REJECTED and state != self.RESOLVED:
-            raise ValidationError(_('%(state)s is an invalid state'), code='invalid', params={'state': state})
+            raise ValidationError(FlagError.STATE_INVALID.format(state=state), code='invalid')
         if self.state == state:
             self.state = self.FLAGGED
         else:

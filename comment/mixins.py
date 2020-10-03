@@ -3,17 +3,17 @@ import abc
 from django.contrib.auth.mixins import LoginRequiredMixin, AccessMixin
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponseBadRequest, HttpResponseForbidden
-from django.utils.translation import gettext_lazy as _
 
 from comment.conf import settings
 from comment.utils import is_comment_admin, is_comment_moderator
 from comment.validators import ValidatorMixin
+from comment.messages import ErrorMessage, FlagError
 
 
 class AJAXRequiredMixin:
     def dispatch(self, request, *args, **kwargs):
         if not request.META.get('HTTP_X_REQUESTED_WITH', None) == 'XMLHttpRequest':
-            return HttpResponseBadRequest(_('Only AJAX request are allowed'))
+            return HttpResponseBadRequest(ErrorMessage.NON_AJAX_REQUEST)
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -43,8 +43,7 @@ class ObjectLevelMixin(BaseCommentMixin):
     @abc.abstractmethod
     def get_object(self):
         raise ImproperlyConfigured(
-            _("Your %s class has not defined a get_object() method, which is required.")
-            % self.__class__.__name__
+            ErrorMessage.METHOD_NOT_IMPLEMENTED.format(class_name=self.__class__.__name__, method_name='get_object()')
         )
 
 
@@ -74,7 +73,7 @@ class CanDeleteMixin(ObjectLevelMixin, ValidatorMixin, abc.ABC):
 class BaseFlagMixin(ObjectLevelMixin, abc.ABC):
     def dispatch(self, request, *args, **kwargs):
         if not getattr(settings, 'COMMENT_FLAGS_ALLOWED', 0):
-            return HttpResponseForbidden(_('Flagging system must be enabled'))
+            return HttpResponseForbidden(FlagError.SYSTEM_NOT_ENABLED)
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -97,7 +96,7 @@ class CanEditFlagStateMixin(BaseFlagMixin, abc.ABC):
     def dispatch(self, request, *args, **kwargs):
         obj = self.get_object()
         if not obj.is_flagged:
-            return HttpResponseBadRequest(_('Object must be flagged!'))
+            return HttpResponseBadRequest(FlagError.NOT_FLAGGED_OBJECT)
         if not self.has_permission(request):
             return self.handle_no_permission()
         return super().dispatch(request, *args, **kwargs)

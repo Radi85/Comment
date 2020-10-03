@@ -2,12 +2,12 @@ from django.core.exceptions import ValidationError
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
-from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.decorators.http import require_POST
 
 from comment.models import Comment, Reaction, ReactionInstance
 from comment.mixins import BaseCommentMixin
+from comment.messages import ReactionInfo
 
 
 @method_decorator(require_POST, name='dispatch')
@@ -28,6 +28,6 @@ class SetReaction(BaseCommentMixin, View):
             'status': 0,
             'likes': comment.likes,
             'dislikes': comment.dislikes,
-            'msg': _('Your reaction has been updated successfully')
+            'msg': ReactionInfo.UPDATED_SUCCESS
         }
         return JsonResponse(response)

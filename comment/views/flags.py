@@ -1,11 +1,11 @@
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from django.utils.translation import gettext_lazy as _
 from django.views import View
 
 from comment.models import Comment, Flag, FlagInstance
 from comment.mixins import CanSetFlagMixin, CanEditFlagStateMixin
+from comment.messages import FlagInfo
 
 
 class SetFlag(CanSetFlagMixin, View):
@@ -23,10 +23,10 @@ class SetFlag(CanSetFlagMixin, View):
 
         try:
             if FlagInstance.objects.set_flag(request.user, flag, **request.POST.dict()):
-                data['msg'] = _('Comment flagged')
+                data['msg'] = FlagInfo.FLAGGED_SUCCESS
                 data['flag'] = 1
             else:
-                data['msg'] = _('Comment flag removed')
+                data['msg'] = FlagInfo.UNFLAGGED_SUCCESS
 
             data.update({
                 'status': 0

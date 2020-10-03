@@ -6,6 +6,7 @@ from rest_framework.generics import ListAPIView
 
 from comment.tests.base import BaseCommentMixinTest
 from comment.validators import CommentBadRequest, ValidatorMixin
+from comment.messages import ExceptionError, ContentTypeError
 
 
 class MockedContentTypeValidatorView(ValidatorMixin, View):
@@ -25,7 +26,7 @@ class CustomValidationTest(TestCase):
         # no params
         validator = CommentBadRequest()
         self.assertEqual(validator.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(validator.detail, "Bad Request")
+        self.assertEqual(validator.detail, ExceptionError.BAD_REQUEST)
 
         # with params
         validator = CommentBadRequest(detail='Not Found', status_code=404)
@@ -46,7 +47,7 @@ class ValidatorMixinTest(BaseCommentMixinTest):
         request = self.factory.get(self.get_url(**url_data))
         response = self.view.dispatch(request)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(self.view.error, 'app name must be provided')
+        self.assertEqual(self.view.error, ContentTypeError.APP_NAME_MISSING)
 
     def test_missing_model_type(self):
         url_data = self.data.copy()
@@ -55,7 +56,7 @@ class ValidatorMixinTest(BaseCommentMixinTest):
         response = self.view.dispatch(request)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(self.view.error, 'model name must be provided')
+        self.assertEqual(self.view.error, ContentTypeError.MODEL_NAME_MISSING)
 
     def test_missing_model_id(self):
         url_data = self.data.copy()
@@ -64,7 +65,7 @@ class ValidatorMixinTest(BaseCommentMixinTest):
         response = self.view.dispatch(request)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(self.view.error, 'model id must be provided')
+        self.assertEqual(self.view.error, ContentTypeError.MODEL_ID_MISSING)
 
     def test_invalid_model_name(self):
         url_data = self.data.copy()
@@ -74,7 +75,7 @@ class ValidatorMixinTest(BaseCommentMixinTest):
         response = self.view.dispatch(request)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(self.view.error, f'{model_name} is NOT a valid model name')
+        self.assertEqual(self.view.error, ContentTypeError.MODEL_NAME_INVALID.format(model_name=model_name))
 
     def test_invalid_app_name(self):
         url_data = self.data.copy()
@@ -84,7 +85,7 @@ class ValidatorMixinTest(BaseCommentMixinTest):
         response = self.view.dispatch(request)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(self.view.error, f'{app_name} is NOT a valid app name')
+        self.assertEqual(self.view.error, ContentTypeError.APP_NAME_INVALID.format(app_name=app_name))
 
     def test_model_id_does_not_exist(self):
         url_data = self.data.copy()
@@ -94,7 +95,10 @@ class ValidatorMixinTest(BaseCommentMixinTest):
         response = self.view.dispatch(request)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(self.view.error, f'{model_id} is NOT a valid model id for the model {url_data["model_name"]}')
+        self.assertEqual(
+            self.view.error,
+            ContentTypeError.MODEL_ID_INVALID.format(model_id=model_id, model_name=url_data['model_name'])
+        )
 
     def test_model_id_non_integral(self):
         url_data = self.data.copy()
@@ -104,7 +108,7 @@ class ValidatorMixinTest(BaseCommentMixinTest):
         response = self.view.dispatch(request)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(self.view.error, f'model id must be an integer, {model_id} is NOT')
+        self.assertEqual(self.view.error, ContentTypeError.ID_NOT_INTEGER.format(var_name='model', id=model_id))
 
     def test_not_valid_parent_id(self):
         url_data = self.data.copy()
@@ -114,11 +118,7 @@ class ValidatorMixinTest(BaseCommentMixinTest):
         response = self.view.dispatch(request)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(
-            self.view.error,
-            (f'{parent_id} is NOT a valid id for a parent comment or '
-             'the parent comment does NOT belong to the provided model object')
-        )
+        self.assertEqual(self.view.error, ContentTypeError.PARENT_ID_INVALID.format(parent_id=parent_id))
 
     def test_parent_id_no_int(self):
         url_data = self.data.copy()
@@ -128,7 +128,7 @@ class ValidatorMixinTest(BaseCommentMixinTest):
         response = self.view.dispatch(request)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(self.view.error, f'the parent id must be an integer, {parent_id} is NOT')
+        self.assertEqual(self.view.error, ContentTypeError.ID_NOT_INTEGER.format(var_name='parent', id=parent_id))
 
     def test_api_case_success(self):
         view = MockedContentTypeValidatorAPIView()

@@ -6,6 +6,7 @@ from rest_framework import status
 
 from comment.conf import settings
 from comment.mixins import AJAXRequiredMixin, BasePermission, ObjectLevelMixin
+from comment.messages import ErrorMessage
 from comment.tests.base import BaseCommentMixinTest
 
 
@@ -18,7 +19,7 @@ class AJAXMixinTest(BaseCommentMixinTest):
         request = self.factory.get('/')
         response = self.mixin.dispatch(request)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.content.decode('utf-8'), 'Only AJAX request are allowed')
+        self.assertEqual(response.content.decode('utf-8'), ErrorMessage.NON_AJAX_REQUEST)
 
 
 class BasePermissionTest(BaseCommentMixinTest):

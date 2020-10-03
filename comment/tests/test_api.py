@@ -7,6 +7,7 @@ from rest_framework import status
 
 from comment.conf import settings
 from comment.models import Comment, FlagInstanceManager
+from comment.messages import ContentTypeError, EmailError
 from comment.api.serializers import get_profile_model, get_user_fields, UserSerializer, CommentCreateSerializer, \
     CommentSerializer
 from comment.api.permissions import (
@@ -157,21 +158,21 @@ class APICommentViewsTest(APIBaseTest):
         data.pop('app_name')
         response = self.client.get(self.get_url(**data))
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data['detail'], 'app name must be provided')
+        self.assertEqual(response.data['detail'], ContentTypeError.APP_NAME_MISSING)
 
     def test_retrieving_comment_list_without_model_name(self):
         data = self.url_data.copy()
         data.pop('model_name')
         response = self.client.get(self.get_url(**data))
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data['detail'], 'model name must be provided')
+        self.assertEqual(response.data['detail'], ContentTypeError.MODEL_NAME_MISSING)
 
     def test_retrieving_comment_list_without_model_id(self):
         url_data = self.url_data.copy()
         url_data.pop('model_id')
         response = self.client.get(self.get_url(**url_data))
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data['detail'], 'model id must be provided')
+        self.assertEqual(response.data['detail'], ContentTypeError.MODEL_ID_MISSING)
 
     def test_retrieving_comment_list_with_invalid_app_name(self):
         data = self.url_data.copy()
@@ -179,7 +180,7 @@ class APICommentViewsTest(APIBaseTest):
         data['app_name'] = app_name
         response = self.client.get(self.get_url(**data))
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data['detail'], f'{app_name} is NOT a valid app name')
+        self.assertEqual(response.data['detail'], ContentTypeError.APP_NAME_INVALID.format(app_name=app_name))
 
     def test_retrieving_comment_list_with_invalid_model_name(self):
         # not exist model type
@@ -188,7 +189,7 @@ class APICommentViewsTest(APIBaseTest):
         url_data['model_name'] = model_name
         response = self.client.get(self.get_url(**url_data))
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data['detail'], f'{model_name} is NOT a valid model name')
+        self.assertEqual(response.data['detail'], ContentTypeError.MODEL_NAME_INVALID.format(model_name=model_name))
 
     def test_retrieving_comment_list_with_invalid_model_id(self):
         # not exist model id
@@ -199,14 +200,18 @@ class APICommentViewsTest(APIBaseTest):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
             response.data['detail'],
-            f'{model_id} is NOT a valid model id for the model {url_data["model_name"]}')
+            ContentTypeError.MODEL_ID_INVALID.format(model_id=model_id, model_name=url_data["model_name"])
+        )
 
         # not integer model id
         model_id = 'c'
         url_data['model_id'] = model_id
         response = self.client.get(self.get_url(**url_data))
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data['detail'], f'model id must be an integer, {model_id} is NOT')
+        self.assertEqual(
+            response.data['detail'],
+            ContentTypeError.ID_NOT_INTEGER.format(var_name='model', id=model_id)
+        )
 
     def test_create_comment(self):
         # create parent comment
@@ -251,7 +256,7 @@ class APICommentViewsTest(APIBaseTest):
         response = self.client.post(url, data=data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json()['email'], ['Email is required for posting anonymous comments.'])
+        self.assertEqual(response.json()['email'], [EmailError.EMAIL_MISSING])
         # test valid data
         data = {'content': 'new anonymous comment from api', 'email': 'a@a.com'}
 
@@ -271,19 +276,16 @@ class APICommentViewsTest(APIBaseTest):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
             response.data['detail'],
-            f'the parent id must be an integer, {parent_id} is NOT')
+            ContentTypeError.ID_NOT_INTEGER.format(var_name='parent', id=parent_id)
+        )
 
         # parent id not exist
         parent_id = 100
         url_data['parent_id'] = parent_id
         data = {'content': 'new child comment from api'}
-        error_msg = (
-            '{} is NOT a valid id for a parent comment or '
-            'the parent comment does NOT belong to the provided model object'
-            )
         response = self.client.post(self.get_url(base_url, **url_data), data=data)
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data['detail'], error_msg.format(parent_id))
+        self.assertEqual(response.data['detail'], ContentTypeError.PARENT_ID_INVALID.format(parent_id=parent_id))
 
         # parent id doesn't belong to the model object
         parent_id = 1
@@ -294,7 +296,7 @@ class APICommentViewsTest(APIBaseTest):
         data = {'content': 'new child comment from api'}
         response = self.client.post(self.get_url(base_url, **url_data), data=data)
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.data['detail'], error_msg.format(parent_id))
+        self.assertEqual(response.data['detail'], ContentTypeError.PARENT_ID_INVALID.format(parent_id=parent_id))
 
     def test_can_retrieve_update_delete_comment(self):
         count = Comment.objects.all().count()
@@ -561,7 +563,7 @@ class APIConfirmCommentViewTest(BaseAnonymousCommentTest, APIBaseTest):
         key = self.key + 'invalid'
         response = self.client.get(self.get_url(key))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json()['detail'], 'Bad Signature, Comment discarded')
+        self.assertEqual(response.json()['detail'], EmailError.BROKEN_VERIFICATION_LINK)
         self.assertEqual(Comment.objects.all().count(), self.init_count)
 
     def test_comment_exists(self):
@@ -575,7 +577,7 @@ class APIConfirmCommentViewTest(BaseAnonymousCommentTest, APIBaseTest):
 
         response = self.client.get(self.get_url(key))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json()['detail'], 'Comment already verified')
+        self.assertEqual(response.json()['detail'], EmailError.USED_VERIFICATION_LINK)
         self.assertEqual(Comment.objects.all().count(), init_count)
 
     def test_success(self):
