@@ -2,7 +2,6 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.views.generic import FormView
-from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.views import View
 from django.contrib import messages
@@ -15,6 +14,7 @@ from comment.utils import (
 )
 from comment.mixins import CanCreateMixin, CanEditMixin, CanDeleteMixin
 from comment.conf import settings
+from comment.messages import EmailError
 
 
 class BaseCommentView(FormView):
@@ -128,9 +128,9 @@ class ConfirmComment(View):
         comment = get_comment_from_key(key)
 
         if comment.why_invalid == CommentFailReason.BAD:
-            messages.error(request, _('The link seems to be broken.'))
+            messages.error(request, EmailError.BROKEN_VERIFICATION_LINK)
         elif comment.why_invalid == CommentFailReason.EXISTS:
-            messages.warning(request, _('The comment has already been verified.'))
+            messages.warning(request, EmailError.USED_VERIFICATION_LINK)
 
         if not comment.is_valid:
             return render(request, template_name='comment/anonymous/discarded.html')

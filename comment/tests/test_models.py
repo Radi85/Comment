@@ -333,10 +333,10 @@ class ReactionModelTest(BaseCommentTest):
 
 class ReactionInstanceManagerTest(BaseCommentTest):
     def test_clean_reaction_type(self):
-        LIKE = ReactionInstance.ReactionType.LIKE
+        like = ReactionInstance.ReactionType.LIKE
         # valid reaction type
-        reaction_type = ReactionInstance.objects.clean_reaction_type(LIKE.name)
-        self.assertEqual(reaction_type, LIKE.value)
+        reaction_type = ReactionInstance.objects.clean_reaction_type(like.name)
+        self.assertEqual(reaction_type, like.value)
 
         # invalid reaction type
         self.assertRaises(ValidationError, ReactionInstance.objects.clean_reaction_type, 1)
@@ -361,7 +361,7 @@ class FlagInstanceManagerTest(BaseCommentFlagTest):
         data.update({'reason': -1})
         self.assertRaises(ValidationError, self.set_flag, self.user, self.comment, **data)
 
-        data.update({'reason': 'abcd'})
+        data.update({'reason': 'abc'})
         self.assertRaises(ValidationError, self.set_flag, self.user, self.comment, **data)
 
     def test_clean_for_invalid_values(self):
@@ -403,7 +403,7 @@ class FlagInstanceManagerTest(BaseCommentFlagTest):
         self.assertTrue(self.set_flag(self.user, self.comment, **self.flag_data))
         self.assertRaises(ValidationError, self.set_flag, self.user, self.comment, **self.flag_data)
 
-    def test_unflag_non_exist_flag(self):
+    def test_un_flag_non_exist_flag(self):
         # user try to un-flag comment that wasn't flagged yet
         self.assertRaises(ValidationError, self.set_flag, self.user, self.comment)
 

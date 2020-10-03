@@ -8,6 +8,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import reverse
 
 from comment.conf import settings
+from comment.messages import EmailInfo
 from comment.utils import (
     get_model_obj, has_valid_profile, get_comment_context_data, id_generator, get_comment_from_key,
     get_user_for_request, send_email_confirmation_request, process_anonymous_commenting, CommentFailReason,
@@ -314,18 +315,14 @@ class TestProcessAnonymousCommenting(BaseAnonymousCommentTest, BaseCommentUtilsT
     def setUp(self):
         super().setUp()
         self.request.user = AnonymousUser()
-        self.response_msg = (
-            'We have have sent a verification link to your email. The comment will be '
-            'displayed after it is verified.'
-        )
 
     def test_for_django(self):
         response = process_anonymous_commenting(self.request, self.comment_obj)
-        self.assertEqual(self.response_msg, response)
+        self.assertEqual(EmailInfo.CONFIRMATION_SENT, response)
 
     def test_for_drf(self):
         response = process_anonymous_commenting(self.request, self.comment_obj, api=True)
-        self.assertEqual(self.response_msg, response)
+        self.assertEqual(EmailInfo.CONFIRMATION_SENT, response)
 
 
 class UtilsTest(TestCase):

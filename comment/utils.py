@@ -9,12 +9,12 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import reverse
 from django.template import loader
 from django.core.mail import EmailMultiAlternatives
-from django.utils.translation import gettext_lazy as _
 from django.core import signing
 from django.apps import apps
 from django.contrib.sites.shortcuts import get_current_site
 
 from comment.conf import settings
+from comment.messages import ErrorMessage, EmailInfo
 
 
 @unique
@@ -114,7 +114,7 @@ def get_comment_context_data(request, model_object=None):
 
     login_url = getattr(settings, 'LOGIN_URL')
     if not login_url:
-        raise ImproperlyConfigured(_('Comment App: LOGIN_URL is not in the settings'))
+        raise ImproperlyConfigured(ErrorMessage.LOGIN_URL_MISSING)
 
     if not login_url.startswith('/'):
         login_url = '/' + login_url
@@ -161,7 +161,7 @@ def send_email_confirmation_request(
     api=False
 ):
     """Send email requesting comment confirmation"""
-    subject = _('Comment Confirmation Request')
+    subject = EmailInfo.SUBJECT
     if api:
         confirmation_url = f'/api/comments/confirm/{key}/'
     else:
@@ -224,10 +224,7 @@ def process_anonymous_commenting(request, comment, api=False):
     key = signing.dumps(comment.to_dict(), compress=True)
     site = get_current_site(request)
     send_email_confirmation_request(comment, comment.to_dict()['email'], key, site, api=api)
-    return _(
-        'We have have sent a verification link to your email. The comment will be '
-        'displayed after it is verified.'
-    )
+    return EmailInfo.CONFIRMATION_SENT
 
 
 def get_user_for_request(request):

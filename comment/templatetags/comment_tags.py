@@ -7,6 +7,7 @@ from comment.utils import (
 )
 from comment.managers import FlagInstanceManager
 from comment.conf import settings
+from comment.messages import ReactionError
 
 register = template.Library()
 
@@ -139,9 +140,7 @@ def has_reacted(comment, user, reaction):
     if user.is_authenticated:
         reaction_type = getattr(ReactionInstance.ReactionType, reaction.upper(), None)
         if not reaction_type:
-            raise template.TemplateSyntaxError(
-                'Reaction must be an valid ReactionManager.RelationType. {} is not'.format(reaction)
-                )
+            raise template.TemplateSyntaxError(ReactionError.TYPE_INVALID.format(reaction_type=reaction))
         return ReactionInstance.objects.filter(
             user=user,
             reaction_type=reaction_type.value,

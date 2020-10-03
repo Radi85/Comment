@@ -1,6 +1,5 @@
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
-from django.utils.translation import gettext_lazy as _
 from rest_framework import generics, permissions, status
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -13,6 +12,7 @@ from comment.api.permissions import (
 )
 from comment.models import Comment, Reaction, ReactionInstance, Flag, FlagInstance
 from comment.utils import get_comment_from_key, CommentFailReason
+from comment.messages import FlagError, EmailError
 
 
 class CommentCreate(ValidatorMixin, generics.CreateAPIView):
@@ -120,7 +120,7 @@ class CommentDetailForFlagStateChange(generics.RetrieveAPIView):
         flag = Flag.objects.get_for_comment(comment)
         if not comment.is_flagged:
             return Response(
-                {'detail': _('This action cannot be applied on unflagged comments')},
+                {'detail': FlagError.REJECT_UNFLAGGED_COMMENT},
                 status=status.HTTP_400_BAD_REQUEST
             )
         state = request.data.get('state') or request.POST.get('state')
@@ -128,7 +128,7 @@ class CommentDetailForFlagStateChange(generics.RetrieveAPIView):
             state = flag.get_clean_state(state)
             if not comment.is_edited and state == flag.RESOLVED:
                 return Response(
-                    {'detail': _('The comment must be edited before resolving the flag')},
+                    {'detail': FlagError.RESOLVE_UNEDITED_COMMENT},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             flag.toggle_state(state, request.user)
@@ -140,14 +140,15 @@ class CommentDetailForFlagStateChange(generics.RetrieveAPIView):
 
 
 class ConfirmComment(APIView):
-    def get(self, request, *args, **kwargs):
+    @staticmethod
+    def get(request, *args, **kwargs):
         key = kwargs.get('key', None)
         comment = get_comment_from_key(key)
 
         if comment.why_invalid == CommentFailReason.BAD:
-            return Response({'detail': _('Bad Signature, Comment discarded')}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': EmailError.BROKEN_VERIFICATION_LINK}, status=status.HTTP_400_BAD_REQUEST)
 
         if comment.why_invalid == CommentFailReason.EXISTS:
-            return Response({'detail': _('Comment already verified')}, status=status.HTTP_200_OK)
+            return Response({'detail': EmailError.USED_VERIFICATION_LINK}, status=status.HTTP_200_OK)
 
         return Response(CommentSerializer(comment.obj).data, status=status.HTTP_201_CREATED)

@@ -2,10 +2,10 @@ from abc import abstractmethod, ABCMeta
 
 from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
-from django.utils.translation import gettext_lazy as _
 
 from comment.models import Comment
 from comment.exceptions import CommentBadRequest
+from comment.messages import ContentTypeError, ExceptionError
 
 
 class BaseValidatorMixin:
@@ -23,7 +23,7 @@ class BaseValidatorMixin:
         try:
             self.validate(request)
         except CommentBadRequest as exc:
-            return JsonResponse({'type': _('error'), 'detail': _(exc.detail)}, status=400)
+            return JsonResponse({'type': ExceptionError.ERROR_TYPE, 'detail': exc.detail}, status=400)
         return super().dispatch(request, *args, **kwargs)
 
     @abstractmethod
@@ -38,17 +38,17 @@ class ContentTypeValidator(BaseValidatorMixin):
 
     def validate_app_name(self, app_name):
         if not app_name:
-            self.error = 'app name must be provided'
+            self.error = ContentTypeError.APP_NAME_MISSING
             raise CommentBadRequest(self.error)
 
         if not ContentType.objects.filter(app_label=app_name).exists():
-            self.error = f'{app_name} is NOT a valid app name'
+            self.error = ContentTypeError.APP_NAME_INVALID.format(app_name=app_name)
             raise CommentBadRequest(self.error)
         return app_name
 
     def validate_model_name(self, model_name):
         if not model_name:
-            self.error = "model name must be provided"
+            self.error = ContentTypeError.MODEL_NAME_MISSING
             raise CommentBadRequest(self.error)
         return str(model_name).lower()
 
@@ -56,18 +56,18 @@ class ContentTypeValidator(BaseValidatorMixin):
         try:
             ct_object = ContentType.objects.get(model=model_name, app_label=app_name)
         except ContentType.DoesNotExist:
-            self.error = f'{model_name} is NOT a valid model name'
+            self.error = ContentTypeError.MODEL_NAME_INVALID.format(model_name=model_name)
             raise CommentBadRequest(self.error)
         return ct_object
 
     def validate_model_id(self, model_id):
         if not model_id:
-            self.error = "model id must be provided"
+            self.error = ContentTypeError.MODEL_ID_MISSING
             raise CommentBadRequest(self.error)
         try:
             model_id = int(model_id)
         except ValueError:
-            self.error = f'model id must be an integer, {model_id} is NOT'
+            self.error = ContentTypeError.ID_NOT_INTEGER.format(var_name='model', id=model_id)
             raise CommentBadRequest(self.error)
         return model_id
 
@@ -76,7 +76,7 @@ class ContentTypeValidator(BaseValidatorMixin):
         model_class = ct_object.model_class()
         model_query = model_class.objects.filter(id=model_id)
         if not model_query.exists() and model_query.count() != 1:
-            self.error = f'{model_id} is NOT a valid model id for the model {model_name}'
+            self.error = ContentTypeError.MODEL_ID_INVALID.format(model_id=model_id, model_name=model_name)
             raise CommentBadRequest(self.error)
         return model_query.first()
 
@@ -98,7 +98,7 @@ class ParentIdValidator(BaseValidatorMixin):
         try:
             parent_id = int(parent_id)
         except ValueError:
-            self.error = f'the parent id must be an integer, {parent_id} is NOT'
+            self.error = ContentTypeError.ID_NOT_INTEGER.format(var_name='parent', id=parent_id)
             raise CommentBadRequest(self.error)
         return parent_id
 
@@ -106,10 +106,7 @@ class ParentIdValidator(BaseValidatorMixin):
         try:
             comment = Comment.objects.get(id=parent_id, object_id=model_id)
         except Comment.DoesNotExist:
-            self.error = (
-                f'{parent_id} is NOT a valid id for a parent comment or '
-                'the parent comment does NOT belong to the provided model object'
-            )
+            self.error = ContentTypeError.PARENT_ID_INVALID.format(parent_id=parent_id)
             raise CommentBadRequest(self.error)
         return comment
 

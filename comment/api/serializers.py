@@ -1,5 +1,4 @@
 from django.contrib.auth import get_user_model
-from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 
 from django.apps import apps
@@ -9,6 +8,7 @@ from rest_framework import serializers
 from comment.conf import settings
 from comment.models import Comment, Flag, Reaction
 from comment.utils import get_model_obj, process_anonymous_commenting, get_user_for_request, get_profile_instance
+from comment.messages import EmailError
 
 
 def get_profile_model():
@@ -109,10 +109,7 @@ class CommentCreateSerializer(BaseCommentSerializer):
     @staticmethod
     def validate_email(value):
         if not value:
-            raise serializers.ValidationError(
-                _('Email is required for posting anonymous comments.'),
-                code='required'
-                )
+            raise serializers.ValidationError(EmailError.EMAIL_MISSING, code='required')
         return value.strip().lower()
 
     def create(self, validated_data):

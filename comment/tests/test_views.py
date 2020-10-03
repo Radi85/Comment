@@ -6,6 +6,7 @@ from django.contrib import messages
 
 from comment.conf import settings
 from comment.models import Comment
+from comment.messages import EmailInfo, ReactionInfo, FlagInfo, EmailError
 from comment.tests.base import BaseCommentTest, BaseCommentFlagTest, BaseCommentViewTest
 from comment.tests.test_utils import BaseAnonymousCommentTest, AnonymousUser, timezone, signing
 
@@ -81,11 +82,7 @@ class CommentViewTestCase(BaseCommentViewTest):
         response_messages = response.context['messages']
         for r in response_messages:
             self.assertEqual(r.level, messages.INFO)
-            self.assertEqual(r.message, (
-                'We have have sent a verification link to your email. The comment will be '
-                'displayed after it is verified.'
-                )
-            )
+            self.assertEqual(r.message, EmailInfo.CONFIRMATION_SENT)
         # no change in comment count
         self.comment_count_test()
 
@@ -242,7 +239,7 @@ class SetReactionViewTest(BaseCommentViewTest):
             'status': 0,
             'likes': 1,
             'dislikes': 0,
-            'msg': 'Your reaction has been updated successfully'
+            'msg': ReactionInfo.UPDATED_SUCCESS
         }
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertDictEqual(response.json(), data)
@@ -257,7 +254,7 @@ class SetReactionViewTest(BaseCommentViewTest):
             'status': 0,
             'likes': 1,
             'dislikes': 0,
-            'msg': 'Your reaction has been updated successfully'
+            'msg': ReactionInfo.UPDATED_SUCCESS
         }
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertDictEqual(response.json(), data)
@@ -317,7 +314,7 @@ class SetFlagViewTest(BaseCommentFlagTest):
         response_data = {
             'status': 0,
             'flag': 1,
-            'msg': 'Comment flagged'
+            'msg': FlagInfo.FLAGGED_SUCCESS
         }
         self.assertEqual(response.status_code, 200)
         self.assertDictEqual(response.json(), response_data)
@@ -340,7 +337,7 @@ class SetFlagViewTest(BaseCommentFlagTest):
         response_data = {
             'status': 0,
             'flag': 1,
-            'msg': 'Comment flagged'
+            'msg': FlagInfo.FLAGGED_SUCCESS
         }
         self.assertEqual(response.status_code, 200)
         self.assertDictEqual(response.json(), response_data)
@@ -352,7 +349,7 @@ class SetFlagViewTest(BaseCommentFlagTest):
         response = self.client.post(_url, data=data)
         response_data = {
             'status': 0,
-            'msg': 'Comment flag removed'
+            'msg': FlagInfo.UNFLAGGED_SUCCESS
         }
         self.assertEqual(response.status_code, 200)
         self.assertDictEqual(response.json(), response_data)
@@ -478,7 +475,7 @@ class ConfirmCommentViewTest(BaseAnonymousCommentTest, BaseCommentTest):
         self.assertEqual(len(response_messages), 1)
         for r in response_messages:
             self.assertEqual(r.level, messages.ERROR)
-            self.assertEqual(r.message, 'The link seems to be broken.')
+            self.assertEqual(r.message, EmailError.BROKEN_VERIFICATION_LINK)
 
     def test_comment_exists(self):
         comment_dict = self.comment_obj.to_dict().copy()
@@ -498,7 +495,7 @@ class ConfirmCommentViewTest(BaseAnonymousCommentTest, BaseCommentTest):
         self.assertEqual(len(response_messages), 1)
         for r in response_messages:
             self.assertEqual(r.level, messages.WARNING)
-            self.assertEqual(r.message, 'The comment has already been verified.')
+            self.assertEqual(r.message, EmailError.USED_VERIFICATION_LINK)
 
     def test_success(self):
         response = self.client.get(self.get_url())

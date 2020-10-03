@@ -5,6 +5,7 @@ from django.contrib.auth.models import AnonymousUser
 from comment.forms import CommentForm
 from comment.tests.base import BaseCommentTest, RequestFactory
 from comment.conf import settings
+from comment.messages import EmailInfo
 
 
 class TestCommentForm(BaseCommentTest):
@@ -31,8 +32,8 @@ class TestCommentForm(BaseCommentTest):
         self.assertEqual(email_field.label, field)
         self.assertEqual(email_field.widget.input_type, field)
         self.assertDictEqual(email_field.widget.attrs, {
-            'placeholder': 'email address, this will be used for verification.',
-            'title': 'email address, it will be used for verification.'
+            'placeholder': EmailInfo.INPUT_PLACEHOLDER,
+            'title': EmailInfo.INPUT_TITLE
         })
 
     @patch.object(settings, 'COMMENT_ALLOW_ANONYMOUS', True)

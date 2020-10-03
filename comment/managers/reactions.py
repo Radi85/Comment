@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
-from django.utils.translation import gettext_lazy as _
 from django.db import models
+
+from comment.messages import ReactionError
 
 
 class ReactionManager(models.Manager):
@@ -21,11 +22,7 @@ class ReactionInstanceManager(models.Manager):
             if reaction:
                 return reaction.value
 
-        raise ValidationError(
-            _('%(reaction)s is an invalid reaction'),
-            code='invalid',
-            params={'reaction': reaction_type}
-        )
+        raise ValidationError(ReactionError.TYPE_INVALID.format(reaction_type=reaction_type), code='invalid')
 
     def _delete_and_create_new_instance(self, instance, user, reaction_type):
         old_reaction_type = instance.reaction_type

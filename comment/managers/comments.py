@@ -30,7 +30,8 @@ class CommentManager(models.Manager):
             return self.all_comments_by_object(obj, include_flagged=True).filter(parent=None)
         return self.all_comments_by_object(obj).filter(parent=None)
 
-    def generate_urlhash(self):
+    @staticmethod
+    def generate_urlhash():
         return id_generator(
             prefix=settings.COMMENT_URL_PREFIX,
             len_id=settings.COMMENT_URL_ID_LENGTH,
