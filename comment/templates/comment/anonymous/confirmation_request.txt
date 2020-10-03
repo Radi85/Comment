@@ -1,5 +1,5 @@
 {% load i18n %}
-{% trans "Hey," %}
+{% trans "Hey there," %}
 
 {% trans "You or someone on behalf of you have requested to post a comment at" %} {{ comment.posted }}, {% trans "to the following URL" %}.
 

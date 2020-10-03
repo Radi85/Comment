@@ -1,6 +1,12 @@
 Changelog
 =========
 
+2.5.1
+------
+
+- Fix version/installation issue.
+- Fix class names conflict.
+
 2.5.0
 ------
 

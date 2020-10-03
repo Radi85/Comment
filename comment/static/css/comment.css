@@ -70,12 +70,15 @@ input#search-input:focus::placeholder {
 #comments .user-has-flagged {
     fill: #ffc96c;
 }
+
 #comments .user-has-not-reacted,
-#comments .user-has-not-flagged {
+#comments .user-has-not-flagged,
+#comments .user-has-followed {
     fill: none;
 }
 #comments .user-has-flagged,
-#comments .user-has-not-flagged {
+#comments .user-has-not-flagged,
+#comments .comment-follow-icon {
     cursor: pointer;
 }
 .flag-modal textarea {
@@ -85,7 +88,8 @@ input#search-input:focus::placeholder {
     color: #999;
 }
 .flag-rejected,
-.flag-resolved {
+.flag-resolved,
+#comments .user-has-followed {
     stroke: #00bc8c;
 }
 .comment-modal {
@@ -150,4 +154,37 @@ input#search-input:focus::placeholder {
     color: #78281f;
     background-color: #fadbd8;
     border-color: #f8cdc8;
+}
+
+.three-dots {
+    position: relative;
+    width: 5px;
+    height: 5px;
+    background-color: #666;
+    border-radius: 50%;
+    margin-bottom: 2px;
+    margin-top: 2px;
+}
+.three-dots-wrapper {
+    cursor: pointer;
+    width: 10px;
+    padding: 3px;
+}
+
+.three-dots-dropdown {
+    position: absolute;
+    background-color: #f9f9f9;
+    overflow: auto;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+    z-index: 10;
+    padding: 0;
+    margin: 0;
+    right: 0;
+}
+.three-dots-dropdown > li {
+    border-bottom: 1px solid #e5e5e5;
+    padding: 0 10px;
+}
+.three-dots-dropdown > li:hover {
+    background: #f1f1f1;
 }

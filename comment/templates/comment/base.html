@@ -1,2 +1,15 @@
 {% include 'comment/static.html' %}
 {% include 'comment/comments/base.html' %}
+
+<div class="comment-modal" id="Modal">
+  <div class="comment-modal-dialog" role="document">
+    <div class="comment-modal-content">
+    </div>
+  </div>
+</div>
+{% if allowed_flags %}
+    {% include "comment/flags/flag_modal.html" %}
+{% endif %}
+{% if is_subscription_allowed %}
+    {% include 'comment/follow/follow_modal.html' %}
+{% endif %}

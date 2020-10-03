@@ -1,11 +1,11 @@
 {% load i18n %}
 {% url 'comment:flag' pk=comment.id  as flag_url %}
 {% if user.is_authenticated %}
-<span class="ml-4 js-comment-flag" data-url="{{ flag_url }}">
+<span class="js-comment-flag" data-url="{{ flag_url }}">
     {% include "comment/flags/flag_icon.html" %}
 </span>
 {% else %}
-<a class="ml-4 js-comment-flag>" href="{{ login_url }}/?next={{ request.build_absolute_uri }}" title="{% trans "flag" %}">
+<a class="js-comment-flag" href="{{ login_url }}/?next={{ request.build_absolute_uri }}" title="{% trans "flag" %}">
     {% include "comment/flags/flag_icon.html" %}
 </a>
 {% endif %}

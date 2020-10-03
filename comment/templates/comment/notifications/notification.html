@@ -1,0 +1,38 @@
+{% extends 'comment/email/base.html' %}
+{% comment %}Email template is used from: * https://github.com/leemunroe/responsive-html-email-template{% endcomment %}
+{% load i18n %}
+{% block content %}
+    <p class="comment-translatable">{% trans "Hey" %} {{receiver}}{% trans "," %} </p>
+
+    <p class="comment-translatable">
+        <strong>{{comment.user}}</strong> {% trans 'has added a comment at' %} {{ comment.posted }}, {% trans "to" %} "{{thread_name}}".
+    </p>
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
+        <tbody>
+            <tr>
+                <td align="left">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                        <tbody>
+                            <tr>
+                                <td> <a href="http://{{ site.domain }}{{ comment.content_object.get_absolute_url }}" target="_blank">{% trans 'Go to site' %}</a> </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <br/>
+    <p class="comment-translatable">{% trans "The comment:" %}</p>
+    <p><em>{{ comment.content }}</em></p>
+    <hr/>
+    <br/>
+    <p class="comment-translatable">{% trans "If clicking does not work, you can also copy and paste the address into your browser's address window" %}.</p>
+    <p class="comment-translatable">{% trans "Thanks for your comment!" %}<p>
+    ------
+    <p class="comment-translatable">{% trans "Kind regards," %}
+    <br/> {{ site }}
+    </p>
+{% endblock content %}
+{% block footer %}
+{% endblock footer %}

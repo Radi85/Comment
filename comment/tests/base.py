@@ -22,51 +22,7 @@ User = get_user_model()
 
 
 class BaseInternationalizationTest:
-    prefix = 'ङङङ '
     translatable_attrs = ['title', 'aria-label']
-
-    def mock_get_text_function_for_hindi(self):
-        '''just adds a prefix to the front of all strings'''
-        def wrapper(func):
-            '''A decorator function that just adds a prefix to the front of all strings'''
-            def new_func(*args, **kwargs):
-                output = func(*args, **kwargs)
-                return self.prefix + output
-            return new_func
-
-        old_lang = translation.get_language()
-        # Activate hindi, so that if the hi files haven't
-        # been loaded, they will be loaded now.
-        translation.activate("hi")
-
-        hindi_translation = translation.trans_real._active.value
-
-        # wrap the gettext and ungettext functions so that 'ङङङ '
-        # will prefix each translation
-        hindi_translation.gettext = wrapper(hindi_translation.gettext)
-
-        # Turn back on our old translations
-        translation.activate(old_lang)
-        del old_lang
-
-    def remove_mocked_prefix_from_get_text_function_for_hindi(self):
-        def wrapper(func):
-            '''A decorator function that just removes the mock prefix added to the front of all strings'''
-            def new_func(*args, **kwargs):
-                output = func(*args, **kwargs)
-                return output[len(self.prefix):]
-            return new_func
-
-        old_lang = translation.get_language()
-        translation.activate('hi')
-        hindi_translation = translation.trans_real._active.value
-
-        # wrap the gettext and ungettext functions so that 'ङङङ '
-        # will prefix each translation
-        hindi_translation.gettext = wrapper(hindi_translation.gettext)
-
-        # Turn back on our old translations
-        translation.activate(old_lang)
 
     @staticmethod
     def has_translatable_html_text(element):
@@ -81,8 +37,12 @@ class BaseInternationalizationTest:
         return False
 
     @staticmethod
-    def has_string(string_to_search, sub_string):
-        return string_to_search.strip().startswith(sub_string)
+    def is_translated(text):
+        try:
+            text.encode('ascii')
+        except UnicodeEncodeError:
+            return True
+        return False
 
     @staticmethod
     def get_view_from_url_or_none(url):
@@ -109,6 +69,10 @@ class BaseCommentTest(TestCase, BaseInternationalizationTest):
         cls.user_2 = User.objects.create_user(
             username="test-2",
             email="test-2@acme.edu",
+            password="1234"
+        )
+        cls.user_without_email = User.objects.create_user(
+            username="no-email",
             password="1234"
         )
         cls.moderator = User.objects.create_user(
@@ -145,10 +109,8 @@ class BaseCommentTest(TestCase, BaseInternationalizationTest):
     def setUp(self):
         super().setUp()
         self.client.force_login(self.user_1)
-        self.mock_get_text_function_for_hindi()
-        translation.activate("hi")
+        translation.activate("test")
         self.addCleanup(patch.stopall)
-        self.addCleanup(self.remove_mocked_prefix_from_get_text_function_for_hindi)
 
     @classmethod
     def increase_comment_count(cls):
@@ -218,17 +180,19 @@ class BaseCommentTest(TestCase, BaseInternationalizationTest):
 
     def _check_translatable_html_text(self, element, url):
         if self.has_translatable_html_text(element):
-            self.assertEqual(True, self.has_string(element.text, self.prefix), (
-                f'No translation for the element {element.tag} with text "{element.text}" '
-                f'from view {self.get_view_from_url_or_none(url)}')
+            self.assertTrue(
+                self.is_translated(element.text),
+                (f'No translation for the element {element.tag} with text "{element.text}" '
+                 f'from view {self.get_view_from_url_or_none(url)}')
             )
 
     def _check_translatable_html_attrs(self, element, url):
         for attr in self.translatable_attrs:
             if self.has_translatable_html_attr(element, attr):
-                self.assertEqual(True, self.has_string(element.attrib.get(attr), self.prefix), (
-                    f'No translation for the attribute "{attr}" of the element {element.tag} with the '
-                    f'value "{element.attrib.get(attr)}" from view {self.get_view_from_url_or_none(url)}')
+                self.assertTrue(
+                    self.is_translated(element.attrib.get(attr)),
+                    (f'No translation for the attribute "{attr}" of the element {element.tag} with the '
+                     f'value "{element.attrib.get(attr)}" from view {self.get_view_from_url_or_none(url)}')
                 )
 
     def assertHtmlTranslated(self, html, url=None):
@@ -240,9 +204,8 @@ class BaseCommentTest(TestCase, BaseInternationalizationTest):
             self._check_translatable_html_attrs(element, url)
 
     def assertTextTranslated(self, text, url=None):
-        self.assertEqual(
-            True,
-            self.has_string(text, self.prefix),
+        self.assertTrue(
+            self.is_translated(text),
             f'No translation for the text "{text}" from view {self.get_view_from_url_or_none(url)}'
         )
 
@@ -305,6 +268,7 @@ class BaseCommentFlagTest(BaseCommentViewTest):
     def setUpTestData(cls):
         super().setUpTestData()
         cls.comment = cls.create_comment(cls.content_object_1)
+        cls.comment_for_change_state = cls.create_comment(cls.content_object_1)
         cls.user = cls.user_1
         cls.flag_data = {
             'reason': str(FlagInstance.objects.reason_values[0]),

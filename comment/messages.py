@@ -56,11 +56,12 @@ class ReactionInfo:
 
 
 class EmailInfo:
-    SUBJECT = _('Comment Confirmation Request')
+    CONFIRMATION_SUBJECT = _('Comment Confirmation Request')
     CONFIRMATION_SENT = _('We have sent a verification link to your email.'
                           'The comment will be displayed after it is verified.')
     INPUT_PLACEHOLDER = _('email address, this will be used for verification.')
     INPUT_TITLE = _('email address, it will be used for verification.')
+    NOTIFICATION_SUBJECT = _('{username} added comment to "{thread_name}"')
     LABEL = _('email')
 
 
@@ -69,3 +70,9 @@ class FlagState:
     FLAGGED = _('Flagged')
     REJECTED = _('Flag rejected by the moderator')
     RESOLVED = _('Comment modified by the author')
+
+
+class FollowError:
+    EMAIL_INVALID = _('Please insert a valid email')
+    EMAIL_REQUIRED = _('Email is required to subscribe {model_object}')
+    SYSTEM_NOT_ENABLED = _('Subscribe system must be enabled')

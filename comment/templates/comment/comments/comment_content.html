@@ -1,7 +1,6 @@
 {% load comment_tags %}
 {% load i18n %}
 
-
 <div class="js-updated-comment {% if comment.has_flagged_state %}flagged-comment {% endif %}{% block content_wrapper_cls %}{% if has_valid_profile %}col-9 col-md-10{% else %}co-11 mx-3{% endif %}{% endblock content_wrapper_cls %}" id="{{ comment.urlhash }}">
     {% block comment_content %}
     {% render_content comment 30 %}
@@ -39,6 +38,11 @@
                 <a class="js-reply-link {% block reply_link_cls %}btn btn-link ml-1{% endblock reply_link_cls %}" href="#">
                     {% blocktrans with plural_str=reply_count|pluralize:"y,ies" %} Repl{{ plural_str }} {% endblocktrans %}
                 </a>
+                {% if comment.user == user and is_subscription_allowed %}
+                    <div class="d-inline ml-3">
+                        {% include 'comment/follow/follow.html' with model_object=comment btnId=comment.id %}
+                    </div>
+                {% endif %}
             {% endif %}
         </small>
         {% include "comment/reactions/reactions.html" with comment=comment %}

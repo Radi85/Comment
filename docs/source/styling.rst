@@ -5,55 +5,69 @@ Some actual customizations has been done in the example_ project
 
 .. _example: https://github.com/Radi85/Comment/tree/master/test/example
 
-1- Default blocks:
----------------------
+1- Templates and default blocks:
+--------------------------------
 
 BS classes, pagination and some other template values can be now customized from within your templates directory as follows:
 
     1. Create ``comment`` folder inside templates directory.
 
-    2. Create a new template file ``.html`` give it the same name of the default template needs to be overridden and put it in the right directory.
+    2. Create a new template file ``.html`` give it the same name of the default template that needs to be overridden and put it in the right directory.
 
     **Templates tree:**
 
     .. code:: bash
 
+        comment
         └── templates
             └── comment
                 ├── anonymous
-                │   ├── confirmation_request.html
-                │   ├── confirmation_request.txt
-                │   └── discarded.html
-                ├── bootstrap.html
+                │   ├── confirmation_request.html
+                │   ├── confirmation_request.txt
+                │   └── discarded.html
                 ├── comments
-                │   ├── apply_icon.html
-                │   ├── base.html
-                │   ├── cancel_icon.html
-                │   ├── child_comment.html
-                │   ├── comment_body.html
-                │   ├── comment_content.html
-                │   ├── comment_form.html
-                │   ├── comment_modal.html
-                │   ├── content.html
-                │   ├── create_comment.html
-                │   ├── delete_icon.html
-                │   ├── edit_icon.html
-                │   ├── messages.html
-                │   ├── pagination.html
-                │   ├── parent_comment.html
-                │   ├── reject_icon.html
-                │   ├── resolve_icon.html
-                │   ├── update_comment.html
-                │   └── urlhash.html
+                │   ├── apply_icon.html
+                │   ├── base.html
+                │   ├── cancel_icon.html
+                │   ├── child_comment.html
+                │   ├── comment_body.html
+                │   ├── comment_content.html
+                │   ├── comment_form.html
+                │   ├── comment_modal.html
+                │   ├── content.html
+                │   ├── create_comment.html
+                │   ├── delete_icon.html
+                │   ├── edit_icon.html
+                │   ├── messages.html
+                │   ├── pagination.html
+                │   ├── parent_comment.html
+                │   ├── reject_icon.html
+                │   ├── resolve_icon.html
+                │   ├── three_dots_menu.html
+                │   ├── update_comment.html
+                │   └── urlhash.html
+                ├── email
+                │   ├── email_template.html
+                │   └── footer.html
                 ├── flags
-                │   ├── flag_icon.html
-                │   ├── flag_modal.html
-                │   └── flags.html
+                │   ├── flag_icon.html
+                │   ├── flag_modal.html
+                │   └── flags.html
+                ├── follow
+                │   ├── follow.html
+                │   ├── follow_icon.html
+                │   └── follow_modal.html
+                ├── notifications
+                │   ├── notification.html
+                │   └── notification.txt
                 ├── reactions
-                │   ├── dislike_icon.html
-                │   ├── like_icon.html
-                │   └── reactions.html
+                │   ├── dislike_icon.html
+                │   ├── like_icon.html
+                │   └── reactions.html
+                ├── base.html
+                ├── bootstrap.html
                 └── static.html
+
 
 
 for example to override the BS classes of `submit buttons` and pagination style do the following:
@@ -282,6 +296,21 @@ Some block tags may not work on old versions.
     {% block resolved_icon_color %}#427297{% endblock resolved_icon_color %}
 
 
+**follow_icon.html**
+
+.. code:: jinja
+
+    {% extends "comment/follow/follow_icon.html" %}
+
+    {% block follow_img_icon %}
+        {#
+        IMPORTANT: please consider adding these classes to your icon element as they are used in JS
+        class="comment-follow-icon {% if user|has_followed:model_object %}user-has-followed{% endif %}"
+        #}
+        Here comes your favorite icon
+    {% endblock follow_img_icon %}
+
+
 **comment_modal.html**
 
 .. code:: jinja
@@ -318,6 +347,56 @@ Some block tags may not work on old versions.
 
     {% block flag_link_cls %}{% endblock flag_link_cls %}
 
+
+**follow_modal.html**
+
+.. code:: jinja
+
+    {% extends "comment/follow/follow_modal.html" %}
+
+    {% block title %}
+    {% trans "Please insert your email to follow this thread" %}
+    {% endblock title %}
+
+    {% block email_input %}
+        <div class="row">
+            <div class="col-3">
+                <label for="email">Email:</label>
+            </div>
+            <div class="col-9">
+
+                <input id="email" class="form-control mr-2 w-100" type="email" name="email" required>
+                <div class="error text-danger small mt-1"></div>
+            </div>
+        </div>
+    {% endblock email_input %}
+
+    {% block follow_btn_extra_cls %}{% endblock follow_btn_extra_cls %}
+
+
+Email templates:
+^^^^^^^^^^^^^^^^^
+
+Responsive email templates are used from https://github.com/leemunroe/responsive-html-email-template
+
+This can be overridden by creating ``base.html`` in `templates/comment/email/` directory.
+
+Both ``confirmation_request.html`` and ``notification.html`` extends the base email template and they have the following blocks
+for partial customization:
+
+.. code:: jinja
+
+    {% extends "comment/notifications/notification.html" %}
+
+    {% block content %}
+    {# your custom email message/template here #}
+    {% endblock content %}
+
+    {% block footer %}
+    {# your footer here #}
+    {% endblock footer %}
+
+PS: The footer template is disabled by default.
 
 2- CSS file:
 ------------

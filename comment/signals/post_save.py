@@ -1,19 +1,17 @@
 from django.dispatch import receiver
 from django.db.models import signals
 
-from comment.models import Comment, Flag, FlagInstance, Reaction, ReactionInstance
+from comment.models import Comment, Flag, FlagInstance, Reaction, ReactionInstance, Follower
+from comment.conf import settings
 
 
 @receiver(signals.post_save, sender=Comment)
-def add_reaction(sender, instance, created, raw, using, update_fields, **kwargs):
+def add_initial_instances(sender, instance, created, raw, using, update_fields, **kwargs):
     if created:
         Reaction.objects.create(comment=instance)
-
-
-@receiver(signals.post_save, sender=Comment)
-def add_flag(sender, instance, created, raw, using, update_fields, **kwargs):
-    if created:
         Flag.objects.create(comment=instance)
+        if settings.COMMENT_ALLOW_SUBSCRIPTION:
+            Follower.objects.follow_parent_thread_for_comment(comment=instance)
 
 
 @receiver(signals.post_save, sender=FlagInstance)

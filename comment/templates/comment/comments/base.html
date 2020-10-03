@@ -3,6 +3,9 @@
 <section id="comments" class="{% block comment_section_cls %}my-5 mx-3{% endblock comment_section_cls %}">
     <script>window.CSRF_TOKEN = "{{ csrf_token }}"</script>
     <strong class="border-bottom bb"><span class="js-comment-number">{% get_comments_count model_object user %}</span><span class="comment-translatable"> {% trans "Comments" %}</span></strong>
+    {% if is_subscription_allowed %}
+        <span class="float-right">{% include 'comment/follow/follow.html' with model_object=model_object btnId=0 %}</span>
+    {% endif %}
     {% block comment_messages %}
     {% include "comment/comments/messages.html" %}
     {% endblock comment_messages %}
@@ -15,17 +18,6 @@
           {% include 'comment/comments/parent_comment.html' with placeholder='reply to this comment...' %}
       {% endfor %}
     </div>
-
-    <div class="comment-modal" id="Modal">
-      <div class="comment-modal-dialog" role="document">
-        <div class="comment-modal-content">
-        </div>
-      </div>
-
-    </div>
-    {% if allowed_flags %}
-        {% include "comment/flags/flag_modal.html" %}
-    {% endif %}
     {% if comments.paginator.num_pages > 1 %}
     {% block pagination %}
     {% include 'comment/comments/pagination.html' with active_btn='bg-success' text_style='text-success' li_cls='page-item rounded mx-1' %}

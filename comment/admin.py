@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from comment.models import Comment, Flag, FlagInstance, Reaction, ReactionInstance
+from comment.models import Comment, Flag, FlagInstance, Reaction, ReactionInstance, Follower
 
 
 class CommentModelAdmin(admin.ModelAdmin):
@@ -37,6 +37,13 @@ class FlagModelAdmin(admin.ModelAdmin):
     inlines = [InlineFlagInstance]
 
 
+class FollowerModelAdmin(admin.ModelAdmin):
+    list_display = ('email', 'username', 'content_type', 'content_object')
+    readonly_fields = list_display
+    search_fields = ('email',)
+
+
 admin.site.register(Comment, CommentModelAdmin)
 admin.site.register(Reaction, ReactionModelAdmin)
 admin.site.register(Flag, FlagModelAdmin)
+admin.site.register(Follower, FollowerModelAdmin)

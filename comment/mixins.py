@@ -7,7 +7,7 @@ from django.http import HttpResponseBadRequest, HttpResponseForbidden
 from comment.conf import settings
 from comment.utils import is_comment_admin, is_comment_moderator
 from comment.validators import ValidatorMixin
-from comment.messages import ErrorMessage, FlagError
+from comment.messages import ErrorMessage, FlagError, FollowError
 
 
 class AJAXRequiredMixin:
@@ -72,7 +72,7 @@ class CanDeleteMixin(ObjectLevelMixin, ValidatorMixin, abc.ABC):
 
 class BaseFlagMixin(ObjectLevelMixin, abc.ABC):
     def dispatch(self, request, *args, **kwargs):
-        if not getattr(settings, 'COMMENT_FLAGS_ALLOWED', 0):
+        if not getattr(settings, 'COMMENT_FLAGS_ALLOWED', False):
             return HttpResponseForbidden(FlagError.SYSTEM_NOT_ENABLED)
         return super().dispatch(request, *args, **kwargs)
 
@@ -99,4 +99,11 @@ class CanEditFlagStateMixin(BaseFlagMixin, abc.ABC):
             return HttpResponseBadRequest(FlagError.NOT_FLAGGED_OBJECT)
         if not self.has_permission(request):
             return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
+
+
+class CanSubscribeMixin(BaseCommentMixin):
+    def dispatch(self, request, *args, **kwargs):
+        if not getattr(settings, 'COMMENT_ALLOW_SUBSCRIPTION', False):
+            return HttpResponseForbidden(FollowError.SYSTEM_NOT_ENABLED)
         return super().dispatch(request, *args, **kwargs)

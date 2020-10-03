@@ -6,15 +6,11 @@ import hashlib
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.shortcuts import reverse
-from django.template import loader
-from django.core.mail import EmailMultiAlternatives
 from django.core import signing
 from django.apps import apps
-from django.contrib.sites.shortcuts import get_current_site
 
 from comment.conf import settings
-from comment.messages import ErrorMessage, EmailInfo
+from comment.messages import ErrorMessage
 
 
 @unique
@@ -148,6 +144,7 @@ def get_comment_context_data(request, model_object=None):
         'allowed_flags': allowed_flags,
         'is_anonymous_allowed': is_anonymous_allowed,
         'is_translation_allowed': is_translation_allowed,
+        'is_subscription_allowed': settings.COMMENT_ALLOW_SUBSCRIPTION,
         'oauth': oauth
     }
 
@@ -156,51 +153,13 @@ def id_generator(prefix='', chars=string.ascii_lowercase, len_id=6, suffix=''):
     return prefix + ''.join(random.choice(chars) for _ in range(len_id)) + suffix
 
 
-def _send_mail(subject, body, sender, receivers,
-               fail_silently=False, html=None):
-    msg = EmailMultiAlternatives(subject, body, sender, receivers)
-    if html:
-        msg.attach_alternative(html, 'text/html')
-    msg.send(fail_silently)
-
-
-def send_email_confirmation_request(
-    comment, receiver, key, site,
-    text_template='comment/anonymous/confirmation_request.txt',
-    html_template='comment/anonymous/confirmation_request.html',
-    api=False
-):
-    """Send email requesting comment confirmation"""
-    subject = EmailInfo.SUBJECT
-    if api:
-        confirmation_url = f'/api/comments/confirm/{key}/'
-    else:
-        confirmation_url = reverse('comment:confirm-comment', args=[key])
-
-    msg_context = {
-        'comment': comment,
-        'confirmation_url': confirmation_url,
-        'contact': settings.COMMENT_CONTACT_EMAIL,
-        'site': site
-    }
-    text_msg_template = loader.get_template(text_template)
-    text_msg = text_msg_template.render(msg_context)
-    if settings.COMMENT_SEND_HTML_EMAIL:
-        html_msg_template = loader.get_template(html_template)
-        html_msg = html_msg_template.render(msg_context)
-    else:
-        html_msg = None
-
-    _send_mail(subject, text_msg, settings.COMMENT_FROM_EMAIL, [receiver], html=html_msg)
-
-
 def get_comment_from_key(key):
     class TmpComment:
         is_valid = True
         why_invalid = None
         obj = None
 
-    comment = TmpComment()
+    temp_comment = TmpComment()
     comment_model = apps.get_model('comment', 'Comment')
     try:
         comment_dict = signing.loads(str(key))
@@ -213,31 +172,28 @@ def get_comment_from_key(key):
                 'parent': comment_model.objects.get_parent_comment(comment_dict['parent'])
             }
         )
-        comment.obj = comment_model(**comment_dict)
+        temp_comment.obj = comment_model(**comment_dict)
 
     except (ValueError, KeyError, AttributeError, signing.BadSignature):
-        comment.is_valid = False
-        comment.why_invalid = CommentFailReason.BAD
+        temp_comment.is_valid = False
+        temp_comment.why_invalid = CommentFailReason.BAD
 
-    if comment.is_valid and comment_model.objects.comment_exists(comment.obj):
-        comment.is_valid = False
-        comment.why_invalid = CommentFailReason.EXISTS
-        comment.obj = None
-
-    if comment.is_valid:
-        comment.obj.save()
-        comment.obj.refresh_from_db()
-    return comment
-
-
-def process_anonymous_commenting(request, comment, api=False):
-    key = signing.dumps(comment.to_dict(), compress=True)
-    site = get_current_site(request)
-    send_email_confirmation_request(comment, comment.to_dict()['email'], key, site, api=api)
-    return EmailInfo.CONFIRMATION_SENT
+    if temp_comment.is_valid and comment_model.objects.comment_exists(temp_comment.obj):
+        temp_comment.is_valid = False
+        temp_comment.why_invalid = CommentFailReason.EXISTS
+        temp_comment.obj = None
+    return temp_comment
 
 
 def get_user_for_request(request):
     if request.user.is_authenticated:
         return request.user
     return None
+
+
+def get_username_for_comment(comment):
+    if not comment.user:
+        if settings.COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME:
+            return comment.email.split('@')[0]
+        return settings.COMMENT_ANONYMOUS_USERNAME
+    return comment.user.username

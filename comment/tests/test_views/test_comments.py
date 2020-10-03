@@ -1,14 +1,19 @@
 from unittest.mock import patch
 
+from django.contrib.auth.models import AnonymousUser
+from django.test import RequestFactory
+from django.utils import timezone
+from django.core import signing, mail
 from django.urls import reverse
 from rest_framework import status
 from django.contrib import messages
 
 from comment.conf import settings
-from comment.models import Comment
-from comment.messages import EmailInfo, ReactionInfo, FlagInfo, EmailError
-from comment.tests.base import BaseCommentTest, BaseCommentFlagTest, BaseCommentViewTest
-from comment.tests.test_utils import BaseAnonymousCommentTest, AnonymousUser, timezone, signing
+from comment.models import Comment, Follower
+from comment.messages import EmailInfo, EmailError
+from comment.tests.base import BaseCommentViewTest
+from comment.tests.test_utils import BaseAnonymousCommentTest
+from comment.views import ConfirmComment
 
 
 class CommentViewTestCase(BaseCommentViewTest):
@@ -38,11 +43,11 @@ class CommentViewTestCase(BaseCommentViewTest):
         self.assertEqual(Comment.objects.all_parents().count(), self.parent_comments)
         self.assertEqual(Comment.objects.all().count(), self.all_comments)
 
-    def test_create_parent_and_child_comment(self):
+    @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', False)
+    def test_create_parent_comment(self):
         self.assertEqual(self.all_comments, 0)
         self.assertEqual(self.parent_comments, 0)
 
-        # parent comment
         url = self.get_create_url()
         response = self.client.post(url, data=self.data)
         self.assertEqual(response.status_code, 200)
@@ -56,8 +61,16 @@ class CommentViewTestCase(BaseCommentViewTest):
         self.increase_count(parent=True)
         self.comment_count_test()
 
-        # child comment
+    @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', False)
+    def test_create_child_comment(self):
+        self.assertEqual(self.all_comments, 0)
+        self.assertEqual(self.parent_comments, 0)
+
+        url = self.get_create_url()
         data = self.data.copy()
+        parent_comment = self.create_comment(self.post_1)
+        self.increase_count(parent=True)
+        self.comment_count_test()
         data['parent_id'] = parent_comment.id
         response = self.client.post(url, data=data)
 
@@ -71,6 +84,16 @@ class CommentViewTestCase(BaseCommentViewTest):
 
         self.increase_count()
         self.comment_count_test()
+
+    @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', True)
+    def test_send_notification_to_thread_followers_on_create_comment(self):
+        Follower.objects.follow('te@te.com', 'test_user', self.post_1)
+        self.assertEqual(len(mail.outbox), 0)
+        url = self.get_create_url()
+        response = self.client.post(url, data=self.data)
+        self.assertEqual(response.status_code, 200)
+        response.context['view'].email_service.thread.join()
+        self.assertEqual(len(mail.outbox), 1)
 
     def test_create_comment_non_ajax_request(self):
         response = self.client_non_ajax.post(self.get_create_url(), data=self.data)
@@ -235,243 +258,7 @@ class TestDeleteComment(BaseCommentViewTest):
         self.response_fails_test(response)
 
 
-class SetReactionViewTest(BaseCommentViewTest):
-    def setUp(self):
-        super().setUp()
-        self.comment = self.create_comment(self.content_object_1)
-
-    @staticmethod
-    def get_reaction_url(obj_id, action):
-        return reverse('comment:react', kwargs={
-            'pk': obj_id,
-            'reaction': action
-        })
-
-    def test_set_reaction_for_authenticated_users(self):
-        """Test whether users can create/change reactions using view"""
-        _url = self.get_reaction_url(self.comment.id, 'like')
-        response = self.client.post(_url)
-        data = {
-            'status': 0,
-            'likes': 1,
-            'dislikes': 0,
-            'msg': ReactionInfo.UPDATED_SUCCESS
-        }
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        server_response = response.json()
-        self.assertDictEqual(server_response, data)
-        self.assertTextTranslated(server_response['msg'], _url)
-
-    def test_set_reaction_for_old_comments(self):
-        """Test backward compatibility for this update"""
-        _url = self.get_reaction_url(self.comment.id, 'like')
-        # delete the reaction object
-        self.comment.reaction.delete()
-        response = self.client.post(_url)
-        data = {
-            'status': 0,
-            'likes': 1,
-            'dislikes': 0,
-            'msg': ReactionInfo.UPDATED_SUCCESS
-        }
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        server_response = response.json()
-        self.assertDictEqual(server_response, data)
-        self.assertTextTranslated(server_response['msg'], _url)
-
-    def test_set_reaction_for_unauthenticated_users(self):
-        """Test whether unauthenticated users can create/change reactions using view"""
-        _url = self.get_reaction_url(self.comment.id, 'dislike')
-        self.client.logout()
-        response = self.client.post(_url)
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
-        self.assertEqual(response.url, '{}?next={}'.format(settings.LOGIN_URL, _url))
-
-    def test_get_request(self):
-        """Test whether GET requests are allowed or not"""
-        _url = self.get_reaction_url(self.comment.id, 'like')
-        response = self.client.get(_url)
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    def test_non_ajax_requests(self):
-        """Test response if non AJAX requests are sent"""
-        _url = self.get_reaction_url(self.comment.id, 'like')
-        response = self.client_non_ajax.post(_url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_incorrect_comment_id(self):
-        """Test response when an incorrect comment id is passed"""
-        _url = self.get_reaction_url(102_876, 'like')
-        response = self.client.post(_url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_incorrect_reaction(self):
-        """Test response when incorrect reaction is passed"""
-        _url = self.get_reaction_url(self.comment.id, 'likes')
-        response = self.client.post(_url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-        # test incorrect type
-        _url = self.get_reaction_url(self.comment.id, 1)
-        response = self.client.post(_url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-
-class SetFlagViewTest(BaseCommentFlagTest):
-    def setUp(self):
-        super().setUp()
-        self.flag_data.update({
-            'info': ''
-            })
-        self.response_data = {
-            'status': 1
-        }
-
-    def test_set_flag_for_flagging(self):
-        _url = self.get_url('comment:flag', self.comment.id)
-        self.flag_data['reason'] = 1
-        response = self.client.post(_url, data=self.flag_data)
-
-        response_data = {
-            'status': 0,
-            'flag': 1,
-            'msg': FlagInfo.FLAGGED_SUCCESS
-        }
-        self.assertEqual(response.status_code, 200)
-        server_response = response.json()
-        self.assertDictEqual(server_response, response_data)
-        self.assertTextTranslated(server_response['msg'], _url)
-
-    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 0)
-    def test_set_flag_when_flagging_not_enabled(self):
-        settings.COMMENT_FLAGS_ALLOWED = 0
-        _url = self.get_url('comment:flag', self.comment.id)
-        self.flag_data['reason'] = 1
-        response = self.client.post(_url, data=self.flag_data)
-        self.assertEqual(response.status_code, 403)
-
-    def test_set_flag_for_flagging_old_comments(self):
-        """Test backward compatibility for this update"""
-        _url = self.get_url('comment:flag', self.comment.id)
-        data = self.flag_data.copy()
-        # delete the flag object
-        self.comment.flag.delete()
-        response = self.client.post(_url, data=data)
-        response_data = {
-            'status': 0,
-            'flag': 1,
-            'msg': FlagInfo.FLAGGED_SUCCESS
-        }
-        self.assertEqual(response.status_code, 200)
-        server_response = response.json()
-        self.assertDictEqual(server_response, response_data)
-        self.assertTextTranslated(server_response['msg'], _url)
-
-    def test_set_flag_for_unflagging(self):
-        # un-flag => no reason is passed and the comment must be already flagged by the user
-        _url = self.get_url('comment:flag', self.comment_2.id)
-        data = {}
-        response = self.client.post(_url, data=data)
-        response_data = {
-            'status': 0,
-            'msg': FlagInfo.UNFLAGGED_SUCCESS
-        }
-        self.assertEqual(response.status_code, 200)
-        server_response = response.json()
-        self.assertDictEqual(server_response, response_data)
-        self.assertTextTranslated(server_response['msg'], _url)
-
-    def test_set_flag_for_unauthenticated_user(self):
-        """Test whether unauthenticated user can create/delete flag using view"""
-        url = self.get_url('comment:flag', self.comment.id).replace('?', '')
-        self.client.logout()
-        response = self.client.post(url, data=self.flag_data)
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
-        self.assertEqual(response.url, '{}?next={}'.format(settings.LOGIN_URL, url))
-
-    def test_get_request(self):
-        """Test whether GET requests are allowed or not"""
-        url = self.get_url('comment:flag', self.comment.id)
-        response = self.client.get(url, data=self.flag_data)
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    def test_non_ajax_requests(self):
-        """Test response if non AJAX requests are sent"""
-        url = self.get_url('comment:flag', self.comment.id)
-        response = self.client_non_ajax.post(url, data=self.flag_data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_incorrect_comment_id(self):
-        """Test response when an incorrect comment id is passed"""
-        url = self.get_url('comment:flag', 102_876)
-        response = self.client.post(url, data=self.flag_data)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_incorrect_reason(self):
-        """Test response when incorrect reason is passed"""
-        url = self.get_url('comment:flag', self.comment.id)
-        data = self.flag_data
-        reason = -1
-        data.update({'reason': reason})
-        response = self.client.post(url, data=data)
-        self.assertEqual(response.status_code, 200)
-
-
-class ChangeFlagStateViewTest(BaseCommentFlagTest):
-    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 1)
-    def setUp(self):
-        super().setUp()
-        self.data = {
-            'state': self.comment.flag.REJECTED
-        }
-        self.create_flag_instance(self.user_1, self.comment, **self.flag_data)
-        self.create_flag_instance(self.user_2, self.comment, **self.flag_data)
-
-    def test_change_flag_state_for_unflagged_comment(self):
-        self.comment.flag.toggle_flagged_state()
-        self.assertFalse(self.comment.is_flagged)
-        self.client.force_login(self.moderator)
-        self.assertEqual(int(self.client.session['_auth_user_id']), self.moderator.id)
-        response = self.client.post(self.get_url('comment:flag-change-state', self.comment.id), data=self.data)
-        self.assertEqual(response.status_code, 400)
-
-    def test_change_flag_state_by_not_permitted_user(self):
-        self.assertTrue(self.comment.is_flagged)
-        self.client.force_login(self.user_1)
-        self.assertEqual(int(self.client.session['_auth_user_id']), self.user_1.id)
-        response = self.client.post(self.get_url('comment:flag-change-state', self.comment.id), data=self.data)
-        self.assertEqual(response.status_code, 403)
-
-    def test_change_flag_state_with_wrong_state_value(self):
-        self.assertTrue(self.comment.is_flagged)
-        self.client.force_login(self.moderator)
-        self.assertEqual(int(self.client.session['_auth_user_id']), self.moderator.id)
-        self.assertEqual(self.comment.flag.state, self.comment.flag.FLAGGED)
-
-        # valid state is REJECTED and RESOLVED
-        self.data['state'] = self.comment.flag.UNFLAGGED
-        response = self.client.post(self.get_url('comment:flag-change-state', self.comment.id), data=self.data)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()['state'], 0)
-        self.assertEqual(self.comment.flag.state, self.comment.flag.FLAGGED)
-
-    def test_change_flag_state_success(self):
-        self.assertTrue(self.comment.is_flagged)
-        self.client.force_login(self.moderator)
-        self.assertEqual(int(self.client.session['_auth_user_id']), self.moderator.id)
-        self.assertEqual(self.comment.flag.state, self.comment.flag.FLAGGED)
-
-        # valid state is REJECTED and RESOLVED
-        self.data['state'] = self.comment.flag.REJECTED
-        response = self.client.post(self.get_url('comment:flag-change-state', self.comment.id), data=self.data)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()['state'], self.comment.flag.REJECTED)
-        self.comment.flag.refresh_from_db()
-        self.assertEqual(self.comment.flag.moderator, self.moderator)
-        self.assertEqual(self.comment.flag.state, self.comment.flag.REJECTED)
-
-
-class ConfirmCommentViewTest(BaseAnonymousCommentTest, BaseCommentTest):
+class ConfirmCommentViewTest(BaseAnonymousCommentTest):
     def setUp(self):
         super().setUp()
         # although this will work for authenticated users as well.
@@ -530,9 +317,26 @@ class ConfirmCommentViewTest(BaseAnonymousCommentTest, BaseCommentTest):
             self.assertEqual(r.message, EmailError.USED_VERIFICATION_LINK)
             self.assertTextTranslated(r.message, _url)
 
-    def test_success(self):
+    @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', False)
+    def test_success_without_notification(self):
         response = self.client.get(self.get_url())
         comment = Comment.objects.get(email=self.comment_obj.email, posted=self.time_posted)
         self.assertEqual(Comment.objects.all().count(), self.init_count + 1)
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertEqual(response.url, comment.get_url(self.request))
+
+    @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', True)
+    def test_success_with_notification(self):
+        self.assertEqual(len(mail.outbox), 0)
+        Follower.objects.follow('t@r.com', 'test_user', self.post_1)
+        request = RequestFactory().get(self.get_url())
+        request.user = self.user_2
+        view = ConfirmComment()
+        response = view.get(request, key=self.key)
+        comment = Comment.objects.get(email=self.comment_obj.email, posted=self.time_posted)
+        self.assertEqual(Comment.objects.all().count(), self.init_count + 1)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response.url, comment.get_url(self.request))
+
+        view.email_service.thread.join()
+        self.assertEqual(len(mail.outbox), 1)

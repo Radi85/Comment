@@ -5,7 +5,7 @@ from django.test import RequestFactory
 from comment.tests.base import BaseCommentTest
 
 
-class InternationationalizationTest(BaseCommentTest):
+class InternationalizationTest(BaseCommentTest):
     """Testing values are not necessarily returned from a view functions"""
 
     @classmethod

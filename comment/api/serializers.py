@@ -7,8 +7,9 @@ from rest_framework import serializers
 
 from comment.conf import settings
 from comment.models import Comment, Flag, Reaction
-from comment.utils import process_anonymous_commenting, get_user_for_request, get_profile_instance
+from comment.utils import get_user_for_request, get_profile_instance
 from comment.messages import EmailError
+from comment.service.email import DABEmailService
 
 
 def get_profile_model():
@@ -97,6 +98,7 @@ class CommentCreateSerializer(BaseCommentSerializer):
 
     def __init__(self, *args, **kwargs):
         user = kwargs['context']['request'].user
+        self.email_service = None
         if user.is_authenticated or not settings.COMMENT_ALLOW_ANONYMOUS:
             del self.fields['email']
 
@@ -122,11 +124,14 @@ class CommentCreateSerializer(BaseCommentSerializer):
             parent=self.context['parent_comment'],
             email=email,
             posted=time_posted
-            )
+        )
+        self.email_service = DABEmailService(comment, request)
         if settings.COMMENT_ALLOW_ANONYMOUS and not user:
-            process_anonymous_commenting(request, comment, api=True)
+            self.email_service.send_confirmation_request(api=True)
         else:
             comment.save()
+            if settings.COMMENT_ALLOW_SUBSCRIPTION:
+                self.email_service.send_notification_to_followers()
         return comment
 
 

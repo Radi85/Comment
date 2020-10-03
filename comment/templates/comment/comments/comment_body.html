@@ -9,9 +9,9 @@
         </div>
     {% endif %}
     {% include 'comment/comments/comment_content.html' with comment=comment %}
-    {% if allowed_flags and comment.user != user %}
+    {% if comment.user != user %}
         <div class="col-1">
-            {% include "comment/flags/flags.html" %}
+            {% include 'comment/comments/three_dots_menu.html' %}
         </div>
     {% endif %}
 </div>

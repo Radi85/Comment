@@ -1,20 +1,46 @@
-{% comment %}Inspired from Daniel Rus Morales's django-comments-xtd: * https://github.com/danirus/django-comments-xtd{% endcomment %} {% load i18n %}
-<p class="comment-translatable">{% trans "Hey," %}</p>
+{% extends 'comment/email/base.html' %}
+{% comment %}Inspired from Daniel Rus Morales's django-comments-xtd: * https://github.com/danirus/django-comments-xtd{% endcomment %}
+{% comment %}Email template is used from: * https://github.com/leemunroe/responsive-html-email-template{% endcomment %}
+{% load i18n %}
+{% block content %}
+    <p class="comment-translatable">{% trans "Hey there," %}</p>
 
-<p class="comment-translatable">{% trans "You or someone on behalf of you have requested to post a comment into this page:" %}<br/>
-    <a href="http://{{ site.domain }}{{ comment.content_object.get_absolute_url }}">http://{{ site.domain }}{{ comment.content_object.get_absolute_url }}</a> <span class="comment-translatable">{% blocktrans with posted_time=comment.posted %}at {{ posted_time }}.{% endblocktrans %}</span>
-</p>
+    <p class="comment-translatable">{% trans "You or someone on your behalf have requested to post a comment into this page:" %}<br/>
+        <a href="http://{{ site.domain }}{{ comment.content_object.get_absolute_url }}">http://{{ site.domain }}{{ comment.content_object.get_absolute_url }}</a>
+        <span class="comment-translatable">{% blocktrans with posted_time=comment.posted %}at {{ posted_time }}.{% endblocktrans %}</span>
+    </p>
 
-<p class="comment-translatable">{% trans "The comment:" %}<br/>
-    <i>{{ comment.content }}</i>
+    <p class="comment-translatable">{% trans "The comment:" %}</p>
+    <p><em>{{ comment.content }}</em></p>
     <hr/>
+    <br/>
 
-    <p class="comment-translatable">{% trans "If you do not wish to post the comment, please ignore this message or report an incident to" %} {{ contact }}. <span class="comment-translatable">{% trans "Otherwise click on the link below to confirm the comment." %}</span></p>
+    <p class="comment-translatable">{% trans "If you do not wish to post the comment, please ignore this message or report an incident to" %} {{ contact }}. <span class="comment-translatable">{% trans "Otherwise click on the button below to confirm the comment." %}</span></p>
 
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
+        <tbody>
+            <tr>
+                <td align="left">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                        <tbody>
+                            <tr>
+                                <td> <a href="http://{{ site.domain }}{{ confirmation_url }}" target="_blank">{% trans 'Confirm your comment' %}</a> </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <br/>
+    <p class="comment-translatable">{% trans "If clicking does not work, you can also copy the below link and paste the address into your browser's address window" %}.</p>
     <p><a href="http://{{ site.domain }}{{ confirmation_url }}">http://{{ site.domain }}{{ confirmation_url|slice:":40" }}...</a></p>
-
-    <p class="comment-translatable">{% trans "If clicking does not work, you can also copy and paste the address into your browser's address window" %}.</p>
-
-    <p class="comment-translatable">{% trans "Thanks for your comment!" %}<br/> --
-        <br/>
-    </p class="comment-translatable">{% trans "Kind regards," %}<br/> {{ site }}</p>
+    <br/>
+    <p class="comment-translatable">{% trans "Thanks for your comment!" %}<p>
+    ------
+    <p class="comment-translatable">{% trans "Kind regards," %}
+    <br/> {{ site }}
+    </p>
+{% endblock content %}
+{% block footer %}
+{% endblock footer %}
