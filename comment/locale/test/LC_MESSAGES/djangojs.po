@@ -1,0 +1,78 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-12-25 15:41+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: comment/static/js/comment.js:153 comment/static/js/comment.js:297
+msgid "Replies"
+msgstr"über"
+
+#: comment/static/js/comment.js:155 comment/static/js/comment.js:299
+msgid "Reply"
+msgstr"über"
+
+#: comment/static/js/comment.js:176
+msgid "Unable to post your comment!, please try again"
+msgstr"über"
+
+#: comment/static/js/comment.js:197
+msgid "You can't edit this comment"
+msgstr"über"
+
+#: comment/static/js/comment.js:220
+msgid "Modification didn't take effect!, please try again"
+msgstr"über"
+
+#: comment/static/js/comment.js:308
+msgid "Unable to delete your comment!, please try again"
+msgstr"über"
+
+#: comment/static/js/comment.js:365
+msgid "Reaction couldn't be processed!, please try again"
+msgstr"über"
+
+#: comment/static/js/comment.js:400
+msgid "Subscription couldn't be processed!, please try again"
+msgstr"über"
+
+#: comment/static/js/comment.js:506
+msgid "Flagging couldn't be processed!, please try again"
+msgstr"über"
+
+#: comment/static/js/comment.js:551
+msgid "read more ..."
+msgstr"über"
+
+#: comment/static/js/comment.js:553
+msgid "read less"
+msgstr"über"
+
+#: comment/static/js/comment.js:581
+msgid "Flag rejected"
+msgstr"über"
+
+#: comment/static/js/comment.js:582 comment/static/js/comment.js:600
+msgid "Reject the flag"
+msgstr"über"
+
+#: comment/static/js/comment.js:587 comment/static/js/comment.js:595
+msgid "Resolve the flag"
+msgstr"über"
+
+#: comment/static/js/comment.js:594
+msgid "Flag resolved"
+msgstr"über"

@@ -139,15 +139,21 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         self.assertEqual(result['text_1'], ' '.join(content_words[:5]))
         self.assertEqual(result['text_2'], ' '.join(content_words[5:]))
 
-    def test_get_username_for_comment(self):
+    @patch.object(settings, 'COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME', True)
+    def test_get_username_for_comment_use_email_first_part_enabled(self):
+        comment = self.create_comment(self.content_object_1, user=self.user_1)
+        anonymous_comment = self.create_anonymous_comment()
+
+        self.assertEqual(get_username_for_comment(comment), comment.user.username)
+        self.assertEqual(get_username_for_comment(anonymous_comment), anonymous_comment.email.split('@')[0])
+
+    @patch.object(settings, 'COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME', False)
+    def test_get_username_for_comment_use_email_first_part_disabled(self):
         comment = self.create_comment(self.content_object_1, user=self.user_1)
         anonymous_comment = self.create_anonymous_comment()
 
         self.assertEqual(get_username_for_comment(comment), comment.user.username)
         self.assertEqual(get_username_for_comment(anonymous_comment), settings.COMMENT_ANONYMOUS_USERNAME)
-
-        patch.object(settings, 'COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME', True).start()
-        self.assertEqual(get_username_for_comment(anonymous_comment), anonymous_comment.email.split('@')[0])
 
 
 class ReactionTemplateTagsTest(BaseTemplateTagsTest):

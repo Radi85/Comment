@@ -1,0 +1,18 @@
+{% load i18n %}
+{% trans "Hey" %} {{receiver}}{% trans "," %}
+
+{{comment.user}} {% trans "has added a comment at" %} {{ comment.posted }}, {% trans "to" %} {{thread_name}}.
+
+--- {% trans "Comment" %}: ---
+{{ comment.content }}
+
+http://{{ site.domain }}{{ comment.content_object.get_absolute_url }}
+----------------
+
+
+{% trans "If clicking does not work, you can also copy and paste the address into your browser's address window" %}.
+{% trans "Thanks for your comment!" %}
+
+----------------
+{% trans "Kind regards," %}
+{{ site }}

@@ -98,11 +98,10 @@ COMMENT_SHOW_FLAGGED = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'user@domain')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'password')
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'localhost')
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
 
 COMMENT_ALLOW_ANONYMOUS = True
 COMMENT_FROM_EMAIL = os.environ.get('COMMENT_FROM_EMAIL', 'user@doamin')
@@ -111,5 +110,8 @@ COMMENT_SEND_HTML_EMAIL = True
 COMMENT_PER_PAGE = 4
 
 COMMENT_USE_GRAVATAR = True
+COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME = True
 
 COMMENT_ALLOW_TRANSLATION = True
+
+COMMENT_ALLOW_SUBSCRIPTION = True

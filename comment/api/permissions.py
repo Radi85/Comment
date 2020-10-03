@@ -36,3 +36,18 @@ class CanChangeFlaggedCommentState(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return obj.is_flagged and (is_comment_admin(request.user) or is_comment_moderator(request.user))
+
+
+class SubscriptionEnabled(permissions.BasePermission):
+    """
+    This will check if the COMMENT_ALLOW_SUBSCRIPTION is enabled
+    """
+    def has_permission(self, request, view):
+        return getattr(settings, 'COMMENT_ALLOW_SUBSCRIPTION', False)
+
+
+class CanGetSubscribers(SubscriptionEnabled):
+    def has_permission(self, request, view):
+        if not super().has_permission(request, view):
+            return False
+        return is_comment_admin(request.user) or is_comment_moderator(request.user)

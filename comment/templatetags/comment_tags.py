@@ -1,12 +1,12 @@
 from django import template
 
-from comment.models import ReactionInstance, FlagInstance
+from comment.models import ReactionInstance, FlagInstance, Follower
 from comment.forms import CommentForm
 from comment.utils import (
-    get_comment_context_data, is_comment_moderator, is_comment_admin, get_gravatar_img, get_profile_instance
+    get_comment_context_data, is_comment_moderator, is_comment_admin, get_gravatar_img, get_profile_instance,
+    get_username_for_comment as get_username
 )
 from comment.managers import FlagInstanceManager
-from comment.conf import settings
 from comment.messages import ReactionError
 
 register = template.Library()
@@ -26,11 +26,7 @@ def get_app_name(obj):
 
 @register.simple_tag(name='get_username_for_comment')
 def get_username_for_comment(comment):
-    if not comment.user:
-        if settings.COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME:
-            return comment.email.split('@')[0]
-        return settings.COMMENT_ANONYMOUS_USERNAME
-    return comment.user.username
+    return get_username(comment)
 
 
 @register.simple_tag(name='get_profile_url')
@@ -155,6 +151,13 @@ def has_flagged(user, comment):
     if user.is_authenticated:
         return FlagInstance.objects.filter(user=user, flag__comment=comment).exists()
 
+    return False
+
+
+@register.filter(name='has_followed')
+def has_followed(user, model_object):
+    if user.is_authenticated:
+        return Follower.objects.is_following(user.email, model_object)
     return False
 
 

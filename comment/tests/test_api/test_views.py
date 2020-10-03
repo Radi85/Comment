@@ -2,20 +2,21 @@ from time import sleep
 from unittest.mock import patch
 
 from django.test import RequestFactory
-from django.core import signing
+from django.core import signing, mail
+
 from rest_framework import status
 
 from comment.conf import settings
 from comment.models import Comment, FlagInstanceManager
 from comment.messages import ContentTypeError, EmailError
-from comment.api.serializers import get_profile_model, get_user_fields, UserSerializerDAB, CommentCreateSerializer, \
-    CommentSerializer
+from comment.api.serializers import CommentSerializer
 from comment.api.permissions import (
-    IsOwnerOrReadOnly, FlagEnabledPermission, CanChangeFlaggedCommentState
-)
+    IsOwnerOrReadOnly, FlagEnabledPermission, CanChangeFlaggedCommentState, SubscriptionEnabled,
+    CanGetSubscribers)
 from comment.api.views import CommentList
 from comment.tests.base import BaseCommentTest, timezone
 from comment.tests.test_utils import BaseAnonymousCommentTest
+from comment.utils import is_comment_admin, is_comment_moderator
 
 
 class APIBaseTest(BaseCommentTest):
@@ -45,6 +46,8 @@ class APIPermissionsTest(APIBaseTest):
         self.owner_permission = IsOwnerOrReadOnly()
         self.flag_enabled_permission = FlagEnabledPermission()
         self.can_change_flagged_comment_state = CanChangeFlaggedCommentState()
+        self.subscription_enabled = SubscriptionEnabled()
+        self.get_subscribers_permission = CanGetSubscribers()
         self.factory = RequestFactory()
         self.view = CommentList()
 
@@ -116,6 +119,43 @@ class APIPermissionsTest(APIBaseTest):
         self.assertFalse(
             self.can_change_flagged_comment_state.has_object_permission(request, self.view, comment)
         )
+
+    @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', True)
+    def test_normal_users_cannot_retrieve_subscribers(self):
+        request = self.factory.get('/')
+        request.user = self.user_1
+        self.assertFalse(is_comment_admin(self.user_1))
+        self.assertFalse(is_comment_moderator(self.user_1))
+        self.assertTrue(settings.COMMENT_ALLOW_SUBSCRIPTION)
+        self.assertFalse(self.get_subscribers_permission.has_permission(request, self.view))
+
+    @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', True)
+    def test_only_moderators_can_retrieve_subscribers(self):
+        request = self.factory.get('/')
+        request.user = self.moderator
+        self.assertTrue(is_comment_moderator(self.moderator))
+        self.assertTrue(settings.COMMENT_ALLOW_SUBSCRIPTION)
+        self.assertTrue(self.get_subscribers_permission.has_permission(request, self.view))
+
+    @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', False)
+    def test_cannot_retrieve_subscribers_when_system_disabled(self):
+        request = self.factory.get('/')
+        request.user = self.moderator
+        self.assertTrue(is_comment_moderator(self.moderator))
+        self.assertFalse(settings.COMMENT_ALLOW_SUBSCRIPTION)
+        self.assertFalse(self.get_subscribers_permission.has_permission(request, self.view))
+
+    @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', False)
+    def test_cannot_subscribe_when_system_disabled(self):
+        request = self.factory.post('/')
+        self.assertFalse(settings.COMMENT_ALLOW_SUBSCRIPTION)
+        self.assertFalse(self.subscription_enabled.has_permission(request, self.view))
+
+    @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', True)
+    def test_can_subscribe(self):
+        request = self.factory.post('/')
+        self.assertTrue(settings.COMMENT_ALLOW_SUBSCRIPTION)
+        self.assertTrue(self.subscription_enabled.has_permission(request, self.view))
 
 
 class APICommentViewsTest(APIBaseTest):
@@ -234,7 +274,7 @@ class APICommentViewsTest(APIBaseTest):
         )
         self.assertTextTranslated(response.data['detail'], url)
 
-    def test_create_comment(self):
+    def test_create_parent_comment(self):
         # create parent comment
         self.assertEqual(self.comment_count, 3)
         self.assertEqual(self.all_comments, 8)
@@ -251,6 +291,13 @@ class APICommentViewsTest(APIBaseTest):
         self.increase_count(parent=True)
         self.comment_count_test()
 
+    def test_create_child_comment(self):
+        # create parent comment
+        self.assertEqual(self.comment_count, 3)
+        self.assertEqual(self.all_comments, 8)
+
+        base_url = '/api/comments/create/'
+        url_data = self.url_data.copy()
         # create child comment
         url_data['parent_id'] = 1
         data = {'content': 'new child comment from api'}
@@ -268,6 +315,11 @@ class APICommentViewsTest(APIBaseTest):
         self.increase_count(parent=True)
         self.comment_count_test()
 
+    @patch.object(settings, 'COMMENT_ALLOW_ANONYMOUS', True)
+    def test_create_comment_for_anonymous_with_invalid_data(self):
+        base_url = '/api/comments/create/'
+        url_data = self.url_data.copy()
+
         # test anonymous commenting
         self.client.logout()
 
@@ -279,6 +331,16 @@ class APICommentViewsTest(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()['email'], [EmailError.EMAIL_MISSING])
         self.assertTextTranslated(response.json()['email'][0], base_url)
+
+    @patch.object(settings, 'COMMENT_ALLOW_ANONYMOUS', True)
+    def test_create_comment_for_anonymous_with_valid_data(self):
+        base_url = '/api/comments/create/'
+        url_data = self.url_data.copy()
+        url = self.get_url(base_url, **url_data)
+
+        # test anonymous commenting
+        self.client.logout()
+
         # test valid data
         data = {'content': 'new anonymous comment from api', 'email': 'a@a.com'}
 
@@ -614,147 +676,97 @@ class APIConfirmCommentViewTest(BaseAnonymousCommentTest, APIBaseTest):
         self.assertTextTranslated(response.data['detail'], url)
         self.assertEqual(Comment.objects.all().count(), init_count)
 
-    def test_success(self):
+    @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', False)
+    def test_success_without_notification(self):
         response = self.client.get(self.get_url())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         comment = Comment.objects.get(email=self.comment_obj.email, posted=self.time_posted)
         self.assertEqual(response.data, CommentSerializer(comment).data)
         self.assertEqual(Comment.objects.all().count(), self.init_count + 1)
+        self.assertEqual(len(mail.outbox), 0)
+
+    @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', True)
+    def test_success_with_notification(self):
+        response = self.client.get(self.get_url())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response.renderer_context['view'].email_service.thread.join()
+        self.assertEqual(len(mail.outbox), 1)
 
 
-class APICommentSerializers(APIBaseTest):
-    def setUp(self):
-        super().setUp()
-        self.parent_count = Comment.objects.filter_parents_by_object(self.post_1).count()
-        self.all_count = Comment.objects.all().count()
+class APIToggleFollowTest(APIBaseTest):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.comment_toggle_follow = cls.create_comment(cls.content_object_1)
+        cls.app_name = cls.comment_toggle_follow._meta.app_label
+        cls.model_name = cls.comment_toggle_follow.__class__.__name__
+        cls.model_id = cls.comment_toggle_follow.id
 
-    def increase_count(self, parent=False):
-        if parent:
-            self.parent_count += 1
-        self.all_count += 1
+    def get_url(self):
+        params = [f'app_name={self.app_name}', f'model_name={self.model_name}', f'model_id={self.model_id}']
+        return f'/api/comments/toggle-subscription/?{"&".join(params)}'
 
-    def comment_count_test(self):
-        self.assertEqual(Comment.objects.filter_parents_by_object(self.post_1).count(), self.parent_count)
-        self.assertEqual(Comment.objects.all().count(), self.all_count)
+    @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', True)
+    def test_unauthenticated_users(self):
+        self.client.logout()
+        response = self.client.post(self.get_url())
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_get_profile_model(self):
-        # missing settings attrs
-        patch.object(settings, 'PROFILE_APP_NAME', None).start()
-        profile = get_profile_model()
-        self.assertIsNone(profile)
+    @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', False)
+    def test_system_is_not_enabled(self):
+        response = self.client.post(self.get_url())
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-        # providing wrong attribute value, an exception is raised
-        patch.object(settings, 'PROFILE_APP_NAME', 'wrong').start()
-        self.assertRaises(LookupError, get_profile_model)
+    @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', True)
+    def test_toggle_follow(self):
+        self.client.force_login(self.user_2)
+        self.assertIsNotNone(self.user_2.email)
+        response = self.client.post(self.get_url())
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['app_name'], self.app_name)
+        self.assertEqual(response.data['model_name'], self.model_name)
+        self.assertEqual(response.data['model_id'], self.model_id)
+        self.assertTrue(response.data['following'])
 
-        # attribute value is None
-        patch.object(settings, 'PROFILE_APP_NAME', None).start()
-        profile = get_profile_model()
-        self.assertIsNone(profile)
 
-        # success
-        patch.object(settings, 'PROFILE_APP_NAME', 'user_profile').start()
-        profile = get_profile_model()
-        self.assertIsNotNone(profile)
+class APIGetSubscribersTest(APIBaseTest):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.comment_get_followers = cls.create_comment(cls.content_object_1)
+        cls.app_name = cls.comment_get_followers._meta.app_label
+        cls.model_name = cls.comment_get_followers.__class__.__name__
+        cls.model_id = cls.comment_get_followers.id
 
-    def test_get_user_fields(self):
-        fields = get_user_fields()
-        self.assertEqual(fields, ('id', 'username', 'email', 'profile'))
+    def get_url(self):
+        params = [f'app_name={self.app_name}', f'model_name={self.model_name}', f'model_id={self.model_id}']
+        return f'/api/comments/subscribers/?{"&".join(params)}'
 
-        mocked_hasattr = patch('comment.api.serializers.hasattr').start()
-        mocked_hasattr.return_value = True
-        fields = get_user_fields()
-        self.assertEqual(fields, ('id', 'username', 'email', 'profile', 'logentry'))
+    @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', True)
+    def test_unauthenticated_users(self):
+        self.client.logout()
+        response = self.client.get(self.get_url())
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_user_serializer(self):
-        # PROFILE_MODEL_NAME not provided
-        patch.object(settings, 'PROFILE_MODEL_NAME', None).start()
-        profile = UserSerializerDAB.get_profile(self.user_1)
-        self.assertIsNone(profile)
+    @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', False)
+    def test_system_is_not_enabled(self):
+        response = self.client.get(self.get_url())
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-        # PROFILE_MODEL_NAME is wrong
-        patch.object(settings, 'PROFILE_MODEL_NAME', 'wrong').start()
-        profile = UserSerializerDAB.get_profile(self.user_1)
-        self.assertIsNone(profile)
+    @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', True)
+    def test_only_moderators_can_get_followers(self):
+        self.client.force_login(self.moderator)
+        response = self.client.get(self.get_url())
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['app_name'], self.app_name)
+        self.assertEqual(response.data['model_name'], self.model_name)
+        self.assertEqual(response.data['model_id'], self.model_id)
+        # creator of comment, follow their comment automatically
+        self.assertEqual(list(response.data['followers']), [self.comment_get_followers.email])
 
-        # success
-        patch.object(settings, 'PROFILE_MODEL_NAME', 'userprofile').start()
-        profile = UserSerializerDAB.get_profile(self.user_1)
-        self.assertIsNotNone(profile)
-
-    def test_comment_create_serializer(self):
-        self.assertEqual(self.parent_count, 3)
-        self.assertEqual(self.all_count, 8)
-
-        factory = RequestFactory()
-        request = factory.get('/')
-        request.user = self.user_1
-        data = {
-            'model_obj': self.post_1,
-            'parent_comment': None,
-            'request': request
-        }
-        settings.COMMENT_ALLOW_ANONYMOUS = False
-
-        serializer = CommentCreateSerializer(context=data)
-        self.assertIsNone(serializer.fields.get('email'))
-        comment = serializer.create(validated_data={'content': 'test'})
-        self.increase_count(parent=True)
-        self.comment_count_test()
-        self.assertIsNotNone(comment)
-
-        # get parent
-        parent_id = serializer.get_parent(comment)
-        self.assertIsNone(parent_id)
-
-        # get replies
-        replies = serializer.get_replies(comment)
-        reply_count = serializer.get_reply_count(comment)
-        self.assertEqual(replies, [])
-        self.assertEqual(reply_count, 0)
-
-        data['parent_comment'] = self.comment_1
-        serializer = CommentCreateSerializer(context=data)
-        comment = serializer.create(validated_data={'content': 'test'})
-        self.increase_count()
-        self.comment_count_test()
-        self.assertIsNotNone(comment)
-
-        # get parent
-        parent_id = CommentCreateSerializer.get_parent(comment)
-        self.assertEqual(parent_id, data['parent_comment'].id)
-
-        replies = serializer.get_replies(self.comment_1)
-        reply_count = serializer.get_reply_count(self.comment_1)
-        self.assertIsNotNone(replies)
-        self.assertEqual(reply_count, 2)
-
-        replies = serializer.get_replies(self.comment_4)
-        reply_count = serializer.get_reply_count(self.comment_4)
-        self.assertEqual(replies, [])
-        self.assertEqual(reply_count, 0)
-
-        # test anonymous commenting
-        from django.contrib.auth.models import AnonymousUser
-        request.user = AnonymousUser()
-        settings.COMMENT_ALLOW_ANONYMOUS = True
-        serializer = CommentCreateSerializer(context=data)
-
-        self.assertIsNotNone(serializer.fields['email'])
-        comment = serializer.create(validated_data={
-            'content': 'anonymous posting',
-            'email': 'abc@abc.com'
-        })
-        # no creation occurs until comment is verified
-        self.comment_count_test()
-        self.assertIsNotNone(comment)
-
-    def test_passing_context_to_serializer(self):
-        serializer = CommentSerializer(self.comment_1)
-        self.assertFalse(serializer.fields['content'].read_only)
-
-        serializer = CommentSerializer(self.comment_1, context={'reaction_update': True})
-        self.assertTrue(serializer.fields['content'].read_only)
-
-        serializer = CommentSerializer(self.comment_1, context={'flag_update': True})
-        self.assertTrue(serializer.fields['content'].read_only)
+    @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', True)
+    def test_normal_users_cannot_get_followers(self):
+        self.client.force_login(self.user_1)
+        self.assertFalse(is_comment_moderator(self.user_1))
+        response = self.client.get(self.get_url())
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

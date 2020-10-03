@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from comment.managers import CommentManager
 from comment.conf import settings
-from comment.utils import is_comment_moderator
+from comment.utils import is_comment_moderator, get_username_for_comment
 
 
 class Comment(models.Model):
@@ -33,10 +33,11 @@ class Comment(models.Model):
         ordering = ['-posted', ]
 
     def __str__(self):
+        username = get_username_for_comment(self)
         if not self.parent:
-            return f'comment by {self.user}: {self.content[:20]}'
+            return f'comment by {username}: {self.content[:20]}'
         else:
-            return f'reply by {self.user}: {self.content[:20]}'
+            return f'reply by {username}: {self.content[:20]}'
 
     def __repr__(self):
         return self.__str__()

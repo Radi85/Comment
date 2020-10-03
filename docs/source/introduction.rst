@@ -71,6 +71,8 @@ It allows you to integrate commenting functionality with any model you have e.g.
 
     8. Resolve or reject flag. This is used to revoke the flagged comment state (admins and moderators)
 
+    9. Follow and unfollow thread. (authenticated users)
+
 - All actions are done by Fetch API since V2.0.0
 
 - Bootstrap 4.1.1 is used in comment templates for responsive design.

@@ -1,0 +1,517 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-12-25 15:41+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: comment/apps.py:8
+msgid "comment"
+msgstr"über"
+
+#: comment/conf/defaults.py:13
+msgid "Spam | Exists only to promote a service"
+msgstr"über"
+
+#: comment/conf/defaults.py:14
+msgid "Abusive | Intended at promoting hatred"
+msgstr"über"
+
+#: comment/managers/flags.py:23
+msgid "Something else"
+msgstr"über"
+
+#: comment/messages.py:5
+msgid "Comment App: LOGIN_URL is not in the settings"
+msgstr"über"
+
+#: comment/messages.py:6
+#, python-brace-format
+msgid ""
+"Your {class_name} class has not defined a {method_name} method, which is "
+"required."
+msgstr"{class_name} über {method_name}"
+
+#: comment/messages.py:7
+msgid "Only AJAX request are allowed"
+msgstr"über"
+
+#: comment/messages.py:11
+msgid "error"
+msgstr"über"
+
+#: comment/messages.py:12
+msgid "Bad Request"
+msgstr"über"
+
+#: comment/messages.py:16
+#, python-brace-format
+msgid "{var_name} id must be an integer, {id} is NOT"
+msgstr"{var_name} über {id}"
+
+#: comment/messages.py:17
+msgid "app name must be provided"
+msgstr"über"
+
+#: comment/messages.py:18
+#, python-brace-format
+msgid "{app_name} is NOT a valid app name"
+msgstr"{app_name} über"
+
+#: comment/messages.py:19
+msgid "model name must be provided"
+msgstr"über"
+
+#: comment/messages.py:20
+#, python-brace-format
+msgid "{model_name} is NOT a valid model name"
+msgstr"{model_name} über"
+
+#: comment/messages.py:21
+msgid "model id must be provided"
+msgstr"über"
+
+#: comment/messages.py:22
+#, python-brace-format
+msgid "{model_id} is NOT a valid model id for the model {model_name}"
+msgstr"{model_id} über {model_name}"
+
+#: comment/messages.py:23
+#, python-brace-format
+msgid ""
+"{parent_id} is NOT a valid id for a parent comment or the parent comment "
+"does NOT belong to the provided model object"
+msgstr"{parent_id} über"
+
+#: comment/messages.py:28
+msgid "Flagging system must be enabled"
+msgstr"über"
+
+#: comment/messages.py:29
+msgid "Object must be flagged!"
+msgstr"über"
+
+#: comment/messages.py:30
+#, python-brace-format
+msgid "{state} is an invalid state"
+msgstr"{state} über"
+
+#: comment/messages.py:31
+#, python-brace-format
+msgid "{reason} is an invalid reason"
+msgstr"{reason} über"
+
+#: comment/messages.py:32
+msgid "Please supply some information as the reason for flagging"
+msgstr"über"
+
+#: comment/messages.py:33
+#, python-brace-format
+msgid "This comment is already flagged by this user ({user})"
+msgstr"über ({user})"
+
+#: comment/messages.py:34
+#, python-brace-format
+msgid "This comment was not flagged by this user ({user})"
+msgstr"über ({user})"
+
+#: comment/messages.py:35
+msgid "This action cannot be applied on unflagged comments"
+msgstr"über"
+
+#: comment/messages.py:36
+msgid "The comment must be edited before resolving the flag"
+msgstr"über"
+
+#: comment/messages.py:40
+#, python-brace-format
+msgid ""
+"Reaction must be an valid ReactionManager.RelationType. {reaction_type} is "
+"not"
+msgstr"über {reaction_type}"
+
+#: comment/messages.py:44
+msgid "Email is required for posting anonymous comments."
+msgstr"über"
+
+#: comment/messages.py:45
+msgid "The link seems to be broken."
+msgstr"über"
+
+#: comment/messages.py:46
+msgid "The comment has already been verified."
+msgstr"über"
+
+#: comment/messages.py:50
+msgid "Comment flagged"
+msgstr"über"
+
+#: comment/messages.py:51
+msgid "Comment flag removed"
+msgstr"über"
+
+#: comment/messages.py:55
+msgid "Your reaction has been updated successfully"
+msgstr"über"
+
+#: comment/messages.py:59
+msgid "Comment Confirmation Request"
+msgstr"über"
+
+#: comment/messages.py:60
+msgid ""
+"We have sent a verification link to your email.The comment will be displayed "
+"after it is verified."
+msgstr"über"
+
+#: comment/messages.py:62
+msgid "email address, this will be used for verification."
+msgstr"über"
+
+#: comment/messages.py:63
+msgid "email address, it will be used for verification."
+msgstr"über"
+
+#: comment/messages.py:64
+#, python-brace-format
+msgid "{username} added comment to \"{thread_name}\""
+msgstr"{username} über \"{thread_name}\""
+
+#: comment/messages.py:65
+msgid "email"
+msgstr"über"
+
+#: comment/messages.py:69
+msgid "Unflagged"
+msgstr"über"
+
+#: comment/messages.py:70
+msgid "Flagged"
+msgstr"über"
+
+#: comment/messages.py:71
+msgid "Flag rejected by the moderator"
+msgstr"über"
+
+#: comment/messages.py:72
+msgid "Comment modified by the author"
+msgstr"über"
+
+#: comment/messages.py:76
+msgid "Please insert a valid email"
+msgstr"über"
+
+#: comment/messages.py:77
+#, python-brace-format
+msgid "Email is required to subscribe {model_object}"
+msgstr"über {model_object}"
+
+#: comment/messages.py:78
+msgid "Subscribe system must be enabled"
+msgstr"über"
+
+#: comment/templates/comment/anonymous/confirmation_request.html:8
+#: comment/templates/comment/anonymous/confirmation_request.txt:2
+msgid "Hey there,"
+msgstr"über"
+
+#: comment/templates/comment/anonymous/confirmation_request.html:10
+msgid ""
+"You or someone on your behalf have requested to post a comment into this "
+"page:"
+msgstr"über"
+
+#: comment/templates/comment/anonymous/confirmation_request.html:12
+#, python-format
+msgid "at %(posted_time)s."
+msgstr"über %(posted_time)s."
+
+#: comment/templates/comment/anonymous/confirmation_request.html:15
+#: comment/templates/comment/notifications/notification.html:27
+msgid "The comment:"
+msgstr"über"
+
+#: comment/templates/comment/anonymous/confirmation_request.html:20
+#: comment/templates/comment/anonymous/confirmation_request.txt:12
+msgid ""
+"If you do not wish to post the comment, please ignore this message or report "
+"an incident to"
+msgstr"über"
+
+#: comment/templates/comment/anonymous/confirmation_request.html:20
+msgid "Otherwise click on the button below to confirm the comment."
+msgstr"über"
+
+#: comment/templates/comment/anonymous/confirmation_request.html:29
+msgid "Confirm your comment"
+msgstr"über"
+
+#: comment/templates/comment/anonymous/confirmation_request.html:38
+msgid ""
+"If clicking does not work, you can also copy the below link and paste the "
+"address into your browser's address window"
+msgstr"über"
+
+#: comment/templates/comment/anonymous/confirmation_request.html:41
+#: comment/templates/comment/anonymous/confirmation_request.txt:17
+#: comment/templates/comment/notifications/notification.html:32
+#: comment/templates/comment/notifications/notification.txt:14
+msgid "Thanks for your comment!"
+msgstr"über"
+
+#: comment/templates/comment/anonymous/confirmation_request.html:43
+#: comment/templates/comment/anonymous/confirmation_request.txt:20
+#: comment/templates/comment/notifications/notification.html:34
+#: comment/templates/comment/notifications/notification.txt:17
+msgid "Kind regards,"
+msgstr"über"
+
+#: comment/templates/comment/anonymous/confirmation_request.txt:4
+msgid "You or someone on behalf of you have requested to post a comment at"
+msgstr"über"
+
+#: comment/templates/comment/anonymous/confirmation_request.txt:4
+msgid "to the following URL"
+msgstr"über"
+
+#: comment/templates/comment/anonymous/confirmation_request.txt:8
+#: comment/templates/comment/comments/create_comment.html:20
+#: comment/templates/comment/notifications/notification.txt:6
+msgid "Comment"
+msgstr"über"
+
+#: comment/templates/comment/anonymous/confirmation_request.txt:12
+msgid "Otherwise click on the link below to confirm the comment"
+msgstr"über"
+
+#: comment/templates/comment/anonymous/confirmation_request.txt:16
+#: comment/templates/comment/notifications/notification.html:31
+#: comment/templates/comment/notifications/notification.txt:13
+msgid ""
+"If clicking does not work, you can also copy and paste the address into your "
+"browser's address window"
+msgstr"über"
+
+#: comment/templates/comment/anonymous/discarded.html:7
+msgid "Comment discarded"
+msgstr"über"
+
+#: comment/templates/comment/anonymous/discarded.html:13
+msgid "Comment can't be verified."
+msgstr"über"
+
+#: comment/templates/comment/anonymous/discarded.html:14
+msgid "Sorry, your comment has been automatically discarded."
+msgstr"über"
+
+#: comment/templates/comment/comments/base.html:5
+msgid "Comments"
+msgstr"über"
+
+#: comment/templates/comment/comments/comment_content.html:13
+#, python-format
+msgid "view %(comment.user)s profile"
+msgstr"%(comment.user)s über"
+
+#: comment/templates/comment/comments/comment_content.html:13
+msgid "comment by anonymous user"
+msgstr"über"
+
+#: comment/templates/comment/comments/comment_content.html:18
+msgid "Edited"
+msgstr"über"
+
+#: comment/templates/comment/comments/comment_content.html:18
+#, python-format
+msgid "Edited: %(edited_time)s ago"
+msgstr"%(edited_time)s über"
+
+#: comment/templates/comment/comments/comment_content.html:20
+msgid "Posted"
+msgstr"über"
+
+#: comment/templates/comment/comments/comment_content.html:20
+#, python-format
+msgid "%(posted_time)s ago"
+msgstr"%(posted_time)s über"
+
+#: comment/templates/comment/comments/comment_content.html:39
+#, python-format
+msgid " Repl%(plural_str)s "
+msgstr"über%(plural_str)s"
+
+#: comment/templates/comment/comments/comment_modal.html:6
+msgid "Confirm comment deletion"
+msgstr"über"
+
+#: comment/templates/comment/comments/comment_modal.html:7
+#: comment/templates/comment/comments/comment_modal.html:15
+#: comment/templates/comment/flags/flag_modal.html:8
+#: comment/templates/comment/follow/follow_modal.html:8
+msgid "Close"
+msgstr"über"
+
+#: comment/templates/comment/comments/comment_modal.html:12
+msgid "Are you sure you want to delete this comment"
+msgstr"über"
+
+#: comment/templates/comment/comments/comment_modal.html:23
+msgid "Delete"
+msgstr"über"
+
+#: comment/templates/comment/comments/content.html:9
+msgid "read more"
+msgstr"über"
+
+#: comment/templates/comment/comments/create_comment.html:20
+msgid "Reply"
+msgstr"über"
+
+#: comment/templates/comment/comments/create_comment.html:29
+msgid "Comment Anonymously or"
+msgstr"über"
+
+#: comment/templates/comment/comments/create_comment.html:31
+#: comment/templates/comment/comments/create_comment.html:37
+msgid "Login"
+msgstr"über"
+
+#: comment/templates/comment/comments/create_comment.html:33
+msgid "to keep your conversations intact"
+msgstr"über"
+
+#: comment/templates/comment/comments/create_comment.html:39
+msgid "to join the discussion"
+msgstr"über"
+
+#: comment/templates/comment/comments/delete_icon.html:3
+msgid "Delete comment"
+msgstr"über"
+
+#: comment/templates/comment/comments/edit_icon.html:3
+msgid "Edit comment"
+msgstr"über"
+
+#: comment/templates/comment/comments/pagination.html:2
+msgid "Page navigation"
+msgstr"über"
+
+#: comment/templates/comment/comments/pagination.html:3
+msgid "first"
+msgstr"über"
+
+#: comment/templates/comment/comments/pagination.html:4
+msgid "last"
+msgstr"über"
+
+#: comment/templates/comment/comments/pagination.html:5
+msgid "Next"
+msgstr"über"
+
+#: comment/templates/comment/comments/pagination.html:6
+msgid "Previous"
+msgstr"über"
+
+#: comment/templates/comment/comments/reject_icon.html:3
+msgid "Flag rejected"
+msgstr"über"
+
+#: comment/templates/comment/comments/reject_icon.html:3
+msgid "Reject the flag"
+msgstr"über"
+
+#: comment/templates/comment/comments/resolve_icon.html:3
+msgid "Flag resolved"
+msgstr"über"
+
+#: comment/templates/comment/comments/resolve_icon.html:3
+msgid "Resolve the flag"
+msgstr"über"
+
+#: comment/templates/comment/comments/urlhash.html:2
+msgid "Permalink to this comment"
+msgstr"über"
+
+#: comment/templates/comment/flags/flag_icon.html:3
+msgid "Remove flag"
+msgstr"über"
+
+#: comment/templates/comment/flags/flag_icon.html:3
+msgid "Report comment"
+msgstr"über"
+
+#: comment/templates/comment/flags/flag_modal.html:7
+msgid "Please select a reason for flagging"
+msgstr"über"
+
+#: comment/templates/comment/flags/flag_modal.html:22
+msgid "Flag"
+msgstr"über"
+
+#: comment/templates/comment/flags/flags.html:8
+msgid "flag"
+msgstr"über"
+
+#: comment/templates/comment/follow/follow.html:9
+msgid "follow"
+msgstr"über"
+
+#: comment/templates/comment/follow/follow_icon.html:3
+msgid "Unfollow this thread"
+msgstr"über"
+
+#: comment/templates/comment/follow/follow_icon.html:3
+msgid "Follow this thread"
+msgstr"über"
+
+#: comment/templates/comment/follow/follow_modal.html:7
+msgid "Please insert your email to follow this thread"
+msgstr"über"
+
+#: comment/templates/comment/follow/follow_modal.html:28
+msgid "Follow"
+msgstr"über"
+
+#: comment/templates/comment/notifications/notification.html:6
+#: comment/templates/comment/notifications/notification.txt:2
+msgid "Hey"
+msgstr"über"
+
+#: comment/templates/comment/notifications/notification.html:6
+#: comment/templates/comment/notifications/notification.txt:2
+msgid ","
+msgstr"über"
+
+#: comment/templates/comment/notifications/notification.html:9
+#: comment/templates/comment/notifications/notification.txt:4
+msgid "has added a comment at"
+msgstr"über"
+
+#: comment/templates/comment/notifications/notification.html:9
+#: comment/templates/comment/notifications/notification.txt:4
+msgid "to"
+msgstr"über"
+
+#: comment/templates/comment/notifications/notification.html:18
+msgid "Go to site"
+msgstr"über"
+
+#: comment/templates/comment/reactions/reactions.html:5
+msgid "like"
+msgstr"über"
+
+#: comment/templates/comment/reactions/reactions.html:16
+msgid "dislike"
+msgstr"über"

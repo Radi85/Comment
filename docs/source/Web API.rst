@@ -22,9 +22,13 @@ The available actions with permitted user as follows:
 
     8. Resolve or reject flag. This is used to revoke the flagged comment state (admins and moderators)
 
-    9. Retrieve the list of comments and associated replies to a given content type and object ID.
+    9. Retrieve a list of comments and associated replies to a given content type and object ID.
 
     10. Confirm comment made by an anonymous users.
+
+    11. Subscribe a thread. (authenticated users)
+
+    12. Retrieve a list of subscribers to a given thread/content type. (admins and moderators)
 
 These actions are explained below.
 
@@ -84,19 +88,16 @@ This action can be performed by providing the url with data queries related to t
 Get request accepts 3 params:
 
 
-- ``model_name``: is the model name of the content type that have comments associated with it.
-- ``model_id``: is the id of an object of that model
-- ``app_name``: is the name of the app that contains the model.
+- ``model_name``: the model name of the content type that has comments associated with it.
+- ``model_id``: the id of an object of that model.
+- ``app_name``: the name of the app that contains the model.
 
 
-
-
-For example if you are using axios to retrieve the comment list of second object (id=2) of a model (content type) called post inside the app(django app) post.
-you can do the following:
+Endpoint call:
 
 ::
 
-    $ curl -H "Content-Type: application/json" 'http://localhost:8000/api/comments/?model_name=MODEL_NAME&model_id=ID&app_name=APP_NAME''
+    $ curl -H "Content-Type: application/json" '$BASE_URL/api/comments/?model_name=MODEL_NAME&model_id=ID&app_name=APP_NAME''
 
 
 **2- Create a comment or reply to an existing comment:**
@@ -112,7 +113,9 @@ Example: posting a parent comment
 
 ::
 
-    $ curl -X POST -u USERNAME:PASSWORD -d "content=CONTENT" -H "Content-Type: application/json" "http://localhost:8000/api/comments/create/?model_name=MODEL_NAME&model_id=ID&app_name=APP_NAME&parent_id=0"
+    $ curl -X POST -u USERNAME:PASSWORD -d "content=CONTENT" -H "Content-Type: application/json" "$BASE_URL/api/comments/create/?model_name=MODEL_NAME&model_id=ID&app_name=APP_NAME&parent_id=0"
+
+PS: The parent_id param can be ignored as well to post a parent comment.
 
 
 **3- Update a comment:**
@@ -124,7 +127,7 @@ This action requires the ``comment.id`` that you want to update:
 
 ::
 
-    $ curl -X PUT -u USERNAME:PASSWORD -d "content=CONTENT" -H "Content-Type: application/json" "http://localhost:8000/api/comments/ID/
+    $ curl -X PUT -u USERNAME:PASSWORD -d "content=CONTENT" -H "Content-Type: application/json" "$BASE_URL/api/comments/ID/
 
 
 **4- Delete a comment:**
@@ -135,7 +138,7 @@ This action requires the ``comment.id`` that you want to delete:
 
 ::
 
-    $ curl -X DELETE -u USERNAME:PASSWORD -H "Content-Type: application/json" "http://localhost:8000/api/comments/ID/
+    $ curl -X DELETE -u USERNAME:PASSWORD -H "Content-Type: application/json" "$BASE_URL/api/comments/ID/
 
 
 **5- React to a comment:**
@@ -149,10 +152,11 @@ This action requires the ``comment.id``. and,
 
 ::
 
-   $ curl -X POST -u USERNAME:PASSWORD -H "Content-Type: application/json" "http://localhost:8000/api/comments/ID/react/REACTION_TYPE/
+   $ curl -X POST -u USERNAME:PASSWORD -H "Content-Type: application/json" "$BASE_URL/api/comments/ID/react/REACTION_TYPE/
 
 
-PS: As in the UI, clicking the **liked** button will remove the reaction => unlike the comment. This behaviour is performed when repeating the same post request.
+
+PS: This endpoint is for toggling the reaction as in the UI, clicking the **liked** button will remove the reaction => unlike the comment. This behaviour is performed when repeating the same post request.
 
 
 **6- Report a comment**
@@ -176,7 +180,7 @@ This action requires the ``comment.id``.
 
 ::
 
-   $ curl -X POST -u USERNAME:PASSWORD -H "Content-Type: application/json" -d '{"reason":1, "info":""}' http://localhost:8000/api/comments/ID/flag/
+   $ curl -X POST -u USERNAME:PASSWORD -H "Content-Type: application/json" -d '{"reason":1, "info":""}' $BASE_URL/api/comments/ID/flag/
 
 
 2. Un-flag a comment:
@@ -185,7 +189,7 @@ To un-flag a FLAGGED comment, set reason value to `0` or remove the payload from
 
 ::
 
-    $ curl -X POST -u USERNAME:PASSWORD http://localhost:8000/api/comments/ID/flag/
+    $ curl -X POST -u USERNAME:PASSWORD $BASE_URL/api/comments/ID/flag/
 
 
 **7- Change flagged comment state**
@@ -194,7 +198,7 @@ To un-flag a FLAGGED comment, set reason value to `0` or remove the payload from
 
 Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
 
-This action requires comment admin or moderator privilege.
+This action requires comment `admin` or `moderator` privilege.
 
 .. code:: python
 
@@ -204,7 +208,7 @@ This action requires comment admin or moderator privilege.
 
 ::
 
-   $ curl -X POST -u USERNAME:PASSWORD -H "Content-Type: application/json" -d '{"state":3}' http://localhost:8000/api/comments/ID/flag/state/change/
+   $ curl -X POST -u USERNAME:PASSWORD -H "Content-Type: application/json" -d '{"state":3}' $BASE_URL/api/comments/ID/flag/state/change/
 
 Repeating the same request and payload toggle the state to its original.
 
@@ -220,10 +224,30 @@ Get request accepts 3 params:
 Example:
 
 :: code:: bash
-    $ curl -X GET -H "Content-Type: application/json" http://localhost:8000/api/comments/confirm/KEY/
+    $ curl -X GET -H "Content-Type: application/json" $BASE_URL/api/comments/confirm/KEY/
 
 Since the key generated for each comment is unique, it can only be used once to verify. Any tampering with the key will result in a BAD HTTP request(400).
 
 
+**9- Subscribe a thread**
+
+``POST`` is the allowed method to toggle subscription.
+
+Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
+
+Subscription variable ``COMMENT_ALLOW_SUBSCRIPTION`` must be enabled in ``settings.py``.
+
+:: code:: bash
+    $ curl -X POST -u USERNAME:PASSWORD -H "Content-Type: application/json" "$BASE_URL/api/comments/toggle-subscription/?model_name=MODEL_NAME&model_id=ID&app_name=APP_NAME"
 
 
+**10- Retrieve subscribers on a given thread/content type**
+
+``GET``.
+
+Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
+
+This action requires comment `admin` or `moderator` privilege.
+
+:: code:: bash
+    $ curl -X GET -u USERNAME:PASSWORD -H "Content-Type: application/json" $BASE_URL/api/comments/subscribers/

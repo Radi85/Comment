@@ -26,6 +26,12 @@ class BaseValidatorMixin:
             return JsonResponse({'type': ExceptionError.ERROR_TYPE, 'detail': exc.detail}, status=400)
         return super().dispatch(request, *args, **kwargs)
 
+    def get_request_data(self, request, item):
+        value = request.GET.get(item) or request.POST.get(item)
+        if not value and self.api:
+            value = request.data.get(item)
+        return value
+
     @abstractmethod
     def validate(self, request):
         pass
@@ -80,9 +86,9 @@ class ContentTypeValidator(BaseValidatorMixin):
 
     def validate(self, request):
         super().validate(request)
-        app_name = request.GET.get("app_name") or request.POST.get("app_name")
-        model_name = request.GET.get("model_name") or request.POST.get("model_name")
-        model_id = request.GET.get("model_id") or request.POST.get("model_id")
+        app_name = self.get_request_data(request, 'app_name')
+        model_name = self.get_request_data(request, 'model_name')
+        model_id = self.get_request_data(request, 'model_id')
         validated_app_name = self.validate_app_name(app_name)
         validated_model_name = self.validate_model_name(model_name)
         validated_model_id = self.validate_model_id(model_id)
@@ -110,8 +116,8 @@ class ParentIdValidator(BaseValidatorMixin):
 
     def validate(self, request):
         super().validate(request)
-        model_id = request.GET.get("model_id") or request.POST.get("model_id")
-        parent_id = request.GET.get("parent_id") or request.POST.get("parent_id")
+        model_id = self.get_request_data(request, 'model_id')
+        parent_id = self.get_request_data(request, 'parent_id')
         if not parent_id or parent_id == '0':
             return
         validated_parent_id = self.validate_parent_id(parent_id)

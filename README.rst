@@ -53,6 +53,12 @@
 django-comments-dab
 ===================
 
+Thanks https://www.pythonanywhere.com/
+
+**Here is a** live_ **demo**
+
+.. _live: https://rmustafa.pythonanywhere.com/
+
 Full Documentation_
 
 .. _Documentation: https://django-comment-dab.readthedocs.io/
@@ -98,6 +104,8 @@ It allows you to integrate commenting functionality with any model you have e.g.
     7. Delete flagged comment. (admins and moderators)
 
     8. Resolve or reject flag. This is used to revoke the flagged comment state (admins and moderators)
+
+    9. Follow and unfollow thread. (authenticated users)
 
 - All actions are done by Fetch API since V2.0.0
 
@@ -280,6 +288,8 @@ The icons are picked from Feather_. Many thanks to them for the good work.
 
 .. _Feather: https://feathericons.com
 
+
+Email's HTML template is used from https://github.com/leemunroe/responsive-html-email-template
 
 Contributing
 ============

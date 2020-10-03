@@ -188,4 +188,23 @@ To further customize different attributes related to anonymous commenting, you m
 5. Enable gravatar:
 ^^^^^^^^^^^^^^^^^^^^
 
-To enable using gravatar for profile pics set ``COMMENT_USE_GRAVATAR`` in settings.py to ``True``
+To enable using gravatar for profile pics set ``COMMENT_USE_GRAVATAR`` in `settings.py` to ``True``
+
+
+6. Enable subscription:
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+To enable app subscription set ``COMMENT_ALLOW_SUBSCRIPTION`` in `settings.py` to ``True``
+
+This will enable the UI functionality and the API endpoint to follow and unfollow `thread`.
+
+The thread can be a `parent` comment or the `content type` (i.g. Post, Picture, Video...) that uses the comment model.
+
+**Automatic Subscription:**
+
+    1. Creating a comment in a thread will set the user automatically as a follower of the `thread`.
+    2. Replying to a comment will set the user as a follower of the `parent` comment
+
+An email notification will be sent to the thread's followers up on adding a new comment to the thread.
+
+PS: This feature needs the email settings to be configured similar to `4. Allow commenting by anonymous:`_

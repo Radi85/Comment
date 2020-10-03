@@ -5,21 +5,28 @@ document.addEventListener('DOMContentLoaded', () => {
     'use strict';
     let currentDeleteCommentButton, commentBeforeEdit;
     let csrfToken = window.CSRF_TOKEN;
+    let deleteModal = document.getElementById("Modal");
+    let flagModal = document.getElementById('flagModal');
+    let followModal = document.getElementById('followModal');
     let headers = {
         'X-Requested-With': 'XMLHttpRequest',
         'X-CSRFToken': csrfToken,
         'Content-Type': 'application/x-www-form-urlencoded'
     };
     document.getElementsByClassName(".js-comment-input").value = '';
-    let removeTargetElement = e => {
+    let removeTargetElement = () => {
         let currentHeight = window.pageYOffset;
         window.location.replace("#");
         // slice off the remaining '#':
         if (typeof window.history.replaceState == 'function') {
             history.replaceState({}, '', window.location.href.slice(0, -1));
         }
-            window.scrollTo(0, currentHeight);
-        }
+        window.scrollTo(0, currentHeight);
+        // close three-dots-menus
+        Array.prototype.forEach.call(document.getElementsByClassName('js-three-dots-menu'), element => {
+            element.classList.add('d-none');
+        });
+    };
 
     let showModal = modalElement => {
         modalElement.style.display = 'block';
@@ -107,11 +114,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let submitCommentCreateForm = form => {
         let formButton = form.querySelector("button");
         let url = form.getAttribute('data-url') || window.location.href;
+        const urlParams = new window.URLSearchParams(window.location.search);
         let formData = serializeObject(form);
+        formData.page = urlParams.get('page');
         // this step is needed to append the form data to request.POST
         let formDataQuery = convertFormDataToURLQuery(formData);
         fetch(url, {
-           method: 'POST',
+            method: 'POST',
             headers: headers,
             body: formDataQuery
         }).then(response => {
@@ -124,7 +133,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return Promise.reject(response);
         }).then(data => {
             if (data.type === 'error') {
-                console.log(data);
                 alert(data.detail);
                 return;
             }
@@ -147,6 +155,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     reply.textContent = gettext("Reply");
                 }
                 commentCount(1);
+                // update followBtn
+                let followButton = form.parentElement.previousElementSibling.querySelector(".js-comment-follow");
+                followButton.querySelector('.comment-follow-icon').classList.add('user-has-followed');
+                followButton.querySelector('span').setAttribute('title', 'Unfollow this thread');
             }
             formButton.setAttribute('disabled', 'disabled');
             let elements = document.getElementsByClassName("js-comment-input");
@@ -160,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 let clean_uri = uri.substring(0, uri.indexOf("?"));
                 window.history.replaceState({}, document.title, clean_uri);
             }
-        }).catch(error => {
+        }).catch(() => {
             alert(gettext("Unable to post your comment!, please try again"));
         });
     };
@@ -181,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
             textAreaElement.value = '';
             textAreaElement.value = value;
             textAreaElement.setAttribute("style", "height: " + textAreaElement.scrollHeight + "px;");
-        }).catch(error => {
+        }).catch(() => {
             alert(gettext("You can't edit this comment"));
         });
     };
@@ -204,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }).then(data => {
            let updatedContentElement = stringToDom(data, '.js-updated-comment');
            form.parentElement.replaceWith(updatedContentElement);
-        }).catch(error => {
+        }).catch(() => {
            alert(gettext("Modification didn't take effect!, please try again"));
         });
     };
@@ -245,9 +257,8 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch(url, {headers: headers}).then(response => {
             return response.json()
         }).then(data => {
-            let modal = document.getElementById("Modal");
-            showModal(modal);
-            let modalContent = modal.querySelector('.comment-modal-content');
+            showModal(deleteModal);
+            let modalContent = deleteModal.querySelector('.comment-modal-content');
             modalContent.innerHTML = data.html_form;
         }).catch(error => {
             console.error(error);
@@ -290,11 +301,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 // update total count of comments
                 commentCount(-1);
             }
-            let modal = document.getElementById("Modal");
-            hideModal(modal);
+            hideModal(deleteModal);
             commentElement.remove();
 
-        }).catch(error => {
+        }).catch(() => {
             alert(gettext("Unable to delete your comment!, please try again"));
         });
     };
@@ -351,10 +361,52 @@ document.addEventListener('DOMContentLoaded', () => {
                     fillReaction(parentReactionEle, targetReaction);
                     changeReactionCount(parentReactionEle, data.likes, data.dislikes);
                 }
-            }).catch(error => {
+            }).catch(() => {
                 alert(gettext("Reaction couldn't be processed!, please try again"));
             });
         };
+
+    let toggleFollow = (followButton, form) => {
+        let formDataQuery = null;
+        if (form) {
+            let formData = serializeObject(form);
+            formDataQuery = convertFormDataToURLQuery(formData);
+        }
+        let url = followButton.getAttribute('data-url');
+        fetch(url,  {
+            method: 'POST',
+            headers: headers,
+            body: formDataQuery,
+        }).then(response => {
+            return response.json();
+        }).then(data => {
+            const infoElement = data.app_name === 'comment'
+                ? followButton.closest('.js-parent-comment')
+                : document.getElementById('comments').querySelector('.js-comment');
+            if (data.email_required) {
+                followModal.querySelector('form').setAttribute('data-target-btn-id', followButton.getAttribute('id'));
+                showModal(followModal);
+            }
+            else if (data.invalid_email) {
+                form.querySelector('.error').innerHTML = data.invalid_email;
+            }
+            else if (data.following) {
+                followButton.querySelector('.comment-follow-icon').classList.add('user-has-followed');
+                followButton.querySelector('span').setAttribute('title', 'Unfollow this thread');
+                const msg = gettext(`You are now subscribing "${data.model_object}"`);
+                createInfoElement(infoElement, 'success', msg);
+                hideModal(followModal);
+            } else {
+                followButton.querySelector('.comment-follow-icon').classList.remove('user-has-followed');
+                followButton.querySelector('span').setAttribute('title', 'Follow this thread');
+                const msg = gettext(`"${data.model_object}" is now unsubscribed`);
+                createInfoElement(infoElement, 'success', msg);
+                hideModal(followModal);
+            }
+        }).catch(() => {
+            alert(gettext("Subscription couldn't be processed!, please try again"));
+        });
+    };
 
     let fadeOut = (element, duration) => {
       let interval = 10;//ms
@@ -453,21 +505,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 flagIcon.parentElement.title = 'Report Comment';
                 toggleClass(flagIcon, addClass, removeClass, 'remove');
             }
-            let modal = document.getElementById('flagModal');
-            hideModal(modal);
+            hideModal(flagModal);
             if (data) {
                 createInfoElement(flagButton.closest('.js-parent-comment'), data.status, data.msg);
             }
-        }).catch(error => {
+        }).catch(() => {
             alert(gettext("Flagging couldn't be processed!, please try again"));
         });
     };
 
     let handleFlagModal = flagButton => {
-        let modal = document.getElementById('flagModal');
-        showModal(modal);
-        document.getElementById('flagModal').querySelector('textarea').value = '';
-        let form = modal.querySelector('.flag-modal-form');
+        showModal(flagModal);
+        flagModal.querySelector('textarea').value = '';
+        let form = flagModal.querySelector('.flag-modal-form');
         let lastReason = form.querySelector('.flag-last-reason');
         let flagInfo = form.querySelector('textarea');
         flagInfo.style.display = "none";
@@ -484,7 +534,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         };
-        let submit = modal.querySelector('.flag-modal-submit');
+        let submit = flagModal.querySelector('.flag-modal-submit');
         submit.onclick = e => {
             e.preventDefault();
             let choice = form.querySelector('input[name="reason"]:checked');
@@ -563,15 +613,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    let openThreeDostMenu = threeDotBtn => {
+        threeDotBtn.nextElementSibling.classList.toggle('d-none');
+    };
+
     document.addEventListener('click', (event) => {
-        removeTargetElement(event);
+        removeTargetElement();
         if (event.target && event.target !== event.currentTarget) {
-            let modal = document.getElementById("Modal");
-            let flagModal = document.getElementById('flagModal');
-           if (event.target === modal || event.target === flagModal ||
+           if (event.target === deleteModal || event.target === flagModal || event.target === followModal ||
                event.target.closest('.modal-close-btn') || event.target.closest('.modal-cancel-btn')) {
-               hideModal(modal);
-               hideModal(flagModal)
+               hideModal(deleteModal);
+               hideModal(flagModal);
+               hideModal(followModal);
            }
            else if(event.target.closest('.js-reply-link')) {
                event.preventDefault();
@@ -605,6 +658,14 @@ document.addEventListener('DOMContentLoaded', () => {
                event.preventDefault();
                toggleFlagState(event.target.closest('.js-flag-reject') || event.target.closest('.js-flag-resolve'));
            }
+           else if (event.target.closest('.js-comment-follow')) {
+               event.preventDefault();
+               toggleFollow(event.target.closest('.js-comment-follow'));
+           }
+           else if (event.target.closest('.js-three-dots')) {
+               event.preventDefault();
+               openThreeDostMenu(event.target.closest('.js-three-dots'));
+           }
         }
     }, false);
 
@@ -623,6 +684,11 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (event.target.classList.contains('js-comment-delete-form')) {
                 event.preventDefault();
                 submitDeleteCommentForm(event.target);
+            }
+            else if (event.target.classList.contains('js-comment-follow-form')) {
+                event.preventDefault();
+                let followButton = document.getElementById(event.target.getAttribute('data-target-btn-id'));
+                toggleFollow(followButton, event.target);
             }
         }
     }, false);

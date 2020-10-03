@@ -1,0 +1,12 @@
+{% load i18n %}
+{% load comment_tags %}
+{% url 'toggle-subscription' as follow_url %}
+{% if user.is_authenticated %}
+<span id="followBtn-{{ btnId }}" class="js-comment-follow" data-url="{{ follow_url }}?model_name={% get_model_name model_object %}&model_id={{ model_object.id }}&app_name={% get_app_name model_object %}">
+    {% include "comment/follow/follow_icon.html" %}
+</span>
+{% else %}
+<a class="js-comment-follow>" href="{{ login_url }}/?next={{ request.build_absolute_uri }}" title="{% trans "follow" %}">
+    {% include "comment/follow/follow_icon.html" %}
+</a>
+{% endif %}

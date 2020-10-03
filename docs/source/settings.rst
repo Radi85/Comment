@@ -118,3 +118,9 @@ COMMENT_USE_GRAVATAR
 Whether to use gravatar_ for displaying profile pictures alongside comments. Defaults to ``False``.
 
 .. _gravatar: https://gravatar.com/
+
+
+COMMENT_ALLOW_SUBSCRIPTION
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Allow threads subscription feature. Defaults to ``False``.

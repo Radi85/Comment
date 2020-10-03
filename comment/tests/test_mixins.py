@@ -150,7 +150,7 @@ class BaseFlagMixinTest(BaseCommentMixinTest):
         self.assertEqual(response.status_code, 200)
 
 
-class CanSetFlagMixin(BaseCommentMixinTest):
+class CanSetFlagMixinTest(BaseCommentMixinTest):
     def setUp(self):
         super().setUp()
         self.client.force_login(self.user_1)
@@ -188,4 +188,26 @@ class CanEditFlagStateMixinTest(BaseCommentMixinTest):
 
         self.client.force_login(self.moderator)
         response = self.client.post(self.url, data=self.data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(response.status_code, 200)
+
+
+class CanSubscribeMixinTest(BaseCommentMixinTest):
+    def setUp(self):
+        super().setUp()
+        self.toggle_follow_url = self.get_url(
+            reverse('comment:toggle-subscription'), app_name='comment', model_name='comment', model_id=self.comment.id
+        )
+
+    @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', False)
+    def test_user_cannot_subscribe(self):
+        self.client.force_login(self.user_1)
+        self.assertFalse(settings.COMMENT_ALLOW_SUBSCRIPTION)
+        response = self.client.post(self.toggle_follow_url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(response.status_code, 403)
+
+    @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', True)
+    def test_user_can_subscribe(self):
+        self.client.force_login(self.user_1)
+        self.assertTrue(settings.COMMENT_ALLOW_SUBSCRIPTION)
+        response = self.client.post(self.toggle_follow_url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)

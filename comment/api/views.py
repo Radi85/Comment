@@ -4,19 +4,21 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from comment.conf import settings
 from comment.validators import ValidatorMixin, ContentTypeValidator
 from comment.api.serializers import CommentSerializer, CommentCreateSerializer
 from comment.api.permissions import (
-    IsOwnerOrReadOnly, FlagEnabledPermission, CanChangeFlaggedCommentState
-)
-from comment.models import Comment, Reaction, ReactionInstance, Flag, FlagInstance
+    IsOwnerOrReadOnly, FlagEnabledPermission, CanChangeFlaggedCommentState,
+    SubscriptionEnabled, CanGetSubscribers)
+from comment.models import Comment, Reaction, ReactionInstance, Flag, FlagInstance, Follower
 from comment.utils import get_comment_from_key, CommentFailReason
 from comment.messages import FlagError, EmailError
+from comment.views import BaseToggleFollowView
+from comment.service.email import DABEmailService
 
 
 class CommentCreate(ValidatorMixin, generics.CreateAPIView):
     serializer_class = CommentCreateSerializer
-    permission_classes = ()
     api = True
 
     def get_serializer_context(self):
@@ -131,15 +133,46 @@ class CommentDetailForFlagStateChange(generics.RetrieveAPIView):
 
 
 class ConfirmComment(APIView):
-    @staticmethod
-    def get(request, *args, **kwargs):
-        key = kwargs.get('key', None)
-        comment = get_comment_from_key(key)
+    email_service = None
 
-        if comment.why_invalid == CommentFailReason.BAD:
+    def get(self, request, *args, **kwargs):
+        key = kwargs.get('key', None)
+        temp_comment = get_comment_from_key(key)
+
+        if temp_comment.why_invalid == CommentFailReason.BAD:
             return Response({'detail': EmailError.BROKEN_VERIFICATION_LINK}, status=status.HTTP_400_BAD_REQUEST)
 
-        if comment.why_invalid == CommentFailReason.EXISTS:
+        if temp_comment.why_invalid == CommentFailReason.EXISTS:
             return Response({'detail': EmailError.USED_VERIFICATION_LINK}, status=status.HTTP_200_OK)
 
-        return Response(CommentSerializer(comment.obj).data, status=status.HTTP_201_CREATED)
+        comment = temp_comment.obj
+        comment.save()
+        comment.refresh_from_db()
+        if settings.COMMENT_ALLOW_SUBSCRIPTION:
+            self.email_service = DABEmailService(comment, request)
+            self.email_service.send_notification_to_followers()
+        return Response(CommentSerializer(comment).data, status=status.HTTP_201_CREATED)
+
+
+class ToggleFollowAPI(BaseToggleFollowView, APIView):
+    api = True
+    response_class = Response
+    permission_classes = (SubscriptionEnabled, permissions.IsAuthenticated)
+
+    def post(self, request, *args, **kwargs):
+        self.validate(request)
+        return super().post(request, *args, **kwargs)
+
+
+class SubscribersAPI(ContentTypeValidator, APIView):
+    api = True
+    permission_classes = (CanGetSubscribers,)
+
+    def get(self, request, *args, **kwargs):
+        self.validate(request)
+        return Response({
+            'app_name': self.model_obj._meta.app_label,
+            'model_name': self.model_obj.__class__.__name__,
+            'model_id': self.model_obj.id,
+            'followers': Follower.objects.get_emails_for_model_object(self.model_obj)
+        })
