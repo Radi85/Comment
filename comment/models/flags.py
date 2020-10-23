@@ -27,7 +27,12 @@ class Flag(models.Model):
     comment = models.OneToOneField(Comment, on_delete=models.CASCADE)
     count = models.PositiveIntegerField(default=0)
     state = models.SmallIntegerField(choices=STATES_CHOICES, default=UNFLAGGED)
-    moderator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    moderator = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='flags_moderated'
+        )
 
     objects = FlagManager()
 
