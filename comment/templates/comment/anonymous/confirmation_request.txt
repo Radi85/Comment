@@ -1,5 +1,5 @@
 {% load i18n %}
-{% trans "Hey" %},
+{% trans "Hey," %}
 
 {% trans "You or someone on behalf of you have requested to post a comment at" %} {{ comment.posted }}, {% trans "to the following URL" %}.
 
@@ -14,8 +14,8 @@ URL:  http://{{ site.domain }}{{ comment.content_object.get_absolute_url }}
 http://{{ site.domain }}{{ confirmation_url }}
 
 {% trans "If clicking does not work, you can also copy and paste the address into your browser's address window" %}.
-{% trans "Thanks for your comment" %}!
+{% trans "Thanks for your comment!" %}
 
 --
-{% trans "Kind regards" %},
+{% trans "Kind regards," %}
 {{ site }}

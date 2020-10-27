@@ -1,24 +1,20 @@
-{% comment %}Inspired from Daniel Rus Morales's django-comments-xtd:
-  * https://github.com/danirus/django-comments-xtd{% endcomment %}
-{% load i18n %}
-<p>{% trans "Hey" %},</p>
+{% comment %}Inspired from Daniel Rus Morales's django-comments-xtd: * https://github.com/danirus/django-comments-xtd{% endcomment %} {% load i18n %}
+<p class="comment-translatable">{% trans "Hey," %}</p>
 
-<p>{% trans "You or someone on behalf of you have requested to post a comment into this page:" %}<br/>
-<a href="http://{{ site.domain }}{{ comment.content_object.get_absolute_url }}">http://{{ site.domain }}{{ comment.content_object.get_absolute_url }}</a>
-{% trans "at" %} {{ comment.posted }}
+<p class="comment-translatable">{% trans "You or someone on behalf of you have requested to post a comment into this page:" %}<br/>
+    <a href="http://{{ site.domain }}{{ comment.content_object.get_absolute_url }}">http://{{ site.domain }}{{ comment.content_object.get_absolute_url }}</a> <span class="comment-translatable">{% blocktrans with posted_time=comment.posted %}at {{ posted_time }}.{% endblocktrans %}</span>
 </p>
 
-<p>{% trans "The comment:" %}<br/>
-<i>{{ comment.content }}</i>
-<hr/>
+<p class="comment-translatable">{% trans "The comment:" %}<br/>
+    <i>{{ comment.content }}</i>
+    <hr/>
 
-<p>{% trans "If you do not wish to post the comment, please ignore this message or report an incident to" %} {{ contact }}. {% trans "Otherwise click on the link below to confirm the comment" %}.</p>
+    <p class="comment-translatable">{% trans "If you do not wish to post the comment, please ignore this message or report an incident to" %} {{ contact }}. <span class="comment-translatable">{% trans "Otherwise click on the link below to confirm the comment." %}</span></p>
 
-<p><a href="http://{{ site.domain }}{{ confirmation_url }}">http://{{ site.domain }}{{ confirmation_url|slice:":40" }}...</a></p>
+    <p><a href="http://{{ site.domain }}{{ confirmation_url }}">http://{{ site.domain }}{{ confirmation_url|slice:":40" }}...</a></p>
 
-<p>{% trans "If clicking does not work, you can also copy and paste the address into your browser's address window" %}.</p>
+    <p class="comment-translatable">{% trans "If clicking does not work, you can also copy and paste the address into your browser's address window" %}.</p>
 
-<p>{% trans "Thanks for your comment!" %}<br/>
---<br/>
-{% trans "Kind regards" %},<br/>
-{{ site }}</p>
+    <p class="comment-translatable">{% trans "Thanks for your comment!" %}<br/> --
+        <br/>
+    </p class="comment-translatable">{% trans "Kind regards," %}<br/> {{ site }}</p>

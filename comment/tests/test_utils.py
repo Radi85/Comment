@@ -240,7 +240,7 @@ class TestSendEmailConfirmationRequest(BaseAnonymousCommentTest, BaseCommentUtil
         self.contact_email = settings.COMMENT_CONTACT_EMAIL
         self.receivers = [self.comment_obj.to_dict()['email']]
         self.sender = settings.COMMENT_FROM_EMAIL
-        self.subject = 'Comment Confirmation Request'
+        self.subject = EmailInfo.SUBJECT
         self.content_object_url = f'http://{self.site.domain}{self.comment_obj.content_object.get_absolute_url()}'
 
     def email_contents_test(self, contents, api=False):

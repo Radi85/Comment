@@ -1,4 +1,5 @@
 {% load comment_tags %}
+{% load i18n %}
 <button title="{% if comment.has_rejected_state %}{% trans "Flag rejected" %}{% else %}{% trans "Reject the flag" %}{% endif %}" class="js-flag-reject {% block reject_btn_cls %}btn btn-link{% endblock reject_btn_cls %}" data-state="{{ comment.flag.REJECTED }}" data-url="{% url 'comment:flag-change-state' pk=comment.id %}">
 
 {% block reject_img_icon %}
