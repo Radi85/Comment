@@ -1,6 +1,10 @@
 django
-Pillow
 djangorestframework
+# used for testing/linting
+Pillow
+lxml
+beautifulsoup4
+cssselect
 coverage
 flake8
 tox

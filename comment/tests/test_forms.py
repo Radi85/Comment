@@ -29,7 +29,8 @@ class TestCommentForm(BaseCommentTest):
         email_field = form.fields.get(field, None)
 
         self.assertIsNotNone(email_field)
-        self.assertEqual(email_field.label, field)
+        self.assertEqual(email_field.label, EmailInfo.LABEL)
+        self.assertTextTranslated(email_field.label)
         self.assertEqual(email_field.widget.input_type, field)
         self.assertDictEqual(email_field.widget.attrs, {
             'placeholder': EmailInfo.INPUT_PLACEHOLDER,

@@ -156,62 +156,83 @@ class APICommentViewsTest(APIBaseTest):
     def test_retrieving_comment_list_without_app_name(self):
         data = self.url_data.copy()
         data.pop('app_name')
-        response = self.client.get(self.get_url(**data))
+        url = self.get_url(**data)
+
+        response = self.client.get(url)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data['detail'], ContentTypeError.APP_NAME_MISSING)
+        self.assertTextTranslated(response.data['detail'], url)
 
     def test_retrieving_comment_list_without_model_name(self):
         data = self.url_data.copy()
         data.pop('model_name')
-        response = self.client.get(self.get_url(**data))
+        url = self.get_url(**data)
+
+        response = self.client.get(url)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data['detail'], ContentTypeError.MODEL_NAME_MISSING)
+        self.assertTextTranslated(response.data['detail'], url)
 
     def test_retrieving_comment_list_without_model_id(self):
         url_data = self.url_data.copy()
         url_data.pop('model_id')
-        response = self.client.get(self.get_url(**url_data))
+        url = self.get_url(**url_data)
+
+        response = self.client.get(url)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data['detail'], ContentTypeError.MODEL_ID_MISSING)
+        self.assertTextTranslated(response.data['detail'], url)
 
     def test_retrieving_comment_list_with_invalid_app_name(self):
         data = self.url_data.copy()
         app_name = 'invalid'
         data['app_name'] = app_name
-        response = self.client.get(self.get_url(**data))
+        url = self.get_url(**data)
+
+        response = self.client.get(url)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data['detail'], ContentTypeError.APP_NAME_INVALID.format(app_name=app_name))
+        self.assertTextTranslated(response.data['detail'], url)
 
     def test_retrieving_comment_list_with_invalid_model_name(self):
         # not exist model type
         url_data = self.url_data.copy()
         model_name = 'does_not_exists'
         url_data['model_name'] = model_name
-        response = self.client.get(self.get_url(**url_data))
+        url = self.get_url(**url_data)
+        response = self.client.get(url)
+
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data['detail'], ContentTypeError.MODEL_NAME_INVALID.format(model_name=model_name))
+        self.assertTextTranslated(response.data['detail'], url)
 
     def test_retrieving_comment_list_with_invalid_model_id(self):
         # not exist model id
         url_data = self.url_data.copy()
         model_id = 100
         url_data['model_id'] = model_id
-        response = self.client.get(self.get_url(**url_data))
+        url = self.get_url(**url_data)
+        response = self.client.get(url)
+
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
             response.data['detail'],
             ContentTypeError.MODEL_ID_INVALID.format(model_id=model_id, model_name=url_data["model_name"])
         )
+        self.assertTextTranslated(response.data['detail'], url)
 
         # not integer model id
         model_id = 'c'
         url_data['model_id'] = model_id
-        response = self.client.get(self.get_url(**url_data))
+        url = self.get_url(**url_data)
+        response = self.client.get(url)
+
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
             response.data['detail'],
             ContentTypeError.ID_NOT_INTEGER.format(var_name='model', id=model_id)
         )
+        self.assertTextTranslated(response.data['detail'], url)
 
     def test_create_comment(self):
         # create parent comment
@@ -257,6 +278,7 @@ class APICommentViewsTest(APIBaseTest):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()['email'], [EmailError.EMAIL_MISSING])
+        self.assertTextTranslated(response.json()['email'][0], base_url)
         # test valid data
         data = {'content': 'new anonymous comment from api', 'email': 'a@a.com'}
 
@@ -273,11 +295,13 @@ class APICommentViewsTest(APIBaseTest):
         url_data['parent_id'] = parent_id
         data = {'content': 'new child comment from api'}
         response = self.client.post(self.get_url(base_url, **url_data), data=data)
+
         self.assertEqual(response.status_code, 400)
         self.assertEqual(
             response.data['detail'],
             ContentTypeError.ID_NOT_INTEGER.format(var_name='parent', id=parent_id)
         )
+        self.assertTextTranslated(response.data['detail'], base_url)
 
         # parent id not exist
         parent_id = 100
@@ -286,6 +310,7 @@ class APICommentViewsTest(APIBaseTest):
         response = self.client.post(self.get_url(base_url, **url_data), data=data)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data['detail'], ContentTypeError.PARENT_ID_INVALID.format(parent_id=parent_id))
+        self.assertTextTranslated(response.data['detail'], base_url)
 
         # parent id doesn't belong to the model object
         parent_id = 1
@@ -561,9 +586,11 @@ class APIConfirmCommentViewTest(BaseAnonymousCommentTest, APIBaseTest):
 
     def test_bad_signature(self):
         key = self.key + 'invalid'
-        response = self.client.get(self.get_url(key))
+        url = self.get_url(key)
+        response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()['detail'], EmailError.BROKEN_VERIFICATION_LINK)
+        self.assertTextTranslated(response.data['detail'], url)
         self.assertEqual(Comment.objects.all().count(), self.init_count)
 
     def test_comment_exists(self):
@@ -574,10 +601,12 @@ class APIConfirmCommentViewTest(BaseAnonymousCommentTest, APIBaseTest):
             'email': self.comment.email
         })
         key = signing.dumps(comment_dict)
+        url = self.get_url(key)
 
-        response = self.client.get(self.get_url(key))
+        response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()['detail'], EmailError.USED_VERIFICATION_LINK)
+        self.assertTextTranslated(response.data['detail'], url)
         self.assertEqual(Comment.objects.all().count(), init_count)
 
     def test_success(self):

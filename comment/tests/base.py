@@ -8,8 +8,10 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
 from django.test import TestCase, RequestFactory, TransactionTestCase, Client
-from django.urls import reverse
-from django.utils import timezone
+from django.urls import reverse, resolve
+from django.utils import timezone, translation
+from lxml.html.soupparser import fromstring
+from lxml.cssselect import CSSSelector
 
 from comment.conf import settings
 from comment.models import Comment, FlagInstance, Reaction, ReactionInstance
@@ -19,7 +21,77 @@ from post.models import Post
 User = get_user_model()
 
 
-class BaseCommentTest(TestCase):
+class BaseInternationalizationTest:
+    prefix = 'ङङङ '
+    translatable_attrs = ['title', 'aria-label']
+
+    def mock_get_text_function_for_hindi(self):
+        '''just adds a prefix to the front of all strings'''
+        def wrapper(func):
+            '''A decorator function that just adds a prefix to the front of all strings'''
+            def new_func(*args, **kwargs):
+                output = func(*args, **kwargs)
+                return self.prefix + output
+            return new_func
+
+        old_lang = translation.get_language()
+        # Activate hindi, so that if the hi files haven't
+        # been loaded, they will be loaded now.
+        translation.activate("hi")
+
+        hindi_translation = translation.trans_real._active.value
+
+        # wrap the gettext and ungettext functions so that 'ङङङ '
+        # will prefix each translation
+        hindi_translation.gettext = wrapper(hindi_translation.gettext)
+
+        # Turn back on our old translations
+        translation.activate(old_lang)
+        del old_lang
+
+    def remove_mocked_prefix_from_get_text_function_for_hindi(self):
+        def wrapper(func):
+            '''A decorator function that just removes the mock prefix added to the front of all strings'''
+            def new_func(*args, **kwargs):
+                output = func(*args, **kwargs)
+                return output[len(self.prefix):]
+            return new_func
+
+        old_lang = translation.get_language()
+        translation.activate('hi')
+        hindi_translation = translation.trans_real._active.value
+
+        # wrap the gettext and ungettext functions so that 'ङङङ '
+        # will prefix each translation
+        hindi_translation.gettext = wrapper(hindi_translation.gettext)
+
+        # Turn back on our old translations
+        translation.activate(old_lang)
+
+    @staticmethod
+    def has_translatable_html_text(element):
+        if "comment-translatable" in element.attrib.get('class', '').split():
+            return True
+        return False
+
+    @staticmethod
+    def has_translatable_html_attr(element, attr):
+        if element.attrib.get(attr, '').strip():
+            return True
+        return False
+
+    @staticmethod
+    def has_string(string_to_search, sub_string):
+        return string_to_search.strip().startswith(sub_string)
+
+    @staticmethod
+    def get_view_from_url_or_none(url):
+        if url:
+            clean_url = url.split('?')[0]
+            return resolve(clean_url)[0].__name__
+
+
+class BaseCommentTest(TestCase, BaseInternationalizationTest):
     flags = 0
     reactions = 0
     content_object_1 = None
@@ -73,7 +145,10 @@ class BaseCommentTest(TestCase):
     def setUp(self):
         super().setUp()
         self.client.force_login(self.user_1)
+        self.mock_get_text_function_for_hindi()
+        translation.activate("hi")
         self.addCleanup(patch.stopall)
+        self.addCleanup(self.remove_mocked_prefix_from_get_text_function_for_hindi)
 
     @classmethod
     def increase_comment_count(cls):
@@ -141,6 +216,36 @@ class BaseCommentTest(TestCase):
         cls.flags += 1
         return instance
 
+    def _check_translatable_html_text(self, element, url):
+        if self.has_translatable_html_text(element):
+            self.assertEqual(True, self.has_string(element.text, self.prefix), (
+                f'No translation for the element {element.tag} with text "{element.text}" '
+                f'from view {self.get_view_from_url_or_none(url)}')
+            )
+
+    def _check_translatable_html_attrs(self, element, url):
+        for attr in self.translatable_attrs:
+            if self.has_translatable_html_attr(element, attr):
+                self.assertEqual(True, self.has_string(element.attrib.get(attr), self.prefix), (
+                    f'No translation for the attribute "{attr}" of the element {element.tag} with the '
+                    f'value "{element.attrib.get(attr)}" from view {self.get_view_from_url_or_none(url)}')
+                )
+
+    def assertHtmlTranslated(self, html, url=None):
+        root = fromstring(html)
+        sel = CSSSelector('*')
+
+        for element in sel(root):
+            self._check_translatable_html_text(element, url)
+            self._check_translatable_html_attrs(element, url)
+
+    def assertTextTranslated(self, text, url=None):
+        self.assertEqual(
+            True,
+            self.has_string(text, self.prefix),
+            f'No translation for the text "{text}" from view {self.get_view_from_url_or_none(url)}'
+        )
+
 
 class BaseCommentManagerTest(BaseCommentTest):
     content_object_2 = None
@@ -177,11 +282,19 @@ class BaseCommentViewTest(BaseCommentTest):
         }
 
     @staticmethod
-    def get_url(reverse_name, pk, data=None):
+    def get_url(reverse_name, pk=None, data=None):
+        if pk:
+            url = reverse(reverse_name, args=[pk])
+        else:
+            url = reverse(reverse_name)
+
         if not data:
             data = {}
+
         query_string = '&'.join([f'{name}={quote_plus(str(value))}' for name, value in data.items()])
-        return reverse(reverse_name, args=[pk]) + f'?{query_string}'
+        if query_string:
+            return url + f'?{query_string}'
+        return url
 
 
 class BaseCommentFlagTest(BaseCommentViewTest):
