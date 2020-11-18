@@ -79,12 +79,20 @@ def has_valid_profile():
 
 
 def is_comment_admin(user):
-    return user.groups.filter(name='comment_admin').exists() or \
-           (user.has_perm('comment.delete_flagged_comment') and user.has_perm('comment.delete_comment'))
+    if settings.COMMENT_FLAGS_ALLOWED:
+        return user.groups.filter(name="comment_admin").exists() or (
+            user.has_perm("comment.delete_flagged_comment")
+            and user.has_perm("comment.delete_comment")
+        )
+    return False
 
 
 def is_comment_moderator(user):
-    return user.groups.filter(name='comment_moderator').exists() or user.has_perm('comment.delete_flagged_comment')
+    if settings.COMMENT_FLAGS_ALLOWED:
+        return user.groups.filter(name="comment_moderator").exists() or user.has_perm(
+            "comment.delete_flagged_comment"
+        )
+    return False
 
 
 def paginate_comments(comments, comments_per_page, current_page):

@@ -501,9 +501,14 @@ class APICommentDetailForFlagStateChangeTest(APIBaseTest):
 
     @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 0)
     def test_change_state_when_flagging_is_disabled(self):
+        response = self.client.post(self.get_url(), data=self.data)
+        self.assertEqual(response.status_code, 403)
+
+    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 1)
+    def test_change_state_when_comment_is_not_flagged(self):
         comment = self.comment_2
         self.assertFalse(comment.is_flagged)
-        response = self.client.post(self.get_url(), data=self.data)
+        response = self.client.post(self.get_url(comment.id), data=self.data)
         self.assertEqual(response.status_code, 400)
 
     def test_change_state_by_not_permitted_user(self):
