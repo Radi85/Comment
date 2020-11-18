@@ -12,7 +12,7 @@ from comment.messages import EmailInfo
 from comment.utils import (
     get_model_obj, has_valid_profile, get_comment_context_data, id_generator, get_comment_from_key,
     get_user_for_request, send_email_confirmation_request, process_anonymous_commenting, CommentFailReason,
-    get_gravatar_img, get_profile_instance)
+    get_gravatar_img, get_profile_instance, is_comment_moderator, is_comment_admin)
 from comment.tests.base import BaseCommentUtilsTest, Comment, RequestFactory
 
 
@@ -131,6 +131,14 @@ class CommentUtilsTest(BaseCommentUtilsTest):
         self.assertEqual(comment_context_data['comments'].paginator.per_page, 2)
         self.assertTrue(comment_context_data['comments'].has_next())
         self.assertEqual(comment_context_data[oauth], False)
+
+    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', False)
+    def test_is_comment_moderator_no_moderation(self):
+        self.assertFalse(is_comment_moderator(self.moderator))
+
+    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', False)
+    def test_is_comment_admin_no_moderation(self):
+        self.assertFalse(is_comment_admin(self.admin))
 
     def test_user_for_request(self):
         request = self.factory.get('/')

@@ -87,7 +87,6 @@ COMMENT_ALLOW_ANONYMOUS
 
 Should the anonymous commenting featured be allowed? Defaults to ``False``.
 
-
 COMMENT_FROM_EMAIL
 ^^^^^^^^^^^^^^^^^^^
 
