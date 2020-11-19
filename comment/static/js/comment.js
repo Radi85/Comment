@@ -1,5 +1,5 @@
 /*jslint browser: true */
-/*global window */
+/*global window, gettext */
 /*jslint plusplus: true */
 document.addEventListener('DOMContentLoaded', () => {
     'use strict';
@@ -11,15 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
         'Content-Type': 'application/x-www-form-urlencoded'
     };
     document.getElementsByClassName(".js-comment-input").value = '';
-
-    let getTranslatedString = str => {
-        try {
-            return gettext(str);
-        } catch (err) {
-            return str;
-        }
-    };
-
     let removeTargetElement = e => {
         let currentHeight = window.pageYOffset;
         window.location.replace("#");
@@ -151,9 +142,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 let replyNum = Number(replyNumberElement.innerText) + 1;
                 replyNumberElement.textContent = replyNum.toString();
                 if (replyNum > 1) {
-                    reply.textContent = getTranslatedString("Replies");
+                    reply.textContent = gettext("Replies");
                 } else {
-                    reply.textContent = getTranslatedString("Reply");
+                    reply.textContent = gettext("Reply");
                 }
                 commentCount(1);
             }
@@ -170,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.history.replaceState({}, document.title, clean_uri);
             }
         }).catch(error => {
-            alert(getTranslatedString("Unable to post your comment!, please try again"));
+            alert(gettext("Unable to post your comment!, please try again"));
         });
     };
 
@@ -191,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
             textAreaElement.value = value;
             textAreaElement.setAttribute("style", "height: " + textAreaElement.scrollHeight + "px;");
         }).catch(error => {
-            alert(getTranslatedString("You can't edit this comment"));
+            alert(gettext("You can't edit this comment"));
         });
     };
 
@@ -214,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
            let updatedContentElement = stringToDom(data, '.js-updated-comment');
            form.parentElement.replaceWith(updatedContentElement);
         }).catch(error => {
-           alert(getTranslatedString("Modification didn't take effect!, please try again"));
+           alert(gettext("Modification didn't take effect!, please try again"));
         });
     };
 
@@ -292,9 +283,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 replyNumberElement.textContent = replyNum.toString();
 
                 if (replyNum > 1) {
-                    replyLinkElement.textContent = getTranslatedString("Replies");
+                    replyLinkElement.textContent = gettext("Replies");
                 } else {
-                    replyLinkElement.textContent = getTranslatedString("Reply");
+                    replyLinkElement.textContent = gettext("Reply");
                 }
                 // update total count of comments
                 commentCount(-1);
@@ -304,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
             commentElement.remove();
 
         }).catch(error => {
-            alert(getTranslatedString("Unable to delete your comment!, please try again"));
+            alert(gettext("Unable to delete your comment!, please try again"));
         });
     };
 
@@ -361,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     changeReactionCount(parentReactionEle, data.likes, data.dislikes);
                 }
             }).catch(error => {
-                alert(getTranslatedString("Reaction couldn't be processed!, please try again"));
+                alert(gettext("Reaction couldn't be processed!, please try again"));
             });
         };
 
@@ -468,7 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 createInfoElement(flagButton.closest('.js-parent-comment'), data.status, data.msg);
             }
         }).catch(error => {
-            alert(getTranslatedString("Flagging couldn't be processed!, please try again"));
+            alert(gettext("Flagging couldn't be processed!, please try again"));
         });
     };
 
@@ -514,9 +505,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleText = readMoreButton => {
         readMoreButton.previousElementSibling.classList.toggle('d-none');
         if (readMoreButton.previousElementSibling.classList.contains('d-none')) {
-           readMoreButton.innerHTML = getTranslatedString("read more ...");
+           readMoreButton.innerHTML = gettext("read more ...");
         } else {
-           readMoreButton.innerHTML = getTranslatedString("read less");
+           readMoreButton.innerHTML = gettext("read less");
         }
     };
 
@@ -544,26 +535,26 @@ document.addEventListener('DOMContentLoaded', () => {
             if (state === 3) {
                 changeStateButton.firstElementChild.classList.toggle("flag-rejected");
                 title = changeStateButton.firstElementChild.classList.contains("flag-rejected")
-                    ? getTranslatedString('Flag rejected')
-                    : getTranslatedString('Reject the flag');
+                    ? gettext('Flag rejected')
+                    : gettext('Reject the flag');
                 const contentModifiedBtn = changeStateButton.parentElement.querySelector('.js-flag-resolve');
                 if (data.state === 3) {
                     if (contentModifiedBtn) {
                        contentModifiedBtn.firstElementChild.classList.remove("flag-resolved");
-                        contentModifiedBtn.setAttribute('title', getTranslatedString('Resolve the flag'));
+                        contentModifiedBtn.setAttribute('title', gettext('Resolve the flag'));
                     }
                     commentBodyElement.classList.remove('flagged-comment');
                 }
             } else if (state === 4) {
                 changeStateButton.firstElementChild.classList.toggle("flag-resolved");
                 title = changeStateButton.firstElementChild.classList.contains("flag-resolved")
-                    ? getTranslatedString('Flag resolved')
-                    : getTranslatedString('Resolve the flag');
+                    ? gettext('Flag resolved')
+                    : gettext('Resolve the flag');
                 let rejectBtn = changeStateButton.parentElement.querySelector('.js-flag-reject');
                 if (data.state === 4) {
                     if (rejectBtn) {
                         rejectBtn.firstElementChild.classList.remove("flag-rejected");
-                        rejectBtn.setAttribute('title', getTranslatedString('Reject the flag'));
+                        rejectBtn.setAttribute('title', gettext('Reject the flag'));
                     }
                     commentBodyElement.classList.remove('flagged-comment');
                 }
