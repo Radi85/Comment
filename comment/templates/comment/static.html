@@ -3,4 +3,9 @@
 <script src="{% static 'js/comment.js' %}"></script>
 {% if is_translation_allowed %}
 <script type="text/javascript" src="{% url 'comment:javascript-catalog' %}"></script>
+{% else %}
+<script>
+    /* This will allow django to detect strings for javascript translations */
+    const gettext = str => str;
+</script>
 {% endif %}
