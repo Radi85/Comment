@@ -1,11 +1,14 @@
 from django.urls import path, re_path
+from django.views.decorators.cache import cache_page
 from django.views.i18n import JavaScriptCatalog
 
+from comment import _get_version
 from comment.views import (
     CreateComment, UpdateComment, DeleteComment, SetReaction, SetFlag, ChangeFlagState,
     ConfirmComment)
 
 app_name = 'comment'
+
 
 urlpatterns = [
     path('create/', CreateComment.as_view(), name='create'),
@@ -16,5 +19,9 @@ urlpatterns = [
     path('<int:pk>/flag/state/change/', ChangeFlagState.as_view(), name='flag-change-state'),
     re_path(r'^confirm/(?P<key>[^/]+)/$', ConfirmComment.as_view(), name='confirm-comment'),
     # javascript translations
-    path('jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),
+    # The value returned by _get_version() must change when translations change.
+    path(
+        'jsi18n/',
+        cache_page(86400, key_prefix='js18n-%s' % _get_version())(JavaScriptCatalog.as_view()),
+        name='javascript-catalog'),
 ]
