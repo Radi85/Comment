@@ -13,6 +13,8 @@ Welcome to django-comments-dab's documentation!
    styling
    example
    settings
+   i18n
+   contributing
    Changelog
    License
    help
