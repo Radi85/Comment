@@ -1,0 +1,79 @@
+====================
+Internationalization
+====================
+
+django-comments-dab is i18n ready. Please, consider extending support for your language if it's not listed below. At the moment it's available only in:
+
+ * English, **en** (default language)
+ * Hindi, **hi**
+
+- To enable internationalization in your django applications, in your ``settings`` file, set
+
+.. code:: python
+
+    USE_I18N = True
+    USE_L18N = True
+    COMMENT_ALLOW_TRANSLATION = True
+
+- To generate the translation files, run:
+
+.. code:: sh
+
+    python manage.py compilemessages
+
+
+Adding Support for Translation
+------------------------------
+
+We would love to expand this projects to support as many languages as possible. In case your native language is not yet supported, it would be really nice if you could take the time to add translations.
+To add translation support for your native language:
+
+* Please follow the guidelines for :ref:`setting up the project<Development>`.
+
+* Find out the ISO_639-1_ code for your language.
+
+.. _ISO_639-1: https://en.wikipedia.org/wiki/ISO_639-1
+
+* Now that you have setup the project, from the root directory of your django project, run:
+
+.. code:: sh
+
+    python manage.py makemessages -l my_language_code
+    # for generating translations corresponding to javascript code
+    python manage.py makemessages -l my_language_code -d djangojs
+
+* This will create two files with the extension ``.po`` inside the ``locale/{language_code}/LC_MESSAGES/`` directory.
+
+* After adding translation to both the files, please run the following command to verify everything is working:
+
+.. code:: sh
+
+    python manage.py compilemessages -l my_language_code
+
+* If you don't see an error in the last command, your translations have been added in the correct format.
+
+* Please consider performing a couple of operations with the UI on the ``example`` app. These guidelines help you in doing so.
+
+    -  Change the language for the ``example`` app.
+
+    .. code:: python
+
+        # in the file test/settings.py
+        LANGUAGE_CODE = '{my_language_code}'
+
+    -  Now, you may test the app by running:
+
+    .. code:: sh
+
+        python manage.py runserver # or docker-compose up(if you are using docker)
+
+    - Open the ``URL`` ``localhost:8000`` inside your browser.
+
+    *  If everything looks fine, you are good to go to the final step.
+
+* You are now ready push_ the changes(the two ``.po`` files) to your forked repository and make a pull-request_ from there.
+
+.. _push: https://gist.github.com/mindplace/b4b094157d7a3be6afd2c96370d39fad
+.. _pull-request: https://docs.github.com/en/free-pro-team@latest/desktop/contributing-and-collaborating-using-github-desktop/creating-an-issue-or-pull-request
+
+Thanks for taking the time to add translations, you are awesome!.

@@ -1,6 +1,5 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'css/comment.css' %}">
-<script src="{% static 'js/comment.js' %}"></script>
 {% if is_translation_allowed %}
 <script type="text/javascript" src="{% url 'comment:javascript-catalog' %}"></script>
 {% else %}
@@ -9,3 +8,4 @@
     const gettext = str => str;
 </script>
 {% endif %}
+<script src="{% static 'js/comment.js' %}"></script>
