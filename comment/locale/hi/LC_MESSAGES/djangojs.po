@@ -1,0 +1,74 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# ABHYUDAI <EMAIL@ADDRESS>, 2020.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-11-24 08:38+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: ABHYUDAI <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+#: comment/static/js/comment.js:145 comment/static/js/comment.js:286
+msgid "Replies"
+msgstr "जवाब"
+
+#: comment/static/js/comment.js:147 comment/static/js/comment.js:288
+msgid "Reply"
+msgstr "जवाब दें"
+
+#: comment/static/js/comment.js:164
+msgid "Unable to post your comment!, please try again"
+msgstr "आपकी टिप्पणी पोस्ट करने में असमर्थ!, कृपया पुनः प्रयास करें"
+
+#: comment/static/js/comment.js:185
+msgid "You can't edit this comment"
+msgstr "आप इस टिप्पणी को बदल नहीं सकते"
+
+#: comment/static/js/comment.js:208
+msgid "Modification didn't take effect!, please try again"
+msgstr "संशोधन प्रभावी नहीं हुआ!, कृपया पुनः प्रयास करें"
+
+#: comment/static/js/comment.js:298
+msgid "Unable to delete your comment!, please try again"
+msgstr "आपकी टिप्पणी को हटाने में असमर्थ!, कृपया पुनः प्रयास करें"
+
+#: comment/static/js/comment.js:355
+msgid "Reaction couldn't be processed!, please try again"
+msgstr "प्रतिक्रिया संसाधित नहीं की जा सकी!, कृपया पुनः प्रयास करें"
+
+#: comment/static/js/comment.js:462
+msgid "Flagging couldn't be processed!, please try again"
+msgstr "फ़्लैगिंग को संसाधित नहीं किया जा सका!, कृपया पुनः प्रयास करें"
+
+#: comment/static/js/comment.js:508
+msgid "read more ..."
+msgstr "और पढ़ें ..."
+
+#: comment/static/js/comment.js:510
+msgid "read less"
+msgstr "कम पढ़ें"
+
+#: comment/static/js/comment.js:538
+msgid "Flag rejected"
+msgstr "फ्लैग को अस्वीकार कर दिया गया"
+
+#: comment/static/js/comment.js:539 comment/static/js/comment.js:557
+msgid "Reject the flag"
+msgstr "फ्लैग को अस्वीकार करें"
+
+#: comment/static/js/comment.js:544 comment/static/js/comment.js:552
+msgid "Resolve the flag"
+msgstr "फ्लैग को समाधान करें"
+
+#: comment/static/js/comment.js:551
+msgid "Flag resolved"
+msgstr "फ्लैग का समाधान कर दिया गया है"
