@@ -18,7 +18,7 @@ setup(
     include_package_data=True,
     author=u'Radico',
     author_email='mus.radi85@gmail.com',
-    maintainer='Radi Mustafa',
+    maintainer='Radi Mustafa, tinkerer',
     maintainer_email='mus.radi85@gmail.com',
     url='https://github.com/radi85/Comment',
     project_urls={

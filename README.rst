@@ -1,19 +1,3 @@
-.. image:: https://badge.fury.io/py/django-comments-dab.svg
-    :target: https://pypi.org/project/django-comments-dab/
-    :alt: pypi
-
-.. image:: https://img.shields.io/github/v/tag/radi85/Comment?color=gr
-    :target: https://github.com/Radi85/Comment/releases
-    :alt: tag
-
-.. image:: https://travis-ci.org/Radi85/Comment.svg?branch=master
-    :target: https://travis-ci.org/Radi85/Comment
-    :alt: build
-
-.. image:: https://coveralls.io/repos/github/Radi85/Comment/badge.svg
-    :target: https://coveralls.io/github/Radi85/Comment
-    :alt: coverage
-
 .. image:: https://img.shields.io/pypi/pyversions/django-comments-dab.svg
     :target: https://pypi.python.org/pypi/django-comments-dab/
     :alt: python
@@ -21,6 +5,14 @@
 .. image:: https://img.shields.io/pypi/djversions/django-comments-dab.svg
     :target: https://pypi.python.org/pypi/django-comments-dab/
     :alt: django
+
+.. image:: https://coveralls.io/repos/github/Radi85/Comment/badge.svg
+    :target: https://coveralls.io/github/Radi85/Comment
+    :alt: coverage
+
+.. image:: https://travis-ci.org/Radi85/Comment.svg?branch=master
+    :target: https://travis-ci.org/Radi85/Comment
+    :alt: build
 
 .. image:: https://readthedocs.org/projects/django-comment-dab/badge/?version=latest
     :target: https://django-comment-dab.readthedocs.io/?badge=latest
@@ -37,6 +29,25 @@
 .. image:: https://img.shields.io/pypi/dm/django-comments-dab
     :alt: downloads
 
+.. image:: https://badge.fury.io/py/django-comments-dab.svg
+    :target: https://pypi.org/project/django-comments-dab/
+    :alt: pypi
+
+.. image:: https://img.shields.io/github/v/tag/radi85/Comment?color=gr
+    :target: https://github.com/Radi85/Comment/releases
+    :alt: tag
+
+.. image:: https://img.shields.io/github/release-date/radi85/comment?color=blue
+    :target: #
+    :alt: Django-comment-dab Release Date
+
+.. image:: https://img.shields.io/github/commits-since/radi85/comment/latest/master
+    :target: #
+    :alt: Commits since latest release for a branch master
+
+.. image:: https://img.shields.io/github/last-commit/radi85/comment?color=blue
+    :target: #
+    :alt: Django-comment-dab last commit
 
 ===================
 django-comments-dab
