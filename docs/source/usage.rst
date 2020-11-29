@@ -183,3 +183,9 @@ Also, related to sending of email the following settings need to set.
 To further customize different attributes related to anonymous commenting, you may look into the `Settings`_ section for different configurations.
 
 .. _`Settings`: https://django-comment-dab.readthedocs.io/settings.html/
+
+
+5. Enable gravatar:
+^^^^^^^^^^^^^^^^^^^^
+
+To enable using gravatar for profile pics set ``COMMENT_USE_GRAVATAR`` in settings.py to ``True``

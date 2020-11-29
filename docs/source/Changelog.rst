@@ -1,13 +1,22 @@
 Changelog
 =========
 
+2.5.0
+------
+
+- Add django 3.1 compatibility.
+- Add gravatar support.
+- Add i18n support.
+- Include static files implicitly. ``include_static`` template tag is deprecated.
+- Bugs fixes.
+
 2.0.0
 ------
 
 - Allow commenting by unauthenticated users (Anonymous comment).
 - Add permalink to comments.
 - Remove JQuery from dependencies and replace it with Vanilla JS.
-- Update mixins and add content type and parent id validators.
+- Update mixin and add content type and parent id validators.
 - Bug fixes.
 
 1.6.7
