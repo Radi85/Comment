@@ -8,7 +8,7 @@ from rest_framework import status
 from comment.conf import settings
 from comment.models import Comment, FlagInstanceManager
 from comment.messages import ContentTypeError, EmailError
-from comment.api.serializers import get_profile_model, get_user_fields, UserSerializer, CommentCreateSerializer, \
+from comment.api.serializers import get_profile_model, get_user_fields, UserSerializerDAB, CommentCreateSerializer, \
     CommentSerializer
 from comment.api.permissions import (
     IsOwnerOrReadOnly, FlagEnabledPermission, CanChangeFlaggedCommentState
@@ -669,17 +669,17 @@ class APICommentSerializers(APIBaseTest):
     def test_user_serializer(self):
         # PROFILE_MODEL_NAME not provided
         patch.object(settings, 'PROFILE_MODEL_NAME', None).start()
-        profile = UserSerializer.get_profile(self.user_1)
+        profile = UserSerializerDAB.get_profile(self.user_1)
         self.assertIsNone(profile)
 
         # PROFILE_MODEL_NAME is wrong
         patch.object(settings, 'PROFILE_MODEL_NAME', 'wrong').start()
-        profile = UserSerializer.get_profile(self.user_1)
+        profile = UserSerializerDAB.get_profile(self.user_1)
         self.assertIsNone(profile)
 
         # success
         patch.object(settings, 'PROFILE_MODEL_NAME', 'userprofile').start()
-        profile = UserSerializer.get_profile(self.user_1)
+        profile = UserSerializerDAB.get_profile(self.user_1)
         self.assertIsNotNone(profile)
 
     def test_comment_create_serializer(self):

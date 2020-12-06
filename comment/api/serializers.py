@@ -28,13 +28,13 @@ def get_user_fields():
     return 'id', 'username', 'email', 'profile'
 
 
-class ProfileSerializer(serializers.ModelSerializer):
+class ProfileSerializerDAB(serializers.ModelSerializer):
     class Meta:
         model = get_profile_model()
         fields = getattr(settings, 'COMMENT_PROFILE_API_FIELDS', '__all__')
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializerDAB(serializers.ModelSerializer):
     profile = serializers.SerializerMethodField()
 
     class Meta:
@@ -47,11 +47,11 @@ class UserSerializer(serializers.ModelSerializer):
         profile = get_profile_instance(obj)
         if not profile:
             return None
-        return ProfileSerializer(profile).data
+        return ProfileSerializerDAB(profile).data
 
 
 class BaseCommentSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
+    user = UserSerializerDAB(read_only=True)
     parent = serializers.SerializerMethodField()
     replies = serializers.SerializerMethodField()
     reply_count = serializers.SerializerMethodField()
