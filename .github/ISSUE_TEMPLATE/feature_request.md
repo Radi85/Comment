@@ -1,20 +1,18 @@
 ---
-name: Feature request
+name: ✨ Feature request
 about: Suggest an idea for this project
-title: ''
 labels: feature
-assignees: ''
-
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+### Environment
+* Python version: 
+* django-comments-dab version: 
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+### Proposed Functionality
+Describe in detail the new functionality you are proposing.
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+Include any specific changes to work flows, data models, or the user interface.
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+### Use Case
+
+### Database Changes
