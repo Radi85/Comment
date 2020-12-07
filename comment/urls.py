@@ -2,7 +2,7 @@ from django.urls import path, re_path
 from django.views.decorators.cache import cache_page
 from django.views.i18n import JavaScriptCatalog
 
-from comment import _get_version
+from comment import __version__
 from comment.views import (
     CreateComment, UpdateComment, DeleteComment, SetReaction, SetFlag, ChangeFlagState,
     ConfirmComment)
@@ -22,6 +22,6 @@ urlpatterns = [
     # The value returned by _get_version() must change when translations change.
     path(
         'jsi18n/',
-        cache_page(86400, key_prefix='js18n-%s' % _get_version())(JavaScriptCatalog.as_view()),
+        cache_page(86400, key_prefix='js18n-%s' % __version__)(JavaScriptCatalog.as_view()),
         name='javascript-catalog'),
 ]
