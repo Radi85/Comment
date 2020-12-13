@@ -1,6 +1,9 @@
 django
 djangorestframework
 # used for testing/linting
+pytest-django
+pytest-cov
+pytest-pythonpath
 Pillow
 lxml
 beautifulsoup4

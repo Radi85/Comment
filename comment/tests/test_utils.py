@@ -1,4 +1,3 @@
-from unittest import TestCase
 from unittest.mock import patch
 
 from django.utils import timezone
@@ -337,36 +336,34 @@ class TestProcessAnonymousCommenting(BaseAnonymousCommentTest, BaseCommentUtilsT
         self.assertEqual(EmailInfo.CONFIRMATION_SENT, response)
 
 
-class UtilsTest(TestCase):
+class TestUtils:
     """Test general purpose utilities that aren't necessarily related to a comment"""
-
-    def setUp(self):
-        self.len_id = 6
+    len_id = 6
 
     def test_id_generator_length(self):
-        self.assertEqual(self.len_id, len(id_generator()))
+        assert self.len_id == len(id_generator())
 
     def test_id_generator_generates_different_ids(self):
-        self.assertNotEqual(id_generator(), id_generator())
+        assert id_generator() != id_generator()
 
     def test_id_generator_prefix(self):
         prefix = 'comment'
         output = id_generator(prefix=prefix)
-        self.assertEqual(True, output.startswith(prefix))
-        self.assertEqual(self.len_id + len(prefix), len(output))
+        assert output.startswith(prefix) is True
+        assert self.len_id + len(prefix) == len(output)
 
     def test_id_generator_suffix(self):
         suffix = 'comment'
         output = id_generator(suffix=suffix)
-        self.assertEqual(True, output.endswith(suffix))
-        self.assertEqual(self.len_id + len(suffix), len(output))
+        assert output.endswith(suffix) is True
+        assert self.len_id + len(suffix) == len(output)
 
     def test_id_generator_chars(self):
-        import string   # flake8:no qa
+        import string
         chars = string.ascii_uppercase
         output = id_generator(chars=chars)
-        self.assertEqual(output, output.upper())
+        assert output == output.upper()
 
     def test_id_generator_len(self):
         len_id = 8
-        self.assertEqual(len_id, len(id_generator(len_id=len_id)))
+        assert len_id == len(id_generator(len_id=len_id))

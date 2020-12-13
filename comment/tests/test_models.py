@@ -40,16 +40,16 @@ class CommentModelTest(BaseCommentManagerTest):
         comment = self.create_anonymous_comment(posted=timezone.now() - timezone.timedelta(days=1))
         self.assertFalse(comment.is_edited)
 
+    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 1)
     def test_replies_method(self):
-        self.assertEqual(self.parent_comment_2.replies().count(), 3)
-
-        settings.COMMENT_FLAGS_ALLOWED = 1
+        init_count = self.parent_comment_2.replies().count()
         reply = self.parent_comment_2.replies().first()
         self.create_flag_instance(self.user_1, reply)
         self.create_flag_instance(self.user_2, reply)
-        # default replies hide flagged comment
-        self.assertEqual(self.parent_comment_2.replies().count(), 2)
-        self.assertEqual(self.parent_comment_2.replies(include_flagged=True).count(), 3)
+        with patch.object(settings, 'COMMENT_SHOW_FLAGGED', False):
+            # default replies hide flagged comment
+            self.assertEqual(self.parent_comment_2.replies().count(), init_count - 1)
+        self.assertEqual(self.parent_comment_2.replies(include_flagged=True).count(), init_count)
 
     @patch('comment.models.comments.hasattr')
     def test_is_flagged_property(self, mocked_hasattr):

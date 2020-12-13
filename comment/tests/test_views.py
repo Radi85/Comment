@@ -196,12 +196,12 @@ class TestDeleteComment(BaseCommentViewTest):
         self.assertEqual(response.status_code, 403)
 
         # moderator can delete flagged comment
-        settings.COMMENT_FLAGS_ALLOWED = 1
-        self.create_flag_instance(self.user_1, comment)
-        self.create_flag_instance(self.user_2, comment)
-        response = self.client.post(self.get_url('comment:delete', comment.id), data=self.data)
-        self.assertEqual(response.status_code, 200)
-        self.assertRaises(Comment.DoesNotExist, Comment.objects.get, id=comment.id)
+        with patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 1):
+            self.create_flag_instance(self.user_1, comment)
+            self.create_flag_instance(self.user_2, comment)
+            response = self.client.post(self.get_url('comment:delete', comment.id), data=self.data)
+            self.assertEqual(response.status_code, 200)
+            self.assertRaises(Comment.DoesNotExist, Comment.objects.get, id=comment.id)
 
     def test_delete_comment_by_admin(self):
         comment = self.create_comment(self.content_object_1)
@@ -344,7 +344,6 @@ class SetFlagViewTest(BaseCommentFlagTest):
 
     @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 0)
     def test_set_flag_when_flagging_not_enabled(self):
-        settings.COMMENT_FLAGS_ALLOWED = 0
         _url = self.get_url('comment:flag', self.comment.id)
         self.flag_data['reason'] = 1
         response = self.client.post(_url, data=self.flag_data)
@@ -455,6 +454,7 @@ class ChangeFlagStateViewTest(BaseCommentFlagTest):
         self.assertEqual(response.json()['state'], 0)
         self.assertEqual(self.comment.flag.state, self.comment.flag.FLAGGED)
 
+    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 1)
     def test_change_flag_state_success(self):
         self.assertTrue(self.comment.is_flagged)
         self.client.force_login(self.moderator)

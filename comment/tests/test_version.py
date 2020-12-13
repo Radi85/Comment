@@ -1,15 +1,14 @@
 from unittest.mock import patch, mock_open
 
-from django.test import TestCase
+import pytest
 
 from comment import _get_version
 
 
-class TestGetVersion(TestCase):
-    def test_when_versions_startswith_v(self):
-        with patch('builtins.open', mock_open(read_data='v2.0.0'), create=True):
-            self.assertEqual('2.0.0', _get_version())
-
-    def test_when_versions_does_not_startwith_v(self):
-        with patch('builtins.open', mock_open(read_data='2.0.0'), create=True):
-            self.assertEqual('2.0.0', _get_version())
+@pytest.mark.parametrize('version, expected', [
+    ('v2.0.0', '2.0.0'),
+    ('2.0.0', '2.0.0'),
+])
+def test_get_version(version, expected):
+    with patch('builtins.open', mock_open(read_data=version), create=True):
+        assert _get_version() == expected
