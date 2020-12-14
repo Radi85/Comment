@@ -7,7 +7,7 @@ from rest_framework import serializers
 
 from comment.conf import settings
 from comment.models import Comment, Flag, Reaction
-from comment.utils import get_model_obj, process_anonymous_commenting, get_user_for_request, get_profile_instance
+from comment.utils import process_anonymous_commenting, get_user_for_request, get_profile_instance
 from comment.messages import EmailError
 
 
@@ -96,12 +96,8 @@ class CommentCreateSerializer(BaseCommentSerializer):
         fields = ('id', 'user', 'email', 'content', 'parent', 'posted', 'edited', 'reply_count', 'replies', 'urlhash')
 
     def __init__(self, *args, **kwargs):
-        self.model_name = kwargs['context'].get('model_name')
-        self.app_name = kwargs['context'].get('app_name')
-        self.model_id = kwargs['context'].get('model_id')
-        self.user = kwargs['context'].get('user')
-        self.parent_id = kwargs['context'].get('parent_id')
-        if kwargs['context']['request'].user.is_authenticated or not settings.COMMENT_ALLOW_ANONYMOUS:
+        user = kwargs['context']['request'].user
+        if user.is_authenticated or not settings.COMMENT_ALLOW_ANONYMOUS:
             del self.fields['email']
 
         super().__init__(*args, **kwargs)
@@ -117,16 +113,13 @@ class CommentCreateSerializer(BaseCommentSerializer):
         user = get_user_for_request(request)
         content = validated_data.get('content')
         email = validated_data.get('email')
-        parent_id = self.parent_id
         time_posted = timezone.now()
-        parent_comment = Comment.objects.get_parent_comment(parent_id)
-        model_object = get_model_obj(self.app_name, self.model_name, self.model_id)
 
         comment = Comment(
-            content_object=model_object,
+            content_object=self.context['model_obj'],
             content=content,
             user=user,
-            parent=parent_comment,
+            parent=self.context['parent_comment'],
             email=email,
             posted=time_posted
             )
