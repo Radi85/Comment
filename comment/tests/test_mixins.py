@@ -42,16 +42,16 @@ class CanCreateMixinTest(BaseCommentMixinTest):
         response = self.client.post(self.url, data=self.data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
 
-    @patch('comment.mixins.settings', COMMENT_ALLOW_ANONYMOUS=False)
-    def test_logged_out_user_permission(self, _):
+    @patch.object(settings, 'COMMENT_ALLOW_ANONYMOUS', False)
+    def test_logged_out_user_permission(self, ):
         self.client.logout()
         response = self.client.post(self.url, data=self.data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 302)
         # user will be redirected to login
         self.assertEqual(response.url, settings.LOGIN_URL + '?next=/comment/create/')
 
+    @patch.object(settings, 'COMMENT_ALLOW_ANONYMOUS', True)
     def test_permission_when_anonymous_comment_allowed(self):
-        self.assertTrue(settings.COMMENT_ALLOW_ANONYMOUS)
         self.client.logout()
         response = self.client.post(self.url, data=self.data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)

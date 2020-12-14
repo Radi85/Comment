@@ -9,7 +9,7 @@ from django.contrib import messages
 from comment.models import Comment
 from comment.forms import CommentForm
 from comment.utils import (
-    get_comment_context_data, get_model_obj, get_comment_from_key, process_anonymous_commenting,
+    get_comment_context_data, get_comment_from_key, process_anonymous_commenting,
     get_user_for_request, CommentFailReason
 )
 from comment.mixins import CanCreateMixin, CanEditMixin, CanDeleteMixin
@@ -47,22 +47,16 @@ class CreateComment(CanCreateMixin, BaseCommentView):
             return ['comment/comments/child_comment.html']
 
     def form_valid(self, form):
-        app_name = self.app_name
-        model_name = self.model_name
-        model_id = self.model_id
-        model_object = get_model_obj(app_name, model_name, model_id)
-        parent_id = self.parent_id
-        parent_comment = Comment.objects.get_parent_comment(parent_id)
         user = get_user_for_request(self.request)
 
         comment_content = form.cleaned_data['content']
         email = form.cleaned_data.get('email', None) or user.email
         time_posted = timezone.now()
         _comment = Comment(
-            content_object=model_object,
+            content_object=self.model_obj,
             content=comment_content,
             user=user,
-            parent=parent_comment,
+            parent=self.parent_comment,
             email=email,
             posted=time_posted
             )
