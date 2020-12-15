@@ -31,6 +31,12 @@ declare the ``COMMENT_PROFILE_API_FIELDS`` tuple inside your ``settings.py``:
         # the field names below must be similar to your profile model fields
         COMMENT_PROFILE_API_FIELDS = ('display_name', 'birth_date', 'image')
 
+
+COMMENT_USER_API_FIELDS
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+The fields returned for the ``user`` serializer by the REST API. Defaults to ``['id', 'username', 'email']``.
+
 COMMENT_FLAGS_ALLOWED
 ^^^^^^^^^^^^^^^^^^^^^^
 

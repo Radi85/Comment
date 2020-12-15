@@ -45,15 +45,6 @@ class APICommentSerializers(APIBaseTest):
             profile = get_profile_model()
             self.assertIsNotNone(profile)
 
-    def test_get_user_fields(self):
-        fields = get_user_fields()
-        self.assertEqual(fields, ('id', 'username', 'email', 'profile'))
-
-        mocked_hasattr = patch('comment.api.serializers.hasattr').start()
-        mocked_hasattr.return_value = True
-        fields = get_user_fields()
-        self.assertEqual(fields, ('id', 'username', 'email', 'profile', 'logentry'))
-
     def test_user_serializer(self):
         # PROFILE_MODEL_NAME not provided
         with patch.object(settings, 'PROFILE_MODEL_NAME', None):
@@ -195,3 +186,17 @@ class APICommentSerializers(APIBaseTest):
 
         serializer = CommentSerializer(self.comment_1, context={'flag_update': True})
         self.assertTrue(serializer.fields['content'].read_only)
+
+
+class TestProfileSerializer(APIBaseTest):
+    def test_default_fields(self):
+        fields = get_user_fields()
+        self.assertSetEqual(set(fields), set(settings.COMMENT_USER_API_FIELDS + ['profile']))
+
+    @patch('comment.api.serializers.isinstance')
+    @patch('comment.api.serializers.hasattr')
+    def test_has_image_field(self, mocked_hasattr, mocked_isinstance):
+        mocked_isinstance.return_value = True
+        mocked_hasattr.return_value = True
+        fields = get_user_fields()
+        self.assertIs('logentry' in fields, True)

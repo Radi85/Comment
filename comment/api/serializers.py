@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from django.apps import apps
+from django.db.models import ImageField
 
 from rest_framework import serializers
 
@@ -23,10 +24,12 @@ def get_profile_model():
 def get_user_fields():
     user_model = get_user_model()
     fields = user_model._meta.get_fields()
+    api_fields = list(settings.COMMENT_USER_API_FIELDS) + ['profile']
+    api_fields = list(set(api_fields))
     for field in fields:
-        if hasattr(field, "upload_to"):
-            return 'id', 'username', 'email', 'profile', field.name
-    return 'id', 'username', 'email', 'profile'
+        if hasattr(field, "upload_to") and isinstance(field, ImageField):
+            api_fields.append(field.name)
+    return api_fields
 
 
 class ProfileSerializerDAB(serializers.ModelSerializer):
@@ -41,7 +44,7 @@ class UserSerializerDAB(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = get_user_fields()
-        lookup_field = 'username'
+        lookup_field = model.USERNAME_FIELD
 
     @staticmethod
     def get_profile(obj):
@@ -164,9 +167,14 @@ class ReactionSerializer(serializers.ModelSerializer):
         users = {'likes': [], 'dislikes': []}
         for instance in obj.reactions.all():
             if instance.reaction_type == instance.ReactionType.LIKE:
-                users['likes'].append({'id': instance.user.id, 'username': instance.user.username})
+                users['likes'].append({
+                    'id': instance.user.id,
+                    'username': getattr(instance.user, instance.user.USERNAME_FIELD)
+                    })
             else:
-                users['dislikes'].append({'id': instance.user.id, 'username': instance.user.username})
+                users['dislikes'].append({
+                    'id': instance.user.id, 'username': getattr(instance.user, instance.user.USERNAME_FIELD)
+                    })
         return users
 
 
