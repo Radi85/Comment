@@ -44,7 +44,7 @@ class UserSerializerDAB(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = get_user_fields()
-        lookup_field = 'username'
+        lookup_field = model.USERNAME_FIELD or 'username'
 
     @staticmethod
     def get_profile(obj):
