@@ -662,14 +662,14 @@ class APICommentSerializers(APIBaseTest):
         self.assertEqual(fields, ['id', 'username', 'email', 'profile'])
 
         # change fields
-        patch.object(settings, 'COMMENT_USER_API_FIELDS', ['email',]).start()
+        patch.object(settings, 'COMMENT_USER_API_FIELDS', ['email', ]).start()
         fields = get_user_fields()
-        self.assertEqual(fields, ['email',])
+        self.assertEqual(fields, ['email', 'profile', ])
 
         mocked_hasattr = patch('comment.api.serializers.hasattr').start()
         mocked_hasattr.return_value = True
         fields = get_user_fields()
-        self.assertEqual(fields, ['email'])
+        self.assertEqual(fields, ['email', 'profile'])
 
     def test_user_serializer(self):
         # PROFILE_MODEL_NAME not provided

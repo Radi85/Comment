@@ -10,6 +10,7 @@ from comment.conf import settings
 from comment.models import Comment, Flag, Reaction
 from comment.utils import process_anonymous_commenting, get_user_for_request, get_profile_instance
 from comment.messages import EmailError
+from collections import OrderedDict
 
 
 def get_profile_model():
@@ -23,13 +24,14 @@ def get_profile_model():
 def get_user_fields():
     user_model = get_user_model()
     fields = user_model._meta.get_fields()
-    api_fields = set(settings.COMMENT_USER_API_FIELDS)
-    api_fields.add('profile')
+    api_fields = settings.COMMENT_USER_API_FIELDS
+    api_fields.append('profile')
+    # remove duplicates while preseving order
+    api_fields = list(OrderedDict((x, 1) for x in api_fields))
     for field in fields:
         if hasattr(field, "upload_to") and isinstance(field, ImageField):
-            api_fields.add(field.name)
+            api_fields.append(field.name)
     return list(api_fields)
-
 
 
 class ProfileSerializerDAB(serializers.ModelSerializer):
