@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from django.apps import apps
-from django.models import ImageField
+from django.db.models import ImageField
 
 from rest_framework import serializers
 
