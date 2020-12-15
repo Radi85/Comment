@@ -23,11 +23,13 @@ def get_profile_model():
 def get_user_fields():
     user_model = get_user_model()
     fields = user_model._meta.get_fields()
-    api_fields = settings.COMMENT_USER_API_FIELDS
+    api_fields = set(settings.COMMENT_USER_API_FIELDS)
+    api_fields.add('profile')
     for field in fields:
         if hasattr(field, "upload_to") and isinstance(field, ImageField):
-            api_fields.append(field.name)
-    return api_fields
+            api_fields.add(field.name)
+    return list(api_fields)
+
 
 
 class ProfileSerializerDAB(serializers.ModelSerializer):
