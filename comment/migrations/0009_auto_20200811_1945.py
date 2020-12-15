@@ -7,8 +7,9 @@ import django.utils.timezone
 def set_default_email(apps, schema_editor):
     comment_model = apps.get_model('comment', 'Comment')
     for comment in comment_model.objects.all():
-        comment.email = comment.user.email
-        comment.save(update_fields=['email'])
+        if getattr(comment.user, 'email', False):
+            comment.email = comment.user.email
+            comment.save(update_fields=['email'])
 
 
 class Migration(migrations.Migration):

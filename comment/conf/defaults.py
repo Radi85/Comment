@@ -4,6 +4,7 @@ from django.conf import settings
 PROFILE_APP_NAME = None
 PROFILE_MODEL_NAME = None
 COMMENT_PROFILE_API_FIELDS = []
+COMMENT_USER_API_FIELDS = ['id', 'username', 'email', 'profile']
 
 COMMENT_USE_GRAVATAR = False
 

@@ -69,7 +69,8 @@ class Comment(models.Model):
 
     def _set_email(self):
         if self.user:
-            self.email = self.user.email
+            if getattr(self.user, 'email', False):
+                self.email = self.user.email
 
     def save(self, *args, **kwargs):
         self._set_unique_urlhash()

@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from django.apps import apps
+from django.models import ImageField
 
 from rest_framework import serializers
 
@@ -22,10 +23,11 @@ def get_profile_model():
 def get_user_fields():
     user_model = get_user_model()
     fields = user_model._meta.get_fields()
+    api_fields = settings.COMMENT_USER_API_FIELDS
     for field in fields:
-        if hasattr(field, "upload_to"):
-            return 'id', 'username', 'email', 'profile', field.name
-    return 'id', 'username', 'email', 'profile'
+        if hasattr(field, "upload_to") and isinstance(field, ImageField):
+            api_fields.append(field.name)
+    return api_fields
 
 
 class ProfileSerializerDAB(serializers.ModelSerializer):
