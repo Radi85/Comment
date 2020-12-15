@@ -1,5 +1,4 @@
 from django.core.exceptions import ValidationError
-from django.contrib.contenttypes.models import ContentType
 from rest_framework import generics, permissions, status
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -23,11 +22,8 @@ class CommentCreate(ValidatorMixin, generics.CreateAPIView):
     def get_serializer_context(self):
         self.validate(self.request)
         context = super().get_serializer_context()
-        context['user'] = self.request.user
-        context['model_name'] = self.model_name
-        context['app_name'] = self.app_name
-        context['model_id'] = self.model_id
-        context['parent_id'] = self.parent_id
+        context['model_obj'] = self.model_obj
+        context['parent_comment'] = self.parent_comment
         context['email'] = self.request.GET.get('email', None)
         return context
 
@@ -39,12 +35,7 @@ class CommentList(ContentTypeValidator, generics.ListAPIView):
 
     def get_queryset(self):
         self.validate(self.request)
-        model_name = self.model_name
-        pk = self.model_id
-        content_type_model = ContentType.objects.get(model=model_name.lower())
-        model_class = content_type_model.model_class()
-        model_obj = model_class.objects.filter(id=pk).first()
-        return Comment.objects.filter_parents_by_object(model_obj)
+        return Comment.objects.filter_parents_by_object(self.model_obj)
 
 
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):

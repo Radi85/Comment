@@ -32,9 +32,7 @@ class BaseValidatorMixin:
 
 
 class ContentTypeValidator(BaseValidatorMixin):
-    app_name = None
-    model_name = None
-    model_id = None
+    model_obj = None
 
     def validate_app_name(self, app_name):
         if not app_name:
@@ -85,14 +83,14 @@ class ContentTypeValidator(BaseValidatorMixin):
         app_name = request.GET.get("app_name") or request.POST.get("app_name")
         model_name = request.GET.get("model_name") or request.POST.get("model_name")
         model_id = request.GET.get("model_id") or request.POST.get("model_id")
-        self.app_name = self.validate_app_name(app_name)
-        self.model_name = self.validate_model_name(model_name)
-        self.model_id = self.validate_model_id(model_id)
-        self.validate_model_object(self.app_name, self.model_name, self.model_id)
+        validated_app_name = self.validate_app_name(app_name)
+        validated_model_name = self.validate_model_name(model_name)
+        validated_model_id = self.validate_model_id(model_id)
+        self.model_obj = self.validate_model_object(validated_app_name, validated_model_name, validated_model_id)
 
 
 class ParentIdValidator(BaseValidatorMixin):
-    parent_id = None
+    parent_comment = None
 
     def validate_parent_id(self, parent_id):
         try:
@@ -116,8 +114,8 @@ class ParentIdValidator(BaseValidatorMixin):
         parent_id = request.GET.get("parent_id") or request.POST.get("parent_id")
         if not parent_id or parent_id == '0':
             return
-        self.parent_id = self.validate_parent_id(parent_id)
-        self.validate_comment_object(model_id, self.parent_id)
+        validated_parent_id = self.validate_parent_id(parent_id)
+        self.parent_comment = self.validate_comment_object(model_id, validated_parent_id)
 
 
 class ValidatorMixin(ContentTypeValidator, ParentIdValidator):

@@ -695,24 +695,14 @@ class APICommentSerializers(APIBaseTest):
         request = factory.get('/')
         request.user = self.user_1
         data = {
-            'model_name': 'post',
-            'app_name': 'post',
-            'model_id': self.post_1.id,
-            'user': self.user_1,
-            'parent_id': None,
+            'model_obj': self.post_1,
+            'parent_comment': None,
             'request': request
         }
         settings.COMMENT_ALLOW_ANONYMOUS = False
 
         serializer = CommentCreateSerializer(context=data)
         self.assertIsNone(serializer.fields.get('email'))
-        comment = serializer.create(validated_data={'content': 'test'})
-        self.increase_count(parent=True)
-        self.comment_count_test()
-        self.assertIsNotNone(comment)
-
-        data['parent_id'] = 0
-        serializer = CommentCreateSerializer(context=data)
         comment = serializer.create(validated_data={'content': 'test'})
         self.increase_count(parent=True)
         self.comment_count_test()
@@ -728,7 +718,7 @@ class APICommentSerializers(APIBaseTest):
         self.assertEqual(replies, [])
         self.assertEqual(reply_count, 0)
 
-        data['parent_id'] = 1
+        data['parent_comment'] = self.comment_1
         serializer = CommentCreateSerializer(context=data)
         comment = serializer.create(validated_data={'content': 'test'})
         self.increase_count()
@@ -737,7 +727,7 @@ class APICommentSerializers(APIBaseTest):
 
         # get parent
         parent_id = CommentCreateSerializer.get_parent(comment)
-        self.assertEqual(parent_id, 1)
+        self.assertEqual(parent_id, data['parent_comment'].id)
 
         replies = serializer.get_replies(self.comment_1)
         reply_count = serializer.get_reply_count(self.comment_1)
