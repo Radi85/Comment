@@ -69,7 +69,7 @@ class Comment(models.Model):
 
     def _set_email(self):
         if self.user:
-            if getattr(self.user, 'email', False):
+            if hasattr(self.user, 'email'):
                 self.email = self.user.email
 
     def save(self, *args, **kwargs):

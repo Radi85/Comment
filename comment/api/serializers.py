@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
@@ -10,7 +12,6 @@ from comment.conf import settings
 from comment.models import Comment, Flag, Reaction
 from comment.utils import process_anonymous_commenting, get_user_for_request, get_profile_instance
 from comment.messages import EmailError
-from collections import OrderedDict
 
 
 def get_profile_model():
@@ -24,12 +25,12 @@ def get_profile_model():
 def get_user_fields():
     user_model = get_user_model()
     fields = user_model._meta.get_fields()
-    api_fields = settings.COMMENT_USER_API_FIELDS
+    api_fields = list(settings.COMMENT_USER_API_FIELDS)
     api_fields.append('profile')
     # remove duplicates while preseving order
-    api_fields = list(OrderedDict((x, 1) for x in api_fields))
+    api_fields = list(OrderedDict.fromkeys(api_fields))
     for field in fields:
-        if hasattr(field, "upload_to") and isinstance(field, ImageField):
+        if isinstance(field, ImageField) and hasattr(field, "upload_to"):
             api_fields.append(field.name)
     return list(api_fields)
 
