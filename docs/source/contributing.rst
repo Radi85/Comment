@@ -4,6 +4,39 @@ Contributing
 Django Comments Dab is developed and maintained by developers in an Open Source manner.
 Any support is welcome. You could help by writing documentation, pull-requests, report issues and/or translations.
 
+PR and commit messages
+^^^^^^^^^^^^^^^^^^^^^^^
+
+**Pull Requests**
+
+Refer to `#125`_
+
+.. _`#125`: https://github.com/Radi85/Comment/discussions/125
+
+In order to keep master clean and up to date with the current release, all PR shall be merged with ``develop-RELEASE_MILESTONE`` branch.
+
+``RELEASE_MILESTONE`` should be milestone tag of the issue you work on.
+
+**Commit messages**
+
+Use one commit per issue and try to keep the first line within 50 characters.
+
+Need more? use the commit body.
+
+The commit message should reference the issue number in the header (first line) like so:
+
+feat(*#NUMBER*): YOUR COMMIT
+
+**headers:**
+
+- feat(*#NUMBER*) for adding new feature
+- fix(*#NUMBER*) for fixing a bug
+- ref(*#NUMBER*) for code refactoring and enhancement
+- test(*#NUMBER*) for adding, fixing or adjusting tests
+- doc(*#NUMBER*) for documentation
+
+The issue number can be skipped if not available.
+
 Development
 ^^^^^^^^^^^
 
@@ -69,4 +102,4 @@ To run tests against all supported ``python`` and ``django`` versions, you may r
 Translations
 ^^^^^^^^^^^^
 
-To add translations in your native language, please take a look at the :ref:`instuctions for translators<Adding Support for Translation>`.
+To add translations in your native language, please take a look at the :ref:`instructions for translators<Adding Support for Translation>`.
