@@ -1,6 +1,12 @@
 Changelog
 =========
 
+2.6.beta1
+---------
+
+- Add subscription feature.
+- Send email notifications.
+
 2.5.1
 ------
 

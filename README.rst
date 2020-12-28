@@ -41,13 +41,10 @@
     :target: #
     :alt: Django-comment-dab Release Date
 
-.. image:: https://img.shields.io/github/commits-since/radi85/comment/latest/master
+.. image:: https://img.shields.io/github/commits-since/radi85/comment/latest/develop
     :target: #
     :alt: Commits since latest release for a branch master
 
-.. image:: https://img.shields.io/github/last-commit/radi85/comment?color=blue
-    :target: #
-    :alt: Django-comment-dab last commit
 
 ===================
 django-comments-dab

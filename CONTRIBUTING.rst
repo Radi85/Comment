@@ -34,6 +34,7 @@ feat(*#NUMBER*): YOUR COMMIT
 - ref(*#NUMBER*) for code refactoring and enhancement
 - test(*#NUMBER*) for adding, fixing or adjusting tests
 - doc(*#NUMBER*) for documentation
+- chore(*#NUMBER*) Changes to the build process, new releases and work doesn't relate to any of the previous header
 
 The issue number can be skipped if not available..
 
