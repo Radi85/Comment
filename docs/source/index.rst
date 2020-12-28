@@ -15,6 +15,7 @@ Welcome to django-comments-dab's documentation!
    settings
    i18n
    contributing
+   release-notes/index
    Changelog
    License
    help

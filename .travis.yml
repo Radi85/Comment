@@ -17,6 +17,8 @@ script:
 after_success: coveralls
 
 jobs:
+  allow_failures:
+    - if: branch = staging
   include:
     - stage: deploy
       python: 3.7
