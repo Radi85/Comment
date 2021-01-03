@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from comment.models import Comment
 from comment.exceptions import CommentBadRequest
 from comment.messages import ContentTypeError, ExceptionError
+from comment.utils import get_request_data
 
 
 class BaseValidatorMixin:
@@ -25,12 +26,6 @@ class BaseValidatorMixin:
         except CommentBadRequest as exc:
             return JsonResponse({'type': ExceptionError.ERROR_TYPE, 'detail': exc.detail}, status=400)
         return super().dispatch(request, *args, **kwargs)
-
-    def get_request_data(self, request, item):
-        value = request.GET.get(item) or request.POST.get(item)
-        if not value and self.api:
-            value = request.data.get(item)
-        return value
 
     @abstractmethod
     def validate(self, request):
@@ -86,9 +81,9 @@ class ContentTypeValidator(BaseValidatorMixin):
 
     def validate(self, request):
         super().validate(request)
-        app_name = self.get_request_data(request, 'app_name')
-        model_name = self.get_request_data(request, 'model_name')
-        model_id = self.get_request_data(request, 'model_id')
+        app_name = get_request_data(request, 'app_name', self.api)
+        model_name = get_request_data(request, 'model_name', self.api)
+        model_id = get_request_data(request, 'model_id', self.api)
         validated_app_name = self.validate_app_name(app_name)
         validated_model_name = self.validate_model_name(model_name)
         validated_model_id = self.validate_model_id(model_id)
@@ -116,8 +111,8 @@ class ParentIdValidator(BaseValidatorMixin):
 
     def validate(self, request):
         super().validate(request)
-        model_id = self.get_request_data(request, 'model_id')
-        parent_id = self.get_request_data(request, 'parent_id')
+        model_id = get_request_data(request, 'model_id', self.api)
+        parent_id = get_request_data(request, 'parent_id', self.api)
         if not parent_id or parent_id == '0':
             return
         validated_parent_id = self.validate_parent_id(parent_id)

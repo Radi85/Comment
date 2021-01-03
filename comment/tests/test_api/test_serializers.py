@@ -27,23 +27,23 @@ class APICommentSerializers(APIBaseTest):
 
     def test_get_profile_model(self):
         # missing settings attrs
-        patch.object(settings, 'PROFILE_APP_NAME', None).start()
-        profile = get_profile_model()
-        self.assertIsNone(profile)
+        with patch.object(settings, 'PROFILE_APP_NAME', None):
+            profile = get_profile_model()
+            self.assertIsNone(profile)
 
         # providing wrong attribute value, an exception is raised
-        patch.object(settings, 'PROFILE_APP_NAME', 'wrong').start()
-        self.assertRaises(LookupError, get_profile_model)
+        with patch.object(settings, 'PROFILE_APP_NAME', 'wrong'):
+            self.assertRaises(LookupError, get_profile_model)
 
         # attribute value is None
-        patch.object(settings, 'PROFILE_APP_NAME', None).start()
-        profile = get_profile_model()
-        self.assertIsNone(profile)
+        with patch.object(settings, 'PROFILE_APP_NAME', None):
+            profile = get_profile_model()
+            self.assertIsNone(profile)
 
         # success
-        patch.object(settings, 'PROFILE_APP_NAME', 'user_profile').start()
-        profile = get_profile_model()
-        self.assertIsNotNone(profile)
+        with patch.object(settings, 'PROFILE_APP_NAME', 'user_profile'):
+            profile = get_profile_model()
+            self.assertIsNotNone(profile)
 
     def test_get_user_fields(self):
         fields = get_user_fields()
@@ -56,19 +56,19 @@ class APICommentSerializers(APIBaseTest):
 
     def test_user_serializer(self):
         # PROFILE_MODEL_NAME not provided
-        patch.object(settings, 'PROFILE_MODEL_NAME', None).start()
-        profile = UserSerializerDAB.get_profile(self.user_1)
-        self.assertIsNone(profile)
+        with patch.object(settings, 'PROFILE_MODEL_NAME', None):
+            profile = UserSerializerDAB.get_profile(self.user_1)
+            self.assertIsNone(profile)
 
         # PROFILE_MODEL_NAME is wrong
-        patch.object(settings, 'PROFILE_MODEL_NAME', 'wrong').start()
-        profile = UserSerializerDAB.get_profile(self.user_1)
-        self.assertIsNone(profile)
+        with patch.object(settings, 'PROFILE_MODEL_NAME', 'wrong'):
+            profile = UserSerializerDAB.get_profile(self.user_1)
+            self.assertIsNone(profile)
 
         # success
-        patch.object(settings, 'PROFILE_MODEL_NAME', 'userprofile').start()
-        profile = UserSerializerDAB.get_profile(self.user_1)
-        self.assertIsNotNone(profile)
+        with patch.object(settings, 'PROFILE_MODEL_NAME', 'userprofile'):
+            profile = UserSerializerDAB.get_profile(self.user_1)
+            self.assertIsNotNone(profile)
 
     @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', False)
     @patch.object(settings, 'COMMENT_ALLOW_ANONYMOUS', False)

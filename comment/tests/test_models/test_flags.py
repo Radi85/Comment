@@ -87,11 +87,11 @@ class FlagModelTest(BaseCommentFlagTest):
 
     def test_is_flagged_enabled(self):
         flag = self.create_comment(self.content_object_1).flag
-        settings.COMMENT_FLAGS_ALLOWED = 1
-        self.assertTrue(flag.is_flag_enabled)
+        with patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 1):
+            self.assertIs(True, flag.is_flag_enabled)
 
-        settings.COMMENT_FLAGS_ALLOWED = 0
-        self.assertFalse(flag.is_flag_enabled)
+        with patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 0):
+            self.assertIs(False, flag.is_flag_enabled)
 
     @patch('comment.models.flags.Flag.get_clean_state')
     def test_get_verbose_state(self, mocked_get_clean_state):
@@ -148,17 +148,17 @@ class FlagModelTest(BaseCommentFlagTest):
         self.assertEqual(flag.count, 2)
 
         # flagging is disabled => state won't change
-        settings.COMMENT_FLAGS_ALLOWED = 0
-        flag.toggle_flagged_state()
-        self.assertEqual(flag.state, flag.UNFLAGGED)
+        with patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 0):
+            flag.toggle_flagged_state()
+            self.assertEqual(flag.state, flag.UNFLAGGED)
 
         # flagging is enabled => state changes
-        settings.COMMENT_FLAGS_ALLOWED = 1
-        flag.toggle_flagged_state()
-        self.assertEqual(flag.state, flag.FLAGGED)
+        with patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 1):
+            flag.toggle_flagged_state()
+            self.assertEqual(flag.state, flag.FLAGGED)
 
         # increase allowed flags count => change the state to UNFLAGGED
-        settings.COMMENT_FLAGS_ALLOWED = 10
-        self.assertEqual(flag.count, 2)
-        flag.toggle_flagged_state()
-        self.assertEqual(flag.state, flag.UNFLAGGED)
+        with patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 10):
+            self.assertEqual(flag.count, 2)
+            flag.toggle_flagged_state()
+            self.assertEqual(flag.state, flag.UNFLAGGED)

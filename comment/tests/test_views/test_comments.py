@@ -99,9 +99,9 @@ class CommentViewTestCase(BaseCommentViewTest):
         response = self.client_non_ajax.post(self.get_create_url(), data=self.data)
         self.assertEqual(response.status_code, 400)
 
+    @patch.object(settings, 'COMMENT_ALLOW_ANONYMOUS', True)
     def test_create_anonymous_comment(self):
         self.client.logout()
-        settings.COMMENT_ALLOW_ANONYMOUS = True
         data = self.data.copy()
         data['email'] = 'a@a.com'
         url = self.get_create_url()
@@ -219,12 +219,12 @@ class TestDeleteComment(BaseCommentViewTest):
         self.assertEqual(response.status_code, 403)
 
         # moderator can delete flagged comment
-        settings.COMMENT_FLAGS_ALLOWED = 1
-        self.create_flag_instance(self.user_1, comment)
-        self.create_flag_instance(self.user_2, comment)
-        response = self.client.post(self.get_url('comment:delete', comment.id), data=self.data)
-        self.assertEqual(response.status_code, 200)
-        self.assertRaises(Comment.DoesNotExist, Comment.objects.get, id=comment.id)
+        with patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 1):
+            self.create_flag_instance(self.user_1, comment)
+            self.create_flag_instance(self.user_2, comment)
+            response = self.client.post(self.get_url('comment:delete', comment.id), data=self.data)
+            self.assertEqual(response.status_code, 200)
+            self.assertRaises(Comment.DoesNotExist, Comment.objects.get, id=comment.id)
 
     def test_delete_comment_by_admin(self):
         comment = self.create_comment(self.content_object_1)

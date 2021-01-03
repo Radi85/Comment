@@ -37,9 +37,9 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         self.assertEqual(url, '/static/img/default.png')
 
         # missing profile
-        patch.object(settings, 'PROFILE_MODEL_NAME', None).start()
-        url = get_profile_url(self.parent_comment_1)
-        self.assertEqual(url, '/static/img/default.png')
+        with patch.object(settings, 'PROFILE_MODEL_NAME', None):
+            url = get_profile_url(self.parent_comment_1)
+            self.assertEqual(url, '/static/img/default.png')
 
     @patch.object(settings, 'COMMENT_USE_GRAVATAR', False)
     def test_get_img_path(self):
@@ -47,25 +47,23 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         self.assertNotEqual(url, '/static/img/default.png')
 
         # use default pic on fail
-        patch.object(settings, 'PROFILE_MODEL_NAME', 'app not exist').start()
-        url = get_img_path(self.parent_comment_1)
-        self.assertEqual(url, '/static/img/default.png')
+        with patch.object(settings, 'PROFILE_MODEL_NAME', 'app not exist'):
+            url = get_img_path(self.parent_comment_1)
+            self.assertEqual(url, '/static/img/default.png')
 
-        patch.object(settings, 'PROFILE_APP_NAME', 'user_profile').start()
-        patch('comment.templatetags.comment_tags.get_profile_instance', return_value=None).start()
-        url = get_img_path(self.parent_comment_1)
-        self.assertEqual(url, '/static/img/default.png')
+        with patch.object(settings, 'PROFILE_APP_NAME', 'user_profile'):
+            with patch('comment.templatetags.comment_tags.get_profile_instance', return_value=None):
+                url = get_img_path(self.parent_comment_1)
+                self.assertEqual(url, '/static/img/default.png')
 
     @patch.object(settings, 'PROFILE_APP_NAME', 'user_profile')
     @patch.object(settings, 'COMMENT_USE_GRAVATAR', False)
     def test_profile_has_no_image_field(self):
-        mocked_hasattr = patch('comment.templatetags.comment_tags.hasattr').start()
-        mocked_hasattr.return_value = False
-        url = get_img_path(self.parent_comment_1)
-        self.assertEqual(url, '/static/img/default.png')
+        with patch('comment.templatetags.comment_tags.hasattr', return_value=False):
+            url = get_img_path(self.parent_comment_1)
+            self.assertEqual(url, '/static/img/default.png')
 
     def test_render_comments(self):
-        current_login_url = getattr(settings, 'LOGIN_URL', '/profile/login/')
         request = self.factory.get('/')
         request.user = self.user_1
         comments_per_page = 'COMMENT_PER_PAGE'
@@ -77,20 +75,21 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         self.assertEqual(data['comments'].count(), count)  # parent comment only
         self.assertEqual(data['login_url'], settings.LOGIN_URL)
 
-        # LOGIN_URL is not provided
-        patch.object(settings, 'LOGIN_URL', None).start()
+    @patch.object(settings, 'LOGIN_URL', None)
+    def test_render_comments_without_login_url(self):
+        request = self.factory.get('/')
+        request.user = self.user_1
         with self.assertRaises(ImproperlyConfigured) as error:
             render_comments(self.post_1, request)
         self.assertIsInstance(error.exception, ImproperlyConfigured)
 
-        # check pagination
-        patch.object(settings, comments_per_page, 2).start()
-        patch.object(settings, 'LOGIN_URL', current_login_url).start()
+    @patch.object(settings, 'COMMENT_PER_PAGE', 2)
+    def test_render_comments_with_pagination(self):
         request = self.factory.get('/?page=2')
         request.user = self.user_1
         data = render_comments(self.post_1, request)
 
-        self.assertTrue(data['comments'].has_previous())
+        self.assertIs(data['comments'].has_previous(), True)
         self.assertEqual(data['comments'].paginator.per_page, 2)  # 2 comment per page
         self.assertEqual(data['comments'].number, 2)  # 3 comment fit in 2 pages
         self.assertEqual(data['login_url'], settings.LOGIN_URL)
@@ -99,13 +98,13 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         request = self.factory.get('/?page=string')
         request.user = self.user_1
         data = render_comments(self.post_1, request)
-        self.assertFalse(data['comments'].has_previous())
+        self.assertIs(data['comments'].has_previous(), False)
 
         # check empty page
         request = self.factory.get('/?page=10')
         request.user = self.user_1
         data = render_comments(self.post_1, request)
-        self.assertTrue(data['comments'].has_previous())
+        self.assertIs(data['comments'].has_previous(), True)
 
     def test_static_functions(self):
         self.assertEqual(include_static(), '')
