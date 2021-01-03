@@ -101,36 +101,45 @@ def paginate_comments(comments, comments_per_page, current_page):
         return paginator.page(paginator.num_pages)
 
 
+def get_request_data(request, item, api=False):
+    value = request.GET.get(item) or request.POST.get(item)
+    if not value and api:
+        value = request.data.get(item)
+    return value
+
+
 def get_comment_context_data(request, model_object=None):
-    app_name = request.GET.get('app_name') or request.POST.get('app_name')
-    model_name = request.GET.get('model_name') or request.POST.get('model_name')
-    model_id = request.GET.get('model_id') or request.POST.get('model_id')
+    def get_login_url():
+        login_url = settings.LOGIN_URL
+        if not login_url:
+            raise ImproperlyConfigured(ErrorMessage.LOGIN_URL_MISSING)
+
+        if not login_url.startswith('/'):
+            login_url = '/' + login_url
+
+        return login_url
+
+    def get_oauth(request):
+        oauth = get_request_data(request, 'oauth')
+        if oauth and oauth.lower() == 'true':
+            return True
+        return False
+
+    def get_comments(request, model_obj):
+        comments = model_object.comments.filter_parents_by_object(
+            model_object, include_flagged=is_comment_moderator(request.user)
+        )
+        page = get_request_data(request, 'page')
+        comments_per_page = settings.COMMENT_PER_PAGE
+        if comments_per_page:
+            comments = paginate_comments(comments, comments_per_page, page)
+        return comments
+
+    app_name = get_request_data(request, 'app_name')
+    model_name = get_request_data(request, 'model_name')
+    model_id = get_request_data(request, 'model_id')
     if not model_object:
         model_object = get_model_obj(app_name, model_name, model_id)
-
-    comments = model_object.comments.filter_parents_by_object(
-        model_object, include_flagged=is_comment_moderator(request.user)
-    )
-    page = request.GET.get('page') or request.POST.get('page')
-    comments_per_page = settings.COMMENT_PER_PAGE
-    if comments_per_page:
-        comments = paginate_comments(comments, comments_per_page, page)
-
-    login_url = getattr(settings, 'LOGIN_URL')
-    if not login_url:
-        raise ImproperlyConfigured(ErrorMessage.LOGIN_URL_MISSING)
-
-    if not login_url.startswith('/'):
-        login_url = '/' + login_url
-
-    allowed_flags = getattr(settings, 'COMMENT_FLAGS_ALLOWED', 0)
-    oauth = request.POST.get('oauth') or request.GET.get('oauth')
-    if oauth and oauth.lower() == 'true':
-        oauth = True
-    else:
-        oauth = False
-    is_anonymous_allowed = settings.COMMENT_ALLOW_ANONYMOUS
-    is_translation_allowed = settings.COMMENT_ALLOW_TRANSLATION
 
     return {
         'model_object': model_object,
@@ -138,14 +147,14 @@ def get_comment_context_data(request, model_object=None):
         'model_id': model_id,
         'app_name': app_name,
         'user': request.user,
-        'comments': comments,
-        'login_url': login_url,
+        'comments': get_comments(request, model_object),
+        'login_url': get_login_url(),
         'has_valid_profile': has_valid_profile(),
-        'allowed_flags': allowed_flags,
-        'is_anonymous_allowed': is_anonymous_allowed,
-        'is_translation_allowed': is_translation_allowed,
+        'allowed_flags': settings.COMMENT_FLAGS_ALLOWED,
+        'is_anonymous_allowed': settings.COMMENT_ALLOW_ANONYMOUS,
+        'is_translation_allowed': settings.COMMENT_ALLOW_TRANSLATION,
         'is_subscription_allowed': settings.COMMENT_ALLOW_SUBSCRIPTION,
-        'oauth': oauth
+        'oauth': get_oauth(request)
     }
 
 

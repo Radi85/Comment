@@ -24,53 +24,51 @@ class CommentUtilsTest(BaseCommentUtilsTest):
         self.assertIsNotNone(model_object)
         self.assertIsInstance(model_object, self.post_1.__class__)
 
-    @patch.object(settings, 'COMMENT_USE_GRAVATAR', True)
     def test_get_gravatar_img(self):
-        # email is not provided
-        self.assertEqual(get_gravatar_img(''), '/static/img/default.png')
+        with patch.object(settings, 'COMMENT_USE_GRAVATAR', True):
+            # email is not provided
+            self.assertEqual(get_gravatar_img(''), '/static/img/default.png')
 
-        # email is provided
-        self.assertTrue(get_gravatar_img('test').startswith('https://www.gravatar.com/avatar/'))
+            # email is provided
+            self.assertTrue(get_gravatar_img('test').startswith('https://www.gravatar.com/avatar/'))
 
         # gravatar is disabled
-        patch.object(settings, 'COMMENT_USE_GRAVATAR', True).start()
-        self.assertEqual(get_gravatar_img(''), '/static/img/default.png')
+        with patch.object(settings, 'COMMENT_USE_GRAVATAR', False):
+            self.assertEqual(get_gravatar_img(''), '/static/img/default.png')
 
     def test_get_profile_instance(self):
         # wrong content type
-        patch.object(settings, 'PROFILE_MODEL_NAME', 'wrong').start()
-        self.assertIsNone(get_profile_instance(self.user_1))
+        with patch.object(settings, 'PROFILE_MODEL_NAME', 'wrong'):
+            self.assertIsNone(get_profile_instance(self.user_1))
 
         # correct data
-        patch.object(settings, 'PROFILE_MODEL_NAME', 'userprofile').start()
-        self.assertIsNotNone(get_profile_instance(self.user_1))
+        with patch.object(settings, 'PROFILE_MODEL_NAME', 'userprofile'):
+            self.assertIsNotNone(get_profile_instance(self.user_1))
 
         # profile model has no user related model
-        patch.object(settings, 'PROFILE_MODEL_NAME', None).start()
-        self.assertIsNone(get_profile_instance(self.user_1))
+        with patch.object(settings, 'PROFILE_MODEL_NAME', None):
+            self.assertIsNone(get_profile_instance(self.user_1))
 
     @patch.object(settings, 'COMMENT_USE_GRAVATAR', False)
     def test_has_valid_profile(self):
-        patch.object(settings, 'PROFILE_APP_NAME', 'user_profile').start()
-        patch.object(settings, 'PROFILE_MODEL_NAME', 'userprofile').start()
-        self.assertTrue(has_valid_profile())
+        with patch.object(settings, 'PROFILE_APP_NAME', 'user_profile'):
+            with patch.object(settings, 'PROFILE_MODEL_NAME', 'userprofile'):
+                self.assertIs(has_valid_profile(), True)
 
-        # one of settings attribute is missing
-        patch.object(settings, 'PROFILE_MODEL_NAME', '').start()
-        self.assertFalse(has_valid_profile())
+            # settings attr provided, profile model has no image
+            with patch('comment.utils.hasattr', return_value=False):
+                self.assertIs(has_valid_profile(), False)
 
-        # settings attr provided with wrong value
-        patch.object(settings, 'PROFILE_MODEL_NAME', 'wrong_value').start()
-        self.assertFalse(has_valid_profile())
+            # one of settings attribute is missing
+            with patch.object(settings, 'PROFILE_MODEL_NAME', ''):
+                self.assertIs(has_valid_profile(), False)
 
-        # settings attr provided, profile model has no image
-        patch.object(settings, 'PROFILE_MODEL_NAME', 'userprofile').start()
-        mocked_hasattr = patch('comment.utils.hasattr').start()
-        mocked_hasattr.return_value = False
-        self.assertFalse(has_valid_profile())
+            # settings attr provided with wrong value
+            with patch.object(settings, 'PROFILE_MODEL_NAME', 'wrong_value'):
+                self.assertIs(has_valid_profile(), False)
 
-        patch.object(settings, 'COMMENT_USE_GRAVATAR', True).start()
-        self.assertTrue(has_valid_profile())
+            with patch.object(settings, 'COMMENT_USE_GRAVATAR', True):
+                self.assertIs(has_valid_profile(), True)
 
     def test_get_comment_context_data(self):
         comment_per_page = 'COMMENT_PER_PAGE'
@@ -79,10 +77,6 @@ class CommentUtilsTest(BaseCommentUtilsTest):
         comment_allow_anonymous = 'COMMENT_ALLOW_ANONYMOUS'
         comment_allow_translation = 'COMMENT_ALLOW_TRANSLATION'
         oauth = 'oauth'
-
-        patch.object(settings, login_url, current_login_url).start()
-        patch.object(settings, comment_allow_anonymous, False).start()
-        patch.object(settings, comment_per_page, 0).start()
 
         data = {
             'model_object': self.post_1,
@@ -93,41 +87,45 @@ class CommentUtilsTest(BaseCommentUtilsTest):
             'page': 10,
             oauth: 'True'
         }
-        request = self.factory.post('/', data=data)
-        request.user = self.post_1.author
-        if current_login_url.startswith('/'):
-            patch.object(settings, login_url, current_login_url[1:]).start()
-        comment_context_data = get_comment_context_data(request)
 
-        self.assertEqual(comment_context_data['comments'].count(), self.increment)
-        # test inserting '/' to the beginning of login url
-        self.assertEqual(comment_context_data['login_url'], '/' + settings.LOGIN_URL)
-        self.assertEqual(comment_context_data['is_anonymous_allowed'], settings.COMMENT_ALLOW_ANONYMOUS)
-        self.assertEqual(comment_context_data['is_translation_allowed'], settings.COMMENT_ALLOW_TRANSLATION)
-        self.assertEqual(comment_context_data['oauth'], True)
+        with patch.object(settings, login_url, current_login_url):
+            with patch.object(settings, comment_allow_anonymous, False):
+                with patch.object(settings, comment_per_page, 0):
 
-        patch.object(settings, login_url, current_login_url).start()
-        patch.object(settings, comment_allow_anonymous, True).start()
-        patch.object(settings, comment_allow_translation, False).start()
-        patch.object(settings, comment_per_page, 2).start()
-        request = self.factory.post('/', data=data)
-        request.user = self.post_1.author
-        comment_context_data = get_comment_context_data(request)
+                    request = self.factory.post('/', data=data)
+                    request.user = self.post_1.author
+                    if current_login_url.startswith('/'):
+                        patch.object(settings, login_url, current_login_url[1:]).start()
+                    comment_context_data = get_comment_context_data(request)
 
-        self.assertEqual(comment_context_data['comments'].paginator.per_page, 2)
-        self.assertTrue(comment_context_data['comments'].has_previous())
-        self.assertEqual(comment_context_data['login_url'], settings.LOGIN_URL)
-        self.assertEqual(comment_context_data['is_anonymous_allowed'], settings.COMMENT_ALLOW_ANONYMOUS)
-        self.assertEqual(comment_context_data['is_translation_allowed'], settings.COMMENT_ALLOW_TRANSLATION)
+                    self.assertEqual(comment_context_data['comments'].count(), self.increment)
+                    # test inserting '/' to the beginning of login url
+                    self.assertEqual(comment_context_data['login_url'], '/' + settings.LOGIN_URL)
+                    self.assertEqual(comment_context_data['is_anonymous_allowed'], settings.COMMENT_ALLOW_ANONYMOUS)
+                    self.assertEqual(comment_context_data['is_translation_allowed'], settings.COMMENT_ALLOW_TRANSLATION)
+                    self.assertEqual(comment_context_data['oauth'], True)
 
-        data.update({'page': 'not integer', oauth: 'False'})
-        request = self.factory.post('/', data=data)
-        request.user = self.post_1.author
-        comment_context_data = get_comment_context_data(request)
+        with patch.object(settings, login_url, current_login_url):
+            with patch.object(settings, comment_allow_translation, False):
+                with patch.object(settings, comment_per_page, 2):
+                    request = self.factory.post('/', data=data)
+                    request.user = self.post_1.author
+                    comment_context_data = get_comment_context_data(request)
 
-        self.assertEqual(comment_context_data['comments'].paginator.per_page, 2)
-        self.assertTrue(comment_context_data['comments'].has_next())
-        self.assertEqual(comment_context_data[oauth], False)
+                    self.assertEqual(comment_context_data['comments'].paginator.per_page, 2)
+                    self.assertIs(comment_context_data['comments'].has_previous(), True)
+                    self.assertEqual(comment_context_data['login_url'], settings.LOGIN_URL)
+                    self.assertEqual(comment_context_data['is_anonymous_allowed'], settings.COMMENT_ALLOW_ANONYMOUS)
+                    self.assertEqual(comment_context_data['is_translation_allowed'], settings.COMMENT_ALLOW_TRANSLATION)
+
+                    data.update({'page': 'not integer', oauth: 'False'})
+                    request = self.factory.post('/', data=data)
+                    request.user = self.post_1.author
+                    comment_context_data = get_comment_context_data(request)
+
+                    self.assertEqual(comment_context_data['comments'].paginator.per_page, 2)
+                    self.assertIs(comment_context_data['comments'].has_next(), True)
+                    self.assertIs(comment_context_data[oauth], False)
 
     @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', False)
     def test_is_comment_moderator_no_moderation(self):
@@ -151,11 +149,11 @@ class CommentUtilsTest(BaseCommentUtilsTest):
         anonymous_comment = self.create_anonymous_comment()
 
         self.assertEqual(get_username_for_comment(comment), comment.user.username)
-        patch.object(settings, 'COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME', False).start()
-        self.assertEqual(get_username_for_comment(anonymous_comment), settings.COMMENT_ANONYMOUS_USERNAME)
+        with patch.object(settings, 'COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME', False):
+            self.assertEqual(get_username_for_comment(anonymous_comment), settings.COMMENT_ANONYMOUS_USERNAME)
 
-        patch.object(settings, 'COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME', True).start()
-        self.assertEqual(get_username_for_comment(anonymous_comment), anonymous_comment.email.split('@')[0])
+        with patch.object(settings, 'COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME', True):
+            self.assertEqual(get_username_for_comment(anonymous_comment), anonymous_comment.email.split('@')[0])
 
 
 class BaseAnonymousCommentTest(BaseCommentUtilsTest):

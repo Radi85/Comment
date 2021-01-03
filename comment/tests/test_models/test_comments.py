@@ -58,11 +58,11 @@ class CommentModelTest(BaseCommentManagerTest):
         comment.flag.state = comment.flag.FLAGGED
         self.assertTrue(comment.is_flagged)
 
-        settings.COMMENT_FLAGS_ALLOWED = 0
-        self.assertFalse(comment.is_flagged)
+        with patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 0):
+            self.assertIs(False, comment.is_flagged)
 
-        mocked_hasattr.return_value = False
-        self.assertFalse(comment.is_flagged)
+            mocked_hasattr.return_value = False
+            self.assertIs(False, comment.is_flagged)
 
     @patch('comment.models.comments.hasattr')
     def test_has_flagged_state(self, mocked_hasattr):
@@ -126,20 +126,20 @@ class CommentModelTest(BaseCommentManagerTest):
         comment = self.parent_comment_3
 
         # no pagination(parent comment 3, 2, 1 belong to the same content_object_1)
-        patch.object(settings, attr, 0).start()
-        comment_url = comment.content_object.get_absolute_url() + '#' + comment.urlhash
+        with patch.object(settings, attr, 0):
+            comment_url = comment.content_object.get_absolute_url() + '#' + comment.urlhash
 
-        self.assertEqual(comment_url, comment.get_url(request))
+            self.assertEqual(comment_url, comment.get_url(request))
 
         # with pagination
-        patch.object(settings, attr, 3).start()
-        # comment on first page
-        self.assertEqual(comment_url, comment.get_url(request))
+        with patch.object(settings, attr, 3):
+            # comment on first page
+            self.assertEqual(comment_url, comment.get_url(request))
 
-        # comment on the second page
-        comment = self.parent_comment_1
-        comment_url = comment.content_object.get_absolute_url() + '?page=2' + '#' + comment.urlhash
-        self.assertEqual(comment_url, comment.get_url(request))
+            # comment on the second page
+            comment = self.parent_comment_1
+            comment_url = comment.content_object.get_absolute_url() + '?page=2' + '#' + comment.urlhash
+            self.assertEqual(comment_url, comment.get_url(request))
 
 
 class CommentModelManagerTest(BaseCommentManagerTest):
@@ -157,12 +157,12 @@ class CommentModelManagerTest(BaseCommentManagerTest):
         self.assertEqual(Comment.objects.all_exclude_flagged().count(), self.increment)
         self.create_flag_instance(self.user_1, comment)
         self.create_flag_instance(self.user_2, comment)
-        self.assertEqual(Comment.objects.all_exclude_flagged().count(), self.increment - 1)
 
-        # if COMMENT_SHOW_FLAGGED is enabled
-        settings.COMMENT_SHOW_FLAGGED = True
-        self.assertEqual(Comment.objects.all_exclude_flagged().count(), self.increment)
-        settings.COMMENT_SHOW_FLAGGED = False
+        with patch.object(settings, 'COMMENT_SHOW_FLAGGED', False):
+            self.assertEqual(Comment.objects.all_exclude_flagged().count(), self.increment - 1)
+
+        with patch.object(settings, 'COMMENT_SHOW_FLAGGED', True):
+            self.assertEqual(Comment.objects.all_exclude_flagged().count(), self.increment)
 
     @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 0)
     def test_filtering_comment_when_flag_not_enabled(self):
@@ -174,13 +174,13 @@ class CommentModelManagerTest(BaseCommentManagerTest):
         self.assertEqual(comment.flag.count, 2)
         self.assertEqual(Comment.objects.all_exclude_flagged().count(), self.increment)
 
+    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 1)
+    @patch.object(settings, 'COMMENT_SHOW_FLAGGED', False)
     def test_all_comments_by_object(self):
         # all comment for a particular content type
         init_count = self.post_1.comments.count()
         self.assertEqual(init_count, 6)
 
-        settings.COMMENT_FLAGS_ALLOWED = 1
-        settings.COMMENT_SHOW_FLAGGED = False
         comment = self.post_1.comments.first()
         self.create_flag_instance(self.user_1, comment)
         self.create_flag_instance(self.user_2, comment)
@@ -192,12 +192,12 @@ class CommentModelManagerTest(BaseCommentManagerTest):
         count = Comment.objects.all_comments_by_object(self.post_1, include_flagged=True).count()
         self.assertEqual(count, init_count)
 
+    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 1)
+    @patch.object(settings, 'COMMENT_SHOW_FLAGGED', False)
     def test_filter_parents_by_object(self):
         # parent comment only
         init_count = self.post_2.comments.filter(parent=None).count()
         self.assertEqual(init_count, 2)
-        settings.COMMENT_FLAGS_ALLOWED = 1
-        settings.COMMENT_SHOW_FLAGGED = False
         comment = Comment.objects.filter_parents_by_object(self.post_2).first()
         self.create_flag_instance(self.user_1, comment)
         self.create_flag_instance(self.user_2, comment)
@@ -209,6 +209,8 @@ class CommentModelManagerTest(BaseCommentManagerTest):
         count = Comment.objects.filter_parents_by_object(self.post_2, include_flagged=True).count()
         self.assertEqual(count, init_count)
 
+    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 1)
+    @patch.object(settings, 'COMMENT_SHOW_FLAGGED', False)
     def test_get_parent_comment(self):
         # no parent_id passed from the url
         self.assertIsNone(Comment.objects.get_parent_comment(''))

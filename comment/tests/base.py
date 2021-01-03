@@ -21,6 +21,7 @@ from post.models import Post
 User = get_user_model()
 
 
+@patch.object(settings, 'COMMENT_ALLOW_TRANSLATION', True)
 class BaseInternationalizationTest:
     translatable_attrs = ['title', 'aria-label']
 

@@ -87,10 +87,10 @@ class APIPermissionsTest(APIBaseTest):
 
     def test_flag_enabled_permission(self):
         request = self.factory.get('/')
-        settings.COMMENT_FLAGS_ALLOWED = 0
-        self.assertFalse(self.flag_enabled_permission.has_permission(request, self.view))
-        settings.COMMENT_FLAGS_ALLOWED = 1
-        self.assertTrue(self.flag_enabled_permission.has_permission(request, self.view))
+        with patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 0):
+            self.assertIs(False, self.flag_enabled_permission.has_permission(request, self.view))
+        with patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 1):
+            self.assertIs(True, self.flag_enabled_permission.has_permission(request, self.view))
 
     def test_can_change_flagged_comment_state(self):
         request = self.factory.get('/')
@@ -107,18 +107,20 @@ class APIPermissionsTest(APIBaseTest):
         self.assertFalse(
             self.can_change_flagged_comment_state.has_object_permission(request, self.view, comment)
         )
-        settings.COMMENT_FLAGS_ALLOWED = 1
-        self.set_flag(self.user_1, comment, **self.flag_data)
-        self.set_flag(self.user_2, comment, **self.flag_data)
-        self.assertTrue(comment.is_flagged)
-        self.assertTrue(
-            self.can_change_flagged_comment_state.has_object_permission(request, self.view, comment)
-        )
+        with patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 1):
+            self.set_flag(self.user_1, comment, **self.flag_data)
+            self.set_flag(self.user_2, comment, **self.flag_data)
+            self.assertIs(True, comment.is_flagged)
+            self.assertIs(
+                True,
+                self.can_change_flagged_comment_state.has_object_permission(request, self.view, comment)
+            )
 
-        request.user = self.user_1
-        self.assertFalse(
-            self.can_change_flagged_comment_state.has_object_permission(request, self.view, comment)
-        )
+            request.user = self.user_1
+            self.assertIs(
+                False,
+                self.can_change_flagged_comment_state.has_object_permission(request, self.view, comment)
+            )
 
     @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', True)
     def test_normal_users_cannot_retrieve_subscribers(self):
@@ -479,15 +481,14 @@ class APICommentFlagViewTest(APIBaseTest):
         comment.flag.refresh_from_db()
         self.assertEqual(comment.flag.count, 1)
 
+    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 0)
     def test_flag_comment_when_flagging_not_enabled(self):
-        settings.COMMENT_FLAGS_ALLOWED = 0
         comment = self.comment
         data = self.flag_data
         url = self.get_url()
         self.assertEqual(comment.flag.count, 0)
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 403)
-        settings.COMMENT_FLAGS_ALLOWED = 1
 
     def test_unflag_to_comment(self):
         comment = self.comment_2
@@ -511,22 +512,29 @@ class APICommentFlagViewTest(APIBaseTest):
         comment.refresh_from_db()
         self.assertEqual(comment.flag.count, 1)
 
+    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 1)
     def test_is_flagged_value(self):
         # test is_flagged property
         comment = self.create_comment(self.content_object_1)
         data = self.flag_data
         url = self.get_url(comment.id)
-        settings.COMMENT_FLAGS_ALLOWED = 1
         response = self.client.post(url, data=data)
+
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(response.json()['is_flagged'])
+        self.assertIs(False, response.json()['is_flagged'])
+
         comment.flag.refresh_from_db()
+
         self.assertEqual(comment.flag.count, 1)
         self.client.force_login(self.user_2)
+
         response = self.client.post(url, data=data)
+
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.json()['is_flagged'])
+        self.assertIs(True, response.json()['is_flagged'])
+
         comment.flag.refresh_from_db()
+
         self.assertEqual(comment.flag.count, 2)
 
     def test_flag_to_comment_with_invalid_reason(self):
@@ -545,13 +553,13 @@ class APICommentDetailForFlagStateChangeTest(APIBaseTest):
         }
 
     @classmethod
+    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 1)
     def setUpTestData(cls):
         super().setUpTestData()
         cls.flag_data = {
             'reason': FlagInstanceManager.reason_values[0],
             'info': None,
         }
-        settings.COMMENT_FLAGS_ALLOWED = 1
         # flag comment_1
         cls.create_flag_instance(cls.user_1, cls.comment_1, **cls.flag_data)
         cls.create_flag_instance(cls.user_2, cls.comment_1, **cls.flag_data)
@@ -566,16 +574,15 @@ class APICommentDetailForFlagStateChangeTest(APIBaseTest):
         response = self.client.post(self.get_url(), data=self.data)
         self.assertEqual(response.status_code, 403)
 
-    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 1)
     def test_change_state_when_comment_is_not_flagged(self):
         comment = self.comment_2
-        self.assertFalse(comment.is_flagged)
+        self.assertIs(False, comment.is_flagged)
         response = self.client.post(self.get_url(comment.id), data=self.data)
         self.assertEqual(response.status_code, 400)
 
     def test_change_state_by_not_permitted_user(self):
         comment = self.comment_1
-        self.assertTrue(comment.is_flagged)
+        self.assertIs(True, comment.is_flagged)
         self.client.force_login(self.user_1)
         response = self.client.post(self.get_url(), data=self.data)
         self.assertEqual(response.status_code, 403)
@@ -583,7 +590,7 @@ class APICommentDetailForFlagStateChangeTest(APIBaseTest):
     def test_change_state_with_wrong_state_value(self):
         data = self.data.copy()
         comment = self.comment_1
-        self.assertTrue(comment.is_flagged)
+        self.assertIs(True, comment.is_flagged)
 
         data['state'] = 100
         response = self.client.post(self.get_url(), data=data)
@@ -604,7 +611,7 @@ class APICommentDetailForFlagStateChangeTest(APIBaseTest):
 
     def test_change_state_success(self):
         comment = self.comment_1
-        self.assertTrue(comment.is_flagged)
+        self.assertIs(True, comment.is_flagged)
         self.assertEqual(comment.flag.state, comment.flag.FLAGGED)
 
         data = self.data.copy()
@@ -617,7 +624,7 @@ class APICommentDetailForFlagStateChangeTest(APIBaseTest):
         sleep(1)
         comment.content = "new content"
         comment.save()
-        self.assertTrue(comment.is_edited)
+        self.assertIs(True, comment.is_edited)
 
         # First request
         data['state'] = comment.flag.RESOLVED
