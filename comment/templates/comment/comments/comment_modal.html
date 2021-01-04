@@ -1,10 +1,10 @@
 {% load i18n %}
 {% load comment_tags %}
-<form class="js-comment-delete-form m-0" method="post" data-url="{% if comment %}{% url 'comment:delete' pk=comment.id %}{% endif %}">
+<form class="js-comment-delete-form m-0" data-url="{% if comment %}{% url 'comment:delete' pk=comment.id %}{% endif %}">
     {% csrf_token %}
     <div class="modal-header">
         <h5 class="modal-title comment-translatable">{% block title %}{% trans "Confirm comment deletion" %}{% endblock title %}</h5>
-        <button class="modal-close-btn" aria-label="{% trans "Close" %}">
+        <button type="button" class="modal-close-btn" aria-label="{% trans "Close" %}">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
@@ -13,7 +13,6 @@
     </div>
     <div class="modal-footer">
         <button type="button" class="comment-translatable modal-cancel-btn {% block close_btn_cls %}btn btn-secondary{% endblock close_btn_cls %}" data-dismiss="modal">{% trans "Close" %}</button>
-
         <input name="model_name" value="{{model_name}}" hidden>
         <input name="model_id" value="{{model_id}}" hidden>
         <input name="app_name" value="{{app_name}}" hidden>
