@@ -102,6 +102,10 @@ Some block tags may not work on old versions.
 
     {% block comment_section_cls %}my-5 mx-3{% endblock comment_section_cls %}
 
+    {% block header_div_cls %}border-bottom mb-4{% endblock header_div_cls %}
+    {% block header_title_cls %}bb{% endblock header_title_cls %}
+    {% block follow_icon_wrapper_cls %}float-right{% endblock follow_icon_wrapper_cls %}
+
     {% block pagination %}  {# override default pagination classes #}
     {% include 'comment/comments/pagination.html' with active_btn='bg-success' text_style='text-success' li_cls='page-item rounded mx-1' %}
     {% endblock pagination %}
@@ -117,12 +121,35 @@ Some block tags may not work on old versions.
     {% block submit_button_wrapper_cls %}col-sm-3 col-md-2 px-2 m-3 m-sm-0{% endblock submit_button_wrapper_cls %}
     {% block submit_button_cls %}btn btn-outline-success btn-block btn-sm{% endblock submit_button_cls %}
 
+    {% block login_info %}
+    {# Please see 'comment/comments/create_comment.html' template for default block #}
+    {% endblock login_info %}
+
     {% block oauth %}  {# override default oauth urls section #}
     <a class="mx-1 my-0 h4 github-color" href="{% url 'social:begin' 'github' %}?next={{request.path}}"><i class="fa fa-github-square"></i></a>
     <a class="mx-1 my-0 h4 facebook-color" href="{% url 'social:begin' 'facebook' %}?next={{request.path}}"><i class="fa fa-facebook-square"></i></a>
     <a class="mx-1 my-0 h4 twitter-color" href="{% url 'social:begin' 'twitter' %}?next={{request.path}}"><i class="fa fa-twitter-square"></i></a>
     <a class="mx-1 my-0 h4 google-color" href="{% url 'social:begin' 'google-oauth2' %}?next={{request.path}}"><i class="fa fa-google-plus-square"></i></a>
     {% endblock oauth %}
+
+
+**parent_comment.html**
+
+.. code:: jinja
+
+    {% extends "comment/comments/parent_comment.html" %}
+
+    {% block parent_comment_wrapper_cls %}text-wrap{% endblock parent_comment_wrapper_cls %}
+    {% block replies_wrapper_cls %}ml-5 my-4{% endblock replies_wrapper_cls %}
+
+
+**child_comment.html**
+
+.. code:: jinja
+
+    {% extends "comment/comments/child_comment.html" %}
+
+    {% block child_comment_wrapper_cls %}text-wrap mb-4{% endblock child_comment_wrapper_cls %}
 
 
 **comment_body.html**
@@ -134,6 +161,8 @@ Some block tags may not work on old versions.
     {% block image_wrapper_cls %}col-2 col-md-1{% endblock image_wrapper_cls %}
     {% block image_cls %}w-100{% endblock image_cls %}
 
+    {% block three_dots_wrapper_cls %}col-1{% endblock three_dots_wrapper_cls %}
+
 
 **comment_content.html**
 
@@ -142,12 +171,25 @@ Some block tags may not work on old versions.
     {% extends "comment/comments/comment_content.html" %}
 
     {% block content_wrapper_cls %}{% if has_valid_profile %}col-9 col-md-10{% else %}co-11 mx-3{% endif %}{% endblock content_wrapper_cls %}
-    {% block comment_content %}   {# override truncate words number - change the number 30 to your desired or 0 if you don't want to fold the comment#}
-        {% render_content comment.content 30 %}
+    {% block comment_content %}   {# override truncate words number - change the number 30 to your desired or 0 if you don't want to fold the comment #}
+        {% render_content comment 30 %}
     {% endblock comment_content %}
 
+    {% block footer_wrapper_cls %}mt-2 text-muted{% endblock footer_wrapper_cls %}
     {% block username_cls %}{% endblock username_cls %}
+    {% block reply_count_cls %}text-dark{% endblock reply_count_cls %}
     {% block reply_link_cls %}btn btn-link ml-1{% endblock reply_link_cls %}
+    {% block follow_icon_wrapper_cls %}d-inline ml-3{% endblock follow_icon_wrapper_cls %}
+
+
+**content.html**
+
+.. code:: jinja
+
+    {% extends "comment/comments/content.html" %}
+
+    {% block content_text_cls %}mb-0{% endblock content_text_cls %}
+    {% block read_more_cls %}btn btn-link btn-xs read-more{% endblock read_more_cls %}
 
 
 **edit_icon.html**

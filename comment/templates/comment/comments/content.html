@@ -1,12 +1,12 @@
 {% load i18n %}
-<p class="js-comment-content {% block c_text_cls %}mb-0{% endblock c_text_cls %}">
+<p class="js-comment-content {% block content_text_cls %}mb-0{% endblock content_text_cls %}">
     {% block comment_urlhash %}
     {% include "comment/comments/urlhash.html" with urlhash=urlhash %}
     {% endblock comment_urlhash %}
     {% if text_2 %}
         {{ text_1 }}
         <span class="d-none">{{ text_2 }}</span>
-        <button class="js-read-more-btn btn btn-link btn-xs" style="font-size: 14px">{% trans "read more" %}...</button>
+        <button class="js-read-more-btn {% block read_more_cls %}btn btn-link btn-xs read-more{% endblock read_more_cls %}">{% trans "read more" %}...</button>
     {% else %}
         {{ text_1 }}
     {% endif %}

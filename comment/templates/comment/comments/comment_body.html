@@ -10,7 +10,7 @@
     {% endif %}
     {% include 'comment/comments/comment_content.html' with comment=comment %}
     {% if comment.user != user %}
-        <div class="col-1">
+        <div class="{% block three_dots_wrapper_cls %}col-1 position-relative d-flex justify-content-end{% endblock three_dots_wrapper_cls %}">
             {% include 'comment/comments/three_dots_menu.html' %}
         </div>
     {% endif %}

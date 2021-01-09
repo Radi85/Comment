@@ -2,25 +2,28 @@
 {% load i18n %}
 <section id="comments" class="{% block comment_section_cls %}my-5 mx-3{% endblock comment_section_cls %}">
     <script>window.CSRF_TOKEN = "{{ csrf_token }}"</script>
-    <strong class="border-bottom bb"><span class="js-comment-number">{% get_comments_count model_object user %}</span><span class="comment-translatable"> {% trans "Comments" %}</span></strong>
-    {% if is_subscription_allowed %}
-        <span class="float-right">{% include 'comment/follow/follow.html' with model_object=model_object btnId=0 %}</span>
-    {% endif %}
+    <div class="{% block header_div_cls %}border-bottom mb-4{% endblock header_div_cls %}">
+        <strong class="{% block header_title_cls %}bb{% endblock header_title_cls %}"><span
+                class="js-comment-number">{% get_comments_count model_object user %}</span><span
+                class="comment-translatable"> {% trans "Comments" %}</span></strong>
+        {% if is_subscription_allowed %}
+            <span class="{% block follow_icon_wrapper_cls %}float-right{% endblock follow_icon_wrapper_cls %}">{% include 'comment/follow/follow.html' with model_object=model_object btnId=0 %}</span>
+        {% endif %}
+    </div>
     {% block comment_messages %}
-    {% include "comment/comments/messages.html" %}
+        {% include "comment/comments/messages.html" %}
     {% endblock comment_messages %}
-    <hr class="hr"/>
     <div class="js-comment comment mb-5">
         {% include 'comment/comments/create_comment.html' with placeholder="comment on this post..." comment=None %}
     </div>
-    <div class="js-main-comment mt-5">
-      {% for comment in comments %}
-          {% include 'comment/comments/parent_comment.html' with placeholder='reply to this comment...' %}
-      {% endfor %}
+    <div class="mt-5">
+        {% for comment in comments %}
+            {% include 'comment/comments/parent_comment.html' with placeholder='reply to this comment...' %}
+        {% endfor %}
     </div>
     {% if comments.paginator.num_pages > 1 %}
-    {% block pagination %}
-    {% include 'comment/comments/pagination.html' with active_btn='bg-success' text_style='text-success' li_cls='page-item rounded mx-1' %}
-    {% endblock pagination %}
+        {% block pagination %}
+            {% include 'comment/comments/pagination.html' with active_btn='bg-success' text_style='text-success' li_cls='page-item rounded mx-1' %}
+        {% endblock pagination %}
     {% endif %}
 </section>

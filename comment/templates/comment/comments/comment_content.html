@@ -5,7 +5,7 @@
     {% block comment_content %}
     {% render_content comment 30 %}
     {% endblock comment_content %}
-    <div class="blockquote-footer">
+    <div class="{% block footer_wrapper_cls %}mt-2 text-muted{% endblock footer_wrapper_cls %}">
         <small>
             {% get_profile_url comment as profile_url %}
             <{% if comment.user %}a{% else %}span{% endif %}
@@ -34,12 +34,12 @@
             {% endif %}
             {% if comment.is_parent %}
                 {% get_replies_count comment user as reply_count %}
-                | <span class="js-reply-number text-dark">{{ reply_count }}</span>
+                | <span class="js-reply-number {% block reply_count_cls %}text-dark{% endblock reply_count_cls %}">{{ reply_count }}</span>
                 <a class="js-reply-link {% block reply_link_cls %}btn btn-link ml-1{% endblock reply_link_cls %}" href="#">
                     {% blocktrans with plural_str=reply_count|pluralize:"y,ies" %} Repl{{ plural_str }} {% endblocktrans %}
                 </a>
                 {% if comment.user == user and is_subscription_allowed %}
-                    <div class="d-inline ml-3">
+                    <div class="{% block follow_icon_wrapper_cls %}d-inline ml-3{% endblock follow_icon_wrapper_cls %}">
                         {% include 'comment/follow/follow.html' with model_object=comment btnId=comment.id %}
                     </div>
                 {% endif %}

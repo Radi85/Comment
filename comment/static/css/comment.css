@@ -13,15 +13,9 @@
     text-decoration: none;
     transition: opacity 200ms ease-in-out;
 }
-#comments .border-bottom {
-    border-bottom: 3px solid #00bc8c !important;
-}
-#comments .hr {
-    margin-top: 0.2rem;
-    margin-bottom: 2.5rem;
-}
 #comments .bb {
-    padding-bottom: 0.3rem;
+    padding-bottom: 2px;
+    border-bottom: 3px solid #00bc8c;
 }
 #comments .text-wrap {
     word-wrap: break-word;
@@ -38,11 +32,11 @@
 }
 #comments textarea {
     min-height: 31px;
-    padding: 4px 15px !important;
+    padding: 4px 15px;
     overflow: hidden;
     resize: none;
 }
-#comments textarea:focus {
+#comments textarea:focus, #comments textarea:hover {
     border: 1px solid #00bc8c;
     outline: none;
 }
@@ -54,17 +48,17 @@ input#search-input:focus::placeholder {
 #comments .js-comment-input:invalid {
     box-shadow: none;
 }
-#comments .js-comment-input:focus {
-    box-shadow: 0 0 0 0.2rem rgba(75, 142, 213, 0.25);
-}
 #comments .edit-comment::before {
     content: none;
 }
 #comments .btn-link {
-    text-decoration: none !important;
+    text-decoration: none;
     padding: 0;
     font-size: 100%;
     font-weight: 400;
+}
+#comments .read-more {
+    font-size: 0.9rem;
 }
 #comments .user-has-reacted,
 #comments .user-has-flagged {

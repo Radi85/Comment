@@ -1,7 +1,7 @@
 {% load comment_tags %}
-<div class="js-parent-comment blockquote text-wrap">
+<div class="js-parent-comment {% block parent_comment_wrapper_cls %}text-wrap{% endblock parent_comment_wrapper_cls %}">
     {% include 'comment/comments/comment_body.html' with comment=comment %}
-    <div class="js-replies ml-5 my-4 d-none">
+    <div class="js-replies {% block replies_wrapper_cls %}ml-5 my-4{% endblock replies_wrapper_cls %} d-none">
         {% get_comment_replies comment user as replies %}
         {% for comment in replies %}
             {% include 'comment/comments/child_comment.html' %}
