@@ -1,5 +1,4 @@
-
-<div class="js-child-comment blockquote text-wrap mb-4">
+<div class="js-child-comment {% block child_comment_wrapper_cls %}text-wrap mb-4{% endblock child_comment_wrapper_cls %}">
     <hr/>
     {% include 'comment/comments/comment_body.html' with comment=comment %}
 </div>

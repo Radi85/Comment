@@ -24,17 +24,20 @@
     </form>
 {% endif %}
 {% if user.is_anonymous %}
+    {% block login_info %}
     <div class="d-flex mb-3">
         {% if is_anonymous_allowed %}
-            <p class="text-muted {% if comment %}h7 my-auto {% endif %}">{% trans "Comment Anonymously or" %}
-            <a class="text-success {% if comment %}h7 my-auto {% endif %}" href="{{login_url}}?next={{request.path}}">
-                {% trans "Login" %}
-            </a>
-            {% trans "to keep your conversations intact" %}</p>
+            <p class="text-muted{% if comment %} h7{% endif %}">
+                {% trans "Comment Anonymously or" %}
+                <a class="text-success" href="{{login_url}}?next={{request.path}}">
+                    <em>{% trans "Login" %}</em>
+                </a>
+                {% trans "to keep your conversations intact" %}
+            </p>
         {% else %}
-            <p class="text-muted">
-                <a class="text-success {% if comment %}h7 my-auto {% endif %}" href="{{login_url}}?next={{request.path}}">
-                    {% trans "Login" %}
+            <p class="text-muted {% if comment %}h7{% endif %}">
+                <a class="text-success" href="{{login_url}}?next={{request.path}}">
+                    <em>{% trans "Login" %}</em>
                 </a>
                 {% trans "to join the discussion" %}
             </p>
@@ -48,4 +51,5 @@
             {% endblock oauth %}
         {% endif %}
     </div>
+    {% endblock login_info %}
 {% endif %}
