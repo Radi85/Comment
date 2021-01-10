@@ -153,10 +153,10 @@ class APICommentSerializers(APIBaseTest):
 
         serializer = CommentCreateSerializer(context=data)
         comment = serializer.create(validated_data={'content': 'test'})
-        self.assertTrue(serializer.email_service.thread.is_alive)
+        self.assertTrue(serializer.email_service._email_thread.is_alive)
         self.assertIsNotNone(comment)
-        self.assertIsNotNone(serializer.email_service.thread)
-        serializer.email_service.thread.join()
+        self.assertIsNotNone(serializer.email_service._email_thread)
+        serializer.email_service._email_thread.join()
         self.assertEqual(len(mail.outbox), 1)
 
     @patch.object(settings, 'COMMENT_ALLOW_ANONYMOUS', True)
@@ -182,8 +182,8 @@ class APICommentSerializers(APIBaseTest):
         self.assertIsNotNone(comment)
 
         # confirmation email is sent
-        self.assertIsNotNone(serializer.email_service.thread)
-        serializer.email_service.thread.join()
+        self.assertIsNotNone(serializer.email_service._email_thread)
+        serializer.email_service._email_thread.join()
         self.assertEqual(len(mail.outbox), 1)
 
     def test_passing_context_to_serializer(self):

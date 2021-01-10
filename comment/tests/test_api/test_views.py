@@ -696,7 +696,7 @@ class APIConfirmCommentViewTest(BaseAnonymousCommentTest, APIBaseTest):
     def test_success_with_notification(self):
         response = self.client.get(self.get_url())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        response.renderer_context['view'].email_service.thread.join()
+        response.renderer_context['view'].email_service._email_thread.join()
         self.assertEqual(len(mail.outbox), 1)
 
 

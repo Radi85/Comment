@@ -11,10 +11,8 @@ from comment.forms import CommentForm
 from comment.utils import (
     get_comment_context_data, get_comment_from_key, get_user_for_request, CommentFailReason
 )
-from comment.mixins import CanCreateMixin, CanEditMixin, CanDeleteMixin
-from comment.conf import settings
-from comment.messages import EmailError, EmailInfo
-from comment.service.email import DABEmailService
+from comment.mixins import CanCreateMixin, CanEditMixin, CanDeleteMixin, CommentCreateMixin
+from comment.messages import EmailError
 
 
 class BaseCommentView(FormView):
@@ -32,7 +30,7 @@ class BaseCommentView(FormView):
         return kwargs
 
 
-class CreateComment(CanCreateMixin, BaseCommentView):
+class CreateComment(CanCreateMixin, BaseCommentView, CommentCreateMixin):
     comment = None
     email_service = None
 
@@ -53,7 +51,7 @@ class CreateComment(CanCreateMixin, BaseCommentView):
         comment_content = form.cleaned_data['content']
         email = form.cleaned_data.get('email', None) or user.email
         time_posted = timezone.now()
-        _comment = Comment(
+        temp_comment = Comment(
             content_object=self.model_obj,
             content=comment_content,
             user=user,
@@ -61,18 +59,7 @@ class CreateComment(CanCreateMixin, BaseCommentView):
             email=email,
             posted=time_posted
         )
-
-        self.email_service = DABEmailService(_comment, self.request)
-
-        if settings.COMMENT_ALLOW_ANONYMOUS and not user:
-            # send response, please verify your email to post this comment.
-            self.email_service.send_confirmation_request()
-            messages.info(self.request, EmailInfo.CONFIRMATION_SENT)
-        else:
-            _comment.save()
-            if settings.COMMENT_ALLOW_SUBSCRIPTION:
-                self.email_service.send_notification_to_followers()
-            self.comment = _comment
+        self.comment = self.perform_create(temp_comment, self.request)
 
         return self.render_to_response(self.get_context_data())
 
@@ -120,23 +107,24 @@ class DeleteComment(CanDeleteMixin, BaseCommentView):
         return render(request, 'comment/comments/base.html', context)
 
 
-class ConfirmComment(View):
+class ConfirmComment(View, CommentCreateMixin):
     email_service = None
+
+    @staticmethod
+    def _handle_invalid_comment(comment, request):
+        if comment.why_invalid == CommentFailReason.BAD:
+            messages.error(request, EmailError.BROKEN_VERIFICATION_LINK)
+        elif comment.why_invalid == CommentFailReason.EXISTS:
+            messages.warning(request, EmailError.USED_VERIFICATION_LINK)
 
     def get(self, request, *args, **kwargs):
         key = kwargs.get('key', None)
         temp_comment = get_comment_from_key(key)
-        if temp_comment.why_invalid == CommentFailReason.BAD:
-            messages.error(request, EmailError.BROKEN_VERIFICATION_LINK)
-        elif temp_comment.why_invalid == CommentFailReason.EXISTS:
-            messages.warning(request, EmailError.USED_VERIFICATION_LINK)
+        self._handle_invalid_comment(temp_comment, request)
+
         if not temp_comment.is_valid:
             return render(request, template_name='comment/anonymous/discarded.html')
 
-        comment = temp_comment.obj
-        comment.save()
-        comment.refresh_from_db()
-        if settings.COMMENT_ALLOW_SUBSCRIPTION:
-            self.email_service = DABEmailService(comment, request)
-            self.email_service.send_notification_to_followers()
+        comment = self.perform_save(temp_comment.obj, request)
+
         return redirect(comment.get_url(request))

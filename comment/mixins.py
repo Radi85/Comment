@@ -1,6 +1,7 @@
 import abc
 
 from django.contrib.auth.mixins import LoginRequiredMixin, AccessMixin
+from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponseBadRequest, HttpResponseForbidden
 
@@ -8,6 +9,8 @@ from comment.conf import settings
 from comment.utils import is_comment_admin, is_comment_moderator
 from comment.validators import ValidatorMixin
 from comment.messages import ErrorMessage, FlagError, FollowError
+from comment.service.email import DABEmailService
+from comment.messages import EmailInfo
 
 
 class AJAXRequiredMixin:
@@ -27,6 +30,38 @@ class BasePermission(AJAXRequiredMixin):
 
 class BaseCommentMixin(LoginRequiredMixin, BasePermission):
     pass
+
+
+class CommentCreateMixin:
+    email_service = None
+
+    def _initialize_email_service(self, comment, request):
+        self.email_service = DABEmailService(comment, request)
+
+    def _send_notification_to_followers(self, comment, request):
+        if settings.COMMENT_ALLOW_SUBSCRIPTION:
+            self._initialize_email_service(comment, request)
+            self.email_service.send_notification_to_followers()
+
+    def perform_save(self, comment, request):
+        comment.save()
+        self._send_notification_to_followers(comment, request)
+        comment.refresh_from_db()
+        return comment
+
+    def _handle_anonymous(self, comment, request, api=False):
+        self._initialize_email_service(comment, request)
+        self.email_service.send_confirmation_request(api=api)
+        if not api:
+            messages.info(request, EmailInfo.CONFIRMATION_SENT)
+
+    def perform_create(self, comment, request, api=False):
+
+        if settings.COMMENT_ALLOW_ANONYMOUS and not comment.user:
+            self._handle_anonymous(comment, request, api)
+        else:
+            comment = self.perform_save(comment, request)
+        return comment
 
 
 class CanCreateMixin(BasePermission, AccessMixin, ValidatorMixin):

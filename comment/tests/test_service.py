@@ -102,13 +102,13 @@ class TestDABEmailService(BaseAnonymousCommentTest):
         self.assertEqual(len(mail.outbox), 0)
         self.email_service.send_messages(messages)
         self.assertNotEqual(len(mail.outbox), 100)
-        self.assertTrue(self.email_service.thread.is_alive())
-        self.email_service.thread.join()
+        self.assertTrue(self.email_service._email_thread.is_alive())
+        self.email_service._email_thread.join()
         self.assertEqual(len(mail.outbox), 100)
 
     def test_send_confirmation_request_django(self):
         self.email_service.send_confirmation_request()
-        self.email_service.thread.join()
+        self.email_service._email_thread.join()
         self.assertEqual(len(mail.outbox), 1)
         sent_email = mail.outbox[0]
         self.assertIsInstance(sent_email, EmailMultiAlternatives)
@@ -121,7 +121,7 @@ class TestDABEmailService(BaseAnonymousCommentTest):
 
     def test_send_confirmation_request_api(self):
         self.email_service.send_confirmation_request(api=True)
-        self.email_service.thread.join()
+        self.email_service._email_thread.join()
         self.assertEqual(len(mail.outbox), 1)
         sent_email = mail.outbox[0]
         self.assertIsInstance(sent_email, EmailMultiAlternatives)
@@ -175,7 +175,7 @@ class TestDABEmailService(BaseAnonymousCommentTest):
         self.assertEqual(followers.count(), 1)
 
         self.email_service.send_notification_to_followers()
-        self.email_service.thread.join()
+        self.email_service._email_thread.join()
 
         self.assertEqual(len(mail.outbox), 1)
         sent_email = mail.outbox[0]
