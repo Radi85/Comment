@@ -9,7 +9,7 @@ from comment.conf import settings
 from comment.models import Comment, Flag, Reaction
 from comment.utils import get_user_for_request, get_profile_instance
 from comment.messages import EmailError
-from comment.service.email import DABEmailService
+from comment.mixins import CommentCreateMixin
 
 
 def get_profile_model():
@@ -91,7 +91,7 @@ class BaseCommentSerializer(serializers.ModelSerializer):
         return ReactionSerializer(obj.reaction).data
 
 
-class CommentCreateSerializer(BaseCommentSerializer):
+class CommentCreateSerializer(BaseCommentSerializer, CommentCreateMixin):
     class Meta:
         model = Comment
         fields = ('id', 'user', 'email', 'content', 'parent', 'posted', 'edited', 'reply_count', 'replies', 'urlhash')
@@ -117,7 +117,7 @@ class CommentCreateSerializer(BaseCommentSerializer):
         email = validated_data.get('email')
         time_posted = timezone.now()
 
-        comment = Comment(
+        temp_comment = Comment(
             content_object=self.context['model_obj'],
             content=content,
             user=user,
@@ -125,14 +125,7 @@ class CommentCreateSerializer(BaseCommentSerializer):
             email=email,
             posted=time_posted
         )
-        self.email_service = DABEmailService(comment, request)
-        if settings.COMMENT_ALLOW_ANONYMOUS and not user:
-            self.email_service.send_confirmation_request(api=True)
-        else:
-            comment.save()
-            if settings.COMMENT_ALLOW_SUBSCRIPTION:
-                self.email_service.send_notification_to_followers()
-        return comment
+        return self.perform_create(temp_comment, request, api=True)
 
 
 class CommentSerializer(BaseCommentSerializer):

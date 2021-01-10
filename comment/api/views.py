@@ -4,7 +4,6 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from comment.conf import settings
 from comment.validators import ValidatorMixin, ContentTypeValidator
 from comment.api.serializers import CommentSerializer, CommentCreateSerializer
 from comment.api.permissions import (
@@ -14,7 +13,7 @@ from comment.models import Comment, Reaction, ReactionInstance, Flag, FlagInstan
 from comment.utils import get_comment_from_key, CommentFailReason
 from comment.messages import FlagError, EmailError
 from comment.views import BaseToggleFollowView
-from comment.service.email import DABEmailService
+from comment.mixins import CommentCreateMixin
 
 
 class CommentCreate(ValidatorMixin, generics.CreateAPIView):
@@ -132,9 +131,7 @@ class CommentDetailForFlagStateChange(generics.RetrieveAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class ConfirmComment(APIView):
-    email_service = None
-
+class ConfirmComment(APIView, CommentCreateMixin):
     def get(self, request, *args, **kwargs):
         key = kwargs.get('key', None)
         temp_comment = get_comment_from_key(key)
@@ -145,12 +142,8 @@ class ConfirmComment(APIView):
         if temp_comment.why_invalid == CommentFailReason.EXISTS:
             return Response({'detail': EmailError.USED_VERIFICATION_LINK}, status=status.HTTP_200_OK)
 
-        comment = temp_comment.obj
-        comment.save()
-        comment.refresh_from_db()
-        if settings.COMMENT_ALLOW_SUBSCRIPTION:
-            self.email_service = DABEmailService(comment, request)
-            self.email_service.send_notification_to_followers()
+        comment = self.perform_save(temp_comment.obj, request)
+
         return Response(CommentSerializer(comment).data, status=status.HTTP_201_CREATED)
 
 

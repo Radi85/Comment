@@ -92,7 +92,7 @@ class CommentViewTestCase(BaseCommentViewTest):
         url = self.get_create_url()
         response = self.client.post(url, data=self.data)
         self.assertEqual(response.status_code, 200)
-        response.context['view'].email_service.thread.join()
+        response.context['view'].email_service._email_thread.join()
         self.assertEqual(len(mail.outbox), 1)
 
     def test_create_comment_non_ajax_request(self):
@@ -338,5 +338,5 @@ class ConfirmCommentViewTest(BaseAnonymousCommentTest):
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertEqual(response.url, comment.get_url(self.request))
 
-        view.email_service.thread.join()
+        view.email_service._email_thread.join()
         self.assertEqual(len(mail.outbox), 1)

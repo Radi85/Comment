@@ -18,7 +18,7 @@ class DABEmailService(object):
         self.request = request
         self.sender = settings.COMMENT_FROM_EMAIL
         self.is_html = settings.COMMENT_SEND_HTML_EMAIL
-        self.thread = None
+        self._email_thread = None
 
     def get_msg_context(self, **context):
         context['comment'] = self.comment
@@ -34,8 +34,8 @@ class DABEmailService(object):
 
     def send_messages(self, messages):
         connection = get_connection()  # Use default email connection
-        self.thread = Thread(target=connection.send_messages, args=(messages,))
-        self.thread.start()
+        self._email_thread = Thread(target=connection.send_messages, args=(messages,))
+        self._email_thread.start()
 
     def get_message_templates(self, text_template, html_template, msg_context):
         text_msg_template = loader.get_template(text_template)
