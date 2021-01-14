@@ -32,7 +32,7 @@ def get_user_fields():
     for field in fields:
         if isinstance(field, ImageField) and hasattr(field, "upload_to"):
             api_fields.append(field.name)
-    return list(api_fields)
+    return api_fields
 
 
 class ProfileSerializerDAB(serializers.ModelSerializer):
@@ -173,9 +173,9 @@ class ReactionSerializer(serializers.ModelSerializer):
         users = {'likes': [], 'dislikes': []}
         for instance in obj.reactions.all():
             if instance.reaction_type == instance.ReactionType.LIKE:
-                users['likes'].append({'id': instance.user.id, 'username': instance.user.username})
+                users['likes'].append({'id': instance.user.id, 'username': getattr(instance.user, instance.user.USERNAME_FIELD)})
             else:
-                users['dislikes'].append({'id': instance.user.id, 'username': instance.user.username})
+                users['dislikes'].append({'id': instance.user.id, 'username': getattr(instance.user, instance.user.USERNAME_FIELD)})
         return users
 
 
