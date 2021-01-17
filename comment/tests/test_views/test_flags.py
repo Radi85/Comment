@@ -3,7 +3,7 @@ from unittest.mock import patch
 from rest_framework import status
 
 from comment.conf import settings
-from comment.messages import FlagInfo
+from comment.messages import FlagInfo, FlagError
 from comment.tests.base import BaseCommentFlagTest
 
 
@@ -17,14 +17,18 @@ class SetFlagViewTest(BaseCommentFlagTest):
             'status': 1
         }
 
-    def test_set_flag_for_flagging(self):
+    def test_set_flag(self):
         _url = self.get_url('comment:flag', self.comment.id)
         self.flag_data['reason'] = 1
         response = self.client.post(_url, data=self.flag_data)
 
         response_data = {
-            'status': 0,
-            'flag': 1,
+            'data': {
+                'status': 0,
+                'flag': 1,
+            },
+            'anonymous': False,
+            'error': None,
             'msg': FlagInfo.FLAGGED_SUCCESS
         }
         self.assertEqual(response.status_code, 200)
@@ -48,8 +52,12 @@ class SetFlagViewTest(BaseCommentFlagTest):
         self.comment.flag.delete()
         response = self.client.post(_url, data=data)
         response_data = {
-            'status': 0,
-            'flag': 1,
+            'data': {
+                'status': 0,
+                'flag': 1,
+            },
+            'anonymous': False,
+            'error': None,
             'msg': FlagInfo.FLAGGED_SUCCESS
         }
         self.assertEqual(response.status_code, 200)
@@ -63,7 +71,11 @@ class SetFlagViewTest(BaseCommentFlagTest):
         data = {}
         response = self.client.post(_url, data=data)
         response_data = {
-            'status': 0,
+            'data': {
+                'status': 0
+            },
+            'anonymous': False,
+            'error': None,
             'msg': FlagInfo.UNFLAGGED_SUCCESS
         }
         self.assertEqual(response.status_code, 200)
@@ -104,7 +116,7 @@ class SetFlagViewTest(BaseCommentFlagTest):
         reason = -1
         data.update({'reason': reason})
         response = self.client.post(url, data=data)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 400)
 
 
 class ChangeFlagStateViewTest(BaseCommentFlagTest):
@@ -145,8 +157,8 @@ class ChangeFlagStateViewTest(BaseCommentFlagTest):
         response = self.client.post(
             self.get_url('comment:flag-change-state', self.comment_for_change_state.id), data=self.data
         )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()['state'], 0)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['error'], FlagError.STATE_CHANGE_ERROR)
         self.assertEqual(self.comment_for_change_state.flag.state, self.comment_for_change_state.flag.FLAGGED)
 
     def test_change_flag_state_success(self):
@@ -161,7 +173,7 @@ class ChangeFlagStateViewTest(BaseCommentFlagTest):
             self.get_url('comment:flag-change-state', self.comment_for_change_state.id), data=self.data
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()['state'], self.comment_for_change_state.flag.REJECTED)
+        self.assertEqual(response.json()['data']['state'], self.comment_for_change_state.flag.REJECTED)
         self.comment_for_change_state.flag.refresh_from_db()
         self.assertEqual(self.comment_for_change_state.flag.moderator, self.moderator)
         self.assertEqual(self.comment_for_change_state.flag.state, self.comment_for_change_state.flag.REJECTED)

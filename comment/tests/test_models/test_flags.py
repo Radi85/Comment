@@ -142,6 +142,8 @@ class FlagModelTest(BaseCommentFlagTest):
         flag.toggle_flagged_state()
         self.assertEqual(flag.state, flag.UNFLAGGED)
 
+        # TODO split this test to be independent from the actual settings
+        # current settings value COMMENT_FLAGS_ALLOWED = 2
         self.create_flag_instance(self.user_1, comment)
         self.create_flag_instance(self.user_2, comment)
         flag.refresh_from_db()

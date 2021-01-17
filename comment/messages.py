@@ -34,6 +34,7 @@ class FlagError:
     NOT_FLAGGED_BY_USER = _('This comment was not flagged by this user ({user})')
     REJECT_UNFLAGGED_COMMENT = _('This action cannot be applied on unflagged comments')
     RESOLVE_UNEDITED_COMMENT = _('The comment must be edited before resolving the flag')
+    STATE_CHANGE_ERROR = _('Unable to change flag state at the moment!')
 
 
 class ReactionError:
@@ -41,6 +42,7 @@ class ReactionError:
 
 
 class EmailError:
+    EMAIL_INVALID = _('Enter a valid email address.')
     EMAIL_MISSING = _('Email is required for posting anonymous comments.')
     BROKEN_VERIFICATION_LINK = _('The link seems to be broken.')
     USED_VERIFICATION_LINK = _('The comment has already been verified.')
@@ -73,6 +75,5 @@ class FlagState:
 
 
 class FollowError:
-    EMAIL_INVALID = _('Please insert a valid email')
     EMAIL_REQUIRED = _('Email is required to subscribe {model_object}')
     SYSTEM_NOT_ENABLED = _('Subscribe system must be enabled')

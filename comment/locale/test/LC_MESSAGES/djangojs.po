@@ -5,10 +5,10 @@
 #
 #, fuzzy
 msgid ""
-msgstr""
+msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-25 15:41+0000\n"
+"POT-Creation-Date: 2021-01-17 09:23+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,62 +17,68 @@ msgstr""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: comment/static/js/comment.js:153 comment/static/js/comment.js:297
+#: comment/static/js/comment.js:160 comment/static/js/comment.js:303
 msgid "Replies"
-msgstr"über"
+msgstr "über Replies"
 
-#: comment/static/js/comment.js:155 comment/static/js/comment.js:299
+#: comment/static/js/comment.js:162 comment/static/js/comment.js:305
 msgid "Reply"
-msgstr"über"
+msgstr "über Reply"
 
-#: comment/static/js/comment.js:176
+#: comment/static/js/comment.js:183
 msgid "Unable to post your comment!, please try again"
-msgstr"über"
+msgstr "über Unable to post your comment!, please try again"
 
-#: comment/static/js/comment.js:197
+#: comment/static/js/comment.js:204
 msgid "You can't edit this comment"
-msgstr"über"
+msgstr "über You can't edit this comment"
 
-#: comment/static/js/comment.js:220
+#: comment/static/js/comment.js:227
 msgid "Modification didn't take effect!, please try again"
-msgstr"über"
+msgstr "über Modification didn't take effect!, please try again"
 
-#: comment/static/js/comment.js:308
+#: comment/static/js/comment.js:271
+#, fuzzy
+#| msgid "Reaction couldn't be processed!, please try again"
+msgid "Deletion cannot be performed!, please try again"
+msgstr "über Deletion cannot be performed!, please try again"
+
+#: comment/static/js/comment.js:313
 msgid "Unable to delete your comment!, please try again"
-msgstr"über"
+msgstr "über Unable to delete your comment!, please try again"
 
-#: comment/static/js/comment.js:365
+#: comment/static/js/comment.js:374
 msgid "Reaction couldn't be processed!, please try again"
-msgstr"über"
+msgstr "über Reaction couldn't be processed!, please try again"
 
-#: comment/static/js/comment.js:400
+#: comment/static/js/comment.js:418
 msgid "Subscription couldn't be processed!, please try again"
-msgstr"über"
+msgstr "über Subscription couldn't be processed!, please try again"
 
-#: comment/static/js/comment.js:506
+#: comment/static/js/comment.js:526
 msgid "Flagging couldn't be processed!, please try again"
-msgstr"über"
+msgstr "über Flagging couldn't be processed!, please try again"
 
-#: comment/static/js/comment.js:551
+#: comment/static/js/comment.js:571
 msgid "read more ..."
-msgstr"über"
+msgstr "über read more ..."
 
-#: comment/static/js/comment.js:553
+#: comment/static/js/comment.js:573
 msgid "read less"
-msgstr"über"
+msgstr "über read less"
 
-#: comment/static/js/comment.js:581
+#: comment/static/js/comment.js:602
 msgid "Flag rejected"
-msgstr"über"
+msgstr "über Flag rejected"
 
-#: comment/static/js/comment.js:582 comment/static/js/comment.js:600
+#: comment/static/js/comment.js:603 comment/static/js/comment.js:621
 msgid "Reject the flag"
-msgstr"über"
+msgstr "über Reject the flag"
 
-#: comment/static/js/comment.js:587 comment/static/js/comment.js:595
+#: comment/static/js/comment.js:608 comment/static/js/comment.js:616
 msgid "Resolve the flag"
-msgstr"über"
+msgstr "über Resolve the flag"
 
-#: comment/static/js/comment.js:594
+#: comment/static/js/comment.js:615
 msgid "Flag resolved"
-msgstr"über"
+msgstr "über Flag resolved"

@@ -1,11 +1,12 @@
 from abc import abstractmethod, ABCMeta
 
 from django.contrib.contenttypes.models import ContentType
+from django.core.validators import EmailValidator
 from django.http import JsonResponse
 
-from comment.models import Comment
+from comment.models import Comment, ValidationError
 from comment.exceptions import CommentBadRequest
-from comment.messages import ContentTypeError, ExceptionError
+from comment.messages import ContentTypeError, ExceptionError, EmailError
 from comment.utils import get_request_data
 
 
@@ -121,3 +122,16 @@ class ParentIdValidator(BaseValidatorMixin):
 
 class ValidatorMixin(ContentTypeValidator, ParentIdValidator):
     pass
+
+
+class DABEmailValidator(EmailValidator):
+    def __init__(self, email):
+        super().__init__(EmailError.EMAIL_INVALID)
+        self.email = email
+
+    def is_valid(self):
+        try:
+            self(self.email)
+            return True
+        except ValidationError:
+            return False

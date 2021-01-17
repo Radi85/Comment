@@ -7,9 +7,9 @@ from django.contrib.auth.models import AnonymousUser
 
 from comment.conf import settings
 from comment.utils import (
-    get_model_obj, has_valid_profile, get_comment_context_data, id_generator, get_comment_from_key,
-    get_user_for_request, CommentFailReason,
-    get_gravatar_img, get_profile_instance, is_comment_moderator, is_comment_admin, get_username_for_comment)
+    get_model_obj, has_valid_profile, id_generator, get_comment_from_key, get_user_for_request, CommentFailReason,
+    get_gravatar_img, get_profile_instance, is_comment_moderator, is_comment_admin, get_username_for_comment
+)
 from comment.tests.base import BaseCommentUtilsTest, Comment, RequestFactory
 
 
@@ -69,63 +69,6 @@ class CommentUtilsTest(BaseCommentUtilsTest):
 
             with patch.object(settings, 'COMMENT_USE_GRAVATAR', True):
                 self.assertIs(has_valid_profile(), True)
-
-    def test_get_comment_context_data(self):
-        comment_per_page = 'COMMENT_PER_PAGE'
-        login_url = 'LOGIN_URL'
-        current_login_url = getattr(settings, login_url, '/profile/login/')
-        comment_allow_anonymous = 'COMMENT_ALLOW_ANONYMOUS'
-        comment_allow_translation = 'COMMENT_ALLOW_TRANSLATION'
-        oauth = 'oauth'
-
-        data = {
-            'model_object': self.post_1,
-            'model_name': 'post',
-            'model_id': self.post_1.id,
-            'app_name': 'post',
-            'user': self.post_1.author,
-            'page': 10,
-            oauth: 'True'
-        }
-
-        with patch.object(settings, login_url, current_login_url):
-            with patch.object(settings, comment_allow_anonymous, False):
-                with patch.object(settings, comment_per_page, 0):
-
-                    request = self.factory.post('/', data=data)
-                    request.user = self.post_1.author
-                    if current_login_url.startswith('/'):
-                        patch.object(settings, login_url, current_login_url[1:]).start()
-                    comment_context_data = get_comment_context_data(request)
-
-                    self.assertEqual(comment_context_data['comments'].count(), self.increment)
-                    # test inserting '/' to the beginning of login url
-                    self.assertEqual(comment_context_data['login_url'], '/' + settings.LOGIN_URL)
-                    self.assertEqual(comment_context_data['is_anonymous_allowed'], settings.COMMENT_ALLOW_ANONYMOUS)
-                    self.assertEqual(comment_context_data['is_translation_allowed'], settings.COMMENT_ALLOW_TRANSLATION)
-                    self.assertEqual(comment_context_data['oauth'], True)
-
-        with patch.object(settings, login_url, current_login_url):
-            with patch.object(settings, comment_allow_translation, False):
-                with patch.object(settings, comment_per_page, 2):
-                    request = self.factory.post('/', data=data)
-                    request.user = self.post_1.author
-                    comment_context_data = get_comment_context_data(request)
-
-                    self.assertEqual(comment_context_data['comments'].paginator.per_page, 2)
-                    self.assertIs(comment_context_data['comments'].has_previous(), True)
-                    self.assertEqual(comment_context_data['login_url'], settings.LOGIN_URL)
-                    self.assertEqual(comment_context_data['is_anonymous_allowed'], settings.COMMENT_ALLOW_ANONYMOUS)
-                    self.assertEqual(comment_context_data['is_translation_allowed'], settings.COMMENT_ALLOW_TRANSLATION)
-
-                    data.update({'page': 'not integer', oauth: 'False'})
-                    request = self.factory.post('/', data=data)
-                    request.user = self.post_1.author
-                    comment_context_data = get_comment_context_data(request)
-
-                    self.assertEqual(comment_context_data['comments'].paginator.per_page, 2)
-                    self.assertIs(comment_context_data['comments'].has_next(), True)
-                    self.assertIs(comment_context_data[oauth], False)
 
     @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', False)
     def test_is_comment_moderator_no_moderation(self):

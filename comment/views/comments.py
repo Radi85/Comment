@@ -1,36 +1,17 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse
 from django.template.loader import render_to_string
-from django.views.generic import FormView
 from django.utils import timezone
-from django.views import View
 from django.contrib import messages
 
 from comment.models import Comment
 from comment.forms import CommentForm
-from comment.utils import (
-    get_comment_context_data, get_comment_from_key, get_user_for_request, CommentFailReason
-)
-from comment.mixins import CanCreateMixin, CanEditMixin, CanDeleteMixin, CommentCreateMixin
+from comment.utils import get_comment_from_key, get_user_for_request, CommentFailReason
+from comment.mixins import CanCreateMixin, CanEditMixin, CanDeleteMixin, CommentCreateMixin, BaseCommentView
+from comment.responses import UTF8JsonResponse
 from comment.messages import EmailError
 
 
-class BaseCommentView(FormView):
-    form_class = CommentForm
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['comment_form'] = context.pop('form')
-        context.update(get_comment_context_data(self.request))
-        return context
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['request'] = self.request
-        return kwargs
-
-
-class CreateComment(CanCreateMixin, BaseCommentView, CommentCreateMixin):
+class CreateComment(CanCreateMixin, CommentCreateMixin):
     comment = None
     email_service = None
 
@@ -41,27 +22,31 @@ class CreateComment(CanCreateMixin, BaseCommentView, CommentCreateMixin):
 
     def get_template_names(self):
         if self.request.user.is_anonymous or self.comment.is_parent:
-            return ['comment/comments/base.html']
+            return 'comment/comments/base.html'
         else:
-            return ['comment/comments/child_comment.html']
+            return 'comment/comments/child_comment.html'
 
     def form_valid(self, form):
         user = get_user_for_request(self.request)
-
         comment_content = form.cleaned_data['content']
-        email = form.cleaned_data.get('email', None) or user.email
+        email = form.cleaned_data.get('email', None)
         time_posted = timezone.now()
         temp_comment = Comment(
             content_object=self.model_obj,
             content=comment_content,
             user=user,
             parent=self.parent_comment,
-            email=email,
+            email=email or user.email,
             posted=time_posted
         )
         self.comment = self.perform_create(temp_comment, self.request)
+        self.data = render_to_string(self.get_template_names(), self.get_context_data(), request=self.request)
+        return UTF8JsonResponse(self.json())
 
-        return self.render_to_response(self.get_context_data())
+    def form_invalid(self, form):
+        self.error = EmailError.EMAIL_INVALID
+        self.status = 400
+        return UTF8JsonResponse(self.json(), status=self.status)
 
 
 class UpdateComment(CanEditMixin, BaseCommentView):
@@ -75,7 +60,8 @@ class UpdateComment(CanEditMixin, BaseCommentView):
         context = self.get_context_data()
         context['comment_form'] = CommentForm(instance=self.comment, request=self.request)
         context['comment'] = self.comment
-        return render(request, 'comment/comments/update_comment.html', context)
+        self.data = render_to_string('comment/comments/update_comment.html', context, request=self.request)
+        return UTF8JsonResponse(self.json())
 
     def post(self, request, *args, **kwargs):
         form = CommentForm(request.POST, instance=self.comment, request=self.request)
@@ -83,7 +69,8 @@ class UpdateComment(CanEditMixin, BaseCommentView):
         if form.is_valid():
             form.save()
             context['comment'] = self.comment
-            return render(request, 'comment/comments/comment_content.html', context)
+            self.data = render_to_string('comment/comments/comment_content.html', context, request=self.request)
+            return UTF8JsonResponse(self.json())
 
 
 class DeleteComment(CanDeleteMixin, BaseCommentView):
@@ -94,21 +81,20 @@ class DeleteComment(CanDeleteMixin, BaseCommentView):
         return self.comment
 
     def get(self, request, *args, **kwargs):
-        data = dict()
         context = self.get_context_data()
         context["comment"] = self.comment
         context['has_parent'] = not self.comment.is_parent
-        data['html_form'] = render_to_string('comment/comments/comment_modal.html', context, request=request)
-        return JsonResponse(data)
+        self.data = render_to_string('comment/comments/comment_modal.html', context, request=request)
+        return UTF8JsonResponse(self.json())
 
     def post(self, request, *args, **kwargs):
         self.comment.delete()
         context = self.get_context_data()
-        return render(request, 'comment/comments/base.html', context)
+        self.data = render_to_string('comment/comments/base.html', context, request=self.request)
+        return UTF8JsonResponse(self.json())
 
 
-class ConfirmComment(View, CommentCreateMixin):
-    email_service = None
+class ConfirmComment(CommentCreateMixin):
 
     @staticmethod
     def _handle_invalid_comment(comment, request):
