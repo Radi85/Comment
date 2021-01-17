@@ -4,13 +4,11 @@ from enum import IntEnum, unique
 import hashlib
 
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ImproperlyConfigured
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core import signing
 from django.apps import apps
 
 from comment.conf import settings
-from comment.messages import ErrorMessage
 
 
 @unique
@@ -106,56 +104,6 @@ def get_request_data(request, item, api=False):
     if not value and api:
         value = request.data.get(item)
     return value
-
-
-def get_comment_context_data(request, model_object=None):
-    def get_login_url():
-        login_url = settings.LOGIN_URL
-        if not login_url:
-            raise ImproperlyConfigured(ErrorMessage.LOGIN_URL_MISSING)
-
-        if not login_url.startswith('/'):
-            login_url = '/' + login_url
-
-        return login_url
-
-    def get_oauth(request):
-        oauth = get_request_data(request, 'oauth')
-        if oauth and oauth.lower() == 'true':
-            return True
-        return False
-
-    def get_comments(request, model_obj):
-        comments = model_object.comments.filter_parents_by_object(
-            model_object, include_flagged=is_comment_moderator(request.user)
-        )
-        page = get_request_data(request, 'page')
-        comments_per_page = settings.COMMENT_PER_PAGE
-        if comments_per_page:
-            comments = paginate_comments(comments, comments_per_page, page)
-        return comments
-
-    app_name = get_request_data(request, 'app_name')
-    model_name = get_request_data(request, 'model_name')
-    model_id = get_request_data(request, 'model_id')
-    if not model_object:
-        model_object = get_model_obj(app_name, model_name, model_id)
-
-    return {
-        'model_object': model_object,
-        'model_name': model_name,
-        'model_id': model_id,
-        'app_name': app_name,
-        'user': request.user,
-        'comments': get_comments(request, model_object),
-        'login_url': get_login_url(),
-        'has_valid_profile': has_valid_profile(),
-        'allowed_flags': settings.COMMENT_FLAGS_ALLOWED,
-        'is_anonymous_allowed': settings.COMMENT_ALLOW_ANONYMOUS,
-        'is_translation_allowed': settings.COMMENT_ALLOW_TRANSLATION,
-        'is_subscription_allowed': settings.COMMENT_ALLOW_SUBSCRIPTION,
-        'oauth': get_oauth(request)
-    }
 
 
 def id_generator(prefix='', chars=string.ascii_lowercase, len_id=6, suffix=''):

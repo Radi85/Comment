@@ -7,7 +7,7 @@ from rest_framework import status
 from comment.conf import settings
 from comment.mixins import AJAXRequiredMixin, BasePermission, ObjectLevelMixin
 from comment.messages import ErrorMessage
-from comment.tests.base import BaseCommentMixinTest
+from comment.tests.base import BaseCommentMixinTest, BaseCommentFlagTest
 
 
 class AJAXMixinTest(BaseCommentMixinTest):
@@ -53,6 +53,7 @@ class CanCreateMixinTest(BaseCommentMixinTest):
     @patch.object(settings, 'COMMENT_ALLOW_ANONYMOUS', True)
     def test_permission_when_anonymous_comment_allowed(self):
         self.client.logout()
+        self.data['email'] = 'test@test.come'
         response = self.client.post(self.url, data=self.data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
 
@@ -130,11 +131,11 @@ class CanDeleteMixinTest(BaseCommentMixinTest):
         self.assertEqual(response.status_code, 200)
 
 
-class BaseFlagMixinTest(BaseCommentMixinTest):
+class BaseFlagMixinTest(BaseCommentFlagTest):
     def setUp(self):
         super().setUp()
         self.client.force_login(self.user_1)
-        self.url = reverse('comment:flag', kwargs={'pk': self.comment.id})
+        self.url = reverse('comment:flag', kwargs={'pk': self.comment_2.id})
 
     @patch('comment.mixins.settings', COMMENT_FLAGS_ALLOWED=0)
     def test_flag_not_enabled_permission(self, _):

@@ -3,11 +3,12 @@ from django import template
 from comment.models import ReactionInstance, FlagInstance, Follower
 from comment.forms import CommentForm
 from comment.utils import (
-    get_comment_context_data, is_comment_moderator, is_comment_admin, get_gravatar_img, get_profile_instance,
+    is_comment_moderator, is_comment_admin, get_gravatar_img, get_profile_instance,
     get_username_for_comment as get_username
 )
 from comment.managers import FlagInstanceManager
 from comment.messages import ReactionError
+from comment.context import DABContext
 
 register = template.Library()
 
@@ -71,7 +72,7 @@ def render_comments(obj, request, oauth=False):
     """
     Retrieves list of comment related to a certain object and renders the appropriate template
     """
-    context = get_comment_context_data(request, model_object=obj)
+    context = DABContext(request, model_object=obj)
     context.update({
         'comment_form': CommentForm(request=request),
         'oauth': oauth

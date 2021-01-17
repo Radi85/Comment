@@ -105,18 +105,29 @@ class CommentViewTestCase(BaseCommentViewTest):
         data = self.data.copy()
         data['email'] = 'a@a.com'
         url = self.get_create_url()
+        self.assertEqual(len(mail.outbox), 0)
 
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTemplateUsed(response, 'comment/comments/base.html')
-        response_messages = response.context['messages']
+        self.assertEqual(response.json()['msg'], EmailInfo.CONFIRMATION_SENT)
+        # confirmation email is sent
+        response.context['view'].email_service._email_thread.join()
+        self.assertEqual(len(mail.outbox), 1)
 
-        for r in response_messages:
-            self.assertEqual(r.level, messages.INFO)
-            self.assertEqual(r.message, EmailInfo.CONFIRMATION_SENT)
-            self.assertTextTranslated(r.message, url)
         # no change in comment count
         self.comment_count_test()
+
+    @patch.object(settings, 'COMMENT_ALLOW_ANONYMOUS', True)
+    def test_create_anonymous_comment_with_invalid_email(self):
+        self.client.logout()
+        data = self.data.copy()
+        data['email'] = 'test@invalid.c'
+        url = self.get_create_url()
+
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json()['error'], EmailError.EMAIL_INVALID)
 
 
 class TestEditComment(BaseCommentViewTest):
@@ -193,8 +204,8 @@ class TestDeleteComment(BaseCommentViewTest):
         response = self.client.get(get_url, data=self.data)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'comment/comments/comment_modal.html')
-        self.assertContains(response, 'html_form')
-        self.assertHtmlTranslated(response.json()['html_form'], get_url)
+        self.assertContains(response, 'data')
+        self.assertHtmlTranslated(response.json()['data'], get_url)
 
         post_url = self.get_url('comment:delete', comment.id)
         response = self.client.post(post_url, data=self.data)

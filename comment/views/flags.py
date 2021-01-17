@@ -1,14 +1,14 @@
 from django.core.exceptions import ValidationError
-from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views import View
 
 from comment.models import Comment, Flag, FlagInstance
-from comment.mixins import CanSetFlagMixin, CanEditFlagStateMixin
-from comment.messages import FlagInfo
+from comment.mixins import CanSetFlagMixin, CanEditFlagStateMixin, DABResponseData
+from comment.responses import UTF8JsonResponse
+from comment.messages import FlagInfo, FlagError
 
 
-class SetFlag(CanSetFlagMixin, View):
+class SetFlag(CanSetFlagMixin, View, DABResponseData):
     comment = None
 
     def get_object(self):
@@ -16,30 +16,27 @@ class SetFlag(CanSetFlagMixin, View):
         return self.comment
 
     def post(self, request, *args, **kwargs):
-        data = {
+        self.data = {
             'status': 1
         }
         flag = Flag.objects.get_for_comment(self.comment)
 
         try:
             if FlagInstance.objects.set_flag(request.user, flag, **request.POST.dict()):
-                data['msg'] = FlagInfo.FLAGGED_SUCCESS
-                data['flag'] = 1
+                self.msg = FlagInfo.FLAGGED_SUCCESS
+                self.data['flag'] = 1
             else:
-                data['msg'] = FlagInfo.UNFLAGGED_SUCCESS
+                self.msg = FlagInfo.UNFLAGGED_SUCCESS
 
-            data.update({
-                'status': 0
-            })
+            self.data.update({'status': 0})
         except ValidationError as e:
-            data.update({
-                'msg': e.messages
-            })
+            self.error = e.message
+            self.status = 400
 
-        return JsonResponse(data)
+        return UTF8JsonResponse(self.json(), status=self.status)
 
 
-class ChangeFlagState(CanEditFlagStateMixin, View):
+class ChangeFlagState(CanEditFlagStateMixin, View, DABResponseData):
     comment = None
 
     def get_object(self):
@@ -51,8 +48,10 @@ class ChangeFlagState(CanEditFlagStateMixin, View):
         try:
             self.comment.flag.toggle_state(state, request.user)
         except ValidationError:
-            return JsonResponse({'state': 0})
-        response = {
+            self.error = FlagError.STATE_CHANGE_ERROR
+            self.status = 400
+
+        self.data = {
             'state': self.comment.flag.state
         }
-        return JsonResponse(response)
+        return UTF8JsonResponse(self.json(), status=self.status)

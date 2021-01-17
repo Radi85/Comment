@@ -730,10 +730,11 @@ class APIToggleFollowTest(APIBaseTest):
         self.assertIsNotNone(self.user_2.email)
         response = self.client.post(self.get_url())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['app_name'], self.app_name)
-        self.assertEqual(response.data['model_name'], self.model_name)
-        self.assertEqual(response.data['model_id'], self.model_id)
-        self.assertTrue(response.data['following'])
+        data = response.json().get('data')
+        self.assertEqual(data['app_name'], self.app_name)
+        self.assertEqual(data['model_name'], self.model_name)
+        self.assertEqual(data['model_id'], self.model_id)
+        self.assertTrue(data['following'])
 
 
 class APIGetSubscribersTest(APIBaseTest):

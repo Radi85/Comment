@@ -1,16 +1,13 @@
-from django.core.exceptions import ValidationError
-from django.core.validators import EmailValidator
-from django.http import JsonResponse
-
 from django.views.generic.base import View
 
 from comment.models import Follower
-from comment.mixins import CanSubscribeMixin
-from comment.validators import ContentTypeValidator
+from comment.mixins import CanSubscribeMixin, DABResponseData
+from comment.responses import UTF8JsonResponse
+from comment.validators import ContentTypeValidator, DABEmailValidator
 from comment.messages import FollowError
 
 
-class BaseToggleFollowView(ContentTypeValidator):
+class BaseToggleFollowView(ContentTypeValidator, DABResponseData):
     response_class = None
 
     def get_response_class(self):
@@ -25,22 +22,23 @@ class BaseToggleFollowView(ContentTypeValidator):
         """ Allow authenticated users only, anonymous may be added in the future """
         email = request.POST.get('email', None)
         response_class = self.get_response_class()
-        if email:
-            email_validator = EmailValidator(FollowError.EMAIL_INVALID)
-            try:
-                email_validator(email)
-            except ValidationError as error:
-                return response_class({'invalid_email': error.messages}, status=400)
+        if email and not DABEmailValidator(email).is_valid():
+            self.error = {
+                'invalid_email': DABEmailValidator.message
+            }
+            self.status = 400
+            return response_class(self.json(), status=self.status)
 
         user = request.user
         if user.email:
             email = user.email
 
         if not email:
-            return response_class({
-                'email_required': True,
-                'message': FollowError.EMAIL_REQUIRED.format(model_object=str(self.model_obj))
-            }, status=400)
+            self.error = {
+                'email_required': FollowError.EMAIL_REQUIRED.format(model_object=str(self.model_obj))
+            }
+            self.status = 400
+            return response_class(self.json(), status=self.status)
 
         if not user.email:
             user.email = email
@@ -48,14 +46,15 @@ class BaseToggleFollowView(ContentTypeValidator):
 
         username = user.username or email.aplit('@')[0]
         following = Follower.objects.toggle_follow(email=email, model_object=self.model_obj, username=username)
-        return response_class({
+        self.data = {
             'following': following,
             'app_name': self.model_obj._meta.app_label,
             'model_name': self.model_obj.__class__.__name__,
             'model_id': self.model_obj.id,
             'model_object': str(self.model_obj)
-        }, status=200)
+        }
+        return response_class(self.json())
 
 
 class ToggleFollowView(BaseToggleFollowView, CanSubscribeMixin, View):
-    response_class = JsonResponse
+    response_class = UTF8JsonResponse

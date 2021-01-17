@@ -23,10 +23,14 @@ class SetReactionViewTest(BaseCommentViewTest):
         _url = self.get_reaction_url(self.comment.id, 'like')
         response = self.client.post(_url)
         data = {
-            'status': 0,
-            'likes': 1,
-            'dislikes': 0,
-            'msg': ReactionInfo.UPDATED_SUCCESS
+            'data': {
+                'status': 0,
+                'likes': 1,
+                'dislikes': 0,
+            },
+            'msg': ReactionInfo.UPDATED_SUCCESS,
+            'anonymous': False,
+            'error': None,
         }
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         server_response = response.json()
@@ -40,10 +44,14 @@ class SetReactionViewTest(BaseCommentViewTest):
         self.comment.reaction.delete()
         response = self.client.post(_url)
         data = {
-            'status': 0,
-            'likes': 1,
-            'dislikes': 0,
-            'msg': ReactionInfo.UPDATED_SUCCESS
+            'data': {
+                'status': 0,
+                'likes': 1,
+                'dislikes': 0,
+            },
+            'msg': ReactionInfo.UPDATED_SUCCESS,
+            'anonymous': False,
+            'error': None,
         }
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         server_response = response.json()

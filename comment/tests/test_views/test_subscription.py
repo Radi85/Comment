@@ -2,7 +2,7 @@ from django.urls import reverse
 
 from comment.tests.base import BaseCommentMixinTest
 from comment.views import BaseToggleFollowView
-from comment.messages import FollowError
+from comment.messages import FollowError, EmailError
 from comment.models import Follower
 
 
@@ -25,13 +25,15 @@ class BaseToggleFollowViewTest(BaseCommentMixinTest):
         self.client.force_login(self.user_without_email)
         response = self.client.post(self.toggle_follow_url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['message'], FollowError.EMAIL_REQUIRED.format(model_object=self.comment))
+        self.assertEqual(
+            response.json()['error']['email_required'], FollowError.EMAIL_REQUIRED.format(model_object=self.comment)
+        )
 
     def test_invalid_email(self):
         data = {'email': 'invalid_email'}
         response = self.client.post(self.toggle_follow_url, HTTP_X_REQUESTED_WITH='XMLHttpRequest', data=data)
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['invalid_email'], [FollowError.EMAIL_INVALID])
+        self.assertEqual(response.json()['error']['invalid_email'], EmailError.EMAIL_INVALID)
 
     def test_toggle_follow_for_valid_email(self):
         self.client.force_login(self.user_without_email)
@@ -40,8 +42,8 @@ class BaseToggleFollowViewTest(BaseCommentMixinTest):
         self.assertFalse(Follower.objects.is_following(data['email'], self.comment))
         response = self.client.post(self.toggle_follow_url, HTTP_X_REQUESTED_WITH='XMLHttpRequest', data=data)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.json()['following'])
-        self.assertEqual(response.json()['model_id'], self.comment.id)
+        self.assertTrue(response.json()['data']['following'])
+        self.assertEqual(response.json()['data']['model_id'], self.comment.id)
         self.assertEqual(response.wsgi_request.user.email, data['email'])
         self.assertEqual(response.wsgi_request.user, self.user_without_email)
 
@@ -52,7 +54,7 @@ class BaseToggleFollowViewTest(BaseCommentMixinTest):
         self.assertFalse(Follower.objects.is_following(data['email'], self.comment))
         response = self.client.post(self.toggle_follow_url, HTTP_X_REQUESTED_WITH='XMLHttpRequest', data=data)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.json()['following'])
-        self.assertEqual(response.json()['model_id'], self.comment.id)
+        self.assertTrue(response.json()['data']['following'])
+        self.assertEqual(response.json()['data']['model_id'], self.comment.id)
         self.assertNotEqual(self.user_2, data['email'])
         self.assertEqual(response.wsgi_request.user, self.user_2)
