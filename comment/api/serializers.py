@@ -173,9 +173,14 @@ class ReactionSerializer(serializers.ModelSerializer):
         users = {'likes': [], 'dislikes': []}
         for instance in obj.reactions.all():
             if instance.reaction_type == instance.ReactionType.LIKE:
-                users['likes'].append({'id': instance.user.id, 'username': getattr(instance.user, instance.user.USERNAME_FIELD)})
+                users['likes'].append({
+                    'id': instance.user.id,
+                    'username': getattr(instance.user, instance.user.USERNAME_FIELD)
+                    })
             else:
-                users['dislikes'].append({'id': instance.user.id, 'username': getattr(instance.user, instance.user.USERNAME_FIELD)})
+                users['dislikes'].append({
+                    'id': instance.user.id, 'username': getattr(instance.user, instance.user.USERNAME_FIELD)
+                    })
         return users
 
 
