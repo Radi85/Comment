@@ -1,11 +1,15 @@
+from unittest.mock import patch
+
 from django.http import JsonResponse
 from django.test import TestCase
 from django.views import View
+from django.core.exceptions import ImproperlyConfigured
 from rest_framework import status
 from rest_framework.generics import ListAPIView
 
 from comment.tests.base import BaseCommentMixinTest
-from comment.validators import CommentBadRequest, ValidatorMixin
+from comment.validators import CommentBadRequest, ValidatorMixin, _validate_order
+from comment.conf import settings
 from comment.messages import ExceptionError, ContentTypeError
 
 
@@ -144,3 +148,32 @@ class ValidatorMixinTest(BaseCommentMixinTest):
         response = view.dispatch(request)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data['detail'], view.error)
+
+
+class ValidateOrderTest(TestCase):
+    def test_success(self):
+        order = ['-reaction__likes']
+        with patch.object(settings, 'COMMENT_ORDER_BY', order):
+            self.assertEqual(_validate_order(), order)
+
+    def test_incorrect_value_raises_exception(self):
+        order = ['err']
+        with patch.object(settings, 'COMMENT_ORDER_BY', order):
+            with self.assertRaises(ImproperlyConfigured) as error:
+                _validate_order()
+
+        exception = error.exception
+
+        self.assertIsInstance(exception, ImproperlyConfigured)
+        self.assertIs(order[0] in str(exception), True)
+
+    def test_duplicate_value_raises_exception(self):
+        order = ['posted', '-posted']
+        with patch.object(settings, 'COMMENT_ORDER_BY', order):
+            with self.assertRaises(ImproperlyConfigured) as error:
+                _validate_order()
+
+        exception = error.exception
+
+        self.assertIsInstance(exception, ImproperlyConfigured)
+        self.assertIs(order[0] in str(exception), True)

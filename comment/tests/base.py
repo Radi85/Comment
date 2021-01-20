@@ -210,6 +210,12 @@ class BaseCommentTest(TestCase, BaseInternationalizationTest):
             f'No translation for the text "{text}" from view {self.get_view_from_url_or_none(url)}'
         )
 
+    def assertQuerysetEqual(self, qs, values, transform=None, ordered=True, msg=None):
+        if not transform:
+            def transform(x):
+                return x
+        return super().assertQuerysetEqual(qs, values, transform=transform, ordered=True, msg=msg)
+
 
 class BaseCommentManagerTest(BaseCommentTest):
     content_object_2 = None

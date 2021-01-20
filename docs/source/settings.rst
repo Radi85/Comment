@@ -88,6 +88,32 @@ COMMENT_PER_PAGE
 No. of comments to be displayed per page. Defaults to ``10``. To disable pagination, set it to ``None``.
 
 
+COMMENT_ORDER_BY
+^^^^^^^^^^^^^^^^^
+Order parent comments in a specific order. Defaults to ``['-posted']``.
+
+.. note::
+    Allowed order should contain a combination of any of the following values without repeating themselves.
+
++--------------------------+------------------------------------------------+
+| Value                    | Comment Ordered By                             |
++==========================+================================================+
+| ``posted``               | Date posted, ascendingly                       |
++--------------------------+------------------------------------------------+
+| ``-posted``              | Date posted, descending                        |
++--------------------------+------------------------------------------------+
+| ``reaction__likes``      | Like count, ascendingly                        |
++--------------------------+------------------------------------------------+
+| ``-reaction__likes``     | Like count, descendingly                       |
++--------------------------+------------------------------------------------+
+| ``reaction__dislikes``   | Dislike count, ascendingly                     |
++--------------------------+------------------------------------------------+
+| ``-reaction__dislikes``  | Dislike count, descendingly                    |
++--------------------------+------------------------------------------------+
+| ``?``                    | Random                                         |
++--------------------------+------------------------------------------------+
+
+
 COMMENT_ALLOW_ANONYMOUS
 ^^^^^^^^^^^^^^^^^^^^^^^^
 

@@ -3,6 +3,7 @@ from django.db import models
 
 from comment.conf import settings
 from comment.utils import id_generator
+from comment.validators import _validate_order
 
 
 class CommentManager(models.Manager):
@@ -16,8 +17,13 @@ class CommentManager(models.Manager):
 
         return super().get_queryset().exclude(flag__state__exact=2)
 
+    @staticmethod
+    def _filter_parents(qs, parent=None):
+        return qs.filter(parent=parent).order_by(*_validate_order())
+
     def all_parents(self):
-        return self.all_exclude_flagged().filter(parent=None)
+        qs = self.all_exclude_flagged()
+        return self._filter_parents(qs)
 
     def all_comments_by_object(self, obj, include_flagged=False):
         content_type = ContentType.objects.get_for_model(obj.__class__)
@@ -27,8 +33,11 @@ class CommentManager(models.Manager):
 
     def filter_parents_by_object(self, obj, include_flagged=False):
         if include_flagged:
-            return self.all_comments_by_object(obj, include_flagged=True).filter(parent=None)
-        return self.all_comments_by_object(obj).filter(parent=None)
+            qs = self.all_comments_by_object(obj, include_flagged=True)
+        else:
+            qs = self.all_comments_by_object(obj)
+
+        return self._filter_parents(qs)
 
     @staticmethod
     def generate_urlhash():
