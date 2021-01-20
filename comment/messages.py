@@ -5,6 +5,14 @@ class ErrorMessage:
     LOGIN_URL_MISSING = _('Comment App: LOGIN_URL is not in the settings')
     METHOD_NOT_IMPLEMENTED = _('Your {class_name} class has not defined a {method_name} method, which is required.')
     NON_AJAX_REQUEST = _('Only AJAX request are allowed')
+    INVALID_ORDER_ARGUMENT = _((
+        'Comment app: "{order}" is not a valid value for COMMENT_ORDER_BY. '
+        'Please choose one among {allowed_orders}.'
+        ))
+    DUPLICATE_ORDER_VALUE = _((
+        'Comment app: COMMENT_ORDER_BY should not have duplicated values '
+        'Duplicated Values: {duplicates}. Please use one value only E.g. "{order}" or "-{order}".'
+    ))
 
 
 class ExceptionError:

@@ -58,9 +58,13 @@ class Comment(models.Model):
         return getattr(self.reaction, reaction_type, None)
 
     def replies(self, include_flagged=False):
+        manager = self.__class__.objects
         if include_flagged:
-            return self.__class__.objects.filter(parent=self).order_by('posted')
-        return self.__class__.objects.all_exclude_flagged().filter(parent=self).order_by('posted')
+            qs = manager.all()
+        else:
+            qs = manager.all_exclude_flagged()
+
+        return manager._filter_parents(qs, parent=self)
 
     def _set_unique_urlhash(self):
         if not self.urlhash:

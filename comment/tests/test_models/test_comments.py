@@ -144,6 +144,25 @@ class CommentModelTest(BaseCommentManagerTest):
 
 class CommentModelManagerTest(BaseCommentManagerTest):
 
+    class OrderForParentCommentsTest(BaseCommentManagerTest):
+        def setUp(self):
+            super().setUp()
+            self.all_parents_qs = Comment.objects.all_exclude_flagged().filter(parent=None)
+            self.all_comments_qs = Comment.objects.all_exclude_flagged()
+
+        def test_default_value(self):
+            self.assertQuerysetEqual(
+                Comment.objects._filter_parents(self.all_comments_qs),
+                self.all_parents_qs.order_by(*settings.COMMENT_ORDER_BY)
+                )
+
+        @patch.object(settings, 'COMMENT_ORDER_BY', ['-reaction__likes'])
+        def test_custom_values(self):
+            self.assertQuerysetEqual(
+                Comment.objects._filter_parents(self.all_comments_qs),
+                self.all_parents_qs.order_by(*settings.COMMENT_ORDER_BY)
+                )
+
     def test_retrieve_all_parent_comments(self):
         # for all objects of a content type
         all_comments = Comment.objects.all().count()
