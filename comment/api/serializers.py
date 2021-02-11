@@ -166,15 +166,15 @@ class ReactionSerializer(serializers.ModelSerializer):
     def get_users(obj):
         users = {'likes': [], 'dislikes': []}
         for instance in obj.reactions.all():
+            user_info = {
+                'id': instance.user.id,
+                'username': instance.user.USERNAME_FIELD
+            }
+
             if instance.reaction_type == instance.ReactionType.LIKE:
-                users['likes'].append({
-                    'id': instance.user.id,
-                    'username': getattr(instance.user, instance.user.USERNAME_FIELD)
-                    })
+                users['likes'].append(user_info)
             else:
-                users['dislikes'].append({
-                    'id': instance.user.id, 'username': getattr(instance.user, instance.user.USERNAME_FIELD)
-                    })
+                users['dislikes'].append(user_info)
         return users
 
 
@@ -189,7 +189,11 @@ class FlagSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_reporters(obj):
         return [
-            {'id': flag_instance.user.id, 'username': flag_instance.user.username} for flag_instance in obj.flags.all()
+            {
+                'id': flag_instance.user.id,
+                'username': flag_instance.user.USERNAME_FIELD
+            }
+            for flag_instance in obj.flags.all()
         ]
 
     @staticmethod

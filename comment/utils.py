@@ -146,11 +146,3 @@ def get_user_for_request(request):
     if request.user.is_authenticated:
         return request.user
     return None
-
-
-def get_username_for_comment(comment):
-    if not comment.user:
-        if settings.COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME:
-            return comment.email.split('@')[0]
-        return settings.COMMENT_ANONYMOUS_USERNAME
-    return comment.user.username

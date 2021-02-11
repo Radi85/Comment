@@ -4,7 +4,6 @@ from comment.models import ReactionInstance, FlagInstance, Follower
 from comment.forms import CommentForm
 from comment.utils import (
     is_comment_moderator, is_comment_admin, get_gravatar_img, get_profile_instance,
-    get_username_for_comment as get_username
 )
 from comment.managers import FlagInstanceManager
 from comment.messages import ReactionError
@@ -27,7 +26,7 @@ def get_app_name(obj):
 
 @register.simple_tag(name='get_username_for_comment')
 def get_username_for_comment(comment):
-    return get_username(comment)
+    return comment.get_username()
 
 
 @register.simple_tag(name='get_profile_url')

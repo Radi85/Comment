@@ -1,8 +1,6 @@
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
-from comment.utils import get_username_for_comment
-
 
 class FollowerManager(models.Manager):
     def is_following(self, email, model_object):
@@ -31,7 +29,7 @@ class FollowerManager(models.Manager):
         """This method is used to set the comment's creator as a follower of own comment and the parent thread"""
         if not comment.email:
             return
-        username = get_username_for_comment(comment)
+        username = comment.get_username()
         model_object = comment
         if not comment.is_parent:
             model_object = comment.parent

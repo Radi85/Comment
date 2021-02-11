@@ -141,17 +141,23 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
     @patch.object(settings, 'COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME', True)
     def test_get_username_for_comment_use_email_first_part_enabled(self):
         comment = self.create_comment(self.content_object_1, user=self.user_1)
-        anonymous_comment = self.create_anonymous_comment()
 
         self.assertEqual(get_username_for_comment(comment), comment.user.username)
+
+        # test for anonymous
+        anonymous_comment = self.create_anonymous_comment()
+
         self.assertEqual(get_username_for_comment(anonymous_comment), anonymous_comment.email.split('@')[0])
 
     @patch.object(settings, 'COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME', False)
     def test_get_username_for_comment_use_email_first_part_disabled(self):
         comment = self.create_comment(self.content_object_1, user=self.user_1)
-        anonymous_comment = self.create_anonymous_comment()
 
         self.assertEqual(get_username_for_comment(comment), comment.user.username)
+
+        # test for anonymous
+        anonymous_comment = self.create_anonymous_comment()
+
         self.assertEqual(get_username_for_comment(anonymous_comment), settings.COMMENT_ANONYMOUS_USERNAME)
 
 

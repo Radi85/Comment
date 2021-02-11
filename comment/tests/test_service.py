@@ -9,7 +9,6 @@ from comment.tests.test_utils import BaseAnonymousCommentTest
 from comment.service.email import DABEmailService
 from comment.messages import EmailInfo
 from comment.models import Follower
-from comment.utils import get_username_for_comment
 
 
 @patch.object(settings, 'COMMENT_ALLOW_ANONYMOUS', True)
@@ -180,7 +179,7 @@ class TestDABEmailService(BaseAnonymousCommentTest):
         self.assertEqual(len(mail.outbox), 1)
         sent_email = mail.outbox[0]
         self.assertIsInstance(sent_email, EmailMultiAlternatives)
-        username = get_username_for_comment(self.comment_obj)
+        username = self.comment_obj.get_username()
         thread_name = str(self.comment_obj.content_object)
         self.email_contents_test(sent_email.body, username, self.comment_obj.content)
         self.assertEqual(
