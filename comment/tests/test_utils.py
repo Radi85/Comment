@@ -8,7 +8,7 @@ from django.contrib.auth.models import AnonymousUser
 from comment.conf import settings
 from comment.utils import (
     get_model_obj, has_valid_profile, id_generator, get_comment_from_key, get_user_for_request, CommentFailReason,
-    get_gravatar_img, get_profile_instance, is_comment_moderator, is_comment_admin, get_username_for_comment
+    get_gravatar_img, get_profile_instance, is_comment_moderator, is_comment_admin
 )
 from comment.tests.base import BaseCommentUtilsTest, Comment, RequestFactory
 
@@ -86,17 +86,6 @@ class CommentUtilsTest(BaseCommentUtilsTest):
         # test authenticated user
         request.user = self.user_1
         self.assertEqual(get_user_for_request(request), self.user_1)
-
-    def test_get_username_for_comment(self):
-        comment = self.create_comment(self.content_object_1, user=self.user_1)
-        anonymous_comment = self.create_anonymous_comment()
-
-        self.assertEqual(get_username_for_comment(comment), comment.user.username)
-        with patch.object(settings, 'COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME', False):
-            self.assertEqual(get_username_for_comment(anonymous_comment), settings.COMMENT_ANONYMOUS_USERNAME)
-
-        with patch.object(settings, 'COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME', True):
-            self.assertEqual(get_username_for_comment(anonymous_comment), anonymous_comment.email.split('@')[0])
 
 
 class BaseAnonymousCommentTest(BaseCommentUtilsTest):

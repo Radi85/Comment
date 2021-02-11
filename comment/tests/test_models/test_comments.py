@@ -141,6 +141,20 @@ class CommentModelTest(BaseCommentManagerTest):
             comment_url = comment.content_object.get_absolute_url() + '?page=2' + '#' + comment.urlhash
             self.assertEqual(comment_url, comment.get_url(request))
 
+    def test_get_username_for_non_anonymous_comment(self):
+        comment = self.create_comment(self.content_object_1, user=self.user_1)
+
+        self.assertEqual(comment.get_username(), comment.user.username)
+
+    def test_get_username_for_anonymous_comment(self):
+        comment = self.create_anonymous_comment()
+
+        with patch.object(settings, 'COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME', False):
+            self.assertEqual(comment.get_username(), settings.COMMENT_ANONYMOUS_USERNAME)
+
+        with patch.object(settings, 'COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME', True):
+            self.assertEqual(comment.get_username(), comment.email.split('@')[0])
+
 
 class CommentModelManagerTest(BaseCommentManagerTest):
 

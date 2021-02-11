@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from comment.managers import CommentManager
 from comment.conf import settings
-from comment.utils import is_comment_moderator, get_username_for_comment
+from comment.utils import is_comment_moderator
 
 
 class Comment(models.Model):
@@ -33,11 +33,12 @@ class Comment(models.Model):
         ordering = ['-posted', ]
 
     def __str__(self):
-        username = get_username_for_comment(self)
+        username = self.get_username()
+        _content = self.content[:20]
         if not self.parent:
-            return f'comment by {username}: {self.content[:20]}'
+            return f'comment by {username}: {_content}'
         else:
-            return f'reply by {username}: {self.content[:20]}'
+            return f'reply by {username}: {_content}'
 
     def __repr__(self):
         return self.__str__()
@@ -74,7 +75,20 @@ class Comment(models.Model):
 
     def _set_email(self):
         if self.user:
-            self.email = self.user.email
+            self.email = getattr(self.user, self.user.EMAIL_FIELD, '')
+
+    def _get_username_for_anonymous(self):
+        if settings.COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME:
+            return self.email.split('@')[0]
+
+        return settings.COMMENT_ANONYMOUS_USERNAME
+
+    def get_username(self):
+        user = self.user
+        if not user:
+            return self._get_username_for_anonymous()
+
+        return getattr(user, user.USERNAME_FIELD)
 
     def save(self, *args, **kwargs):
         self._set_unique_urlhash()

@@ -9,7 +9,6 @@ from django.urls import reverse
 from comment.conf import settings
 from comment.messages import EmailInfo
 from comment.models import Follower
-from comment.utils import get_username_for_comment
 
 
 class DABEmailService(object):
@@ -74,7 +73,7 @@ class DABEmailService(object):
         return str(self.comment.parent).split(':')[0]
 
     def get_subject_for_notification(self, thread_name):
-        username = get_username_for_comment(self.comment)
+        username = self.comment.get_username()
         return EmailInfo.NOTIFICATION_SUBJECT.format(username=username, thread_name=thread_name)
 
     def get_messages_for_notification(self, thread_name, receivers):
