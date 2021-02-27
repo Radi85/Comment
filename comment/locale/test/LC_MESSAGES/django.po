@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-01-17 11:26+0000\n"
+"POT-Creation-Date: 2021-02-27 10:52+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,11 +21,11 @@ msgstr ""
 msgid "comment"
 msgstr "über comment"
 
-#: comment/conf/defaults.py:13
+#: comment/conf/defaults.py:14
 msgid "Spam | Exists only to promote a service"
 msgstr "über Spam | Exists only to promote a service"
 
-#: comment/conf/defaults.py:14
+#: comment/conf/defaults.py:15
 msgid "Abusive | Intended at promoting hatred"
 msgstr "über Abusive | Intended at promoting hatred"
 
@@ -50,47 +50,51 @@ msgstr ""
 msgid "Only AJAX request are allowed"
 msgstr "über Only AJAX request are allowed"
 
-#: comment/messages.py:11
+#: comment/messages.py:16
+msgid "Comment App: settings var COMMENT_WRAP_CONTENT_WORDS must be an integer"
+msgstr "über Comment App: settings var COMMENT_WRAP_CONTENT_WORDS must be an integer"
+
+#: comment/messages.py:20
 msgid "error"
 msgstr "über error"
 
-#: comment/messages.py:12
+#: comment/messages.py:21
 msgid "Bad Request"
 msgstr "über Bad Request"
 
-#: comment/messages.py:16
+#: comment/messages.py:25
 #, python-brace-format
 msgid "{var_name} id must be an integer, {id} is NOT"
 msgstr "über {var_name} id must be an integer, {id} is NOT"
 
-#: comment/messages.py:17
+#: comment/messages.py:26
 msgid "app name must be provided"
 msgstr "über app name must be provided"
 
-#: comment/messages.py:18
+#: comment/messages.py:27
 #, python-brace-format
 msgid "{app_name} is NOT a valid app name"
 msgstr "über {app_name} is NOT a valid app name"
 
-#: comment/messages.py:19
+#: comment/messages.py:28
 msgid "model name must be provided"
 msgstr "über model name must be provided"
 
-#: comment/messages.py:20
+#: comment/messages.py:29
 #, python-brace-format
 msgid "{model_name} is NOT a valid model name"
 msgstr "über {model_name} is NOT a valid model name"
 
-#: comment/messages.py:21
+#: comment/messages.py:30
 msgid "model id must be provided"
 msgstr "über model id must be provided"
 
-#: comment/messages.py:22
+#: comment/messages.py:31
 #, python-brace-format
 msgid "{model_id} is NOT a valid model id for the model {model_name}"
 msgstr "über {model_id} is NOT a valid model id for the model {model_name}"
 
-#: comment/messages.py:23
+#: comment/messages.py:32
 #, python-brace-format
 msgid ""
 "{parent_id} is NOT a valid id for a parent comment or the parent comment "
@@ -99,51 +103,51 @@ msgstr ""
 "über {parent_id} is NOT a valid id for a parent comment or the parent "
 "comment does NOT belong to the provided model object"
 
-#: comment/messages.py:28
+#: comment/messages.py:37
 msgid "Flagging system must be enabled"
 msgstr "über Flagging system must be enabled"
 
-#: comment/messages.py:29
+#: comment/messages.py:38
 msgid "Object must be flagged!"
 msgstr "über Object must be flagged!"
 
-#: comment/messages.py:30
+#: comment/messages.py:39
 #, python-brace-format
 msgid "{state} is an invalid state"
 msgstr "über {state} is an invalid state"
 
-#: comment/messages.py:31
+#: comment/messages.py:40
 #, python-brace-format
 msgid "{reason} is an invalid reason"
 msgstr "über {reason} is an invalid reason"
 
-#: comment/messages.py:32
+#: comment/messages.py:41
 msgid "Please supply some information as the reason for flagging"
 msgstr "über Please supply some information as the reason for flagging"
 
-#: comment/messages.py:33
+#: comment/messages.py:42
 #, python-brace-format
 msgid "This comment is already flagged by this user ({user})"
 msgstr "über This comment is already flagged by this user ({user})"
 
-#: comment/messages.py:34
+#: comment/messages.py:43
 #, python-brace-format
 msgid "This comment was not flagged by this user ({user})"
 msgstr "über This comment was not flagged by this user ({user})"
 
-#: comment/messages.py:35
+#: comment/messages.py:44
 msgid "This action cannot be applied on unflagged comments"
 msgstr "über This action cannot be applied on unflagged comments"
 
-#: comment/messages.py:36
+#: comment/messages.py:45
 msgid "The comment must be edited before resolving the flag"
 msgstr "über The comment must be edited before resolving the flag"
 
-#: comment/messages.py:37
+#: comment/messages.py:46
 msgid "Unable to change flag state at the moment!"
 msgstr "über Unable to change flag state at the moment!"
 
-#: comment/messages.py:41
+#: comment/messages.py:50
 #, python-brace-format
 msgid ""
 "Reaction must be an valid ReactionManager.RelationType. {reaction_type} is "
@@ -152,39 +156,39 @@ msgstr ""
 "über Reaction must be an valid ReactionManager.RelationType. {reaction_type} "
 "is not"
 
-#: comment/messages.py:45
+#: comment/messages.py:54
 msgid "Enter a valid email address."
 msgstr "über Enter a valid email address."
 
-#: comment/messages.py:46
+#: comment/messages.py:55
 msgid "Email is required for posting anonymous comments."
 msgstr "über Email is required for posting anonymous comments."
 
-#: comment/messages.py:47
+#: comment/messages.py:56
 msgid "The link seems to be broken."
 msgstr "über The link seems to be broken."
 
-#: comment/messages.py:48
+#: comment/messages.py:57
 msgid "The comment has already been verified."
 msgstr "über The comment has already been verified."
 
-#: comment/messages.py:52
+#: comment/messages.py:61
 msgid "Comment flagged"
 msgstr "über Comment flagged"
 
-#: comment/messages.py:53
+#: comment/messages.py:62
 msgid "Comment flag removed"
 msgstr "über Comment flag removed"
 
-#: comment/messages.py:57
+#: comment/messages.py:66
 msgid "Your reaction has been updated successfully"
 msgstr "über Your reaction has been updated successfully"
 
-#: comment/messages.py:61
+#: comment/messages.py:70
 msgid "Comment Confirmation Request"
 msgstr "über Comment Confirmation Request"
 
-#: comment/messages.py:62
+#: comment/messages.py:71
 msgid ""
 "We have sent a verification link to your email.The comment will be displayed "
 "after it is verified."
@@ -192,45 +196,45 @@ msgstr ""
 "über We have sent a verification link to your email.The comment will be "
 "displayed after it is verified."
 
-#: comment/messages.py:64
+#: comment/messages.py:73
 msgid "email address, this will be used for verification."
 msgstr "über email address, this will be used for verification."
 
-#: comment/messages.py:65
+#: comment/messages.py:74
 msgid "email address, it will be used for verification."
 msgstr "über email address, it will be used for verification."
 
-#: comment/messages.py:66
+#: comment/messages.py:75
 #, python-brace-format
 msgid "{username} added comment to \"{thread_name}\""
 msgstr "über {username} added comment to \"{thread_name}\""
 
-#: comment/messages.py:67
+#: comment/messages.py:76
 msgid "email"
 msgstr "über email"
 
-#: comment/messages.py:71
+#: comment/messages.py:80
 msgid "Unflagged"
 msgstr "über Unflagged"
 
-#: comment/messages.py:72
+#: comment/messages.py:81
 msgid "Flagged"
 msgstr "über Flagged"
 
-#: comment/messages.py:73
+#: comment/messages.py:82
 msgid "Flag rejected by the moderator"
 msgstr "über Flag rejected by the moderator"
 
-#: comment/messages.py:74
+#: comment/messages.py:83
 msgid "Comment modified by the author"
 msgstr "über Comment modified by the author"
 
-#: comment/messages.py:78
+#: comment/messages.py:87
 #, python-brace-format
 msgid "Email is required to subscribe {model_object}"
 msgstr "über Email is required to subscribe {model_object}"
 
-#: comment/messages.py:79
+#: comment/messages.py:88
 msgid "Subscribe system must be enabled"
 msgstr "über Subscribe system must be enabled"
 
@@ -337,7 +341,7 @@ msgstr "über Comment can't be verified."
 msgid "Sorry, your comment has been automatically discarded."
 msgstr "über Sorry, your comment has been automatically discarded."
 
-#: comment/templates/comment/comments/base.html:5
+#: comment/templates/comment/comments/base.html:8
 msgid "Comments"
 msgstr "über Comments"
 
@@ -400,20 +404,20 @@ msgstr "über read more"
 msgid "Reply"
 msgstr "über Reply"
 
-#: comment/templates/comment/comments/create_comment.html:29
+#: comment/templates/comment/comments/create_comment.html:31
 msgid "Comment Anonymously or"
 msgstr "über Comment Anonymously or"
 
-#: comment/templates/comment/comments/create_comment.html:31
-#: comment/templates/comment/comments/create_comment.html:37
+#: comment/templates/comment/comments/create_comment.html:33
+#: comment/templates/comment/comments/create_comment.html:40
 msgid "Login"
 msgstr "über Login"
 
-#: comment/templates/comment/comments/create_comment.html:33
+#: comment/templates/comment/comments/create_comment.html:35
 msgid "to keep your conversations intact"
 msgstr "über to keep your conversations intact"
 
-#: comment/templates/comment/comments/create_comment.html:39
+#: comment/templates/comment/comments/create_comment.html:42
 msgid "to join the discussion"
 msgstr "über to join the discussion"
 

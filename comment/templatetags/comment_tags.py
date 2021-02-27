@@ -1,14 +1,18 @@
+import re
+
 from django import template
 
 from comment.models import ReactionInstance, FlagInstance, Follower
 from comment.forms import CommentForm
 from comment.utils import (
-    is_comment_moderator, is_comment_admin, get_gravatar_img, get_profile_instance,
+    is_comment_moderator, is_comment_admin, get_gravatar_img, get_profile_instance, get_wrapped_words_number
 )
 from comment.managers import FlagInstanceManager
 from comment.messages import ReactionError
 from comment.context import DABContext
 
+MULTIPLE_NEW_LINE_RE = re.compile(r'(.*)(\n){2,}(.*)')
+SINGLE_NEW_LINE_RE = re.compile(r'(.*)(\n)(.*)')
 register = template.Library()
 
 
@@ -82,9 +86,15 @@ def render_comments(obj, request, oauth=False):
 register.inclusion_tag('comment/base.html')(render_comments)
 
 
-def render_content(comment, number):
-    number = int(number)
-    content = comment.content
+def render_content(comment, number=None):
+    try:
+        number = int(number)
+    except (ValueError, TypeError):
+        number = get_wrapped_words_number()
+
+    # Restrict 2 or more line breaks to 2 <br>
+    content = MULTIPLE_NEW_LINE_RE.sub(r'\1<br><br>\3', comment.content)
+    content = SINGLE_NEW_LINE_RE.sub(r'\1<br>\3', content)
     content_words = content.split()
     if not number or len(content_words) <= number:
         text_1 = content

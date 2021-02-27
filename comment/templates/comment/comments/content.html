@@ -4,10 +4,10 @@
     {% include "comment/comments/urlhash.html" with urlhash=urlhash %}
     {% endblock comment_urlhash %}
     {% if text_2 %}
-        {{ text_1 }}
-        <span class="d-none">{{ text_2 }}</span>
+        {{ text_1|safe }}
+        <span class="d-none">{{ text_2|safe }}</span>
         <button class="js-read-more-btn {% block read_more_cls %}btn btn-link btn-xs read-more{% endblock read_more_cls %}">{% trans "read more" %}...</button>
     {% else %}
-        {{ text_1 }}
+        {{ text_1|safe }}
     {% endif %}
 </p>
