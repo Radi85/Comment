@@ -172,7 +172,9 @@ Some block tags may not work on old versions.
 
     {% block content_wrapper_cls %}{% if has_valid_profile %}col-9 col-md-10{% else %}co-11 mx-3{% endif %}{% endblock content_wrapper_cls %}
     {% block comment_content %}   {# override truncate words number - change the number 30 to your desired or 0 if you don't want to fold the comment #}
-        {% render_content comment 30 %}
+        {# new settings variable COMMENT_WRAP_CONTENT_WORDS is introduce for changing the number of wrapped words. #}
+        {# working with the settings var is more convenient than overriding the template #}
+        {% render_content comment words_number %}  {# words_number is the settings variable COMMENT_WRAP_CONTENT_WORDS #}
     {% endblock comment_content %}
 
     {% block footer_wrapper_cls %}mt-2 text-muted{% endblock footer_wrapper_cls %}

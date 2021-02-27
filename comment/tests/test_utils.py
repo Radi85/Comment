@@ -1,6 +1,7 @@
 from unittest import TestCase
 from unittest.mock import patch
 
+from django.core.exceptions import ImproperlyConfigured
 from django.utils import timezone
 from django.core import signing
 from django.contrib.auth.models import AnonymousUser
@@ -8,9 +9,10 @@ from django.contrib.auth.models import AnonymousUser
 from comment.conf import settings
 from comment.utils import (
     get_model_obj, has_valid_profile, id_generator, get_comment_from_key, get_user_for_request, CommentFailReason,
-    get_gravatar_img, get_profile_instance, is_comment_moderator, is_comment_admin
+    get_gravatar_img, get_profile_instance, is_comment_moderator, is_comment_admin, get_wrapped_words_number
 )
 from comment.tests.base import BaseCommentUtilsTest, Comment, RequestFactory
+from comment.messages import ErrorMessage
 
 
 class CommentUtilsTest(BaseCommentUtilsTest):
@@ -86,6 +88,21 @@ class CommentUtilsTest(BaseCommentUtilsTest):
         # test authenticated user
         request.user = self.user_1
         self.assertEqual(get_user_for_request(request), self.user_1)
+
+    @patch.object(settings, 'COMMENT_WRAP_CONTENT_WORDS', None)
+    def test_get_wrapped_words_number_return_0_for_None(self):
+        self.assertEqual(get_wrapped_words_number(), 0)
+
+    @patch.object(settings, 'COMMENT_WRAP_CONTENT_WORDS', 'test')
+    def test_get_wrapped_words_number_fails_on_non_int_value(self):
+        with self.assertRaises(ImproperlyConfigured) as e:
+            get_wrapped_words_number()
+        self.assertEqual(str(e.exception), ErrorMessage.WRAP_CONTENT_WORDS_NOT_INT)
+        self.assertTextTranslated(ErrorMessage.WRAP_CONTENT_WORDS_NOT_INT)
+
+    @patch.object(settings, 'COMMENT_WRAP_CONTENT_WORDS', 20)
+    def test_get_wrapped_words_number_return_specified_setting_value(self):
+        self.assertEqual(get_wrapped_words_number(), 20)
 
 
 class BaseAnonymousCommentTest(BaseCommentUtilsTest):

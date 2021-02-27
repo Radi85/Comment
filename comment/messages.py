@@ -13,6 +13,7 @@ class ErrorMessage:
         'Comment app: COMMENT_ORDER_BY should not have duplicated values '
         'Duplicated Values: {duplicates}. Please use one value only E.g. "{order}" or "-{order}".'
     ))
+    WRAP_CONTENT_WORDS_NOT_INT = _('Comment App: settings var COMMENT_WRAP_CONTENT_WORDS must be an integer')
 
 
 class ExceptionError:

@@ -119,6 +119,7 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
             field = render_field(field, placeholder='placeholder')
             self.assertEqual(field.field.widget.attrs.get('placeholder'), 'placeholder')
 
+    @patch.object(settings, 'COMMENT_WRAP_CONTENT_WORDS', 10)
     def test_render_content(self):
         comment = self.parent_comment_1
         content = "Any long text just for testing render content function"
@@ -127,14 +128,43 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         content_words = comment.content.split()
         self.assertEqual(len(content_words), len(content.split()))
 
-        result = render_content(comment, 10)
+        result = render_content(comment)
         # test urlhash
         self.assertEqual(result['urlhash'], comment.urlhash)
         # truncate number is bigger than content words
         self.assertEqual(result['text_1'], comment.content)
         self.assertIsNone(result['text_2'])
-        # truncate number is smaller than content words
+
+    def test_single_line_breaks_in_render_content(self):
+        comment = self.parent_comment_1
+        comment.content = "Any long text\njust for testing render\ncontent function"
+
+        result = render_content(comment)
+
+        self.assertIn('<br>', result['text_1'])
+        self.assertNotIn('<br><br>', result['text_1'])
+
+    def test_multiple_line_breaks_in_render_content(self):
+        comment = self.parent_comment_1
+        comment.content = "Any long text\n\njust for testing render\n\n\ncontent function"
+
+        result = render_content(comment)
+
+        self.assertIn('<br><br>', result['text_1'])
+        self.assertNotIn('<br><br><br>', result['text_1'])
+
+    def test_render_content_with_passing_value(self):
+        comment = self.parent_comment_1
+        content = "Any long text just for testing render content function"
+        comment.content = content
+        comment.save()
+        content_words = comment.content.split()
+        self.assertEqual(len(content_words), len(content.split()))
+
         result = render_content(comment, 5)
+        # test urlhash
+        self.assertEqual(result['urlhash'], comment.urlhash)
+        # truncate number is smaller than content words
         self.assertEqual(result['text_1'], ' '.join(content_words[:5]))
         self.assertEqual(result['text_2'], ' '.join(content_words[5:]))
 

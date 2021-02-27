@@ -4,11 +4,13 @@ from enum import IntEnum, unique
 import hashlib
 
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ImproperlyConfigured
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core import signing
 from django.apps import apps
 
 from comment.conf import settings
+from comment.messages import ErrorMessage
 
 
 @unique
@@ -146,3 +148,15 @@ def get_user_for_request(request):
     if request.user.is_authenticated:
         return request.user
     return None
+
+
+def get_wrapped_words_number():
+    words_number = 0
+    if settings.COMMENT_WRAP_CONTENT_WORDS is None:
+        return words_number
+    try:
+        words_number = int(settings.COMMENT_WRAP_CONTENT_WORDS)
+    except (ValueError, TypeError):
+        raise ImproperlyConfigured(ErrorMessage.WRAP_CONTENT_WORDS_NOT_INT)
+
+    return words_number

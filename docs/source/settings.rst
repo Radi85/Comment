@@ -156,3 +156,9 @@ COMMENT_ALLOW_SUBSCRIPTION
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Allow threads subscription feature. Defaults to ``False``.
+
+
+COMMENT_WRAP_CONTENT_WORDS
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Number of comment content to be show and the rest of words to be wrapped.
+Default is ``30``. Changing it to ``0`` or ``None`` no words will be wrapped (Full content is shown/rendered).
