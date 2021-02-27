@@ -36,7 +36,7 @@
                 {% get_replies_count comment user as reply_count %}
                 | <span class="js-reply-number {% block reply_count_cls %}text-dark{% endblock reply_count_cls %}">{{ reply_count }}</span>
                 <a class="js-reply-link {% block reply_link_cls %}btn btn-link ml-1{% endblock reply_link_cls %}" href="#">
-                    {% blocktrans with plural_str=reply_count|pluralize:"y,ies" %} Repl{{ plural_str }} {% endblocktrans %}
+                    {% blocktrans count reply_count=reply_count %} Reply{% plural %} Replies{% endblocktrans %}
                 </a>
                 {% if comment.user == user and is_subscription_allowed %}
                     <div class="{% block follow_icon_wrapper_cls %}d-inline ml-3{% endblock follow_icon_wrapper_cls %}">
