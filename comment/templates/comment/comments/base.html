@@ -14,11 +14,13 @@
         {% include "comment/comments/messages.html" %}
     {% endblock comment_messages %}
     <div class="js-comment comment mb-5">
-        {% include 'comment/comments/create_comment.html' with placeholder="comment on this post..." comment=None %}
+        {% trans 'comment on this post...' as parent_placeholder %}
+        {% include 'comment/comments/create_comment.html' with placeholder=parent_placeholder comment=None %}
     </div>
     <div class="mt-5">
+        {% trans 'reply to this comment...' as child_placeholder %}
         {% for comment in comments %}
-            {% include 'comment/comments/parent_comment.html' with placeholder='reply to this comment...' %}
+            {% include 'comment/comments/parent_comment.html' with placeholder=child_placeholder %}
         {% endfor %}
     </div>
     {% if comments.paginator.num_pages > 1 %}

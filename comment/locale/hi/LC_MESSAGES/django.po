@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-22 08:52+0000\n"
+"POT-Creation-Date: 2021-02-27 13:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: ABHYUDAI <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,11 +22,11 @@ msgstr ""
 msgid "comment"
 msgstr "टिप्पणी"
 
-#: comment/conf/defaults.py:13
+#: comment/conf/defaults.py:14
 msgid "Spam | Exists only to promote a service"
 msgstr "स्पैम | केवल एक सेवा को बढ़ावा देने के लिए मौजूद है"
 
-#: comment/conf/defaults.py:14
+#: comment/conf/defaults.py:15
 msgid "Abusive | Intended at promoting hatred"
 msgstr "अपमानजनक | नफरत को बढ़ावा देने के इरादे से"
 
@@ -51,47 +51,47 @@ msgstr ""
 msgid "Only AJAX request are allowed"
 msgstr "केवल AJAX अनुरोध की अनुमति है"
 
-#: comment/messages.py:11
+#: comment/messages.py:19
 msgid "error"
 msgstr "त्रुटि"
 
-#: comment/messages.py:12
+#: comment/messages.py:20
 msgid "Bad Request"
 msgstr "खराब अनुरोध"
 
-#: comment/messages.py:16
+#: comment/messages.py:24
 #, python-brace-format
 msgid "{var_name} id must be an integer, {id} is NOT"
 msgstr "{var_name} id एक पूर्णांक होना चाहिए, {id} नहीं है"
 
-#: comment/messages.py:17
+#: comment/messages.py:25
 msgid "app name must be provided"
 msgstr "app name प्रदान किया जाना चाहिए"
 
-#: comment/messages.py:18
+#: comment/messages.py:26
 #, python-brace-format
 msgid "{app_name} is NOT a valid app name"
 msgstr "{app_name} एक मान्य ऐप नाम नहीं है"
 
-#: comment/messages.py:19
+#: comment/messages.py:27
 msgid "model name must be provided"
 msgstr "model name प्रदान किया जाना चाहिए"
 
-#: comment/messages.py:20
+#: comment/messages.py:28
 #, python-brace-format
 msgid "{model_name} is NOT a valid model name"
 msgstr "{model_name} एक मान्य मॉडल नाम नहीं है"
 
-#: comment/messages.py:21
+#: comment/messages.py:29
 msgid "model id must be provided"
 msgstr "model id प्रदान करनी होगी"
 
-#: comment/messages.py:22
+#: comment/messages.py:30
 #, python-brace-format
 msgid "{model_id} is NOT a valid model id for the model {model_name}"
 msgstr "{model_id} मॉडल के लिए मान्य मॉडल आईडी नहीं है {model_name}"
 
-#: comment/messages.py:23
+#: comment/messages.py:31
 #, python-brace-format
 msgid ""
 "{parent_id} is NOT a valid id for a parent comment or the parent comment "
@@ -100,82 +100,92 @@ msgstr ""
 "{parent_id} मूल टिप्पणी के लिए मान्य आईडी नहीं है या मूल टिप्पणी प्रदान की गई मॉडल "
 "ऑब्जेक्ट से संबंधित नहीं है"
 
-#: comment/messages.py:28
+#: comment/messages.py:36
 msgid "Flagging system must be enabled"
 msgstr "फ़्लैगिंग सिस्टम सक्षम होना चाहिए"
 
-#: comment/messages.py:29
+#: comment/messages.py:37
 msgid "Object must be flagged!"
 msgstr "ऑब्जेक्ट को फ्लैग किया जाना चाहिए!"
 
-#: comment/messages.py:30
+#: comment/messages.py:38
 #, python-brace-format
 msgid "{state} is an invalid state"
 msgstr "{state} एक अमान्य स्थिति है"
 
-#: comment/messages.py:31
+#: comment/messages.py:39
 #, python-brace-format
 msgid "{reason} is an invalid reason"
 msgstr "{reason} एक अमान्य कारण है"
 
-#: comment/messages.py:32
+#: comment/messages.py:40
 msgid "Please supply some information as the reason for flagging"
 msgstr "कृपया फ्लैग करने के कारण के रूप में कुछ जानकारी प्रदान करें"
 
-#: comment/messages.py:33
+#: comment/messages.py:41
 #, python-brace-format
 msgid "This comment is already flagged by this user ({user})"
 msgstr "यह टिप्पणी पहले से ही इस उपयोगकर्ता ({user}) द्वारा फ्लैग की गई है"
 
-#: comment/messages.py:34
+#: comment/messages.py:42
 #, python-brace-format
 msgid "This comment was not flagged by this user ({user})"
 msgstr "यह टिप्पणी इस उपयोगकर्ता द्वारा फ्लैग नहीं की गई थी ({user})"
 
-#: comment/messages.py:35
+#: comment/messages.py:43
 msgid "This action cannot be applied on unflagged comments"
 msgstr "यह कार्रवाई उन टिप्पणियों पर लागू नहीं की जा सकती जिन्हें फ्लैग नहीं किया गया है"
 
-#: comment/messages.py:36
+#: comment/messages.py:44
 msgid "The comment must be edited before resolving the flag"
 msgstr "फ्लैग का समाधान करने से पहले टिप्पणी को संपादित किया जाना चाहिए"
 
-#: comment/messages.py:40
+#: comment/messages.py:45
+msgid "Unable to change flag state at the moment!"
+msgstr "फिलहाल फ्लैग स्टेट बदलने में असमर्थ!"
+
+#: comment/messages.py:49
 #, python-brace-format
 msgid ""
 "Reaction must be an valid ReactionManager.RelationType. {reaction_type} is "
 "not"
 msgstr "{reaction_type} प्रतिक्रिया मान्य नहीं है"
 
-#: comment/messages.py:44
+#: comment/messages.py:53
+#, fuzzy
+#| msgid "Please insert a valid email"
+msgid "Enter a valid email address."
+msgstr "कृपया एक मान्य ईमेल डालें"
+
+#: comment/messages.py:54
 msgid "Email is required for posting anonymous comments."
 msgstr "गुमनाम टिप्पणियों को पोस्ट करने के लिए ईमेल आवश्यक है।"
 
-#: comment/messages.py:45
+#: comment/messages.py:55
 msgid "The link seems to be broken."
 msgstr "लिंक गलत प्रतीत हो रहा है।"
 
-#: comment/messages.py:46
+#: comment/messages.py:56
 msgid "The comment has already been verified."
 msgstr "टिप्पणी को पहले ही सत्यापित किया जा चुका है।"
 
-#: comment/messages.py:50
+#: comment/messages.py:60
 msgid "Comment flagged"
 msgstr "टिप्पणी को फ्लैग किया गया"
 
-#: comment/messages.py:51
+#: comment/messages.py:61
 msgid "Comment flag removed"
 msgstr "टिप्पणी पर फ्लैग को हटा दिया गया है"
 
-#: comment/messages.py:55
+#: comment/messages.py:65
 msgid "Your reaction has been updated successfully"
 msgstr "आपकी प्रतिक्रिया सफलतापूर्वक अपडेट कर दी गई है"
 
-#: comment/messages.py:59
+#: comment/messages.py:69
 msgid "Comment Confirmation Request"
 msgstr "टिप्पणी पुष्टि अनुरोध"
 
-#: comment/messages.py:60
+#: comment/messages.py:70
 msgid ""
 "We have sent a verification link to your email.The comment will be displayed "
 "after it is verified."
@@ -183,49 +193,45 @@ msgstr ""
 "हमने आपके ईमेल पर एक सत्यापन लिंक भेजा है। सत्यापित होने के बाद टिप्पणी प्रदर्शित की "
 "जाएगी।"
 
-#: comment/messages.py:62
+#: comment/messages.py:72
 msgid "email address, this will be used for verification."
 msgstr "ईमेल पता, यह सत्यापन के लिए उपयोग किया जाएगा।"
 
-#: comment/messages.py:63
+#: comment/messages.py:73
 msgid "email address, it will be used for verification."
 msgstr "ईमेल पता, इसका उपयोग सत्यापन के लिए किया जाएगा।"
 
-#: comment/messages.py:64
+#: comment/messages.py:74
 #, python-brace-format
 msgid "{username} added comment to \"{thread_name}\""
 msgstr "{username} में टिप्पणी जोड़ दी \"{thread_name}\""
 
-#: comment/messages.py:65
+#: comment/messages.py:75
 msgid "email"
 msgstr "ईमेल"
 
-#: comment/messages.py:69
+#: comment/messages.py:79
 msgid "Unflagged"
 msgstr "फ्लैग नहीं किया गया है"
 
-#: comment/messages.py:70
+#: comment/messages.py:80
 msgid "Flagged"
 msgstr "फ्लैग किया गया है"
 
-#: comment/messages.py:71
+#: comment/messages.py:81
 msgid "Flag rejected by the moderator"
 msgstr "मॉडरेटर द्वारा फ्लैग को अस्वीकार कर दिया गया"
 
-#: comment/messages.py:72
+#: comment/messages.py:82
 msgid "Comment modified by the author"
 msgstr "टिप्पणी को लेखक द्वारा संशोधित किया गया है"
 
-#: comment/messages.py:76
-msgid "Please insert a valid email"
-msgstr "कृपया एक मान्य ईमेल डालें"
-
-#: comment/messages.py:77
+#: comment/messages.py:86
 #, python-brace-format
 msgid "Email is required to subscribe {model_object}"
 msgstr "सदस्यता लेने के लिए ईमेल आवश्यक है {model_object}"
 
-#: comment/messages.py:78
+#: comment/messages.py:87
 msgid "Subscribe system must be enabled"
 msgstr "सदस्यता प्रणाली सक्षम होना चाहिए"
 
@@ -238,8 +244,7 @@ msgstr "सुनो,"
 msgid ""
 "You or someone on your behalf have requested to post a comment into this "
 "page:"
-msgstr "आपने या आपकी ओर से किसी ने इस पर टिप्पणी पोस्ट करने का अनुरोध किया है "
-"पृष्ठ:"
+msgstr "आपने या आपकी ओर से किसी ने इस पर टिप्पणी पोस्ट करने का अनुरोध किया है पृष्ठ:"
 
 #: comment/templates/comment/anonymous/confirmation_request.html:12
 #, python-format
@@ -273,8 +278,8 @@ msgid ""
 "If clicking does not work, you can also copy the below link and paste the "
 "address into your browser's address window"
 msgstr ""
-"यदि क्लिक करने से काम नहीं चलता है, तो आप नीचे दिए गए लिंक को भी कॉपी कर सकते हैं और पेस्ट कर सकते हैं "
-"आपके ब्राउज़र की पता विंडो में पता"
+"यदि क्लिक करने से काम नहीं चलता है, तो आप नीचे दिए गए लिंक को भी कॉपी कर सकते हैं और "
+"पेस्ट कर सकते हैं आपके ब्राउज़र की पता विंडो में पता"
 
 #: comment/templates/comment/anonymous/confirmation_request.html:41
 #: comment/templates/comment/anonymous/confirmation_request.txt:17
@@ -330,41 +335,50 @@ msgstr "टिप्पणी सत्यापित नहीं की ज�
 msgid "Sorry, your comment has been automatically discarded."
 msgstr "क्षमा करें, आपकी टिप्पणी स्वचालित रूप से अस्वीकृत कर दी गई है।"
 
-#: comment/templates/comment/comments/base.html:5
+#: comment/templates/comment/comments/base.html:8
 msgid "Comments"
 msgstr "टिप्पणियाँ"
 
-#: comment/templates/comment/comments/comment_content.html:13
+#: comment/templates/comment/comments/base.html:17
+msgid "comment on this post..."
+msgstr "इस पोस्ट पर टिप्पणी करें ..."
+
+#: comment/templates/comment/comments/base.html:21
+msgid "reply to this comment..."
+msgstr "इस टिप्पणी का जवाब ..."
+
+#: comment/templates/comment/comments/comment_content.html:16
 #, python-format
 msgid "view %(comment.user)s profile"
 msgstr "देखें %(comment.user)s का प्रोफ़ाइल"
 
-#: comment/templates/comment/comments/comment_content.html:13
+#: comment/templates/comment/comments/comment_content.html:16
 msgid "comment by anonymous user"
 msgstr "गुमनाम उपयोगकर्ता द्वारा टिप्पणी"
 
-#: comment/templates/comment/comments/comment_content.html:18
+#: comment/templates/comment/comments/comment_content.html:21
 msgid "Edited"
 msgstr "बदला हुआ"
 
-#: comment/templates/comment/comments/comment_content.html:18
+#: comment/templates/comment/comments/comment_content.html:21
 #, python-format
 msgid "Edited: %(edited_time)s ago"
 msgstr "बदला हुआ: %(edited_time)s पहले"
 
-#: comment/templates/comment/comments/comment_content.html:20
+#: comment/templates/comment/comments/comment_content.html:23
 msgid "Posted"
 msgstr "पोस्ट किया गया है"
 
-#: comment/templates/comment/comments/comment_content.html:20
+#: comment/templates/comment/comments/comment_content.html:23
 #, python-format
 msgid "%(posted_time)s ago"
 msgstr "%(posted_time)s पहले"
 
-#: comment/templates/comment/comments/comment_content.html:39
-#, python-format
-msgid " Repl%(plural_str)s "
-msgstr "जवाब %(plural_str)s"
+#: comment/templates/comment/comments/comment_content.html:42
+msgid " Reply"
+msgid_plural " Replies"
+msgstr[0] "जवाब दें"
+msgstr[1] "जवाब"
 
 #: comment/templates/comment/comments/comment_modal.html:6
 msgid "Confirm comment deletion"
@@ -381,7 +395,7 @@ msgstr "बंद करे"
 msgid "Are you sure you want to delete this comment"
 msgstr "क्या आप इस टिप्पणी को मिटाने के बारे में पक्के हैं"
 
-#: comment/templates/comment/comments/comment_modal.html:23
+#: comment/templates/comment/comments/comment_modal.html:22
 msgid "Delete"
 msgstr "हटाएं"
 
@@ -391,22 +405,22 @@ msgstr "और पढ़ें"
 
 #: comment/templates/comment/comments/create_comment.html:20
 msgid "Reply"
-msgstr "जवाब दे"
+msgstr "जवाब दें"
 
-#: comment/templates/comment/comments/create_comment.html:29
+#: comment/templates/comment/comments/create_comment.html:31
 msgid "Comment Anonymously or"
 msgstr "गुमनाम रूप से टिप्पणी करें या"
 
-#: comment/templates/comment/comments/create_comment.html:31
-#: comment/templates/comment/comments/create_comment.html:37
+#: comment/templates/comment/comments/create_comment.html:33
+#: comment/templates/comment/comments/create_comment.html:40
 msgid "Login"
 msgstr "लॉग इन करें"
 
-#: comment/templates/comment/comments/create_comment.html:33
+#: comment/templates/comment/comments/create_comment.html:35
 msgid "to keep your conversations intact"
 msgstr "अपनी बातचीत को बरकरार रखने के लिए"
 
-#: comment/templates/comment/comments/create_comment.html:39
+#: comment/templates/comment/comments/create_comment.html:42
 msgid "to join the discussion"
 msgstr "चर्चा में शामिल होने के लिए"
 
@@ -494,7 +508,7 @@ msgstr "इस सूत्र का पालन करें"
 msgid "Please insert your email to follow this thread"
 msgstr "कृपया इस धागे का पालन करने के लिए अपना ईमेल डालें"
 
-#: comment/templates/comment/follow/follow_modal.html:25
+#: comment/templates/comment/follow/follow_modal.html:28
 msgid "Follow"
 msgstr "का पालन करें"
 

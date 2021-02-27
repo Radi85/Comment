@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-13 13:43+0000\n"
+"POT-Creation-Date: 2021-02-27 11:18+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: ABHYUDAI <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,62 +18,68 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: comment/static/js/comment.js:151 comment/static/js/comment.js:291
+#: comment/static/js/comment.js:161 comment/static/js/comment.js:304
 msgid "Replies"
 msgstr "जवाब"
 
-#: comment/static/js/comment.js:153 comment/static/js/comment.js:293
+#: comment/static/js/comment.js:163 comment/static/js/comment.js:306
 msgid "Reply"
 msgstr "जवाब दें"
 
-#: comment/static/js/comment.js:170
+#: comment/static/js/comment.js:184
 msgid "Unable to post your comment!, please try again"
 msgstr "आपकी टिप्पणी पोस्ट करने में असमर्थ!, कृपया पुनः प्रयास करें"
 
-#: comment/static/js/comment.js:191
+#: comment/static/js/comment.js:205
 msgid "You can't edit this comment"
 msgstr "आप इस टिप्पणी को बदल नहीं सकते"
 
-#: comment/static/js/comment.js:214
+#: comment/static/js/comment.js:228
 msgid "Modification didn't take effect!, please try again"
 msgstr "संशोधन प्रभावी नहीं हुआ!, कृपया पुनः प्रयास करें"
 
-#: comment/static/js/comment.js:302
+#: comment/static/js/comment.js:272
+#, fuzzy
+#| msgid "Reaction couldn't be processed!, please try again"
+msgid "Deletion cannot be performed!, please try again"
+msgstr "प्रतिक्रिया संसाधित नहीं की जा सकी!, कृपया पुनः प्रयास करें"
+
+#: comment/static/js/comment.js:314
 msgid "Unable to delete your comment!, please try again"
 msgstr "आपकी टिप्पणी को हटाने में असमर्थ!, कृपया पुनः प्रयास करें"
 
-#: comment/static/js/comment.js:359
+#: comment/static/js/comment.js:375
 msgid "Reaction couldn't be processed!, please try again"
 msgstr "प्रतिक्रिया संसाधित नहीं की जा सकी!, कृपया पुनः प्रयास करें"
 
-#: comment/static/js/comment.js:394
+#: comment/static/js/comment.js:419
 msgid "Subscription couldn't be processed!, please try again"
 msgstr "सदस्यता संसाधित नहीं हो सकी!, कृपया पुनः प्रयास करें"
 
-#: comment/static/js/comment.js:500
+#: comment/static/js/comment.js:527
 msgid "Flagging couldn't be processed!, please try again"
 msgstr "फ़्लैगिंग को संसाधित नहीं किया जा सका!, कृपया पुनः प्रयास करें"
 
-#: comment/static/js/comment.js:545
+#: comment/static/js/comment.js:572
 msgid "read more ..."
 msgstr "और पढ़ें ..."
 
-#: comment/static/js/comment.js:547
+#: comment/static/js/comment.js:574
 msgid "read less"
 msgstr "कम पढ़ें"
 
-#: comment/static/js/comment.js:575
+#: comment/static/js/comment.js:603
 msgid "Flag rejected"
 msgstr "फ्लैग को अस्वीकार कर दिया गया"
 
-#: comment/static/js/comment.js:576 comment/static/js/comment.js:594
+#: comment/static/js/comment.js:604 comment/static/js/comment.js:622
 msgid "Reject the flag"
 msgstr "फ्लैग को अस्वीकार करें"
 
-#: comment/static/js/comment.js:581 comment/static/js/comment.js:589
+#: comment/static/js/comment.js:609 comment/static/js/comment.js:617
 msgid "Resolve the flag"
 msgstr "फ्लैग को समाधान करें"
 
-#: comment/static/js/comment.js:588
+#: comment/static/js/comment.js:616
 msgid "Flag resolved"
 msgstr "फ्लैग का समाधान कर दिया गया है"
