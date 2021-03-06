@@ -1,17 +1,15 @@
 Changelog
 =========
 
-2.6.beta-2
----------
+2.6.0
+------
 
-- Add support for customization of user fields in the api.
+- Support rendering new lines in the comment content.
+- Fix pluralization issue for the translation.
+- Add support for custom fields in user model.
 - Add ordering option for comments.
 - extend UI customization.
 - Fix bugs.
-
-2.6.beta-1
----------
-
 - Add subscription feature.
 - Send email notifications.
 
