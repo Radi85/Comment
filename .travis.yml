@@ -10,7 +10,7 @@ python:
 env:
   - DJANGO=2.1
   - DJANGO=3.1
-  - DJANGO=master
+  - DJANGO=main
 
 install: pip install tox-travis coveralls
 script:
