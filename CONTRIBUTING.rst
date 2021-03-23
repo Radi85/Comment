@@ -4,6 +4,17 @@ Contributing
 Django Comments Dab is developed and maintained by developers in an Open Source manner.
 Any support is welcome. You could help by writing documentation, pull-requests, report issues and/or translations.
 
+Starting points
+^^^^^^^^^^^^^^^^
+
+An issue with a `good first`_ label might be a good place to start with.
+
+You can also try to take up an issue tagged with an `upcoming release`_.
+
+.. _`good first`: https://github.com/Radi85/Comment/issues?q=is%3Aopen+is%3Aissue+label%3A"good+first+issue"
+.. _`upcoming release`: https://github.com/Radi85/Comment/milestones
+
+
 PR and commit messages
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -13,9 +24,7 @@ Refer to `#125`_
 
 .. _`#125`: https://github.com/Radi85/Comment/discussions/125
 
-In order to keep master clean and up to date with the current release, all PR shall be merged with ``develop-RELEASE_MILESTONE`` branch.
-
-``RELEASE_MILESTONE`` should be milestone tag of the issue you work on.
+In order to keep the default branch clean and up to date with the current release, all PR shall be merged with ``develop`` branch.
 
 **Commit messages**
 

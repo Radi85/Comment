@@ -10,7 +10,7 @@
     :target: https://coveralls.io/github/Radi85/Comment
     :alt: coverage
 
-.. image:: https://travis-ci.org/Radi85/Comment.svg?branch=master
+.. image:: https://travis-ci.org/Radi85/Comment.svg?branch=develop
     :target: https://travis-ci.org/Radi85/Comment
     :alt: build
 
@@ -23,7 +23,7 @@
     :alt: contributors
 
 .. image:: https://img.shields.io/github/license/radi85/Comment?color=gr
-    :target: https://github.com/Radi85/Comment/blob/master/LICENSE
+    :target: https://github.com/Radi85/Comment/blob/develop/LICENSE
     :alt: licence
 
 .. image:: https://img.shields.io/pypi/dm/django-comments-dab
@@ -43,7 +43,7 @@
 
 .. image:: https://img.shields.io/github/commits-since/radi85/comment/latest/develop
     :target: #
-    :alt: Commits since latest release for a branch master
+    :alt: Commits since latest release for a branch develop
 
 
 ===================
@@ -61,7 +61,7 @@ Full Documentation_
 .. _Documentation: https://django-comment-dab.readthedocs.io/
 
 
-    .. image:: https://github.com/radi85/comment/blob/master/docs/_static/img/comment.gif
+    .. image:: https://github.com/radi85/comment/blob/develop/docs/_static/img/comment.gif
 
 
 Content:
@@ -244,7 +244,7 @@ In the template (e.g. post_detail.) add the following template tags where ``obj`
 
 For advanced usage and other documentation, you may read the Documentation_ or look at the docs_ directory in the repository.
 
-.. _docs: https://github.com/Radi85/Comment/tree/master/docs
+.. _docs: https://github.com/Radi85/Comment/tree/develop/docs
 
 .. _Example:
 
@@ -293,4 +293,4 @@ Contributing
 
 For contributing, please see the instructions at Contributing_
 
-.. _Contributing: https://github.com/Radi85/Comment/blob/master/CONTRIBUTING.rst
+.. _Contributing: https://github.com/Radi85/Comment/blob/develop/CONTRIBUTING.rst
