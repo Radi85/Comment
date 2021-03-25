@@ -165,8 +165,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 commentCount(1);
                 // update followBtn
                 let followButton = form.parentElement.previousElementSibling.querySelector(".js-comment-follow");
-                followButton.querySelector('.comment-follow-icon').classList.add('user-has-followed');
-                followButton.querySelector('span').setAttribute('title', 'Unfollow this thread');
+                if (followButton){
+                    followButton.querySelector('.comment-follow-icon').classList.add('user-has-followed');
+                    followButton.querySelector('span').setAttribute('title', 'Unfollow this thread');
+                }
             }
             formButton.setAttribute('disabled', 'disabled');
             let elements = document.getElementsByClassName("js-comment-input");
