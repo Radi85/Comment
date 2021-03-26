@@ -19,9 +19,21 @@ E.g. ``Post`` model, as shown below:
     class Post(models.Model):
         author = models.ForeignKey(User)
         title = models.CharField(max_length=200)
+        slug = models.SlugField(unique=True)
         body = models.TextField()
         # the field name should be comments
         comments = GenericRelation(Comment)
+
+.. important::
+
+    Please add a ``get_absolute_url`` method to the model that you're associating with the ``Comment`` model. It is used at several places.
+
+    .. code:: python
+
+        from django.urls import reverse
+
+        def get_absolute_url(self):
+            return reverse('post_detail_url', kwargs={'slug': self.slug})
 
 Step 2 - Adding template tags:
 ------------------------------
@@ -31,4 +43,3 @@ Step 2 - Adding template tags:
     1. Instance of the targeted model. (**Required**)
     2. Request object. (**Required**)
     3. oauth. (optional - Default is false)
-
