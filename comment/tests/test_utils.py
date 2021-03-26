@@ -29,14 +29,15 @@ class CommentUtilsTest(BaseCommentUtilsTest):
     def test_get_gravatar_img(self):
         with patch.object(settings, 'COMMENT_USE_GRAVATAR', True):
             # email is not provided
-            self.assertEqual(get_gravatar_img(''), '/static/img/default.png')
+            default_profile_pic_loc = settings.COMMENT_DEFAULT_PROFILE_PIC_LOC
+            self.assertEqual(get_gravatar_img(''), default_profile_pic_loc)
 
             # email is provided
             self.assertTrue(get_gravatar_img('test').startswith('https://www.gravatar.com/avatar/'))
 
         # gravatar is disabled
         with patch.object(settings, 'COMMENT_USE_GRAVATAR', False):
-            self.assertEqual(get_gravatar_img(''), '/static/img/default.png')
+            self.assertEqual(get_gravatar_img(''), default_profile_pic_loc)
 
     def test_get_profile_instance(self):
         # wrong content type

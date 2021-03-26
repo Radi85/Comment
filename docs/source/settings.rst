@@ -162,3 +162,9 @@ COMMENT_WRAP_CONTENT_WORDS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Number of comment content to be show and the rest of words to be wrapped.
 Default is ``30``. Changing it to ``0`` or ``None`` no words will be wrapped (Full content is shown/rendered).
+
+COMMENT_DEFAULT_PROFILE_PIC_LOC
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Provides an alternate location for profile picture that can be used other than
+default image. Defaults to '/static/img/default.png'
