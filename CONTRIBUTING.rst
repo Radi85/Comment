@@ -64,15 +64,15 @@ To start development on this project, fork_ this repository and follow the guide
     # activate the virtual environment
     $ source local_env/bin/activate
     # install dependencies
-    (venv) $ pip install -e . -r example/requirements.txt
+    (local_env) $ pip install -e . -r test/example/requirements.txt
 
-    (venv) $ export DEBUG="True"
+    (local_env) $ export DEBUG="True"
     # migrate the changes to database
-    (venv) $ python manage.py migrate
+    (local_env) $ python manage.py migrate
     # prepare initial data
-    (venv) $ python manage.py create_initial_data
+    (local_env) $ python manage.py create_initial_data
     # start the development server
-    (venv) $ python manage.py runserver
+    (local_env) $ python manage.py runserver
 
 Or run with docker
 
@@ -96,7 +96,7 @@ To run tests against a particular ``python`` and ``django`` version installed in
 
 .. code:: bash
 
-    (venv) $ python manage.py test
+    (local_env) $ python manage.py test
 
 
 To run tests against all supported ``python`` and ``django`` versions, you may run:
@@ -104,9 +104,9 @@ To run tests against all supported ``python`` and ``django`` versions, you may r
 .. code:: bash
 
     # install dependency
-    (venv) $ pip install tox
+    (local_env) $ pip install tox
     # run tests
-    (venv) $ tox
+    (local_env) $ tox
 
 
 Translations
