@@ -31,7 +31,7 @@ def is_gravatar_enabled():
 
 def get_gravatar_img(email):
     if not is_gravatar_enabled() or not email:
-        return '/static/img/default.png'
+        return settings.COMMENT_DEFAULT_PROFILE_PIC_LOC
     hashed_email = hashlib.md5(email.lower().encode('utf-8')).hexdigest()
     return f'https://www.gravatar.com/avatar/{hashed_email}'
 
