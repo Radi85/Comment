@@ -78,7 +78,8 @@ def render_comments(obj, request, oauth=False):
     context = DABContext(request, model_object=obj)
     context.update({
         'comment_form': CommentForm(request=request),
-        'oauth': oauth
+        'oauth': oauth,
+        'request': request,
     })
     return context
 
