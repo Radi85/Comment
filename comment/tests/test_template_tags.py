@@ -74,6 +74,8 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         # no pagination
         self.assertEqual(data['comments'].count(), count)  # parent comment only
         self.assertEqual(data['login_url'], settings.LOGIN_URL)
+        # check if `request` object is passed in context template
+        self.assertEqual(data['request'], request)
 
     @patch.object(settings, 'LOGIN_URL', None)
     def test_render_comments_without_login_url(self):
