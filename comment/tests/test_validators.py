@@ -26,14 +26,16 @@ class MockedContentTypeValidatorAPIView(ValidatorMixin, ListAPIView):
 
 
 class CustomValidationTest(TestCase):
-    def test_can_create_custom_validation(self):
-        # no params
+
+    def test_without_param(self):
         validator = CommentBadRequest()
+
         self.assertEqual(validator.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(validator.detail, ExceptionError.BAD_REQUEST)
 
-        # with params
+    def test_with_params(self):
         validator = CommentBadRequest(detail='Not Found', status_code=404)
+
         self.assertEqual(validator.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(validator.detail, "Not Found")
 
@@ -50,6 +52,7 @@ class ValidatorMixinTest(BaseCommentMixinTest):
         url_data.pop('app_name')
         request = self.factory.get(self.get_url(**url_data))
         response = self.view.dispatch(request)
+
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(self.view.error, ContentTypeError.APP_NAME_MISSING)
 
@@ -138,6 +141,7 @@ class ValidatorMixinTest(BaseCommentMixinTest):
         view = MockedContentTypeValidatorAPIView()
         request = self.factory.get(self.get_url(**self.data))
         response = view.dispatch(request)
+
         self.assertEqual(response.status_code, 200)
 
     def test_api_case_missing_app_name(self):
@@ -146,6 +150,7 @@ class ValidatorMixinTest(BaseCommentMixinTest):
         url_data.pop('app_name')
         request = self.factory.get(self.get_url(**url_data))
         response = view.dispatch(request)
+
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data['detail'], view.error)
 
@@ -153,11 +158,13 @@ class ValidatorMixinTest(BaseCommentMixinTest):
 class ValidateOrderTest(TestCase):
     def test_success(self):
         order = ['-reaction__likes']
+
         with patch.object(settings, 'COMMENT_ORDER_BY', order):
             self.assertEqual(_validate_order(), order)
 
     def test_incorrect_value_raises_exception(self):
         order = ['err']
+
         with patch.object(settings, 'COMMENT_ORDER_BY', order):
             with self.assertRaises(ImproperlyConfigured) as error:
                 _validate_order()
@@ -169,6 +176,7 @@ class ValidateOrderTest(TestCase):
 
     def test_duplicate_value_raises_exception(self):
         order = ['posted', '-posted']
+
         with patch.object(settings, 'COMMENT_ORDER_BY', order):
             with self.assertRaises(ImproperlyConfigured) as error:
                 _validate_order()
