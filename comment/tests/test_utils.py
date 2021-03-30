@@ -1,4 +1,3 @@
-from unittest import TestCase
 from unittest.mock import patch
 
 from django.core.exceptions import ImproperlyConfigured
@@ -15,116 +14,132 @@ from comment.tests.base import BaseCommentUtilsTest, Comment, RequestFactory
 from comment.messages import ErrorMessage
 
 
-class CommentUtilsTest(BaseCommentUtilsTest):
-    def test_get_model_object(self):
+class GetModelObjectTest(BaseCommentUtilsTest):
+    def test_success(self):
         data = {
             'app_name': 'post',
             'model_name': 'Post',
             'model_id': self.post_1.id
         }
         model_object = get_model_obj(**data)
-        self.assertIsNotNone(model_object)
         self.assertIsInstance(model_object, self.post_1.__class__)
 
-    def test_get_gravatar_img(self):
-        with patch.object(settings, 'COMMENT_USE_GRAVATAR', True):
-            # email is not provided
-            default_profile_pic_loc = settings.COMMENT_DEFAULT_PROFILE_PIC_LOC
-            self.assertEqual(get_gravatar_img(''), default_profile_pic_loc)
 
-            # email is provided
-            self.assertTrue(get_gravatar_img('test').startswith('https://www.gravatar.com/avatar/'))
+class GetGratavarImgTest(BaseCommentUtilsTest):
+    @patch.object(settings, 'COMMENT_USE_GRAVATAR', True)
+    def test_without_email(self):
+        self.assertEqual(get_gravatar_img(''), settings.COMMENT_DEFAULT_PROFILE_PIC_LOC)
 
-        # gravatar is disabled
-        with patch.object(settings, 'COMMENT_USE_GRAVATAR', False):
-            self.assertEqual(get_gravatar_img(''), default_profile_pic_loc)
-
-    def test_get_profile_instance(self):
-        # wrong content type
-        with patch.object(settings, 'PROFILE_MODEL_NAME', 'wrong'):
-            self.assertIsNone(get_profile_instance(self.user_1))
-
-        # correct data
-        with patch.object(settings, 'PROFILE_MODEL_NAME', 'userprofile'):
-            self.assertIsNotNone(get_profile_instance(self.user_1))
-
-        # profile model has no user related model
-        with patch.object(settings, 'PROFILE_MODEL_NAME', None):
-            self.assertIsNone(get_profile_instance(self.user_1))
+    @patch.object(settings, 'COMMENT_USE_GRAVATAR', True)
+    def test_with_email(self):
+        self.assertTrue(get_gravatar_img('test').startswith('https://www.gravatar.com/avatar/'))
 
     @patch.object(settings, 'COMMENT_USE_GRAVATAR', False)
-    def test_has_valid_profile(self):
-        with patch.object(settings, 'PROFILE_APP_NAME', 'user_profile'):
-            with patch.object(settings, 'PROFILE_MODEL_NAME', 'userprofile'):
-                self.assertIs(has_valid_profile(), True)
+    def test_disabling(self):
+        self.assertEqual(get_gravatar_img(''), settings.COMMENT_DEFAULT_PROFILE_PIC_LOC)
 
-            # settings attr provided, profile model has no image
-            with patch('comment.utils.hasattr', return_value=False):
-                self.assertIs(has_valid_profile(), False)
 
-            # one of settings attribute is missing
-            with patch.object(settings, 'PROFILE_MODEL_NAME', ''):
-                self.assertIs(has_valid_profile(), False)
+class GetProfileInstanceTest(BaseCommentUtilsTest):
+    @patch.object(settings, 'PROFILE_MODEL_NAME', 'wrong')
+    def test_wrong_content_type(self):
+        self.assertIsNone(get_profile_instance(self.user_1))
 
-            # settings attr provided with wrong value
-            with patch.object(settings, 'PROFILE_MODEL_NAME', 'wrong_value'):
-                self.assertIs(has_valid_profile(), False)
+    @patch.object(settings, 'PROFILE_MODEL_NAME', 'userprofile')
+    def test_correct_content_type(self):
+        self.assertIsNotNone(get_profile_instance(self.user_1))
 
-            with patch.object(settings, 'COMMENT_USE_GRAVATAR', True):
-                self.assertIs(has_valid_profile(), True)
+    @patch.object(settings, 'PROFILE_MODEL_NAME', None)
+    def test_profile_model_is_not_associated_with_user(self):
+        self.assertIsNone(get_profile_instance(self.user_1))
 
+
+@patch.object(settings, 'COMMENT_USE_GRAVATAR', False)
+@patch.object(settings, 'PROFILE_APP_NAME', 'user_profile')
+class HasValidProfileTest(BaseCommentUtilsTest):
+    def test_success(self):
+        self.assertIs(has_valid_profile(), True)
+
+    def test_model_provided_without_image(self):
+        with patch('comment.utils.hasattr', return_value=False):
+            self.assertIs(has_valid_profile(), False)
+
+    @patch.object(settings, 'PROFILE_MODEL_NAME', '')
+    def test_missing_setting_attribute(self):
+        self.assertIs(has_valid_profile(), False)
+
+    @patch.object(settings, 'PROFILE_MODEL_NAME', 'wrong_value')
+    def test_wrong_setting_attribute(self):
+        self.assertIs(has_valid_profile(), False)
+
+    @patch.object(settings, 'COMMENT_USE_GRAVATAR', True)
+    def test_gravatar_enabled(self):
+        self.assertIs(has_valid_profile(), True)
+
+
+class IsCommentModeratorTest(BaseCommentUtilsTest):
     @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', False)
-    def test_is_comment_moderator_no_moderation(self):
-        self.assertFalse(is_comment_moderator(self.moderator))
+    def test_flagging_disabled(self):
+        self.assertIs(is_comment_moderator(self.moderator), False)
 
+
+class IsCommentAdminTest(BaseCommentUtilsTest):
     @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', False)
-    def test_is_comment_admin_no_moderation(self):
-        self.assertFalse(is_comment_admin(self.admin))
+    def test_flagging_disabled(self):
+        self.assertIs(is_comment_admin(self.admin), False)
 
-    def test_user_for_request(self):
-        request = self.factory.get('/')
-        request.user = AnonymousUser()
-        # test unauthenticated user
-        self.assertIsNone(get_user_for_request(request))
-        # test authenticated user
-        request.user = self.user_1
-        self.assertEqual(get_user_for_request(request), self.user_1)
 
+class GetUserForRequestTest(BaseCommentUtilsTest):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.request = cls.factory.get('/')
+
+    def test_unauthenticated_user(self):
+        self.request.user = AnonymousUser()
+        self.assertIsNone(get_user_for_request(self.request))
+
+    def test_authenticated_user(self):
+        self.request.user = self.user_1
+        self.assertEqual(get_user_for_request(self.request), self.user_1)
+
+
+class GetWrappedWordsNumberTest(BaseCommentUtilsTest):
     @patch.object(settings, 'COMMENT_WRAP_CONTENT_WORDS', None)
-    def test_get_wrapped_words_number_return_0_for_None(self):
+    def test_using_None(self):
         self.assertEqual(get_wrapped_words_number(), 0)
 
     @patch.object(settings, 'COMMENT_WRAP_CONTENT_WORDS', 'test')
-    def test_get_wrapped_words_number_fails_on_non_int_value(self):
+    def test_using_non_integeral_value(self):
         with self.assertRaises(ImproperlyConfigured) as e:
             get_wrapped_words_number()
         self.assertEqual(str(e.exception), ErrorMessage.WRAP_CONTENT_WORDS_NOT_INT)
         self.assertTextTranslated(ErrorMessage.WRAP_CONTENT_WORDS_NOT_INT)
 
     @patch.object(settings, 'COMMENT_WRAP_CONTENT_WORDS', 20)
-    def test_get_wrapped_words_number_return_specified_setting_value(self):
+    def test_using_integer_value(self):
         self.assertEqual(get_wrapped_words_number(), 20)
 
 
 class BaseAnonymousCommentTest(BaseCommentUtilsTest):
-    def setUp(self):
-        super().setUp()
-        self.time_posted = timezone.now()
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.time_posted = timezone.now()
         _email = 'test-1@acme.edu'
         _content = 'posting anonymous comment'
         _parent = None
         _factory = RequestFactory()
-        self.comment_obj = Comment(
-            content_object=self.post_1,
+        cls.comment_obj = Comment(
+            content_object=cls.post_1,
             content=_content,
             user=None,
             parent=_parent,
             email=_email,
-            posted=self.time_posted
+            posted=cls.time_posted
         )
 
-        self.key = signing.dumps(self.comment_obj.to_dict(), compress=True)
-        self.request = _factory.get('/')
+        cls.key = signing.dumps(cls.comment_obj.to_dict(), compress=True)
+        cls.request = _factory.get('/')
 
 
 class TestGetCommentFromKey(BaseAnonymousCommentTest):
@@ -188,9 +203,7 @@ class TestGetCommentFromKey(BaseAnonymousCommentTest):
         self.assertIsInstance(response.obj, Comment)
 
 
-class UtilsTest(TestCase):
-    """Test general purpose utilities that aren't necessarily related to a comment"""
-
+class TestIdGenerator(BaseCommentUtilsTest):
     def setUp(self):
         self.len_id = 6
 

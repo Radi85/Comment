@@ -13,48 +13,56 @@ from comment.templatetags.comment_tags import (
 from comment.tests.base import BaseTemplateTagsTest
 
 
-class CommentTemplateTagsTest(BaseTemplateTagsTest):
-    def test_get_model_name(self):
+class GetModelNameTest(BaseTemplateTagsTest):
+    def test_success(self):
         model_name = get_model_name(self.post_1)
         self.assertEqual(model_name, 'Post')
 
-    def test_get_app_name(self):
+
+class GetAppNameTest(BaseTemplateTagsTest):
+    def test_success(self):
         app_name = get_app_name(self.post_1)
         self.assertEqual(app_name, 'post')
 
-    def test_comments_count(self):
+
+class GetCommentCountTest(BaseTemplateTagsTest):
+    def test_success(self):
         counts = get_comments_count(self.post_1, self.user_1)
         self.assertEqual(counts, self.increment)
 
-    @patch.object(settings, 'COMMENT_USE_GRAVATAR', False)
-    def test_get_profile_url(self):
-        # profile exist
+
+@patch.object(settings, 'COMMENT_USE_GRAVATAR', False)
+class GetProfileURLTest(BaseTemplateTagsTest):
+    def test_profile_exists(self):
         url = get_profile_url(self.parent_comment_1)
         self.assertEqual(url, '/profile/profile/test-1')
 
-        # anonymous comment
+    def test_anonymous_comment(self):
         url = get_profile_url(self.anonymous_parent_comment)
         self.assertEqual(url, '/static/img/default.png')
 
-        # missing profile
-        with patch.object(settings, 'PROFILE_MODEL_NAME', None):
-            url = get_profile_url(self.parent_comment_1)
-            self.assertEqual(url, '/static/img/default.png')
+    @patch.object(settings, 'PROFILE_MODEL_NAME', None)
+    def test_profile_does_not_exist(self):
+        url = get_profile_url(self.parent_comment_1)
+        self.assertEqual(url, '/static/img/default.png')
 
-    @patch.object(settings, 'COMMENT_USE_GRAVATAR', False)
+
+@patch.object(settings, 'COMMENT_USE_GRAVATAR', False)
+class GetImgPathTest(BaseTemplateTagsTest):
     def test_get_img_path(self):
         url = get_img_path(self.parent_comment_1)
         self.assertNotEqual(url, '/static/img/default.png')
 
-        # use default pic on fail
-        with patch.object(settings, 'PROFILE_MODEL_NAME', 'app not exist'):
+    @patch.object(settings, 'PROFILE_MODEL_NAME', 'app not exist')
+    def test_profile_is_not_found(self):
+        url = get_img_path(self.parent_comment_1)
+        self.assertEqual(url, settings.COMMENT_DEFAULT_PROFILE_PIC_LOC)
+
+    @patch.object(settings, 'PROFILE_APP_NAME', 'user_profile')
+    def test_profile_with_image(self):
+        with patch('comment.templatetags.comment_tags.get_profile_instance', return_value=None):
             url = get_img_path(self.parent_comment_1)
             self.assertEqual(url, '/static/img/default.png')
-
-        with patch.object(settings, 'PROFILE_APP_NAME', 'user_profile'):
-            with patch('comment.templatetags.comment_tags.get_profile_instance', return_value=None):
-                url = get_img_path(self.parent_comment_1)
-                self.assertEqual(url, '/static/img/default.png')
 
     @patch.object(settings, 'PROFILE_APP_NAME', 'user_profile')
     @patch.object(settings, 'COMMENT_USE_GRAVATAR', False)
@@ -63,30 +71,32 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
             url = get_img_path(self.parent_comment_1)
             self.assertEqual(url, '/static/img/default.png')
 
-    def test_render_comments(self):
-        request = self.factory.get('/')
-        request.user = self.user_1
-        comments_per_page = 'COMMENT_PER_PAGE'
-        patch.object(settings, comments_per_page, 0).start()
-        count = self.post_1.comments.filter_parents_by_object(self.post_1).count()
-        data = render_comments(self.post_1, request)
 
-        # no pagination
+class RenderCommentsTest(BaseTemplateTagsTest):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.request = cls.factory.get('/')
+        cls.request.user = cls.user_1
+
+    @patch.object(settings, 'COMMENT_PER_PAGE', 0)
+    def test_without_pagination(self):
+        count = self.post_1.comments.filter_parents_by_object(self.post_1).count()
+        data = render_comments(self.post_1, self.request)
+
         self.assertEqual(data['comments'].count(), count)  # parent comment only
         self.assertEqual(data['login_url'], settings.LOGIN_URL)
         # check if `request` object is passed in context template
-        self.assertEqual(data['request'], request)
+        self.assertEqual(data['request'], self.request)
 
     @patch.object(settings, 'LOGIN_URL', None)
-    def test_render_comments_without_login_url(self):
-        request = self.factory.get('/')
-        request.user = self.user_1
+    def test_without_login_url(self):
         with self.assertRaises(ImproperlyConfigured) as error:
-            render_comments(self.post_1, request)
+            render_comments(self.post_1, self.request)
         self.assertIsInstance(error.exception, ImproperlyConfigured)
 
     @patch.object(settings, 'COMMENT_PER_PAGE', 2)
-    def test_render_comments_with_pagination(self):
+    def test_with_pagination(self):
         request = self.factory.get('/?page=2')
         request.user = self.user_1
         data = render_comments(self.post_1, request)
@@ -96,23 +106,30 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
         self.assertEqual(data['comments'].number, 2)  # 3 comment fit in 2 pages
         self.assertEqual(data['login_url'], settings.LOGIN_URL)
 
-        # check not integer page
+    def test_non_integral_page_number(self):
         request = self.factory.get('/?page=string')
         request.user = self.user_1
         data = render_comments(self.post_1, request)
         self.assertIs(data['comments'].has_previous(), False)
 
-        # check empty page
+    @patch.object(settings, 'COMMENT_PER_PAGE', 2)
+    def test_empty_page(self):
         request = self.factory.get('/?page=10')
         request.user = self.user_1
         data = render_comments(self.post_1, request)
         self.assertIs(data['comments'].has_previous(), True)
 
-    def test_static_functions(self):
+
+class TestStaticFunctions(BaseTemplateTagsTest):
+    def test_include_static(self):
         self.assertEqual(include_static(), '')
+
+    def test_include_bootstrap(self):
         self.assertIsNone(include_bootstrap())
 
-    def test_render_field(self):
+
+class RenderFieldTest(BaseTemplateTagsTest):
+    def test_success(self):
         request = self.factory.get('/')
         request.user = self.user_1
         form = CommentForm(request=request)
@@ -121,76 +138,86 @@ class CommentTemplateTagsTest(BaseTemplateTagsTest):
             field = render_field(field, placeholder='placeholder')
             self.assertEqual(field.field.widget.attrs.get('placeholder'), 'placeholder')
 
-    @patch.object(settings, 'COMMENT_WRAP_CONTENT_WORDS', 10)
-    def test_render_content(self):
-        comment = self.parent_comment_1
-        content = "Any long text just for testing render content function"
-        comment.content = content
-        comment.save()
-        content_words = comment.content.split()
-        self.assertEqual(len(content_words), len(content.split()))
 
-        result = render_content(comment)
-        # test urlhash
-        self.assertEqual(result['urlhash'], comment.urlhash)
-        # truncate number is bigger than content words
-        self.assertEqual(result['text_1'], comment.content)
+class RenderContentTest(BaseTemplateTagsTest):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.comment = cls.parent_comment_1
+        cls.content = "Any long text just for testing render content function"
+        cls.comment.content = cls.content
+        cls.comment.save()
+        cls.comment.refresh_from_db()
+
+    def test_urlhash(self):
+        result = render_content(self.comment)
+        self.assertEqual(result['urlhash'], self.comment.urlhash)
+
+    @patch.object(settings, 'COMMENT_WRAP_CONTENT_WORDS', 10)
+    def test_content_wrapping(self):
+        content_words = self.comment.content.split()
+        self.assertEqual(len(content_words), len(self.content.split()))
+
+        result = render_content(self.comment)
+        # truncate number is bigger than self.contentwords
+        self.assertEqual(result['text_1'], self.comment.content)
         self.assertIsNone(result['text_2'])
 
-    def test_single_line_breaks_in_render_content(self):
+    def test_single_line_breaks(self):
         comment = self.parent_comment_1
         comment.content = "Any long text\njust for testing render\ncontent function"
+        comment.save()
+        comment.refresh_from_db()
 
         result = render_content(comment)
 
         self.assertIn('<br>', result['text_1'])
         self.assertNotIn('<br><br>', result['text_1'])
 
-    def test_multiple_line_breaks_in_render_content(self):
+    def test_multiple_line_breaks(self):
         comment = self.parent_comment_1
         comment.content = "Any long text\n\njust for testing render\n\n\ncontent function"
+        comment.save()
+        comment.refresh_from_db()
 
         result = render_content(comment)
 
         self.assertIn('<br><br>', result['text_1'])
         self.assertNotIn('<br><br><br>', result['text_1'])
 
-    def test_render_content_with_passing_value(self):
-        comment = self.parent_comment_1
-        content = "Any long text just for testing render content function"
-        comment.content = content
-        comment.save()
-        content_words = comment.content.split()
-        self.assertEqual(len(content_words), len(content.split()))
+    def test_wrapping_after_certain_length(self):
+        self.comment.refresh_from_db()
+        content_words = self.comment.content.split()
+        self.assertEqual(len(content_words), len(self.content.split()))
 
-        result = render_content(comment, 5)
-        # test urlhash
-        self.assertEqual(result['urlhash'], comment.urlhash)
-        # truncate number is smaller than content words
-        self.assertEqual(result['text_1'], ' '.join(content_words[:5]))
-        self.assertEqual(result['text_2'], ' '.join(content_words[5:]))
+        truncate_words_after = 5
+        result = render_content(self.comment, truncate_words_after)
+
+        # truncate number is smaller than words in content
+        self.assertEqual(result['text_1'], ' '.join(content_words[:truncate_words_after]))
+        self.assertEqual(result['text_2'], ' '.join(content_words[truncate_words_after:]))
+
+
+class GetUsernameForCommentTest(BaseTemplateTagsTest):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.comment = cls.create_comment(cls.content_object_1, user=cls.user_1)
+        cls.anonymous_comment = cls.create_anonymous_comment()
 
     @patch.object(settings, 'COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME', True)
-    def test_get_username_for_comment_use_email_first_part_enabled(self):
-        comment = self.create_comment(self.content_object_1, user=self.user_1)
-
-        self.assertEqual(get_username_for_comment(comment), comment.user.username)
+    def test_use_email_first_part_enabled(self):
+        self.assertEqual(get_username_for_comment(self.comment), self.comment.user.username)
 
         # test for anonymous
-        anonymous_comment = self.create_anonymous_comment()
-
-        self.assertEqual(get_username_for_comment(anonymous_comment), anonymous_comment.email.split('@')[0])
+        self.assertEqual(get_username_for_comment(self.anonymous_comment), self.anonymous_comment.email.split('@')[0])
 
     @patch.object(settings, 'COMMENT_USE_EMAIL_FIRST_PART_AS_USERNAME', False)
-    def test_get_username_for_comment_use_email_first_part_disabled(self):
-        comment = self.create_comment(self.content_object_1, user=self.user_1)
-
-        self.assertEqual(get_username_for_comment(comment), comment.user.username)
+    def test_use_email_first_part_disabled(self):
+        self.assertEqual(get_username_for_comment(self.comment), self.comment.user.username)
 
         # test for anonymous
-        anonymous_comment = self.create_anonymous_comment()
-
-        self.assertEqual(get_username_for_comment(anonymous_comment), settings.COMMENT_ANONYMOUS_USERNAME)
+        self.assertEqual(get_username_for_comment(self.anonymous_comment), settings.COMMENT_ANONYMOUS_USERNAME)
 
 
 class ReactionTemplateTagsTest(BaseTemplateTagsTest):

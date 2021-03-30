@@ -21,6 +21,7 @@ class ReactionInstanceModelTest(BaseCommentManagerTest):
     def test_unique_togetherness_of_user_and_reaction_type(self):
         """Test Integrity error is raised when one user is set to have more than 1 reaction type for the same comment"""
         self.create_reaction_instance(self.user, self.comment, self.LIKE)
+
         self.assertRaises(IntegrityError, self.create_reaction_instance, self.user, self.comment, self.DISLIKE)
 
     def test_comment_property_likes_increase_and_decrease(self):
@@ -31,10 +32,12 @@ class ReactionInstanceModelTest(BaseCommentManagerTest):
         user = self.user_2
         self.create_reaction_instance(user, comment, self.LIKE)
         comment.refresh_from_db()
+
         self.assertEqual(comment.likes, 2)
 
         self.set_reaction(user, comment, self.LIKE)
         comment.refresh_from_db()
+
         self.assertEqual(comment.likes, 1)
 
     def test_comment_property_dislikes_increase_and_decrease(self):
@@ -45,11 +48,13 @@ class ReactionInstanceModelTest(BaseCommentManagerTest):
         user = self.user_2
         self.create_reaction_instance(user, comment, self.DISLIKE)
         comment.refresh_from_db()
+
         self.assertEqual(comment.dislikes, 2)
 
         # can't use create_reaction: one user can't create multiple reaction instances for a comment.
         self.set_reaction(user, comment, self.DISLIKE)
         comment.refresh_from_db()
+
         self.assertEqual(comment.dislikes, 1)
 
     def test_set_reaction(self):
@@ -58,21 +63,25 @@ class ReactionInstanceModelTest(BaseCommentManagerTest):
         user = self.user_2
         self.set_reaction(user, comment, self.DISLIKE)
         comment.refresh_from_db()
+
         self.assertEqual(comment.dislikes, 1)
         self.assertEqual(comment.likes, 0)
 
         self.set_reaction(user, comment, self.DISLIKE)
         comment.refresh_from_db()
+
         self.assertEqual(comment.dislikes, 0)
         self.assertEqual(comment.likes, 0)
 
         self.set_reaction(user, comment, self.LIKE)
         comment.refresh_from_db()
+
         self.assertEqual(comment.dislikes, 0)
         self.assertEqual(comment.likes, 1)
 
         self.set_reaction(user, comment, self.DISLIKE)
         comment.refresh_from_db()
+
         self.assertEqual(comment.dislikes, 1)
         self.assertEqual(comment.likes, 0)
 
@@ -117,6 +126,7 @@ class ReactionInstanceManagerTest(BaseCommentTest):
         like = ReactionInstance.ReactionType.LIKE
         # valid reaction type
         reaction_type = ReactionInstance.objects.clean_reaction_type(like.name)
+
         self.assertEqual(reaction_type, like.value)
 
         # invalid reaction type

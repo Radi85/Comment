@@ -53,7 +53,7 @@ class DABEmailService(object):
         html_template = 'comment/anonymous/confirmation_request.html'
         subject = EmailInfo.CONFIRMATION_SUBJECT
         if api:
-            confirmation_url = f'/api/comments/confirm/{key}/'
+            confirmation_url = reverse('comment-api:confirm-comment', args=[key])
         else:
             confirmation_url = reverse('comment:confirm-comment', args=[key])
 

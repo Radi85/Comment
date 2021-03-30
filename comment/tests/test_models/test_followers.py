@@ -56,6 +56,7 @@ class FollowerManagerTest(BaseCommentTest):
     def test_follow_create_follower_instance(self):
         initial_count = self.manager.count()
         follower = self.manager.follow(self.unfollower_email, 'username', self.comment_test_follow)
+
         self.assertIsInstance(follower, self.manager.model)
         self.assertEqual(self.manager.count(), initial_count + 1)
 
@@ -63,11 +64,13 @@ class FollowerManagerTest(BaseCommentTest):
         initial_count = self.manager.count()
         self.assertTrue(self.manager.is_following(self.follower_email, self.comment_test_follow))
         self.manager.unfollow(self.follower_email, self.comment_test_follow)
+
         self.assertEqual(self.manager.count(), initial_count - 1)
 
     def test_toggle_follow_return_false_on_missing_email(self):
         email = None
         result = self.manager.toggle_follow(email=email, username='test', model_object=self.comment_test_follow)
+
         self.assertFalse(result)
 
     def test_toggle_follow_for_follower(self):
@@ -79,6 +82,7 @@ class FollowerManagerTest(BaseCommentTest):
             model_object=self.comment_test_follow
         )
         self.assertFalse(result)
+
         self.assertFalse(self.manager.is_following(self.follower_email, self.comment_test_follow))
 
     def test_toggle_follow_for_unfollower(self):
@@ -90,6 +94,7 @@ class FollowerManagerTest(BaseCommentTest):
             model_object=self.comment_test_follow
         )
         self.assertTrue(result)
+
         self.assertTrue(self.manager.is_following(self.unfollower_email, self.comment_test_follow))
 
     def test_follow_parent_thread_for_comment_no_email(self):
@@ -135,8 +140,9 @@ class FollowerManagerTest(BaseCommentTest):
 
     def test_get_all_followers_for_model_object(self):
         followers = self.manager.filter_for_model_object(self.comment_test_follow)
-        content_type = ContentType.objects.get_for_model(self.comment_test_follow)
         self.assertNotEqual(followers.count(), 0)
+        content_type = ContentType.objects.get_for_model(self.comment_test_follow)
+
         self.assertEqual(
             list(followers),
             list(self.manager.filter(content_type=content_type, object_id=self.comment_test_follow.id))
@@ -144,4 +150,5 @@ class FollowerManagerTest(BaseCommentTest):
 
     def test_get_get_emails_for_model_object(self):
         emails = self.manager.get_emails_for_model_object(self.comment_test_follow)
+
         self.assertIn(self.comment_test_follow.email, emails)

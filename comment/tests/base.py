@@ -217,6 +217,24 @@ class BaseCommentTest(TestCase, BaseInternationalizationTest):
         return super().assertQuerysetEqual(qs, values, transform=transform, ordered=True, msg=msg)
 
 
+class BaseAPITest(BaseCommentTest):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.comment = cls.create_comment(cls.content_object_1)
+        cls.comment_1 = cls.create_comment(cls.content_object_1)
+        cls.comment_2 = cls.create_comment(cls.content_object_1)
+        cls.comment_3 = cls.create_comment(cls.content_object_1)
+        cls.comment_4 = cls.create_comment(cls.content_object_1, parent=cls.comment_1)
+        cls.reaction_1 = cls.create_reaction_instance(cls.user_1, cls.comment_1, 'like')
+
+        cls.comment_5 = cls.create_comment(cls.content_object_2)
+        cls.comment_6 = cls.create_comment(cls.content_object_2)
+        cls.comment_7 = cls.create_comment(cls.content_object_2, parent=cls.comment_5)
+        cls.comment_8 = cls.create_comment(cls.content_object_2, parent=cls.comment_5)
+        cls.reaction_2 = cls.create_reaction_instance(cls.user_1, cls.comment_5, 'dislike')
+
+
 class BaseCommentManagerTest(BaseCommentTest):
     content_object_2 = None
 

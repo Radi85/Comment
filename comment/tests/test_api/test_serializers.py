@@ -7,10 +7,10 @@ from comment.conf import settings
 from comment.models import Comment, Follower
 from comment.api.serializers import get_profile_model, get_user_fields, UserSerializerDAB, CommentCreateSerializer, \
     CommentSerializer
-from comment.tests.test_api.test_views import APIBaseTest
+from comment.tests.test_api.test_views import BaseAPITest
 
 
-class APICommentSerializers(APIBaseTest):
+class APICommentSerializersTest(BaseAPITest):
     def setUp(self):
         super().setUp()
         self.parent_count = Comment.objects.filter_parents_by_object(self.post_1).count()
@@ -25,48 +25,9 @@ class APICommentSerializers(APIBaseTest):
         self.assertEqual(Comment.objects.filter_parents_by_object(self.post_1).count(), self.parent_count)
         self.assertEqual(Comment.objects.all().count(), self.all_count)
 
-    def test_get_profile_model(self):
-        # missing settings attrs
-        with patch.object(settings, 'PROFILE_APP_NAME', None):
-            profile = get_profile_model()
-            self.assertIsNone(profile)
-
-        # providing wrong attribute value, an exception is raised
-        with patch.object(settings, 'PROFILE_APP_NAME', 'wrong'):
-            self.assertRaises(LookupError, get_profile_model)
-
-        # attribute value is None
-        with patch.object(settings, 'PROFILE_APP_NAME', None):
-            profile = get_profile_model()
-            self.assertIsNone(profile)
-
-        # success
-        with patch.object(settings, 'PROFILE_APP_NAME', 'user_profile'):
-            profile = get_profile_model()
-            self.assertIsNotNone(profile)
-
-    def test_user_serializer(self):
-        # PROFILE_MODEL_NAME not provided
-        with patch.object(settings, 'PROFILE_MODEL_NAME', None):
-            profile = UserSerializerDAB.get_profile(self.user_1)
-            self.assertIsNone(profile)
-
-        # PROFILE_MODEL_NAME is wrong
-        with patch.object(settings, 'PROFILE_MODEL_NAME', 'wrong'):
-            profile = UserSerializerDAB.get_profile(self.user_1)
-            self.assertIsNone(profile)
-
-        # success
-        with patch.object(settings, 'PROFILE_MODEL_NAME', 'userprofile'):
-            profile = UserSerializerDAB.get_profile(self.user_1)
-            self.assertIsNotNone(profile)
-
     @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', False)
     @patch.object(settings, 'COMMENT_ALLOW_ANONYMOUS', False)
     def test_create_parent_comment_serializer(self):
-        self.assertEqual(self.parent_count, 3)
-        self.assertEqual(self.all_count, 8)
-
         factory = RequestFactory()
         request = factory.get('/')
         request.user = self.user_1
@@ -96,9 +57,6 @@ class APICommentSerializers(APIBaseTest):
     @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', False)
     @patch.object(settings, 'COMMENT_ALLOW_ANONYMOUS', False)
     def test_create_child_comment_serializer(self):
-        self.assertEqual(self.parent_count, 3)
-        self.assertEqual(self.all_count, 8)
-
         factory = RequestFactory()
         request = factory.get('/')
         request.user = self.user_1
@@ -188,9 +146,10 @@ class APICommentSerializers(APIBaseTest):
         self.assertTrue(serializer.fields['content'].read_only)
 
 
-class TestProfileSerializer(APIBaseTest):
+class TestProfileSerializer(BaseAPITest):
     def test_default_fields(self):
         fields = get_user_fields()
+
         self.assertSetEqual(set(fields), set(settings.COMMENT_USER_API_FIELDS + ['profile']))
 
     @patch('comment.api.serializers.isinstance')
@@ -199,4 +158,43 @@ class TestProfileSerializer(APIBaseTest):
         mocked_isinstance.return_value = True
         mocked_hasattr.return_value = True
         fields = get_user_fields()
+
         self.assertIs('logentry' in fields, True)
+
+
+class GetProfileTest(BaseAPITest):
+    @patch.object(settings, 'PROFILE_APP_NAME', None)
+    def test_setting_attribute_not_set(self):
+        profile = get_profile_model()
+
+        self.assertIsNone(profile)
+
+    @patch.object(settings, 'PROFILE_APP_NAME', 'wrong')
+    def test_setting_attribute_set_wrong(self):
+        self.assertRaises(LookupError, get_profile_model)
+
+    @patch.object(settings, 'PROFILE_APP_NAME', 'user_profile')
+    def tests_success(self):
+        profile = get_profile_model()
+
+        self.assertIsNotNone(profile)
+
+
+class TestUserSerializer(BaseAPITest):
+    @patch.object(settings, 'PROFILE_MODEL_NAME', None)
+    def test_profile_model_name_not_provided(self):
+        profile = UserSerializerDAB.get_profile(self.user_1)
+
+        self.assertIsNone(profile)
+
+    @patch.object(settings, 'PROFILE_MODEL_NAME', 'wrong')
+    def test_profile_model_wrong(self):
+        profile = UserSerializerDAB.get_profile(self.user_1)
+
+        self.assertIsNone(profile)
+
+    @patch.object(settings, 'PROFILE_MODEL_NAME', 'userprofile')
+    def test_success(self):
+        profile = UserSerializerDAB.get_profile(self.user_1)
+
+        self.assertIsNotNone(profile)

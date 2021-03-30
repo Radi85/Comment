@@ -50,11 +50,13 @@ class CommentViewTestCase(BaseCommentViewTest):
 
         url = self.get_create_url()
         response = self.client.post(url, data=self.data)
+
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'comment/comments/base.html')
         self.assertHtmlTranslated(response.content, url)
 
         parent_comment = Comment.objects.get(object_id=self.post_1.id, parent=None)
+
         self.assertEqual(response.context.get('comment').id, parent_comment.id)
         self.assertTrue(response.context.get('comment').is_parent)
 
@@ -91,12 +93,14 @@ class CommentViewTestCase(BaseCommentViewTest):
         self.assertEqual(len(mail.outbox), 0)
         url = self.get_create_url()
         response = self.client.post(url, data=self.data)
+
         self.assertEqual(response.status_code, 200)
         response.context['view'].email_service._email_thread.join()
         self.assertEqual(len(mail.outbox), 1)
 
     def test_create_comment_non_ajax_request(self):
         response = self.client_non_ajax.post(self.get_create_url(), data=self.data)
+
         self.assertEqual(response.status_code, 400)
 
     @patch.object(settings, 'COMMENT_ALLOW_ANONYMOUS', True)
@@ -108,11 +112,13 @@ class CommentViewTestCase(BaseCommentViewTest):
         self.assertEqual(len(mail.outbox), 0)
 
         response = self.client.post(url, data=data)
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTemplateUsed(response, 'comment/comments/base.html')
         self.assertEqual(response.json()['msg'], EmailInfo.CONFIRMATION_SENT)
         # confirmation email is sent
         response.context['view'].email_service._email_thread.join()
+
         self.assertEqual(len(mail.outbox), 1)
 
         # no change in comment count
@@ -126,6 +132,7 @@ class CommentViewTestCase(BaseCommentViewTest):
         url = self.get_create_url()
 
         response = self.client.post(url, data=data)
+
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()['error'], EmailError.EMAIL_INVALID)
 
@@ -150,6 +157,7 @@ class TestEditComment(BaseCommentViewTest):
         get_url = self.get_url('comment:edit', comment.id, data)
         self.assertEqual(comment.content, 'comment 2')
         response = self.client.get(get_url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('comment/comments/update_comment.html')
         self.assertHtmlTranslated(response.content, get_url)
@@ -157,6 +165,7 @@ class TestEditComment(BaseCommentViewTest):
 
         post_url = self.get_url('comment:edit', comment.id)
         response = self.client.post(post_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('comment/comments/comment_content.html')
         self.assertHtmlTranslated(response.content, post_url)
@@ -181,10 +190,12 @@ class TestEditComment(BaseCommentViewTest):
         }
         self.assertEqual(comment.user.username, self.user_1.username)
         response = self.client.get(self.get_url('comment:edit', comment.id), data=data)
+
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.reason_phrase, 'Forbidden')
 
         response = self.client.post(self.get_url('comment:edit', comment.id), data=data)
+
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.reason_phrase, 'Forbidden')
 
@@ -202,6 +213,7 @@ class TestDeleteComment(BaseCommentViewTest):
         self.assertEqual(init_count, 1)
         get_url = self.get_url('comment:delete', comment.id, self.data)
         response = self.client.get(get_url, data=self.data)
+
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'comment/comments/comment_modal.html')
         self.assertContains(response, 'data')
@@ -227,6 +239,7 @@ class TestDeleteComment(BaseCommentViewTest):
         self.assertEqual(init_count, 1)
         # moderator cannot delete un-flagged comment
         response = self.client.post(self.get_url('comment:delete', comment.id), data=self.data)
+
         self.assertEqual(response.status_code, 403)
 
         # moderator can delete flagged comment
@@ -345,6 +358,7 @@ class ConfirmCommentViewTest(BaseAnonymousCommentTest):
         view = ConfirmComment()
         response = view.get(request, key=self.key)
         comment = Comment.objects.get(email=self.comment_obj.email, posted=self.time_posted)
+
         self.assertEqual(Comment.objects.all().count(), self.init_count + 1)
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertEqual(response.url, comment.get_url(self.request))
