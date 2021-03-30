@@ -63,6 +63,7 @@ class TestPostSave(BaseCommentSignalTest):
         reaction_instance = ReactionInstance.objects.create(
             reaction=comment.reaction, user=self.user_1, reaction_type=self.LIKE.value)
         comment.reaction.refresh_from_db()
+
         self.assertEqual(comment.reaction.likes, 1)
         self.assertEqual(comment.reaction.dislikes, 0)
 
@@ -70,6 +71,7 @@ class TestPostSave(BaseCommentSignalTest):
         reaction_instance.reaction_type = self.DISLIKE.value
         reaction_instance.save()
         comment.reaction.refresh_from_db()
+
         self.assertEqual(comment.reaction.likes, 1)
         self.assertEqual(comment.reaction.dislikes, 0)
 
@@ -78,13 +80,16 @@ class TestPostSave(BaseCommentSignalTest):
         # instance created
         self.set_flag(self.user, self.comment, **self.flag_data)
         self.comment.flag.refresh_from_db()
+
         self.assertEqual(self.comment.flag.count, 1)
+
         # instance edited won't increase the flag count
         flag_instance = FlagInstance.objects.get(user=self.user, flag__comment=self.comment)
         self.assertIsNotNone(flag_instance)
         flag_instance.info = 'change value for test'
         flag_instance.save()
         self.comment.flag.refresh_from_db()
+
         self.assertEqual(self.comment.flag.count, 1)
 
 
@@ -94,9 +99,12 @@ class TestPostDelete(BaseCommentSignalTest):
         comment = self.comment
         instance = self.create_reaction_instance(self.user, self.comment, self.LIKE.name)
         comment.refresh_from_db()
+
         self.assertEqual(comment.likes, 1)
+
         instance.delete()
         comment.refresh_from_db()
+
         self.assertEqual(comment.likes, 0)
 
     def test_flag_decrease_count(self):
@@ -105,7 +113,10 @@ class TestPostDelete(BaseCommentSignalTest):
         comment = self.comment
         instance = self.create_flag_instance(self.user, comment, **data)
         comment.refresh_from_db()
+
         self.assertEqual(comment.flag.count, 1)
+
         instance.delete()
         comment.refresh_from_db()
+
         self.assertEqual(comment.flag.count, 0)

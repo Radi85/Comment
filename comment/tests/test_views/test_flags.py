@@ -31,6 +31,7 @@ class SetFlagViewTest(BaseCommentFlagTest):
             'error': None,
             'msg': FlagInfo.FLAGGED_SUCCESS
         }
+
         self.assertEqual(response.status_code, 200)
         server_response = response.json()
         self.assertDictEqual(server_response, response_data)
@@ -42,6 +43,7 @@ class SetFlagViewTest(BaseCommentFlagTest):
         _url = self.get_url('comment:flag', self.comment.id)
         self.flag_data['reason'] = 1
         response = self.client.post(_url, data=self.flag_data)
+
         self.assertEqual(response.status_code, 403)
 
     def test_set_flag_for_flagging_old_comments(self):
@@ -60,6 +62,7 @@ class SetFlagViewTest(BaseCommentFlagTest):
             'error': None,
             'msg': FlagInfo.FLAGGED_SUCCESS
         }
+
         self.assertEqual(response.status_code, 200)
         server_response = response.json()
         self.assertDictEqual(server_response, response_data)
@@ -80,6 +83,7 @@ class SetFlagViewTest(BaseCommentFlagTest):
         }
         self.assertEqual(response.status_code, 200)
         server_response = response.json()
+
         self.assertDictEqual(server_response, response_data)
         self.assertTextTranslated(server_response['msg'], _url)
 
@@ -88,6 +92,7 @@ class SetFlagViewTest(BaseCommentFlagTest):
         url = self.get_url('comment:flag', self.comment.id).replace('?', '')
         self.client.logout()
         response = self.client.post(url, data=self.flag_data)
+
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertEqual(response.url, '{}?next={}'.format(settings.LOGIN_URL, url))
 
@@ -95,18 +100,21 @@ class SetFlagViewTest(BaseCommentFlagTest):
         """Test whether GET requests are allowed or not"""
         url = self.get_url('comment:flag', self.comment.id)
         response = self.client.get(url, data=self.flag_data)
+
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_non_ajax_requests(self):
         """Test response if non AJAX requests are sent"""
         url = self.get_url('comment:flag', self.comment.id)
         response = self.client_non_ajax.post(url, data=self.flag_data)
+
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_incorrect_comment_id(self):
         """Test response when an incorrect comment id is passed"""
         url = self.get_url('comment:flag', 102_876)
         response = self.client.post(url, data=self.flag_data)
+
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_incorrect_reason(self):
@@ -116,6 +124,7 @@ class SetFlagViewTest(BaseCommentFlagTest):
         reason = -1
         data.update({'reason': reason})
         response = self.client.post(url, data=data)
+
         self.assertEqual(response.status_code, 400)
 
 
@@ -135,6 +144,7 @@ class ChangeFlagStateViewTest(BaseCommentFlagTest):
         self.client.force_login(self.moderator)
         self.assertEqual(int(self.client.session['_auth_user_id']), self.moderator.id)
         response = self.client.post(self.get_url('comment:flag-change-state', comment.id), data=self.data)
+
         self.assertEqual(response.status_code, 400)
 
     def test_change_flag_state_by_not_permitted_user(self):
@@ -144,6 +154,7 @@ class ChangeFlagStateViewTest(BaseCommentFlagTest):
         response = self.client.post(
             self.get_url('comment:flag-change-state', self.comment_for_change_state.id), data=self.data
         )
+
         self.assertEqual(response.status_code, 403)
 
     def test_change_flag_state_with_wrong_state_value(self):
@@ -157,6 +168,7 @@ class ChangeFlagStateViewTest(BaseCommentFlagTest):
         response = self.client.post(
             self.get_url('comment:flag-change-state', self.comment_for_change_state.id), data=self.data
         )
+
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['error'], FlagError.STATE_CHANGE_ERROR)
         self.assertEqual(self.comment_for_change_state.flag.state, self.comment_for_change_state.flag.FLAGGED)
@@ -172,6 +184,7 @@ class ChangeFlagStateViewTest(BaseCommentFlagTest):
         response = self.client.post(
             self.get_url('comment:flag-change-state', self.comment_for_change_state.id), data=self.data
         )
+
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['data']['state'], self.comment_for_change_state.flag.REJECTED)
         self.comment_for_change_state.flag.refresh_from_db()

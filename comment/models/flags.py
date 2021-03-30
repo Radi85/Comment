@@ -88,7 +88,7 @@ class Flag(models.Model):
         self.save()
 
     def toggle_flagged_state(self):
-        allowed_flags = getattr(settings, 'COMMENT_FLAGS_ALLOWED', 0)
+        allowed_flags = settings.COMMENT_FLAGS_ALLOWED
         if not allowed_flags:
             return
         self.refresh_from_db()

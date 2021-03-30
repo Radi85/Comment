@@ -18,6 +18,7 @@ class AJAXMixinTest(BaseCommentMixinTest):
     def test_non_ajax_request(self):
         request = self.factory.get('/')
         response = self.mixin.dispatch(request)
+
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.content.decode('utf-8'), ErrorMessage.NON_AJAX_REQUEST)
 
@@ -29,6 +30,7 @@ class BasePermissionTest(BaseCommentMixinTest):
 
     def test_has_object_permission(self):
         request = self.factory.get('/')
+
         self.assertTrue(BasePermission().has_object_permission(request, 'object'))
 
 
@@ -40,12 +42,14 @@ class CanCreateMixinTest(BaseCommentMixinTest):
 
     def test_logged_in_user_permission(self):
         response = self.client.post(self.url, data=self.data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
         self.assertEqual(response.status_code, 200)
 
     @patch.object(settings, 'COMMENT_ALLOW_ANONYMOUS', False)
     def test_logged_out_user_permission(self, ):
         self.client.logout()
         response = self.client.post(self.url, data=self.data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
         self.assertEqual(response.status_code, 302)
         # user will be redirected to login
         self.assertEqual(response.url, settings.LOGIN_URL + '?next=/comment/create/')
@@ -55,12 +59,14 @@ class CanCreateMixinTest(BaseCommentMixinTest):
         self.client.logout()
         self.data['email'] = 'test@test.come'
         response = self.client.post(self.url, data=self.data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
         self.assertEqual(response.status_code, 200)
 
 
 class ObjectLevelMixinTest(BaseCommentMixinTest):
     def test_get_object_without_overriding(self):
         object_mixin = ObjectLevelMixin()
+
         self.assertRaises(ImproperlyConfigured, object_mixin.get_object)
 
 
@@ -72,18 +78,21 @@ class CanEditMixinTest(BaseCommentMixinTest):
 
     def test_comment_owner_can_edit(self):
         response = self.client.post(self.url, data=self.data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
         self.assertEqual(response.status_code, 200)
 
     def test_edit_comment_by_non_owner(self):
         self.assertNotEqual(self.comment.user.id, self.user_2.id)
         self.client.force_login(self.user_2)
         response = self.client.post(self.url, data=self.data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
         self.assertEqual(response.status_code, 403)
 
     def test_edit_comment_by_anonymous(self):
         """anonymous will be redirected to login page"""
         self.client.logout()
         response = self.client.post(self.url, data=self.data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, settings.LOGIN_URL + f'?next=/comment/edit/{self.comment.id}/')
 
@@ -97,18 +106,21 @@ class CanDeleteMixinTest(BaseCommentMixinTest):
     def test_delete_comment_by_owner(self):
         self.assertEqual(self.comment.user.id, self.user_1.id)
         response = self.client.post(self.url, data=self.data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
         self.assertEqual(response.status_code, 200)
 
     def test_delete_comment_by_non_owner(self):
         self.assertNotEqual(self.comment.user.id, self.user_2.id)
         self.client.force_login(self.user_2)
         response = self.client.post(self.url, data=self.data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
         self.assertEqual(response.status_code, 403)
 
     def test_delete_comment_by_admin(self):
         self.assertNotEqual(self.comment.user.id, self.admin.id)
         self.client.force_login(self.admin)
         response = self.client.post(self.url, data=self.data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
         self.assertEqual(response.status_code, 200)
 
     def test_delete_comment_by_moderator(self):
@@ -116,18 +128,20 @@ class CanDeleteMixinTest(BaseCommentMixinTest):
         self.assertNotEqual(self.comment.user.id, self.moderator.id)
         self.client.force_login(self.moderator)
         response = self.client.post(self.url, data=self.data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
         self.assertEqual(response.status_code, 403)
 
+    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 1)
     def test_delete_flagged_comment_by_moderator(self):
         """moderator cannot delete comment unless it's flagged"""
         self.assertNotEqual(self.comment.user.id, self.moderator.id)
         self.client.force_login(self.moderator)
-        self.create_flag_instance(self.user_2, self.comment)
-        self.create_flag_instance(self.admin, self.comment)
         self.create_flag_instance(self.moderator, self.comment)
-        self.assertEqual(self.flags, 3)
+        self.create_flag_instance(self.admin, self.comment)
+        self.assertEqual(self.flags, 2)
         self.assertTrue(self.comment.is_flagged)
         response = self.client.post(self.url, data=self.data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
         self.assertEqual(response.status_code, 200)
 
 
@@ -142,12 +156,14 @@ class BaseFlagMixinTest(BaseCommentFlagTest):
         """permission denied when flagging not enabled"""
         self.client.force_login(self.user_2)
         response = self.client.post(self.url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
         self.assertEqual(response.status_code, 403)
 
     @patch('comment.mixins.settings', COMMENT_FLAGS_ALLOWED=2)
     def test_flag_enabled_permission(self, _):
         self.client.force_login(self.user_2)
         response = self.client.post(self.url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
         self.assertEqual(response.status_code, 200)
 
 
@@ -161,6 +177,7 @@ class CanSetFlagMixinTest(BaseCommentMixinTest):
         self.assertEqual(self.comment.user.id, self.user_1.id)
         self.client.force_login(self.user_1)
         response = self.client.post(self.url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
         self.assertEqual(response.status_code, 403)
 
 
@@ -173,22 +190,25 @@ class CanEditFlagStateMixinTest(BaseCommentMixinTest):
 
     def test_change_state_of_unflagged_comment(self):
         response = self.client.post(self.url, data=self.data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
         self.assertEqual(response.status_code, 400)
 
+    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 1)
     def test_moderator_can_change_flag_state(self):
-        self.create_flag_instance(self.user_2, self.comment)
         self.create_flag_instance(self.admin, self.comment)
         self.create_flag_instance(self.moderator, self.comment)
         self.comment.flag.refresh_from_db()
-        self.assertEqual(self.flags, 3)
+        self.assertEqual(self.flags, 2)
         self.assertTrue(self.comment.is_flagged)
         # normal user cannot change flag state
         self.client.force_login(self.user_2)
         response = self.client.post(self.url, data=self.data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
         self.assertEqual(response.status_code, 403)
 
         self.client.force_login(self.moderator)
         response = self.client.post(self.url, data=self.data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
         self.assertEqual(response.status_code, 200)
 
 
@@ -204,6 +224,7 @@ class CanSubscribeMixinTest(BaseCommentMixinTest):
         self.client.force_login(self.user_1)
         self.assertFalse(settings.COMMENT_ALLOW_SUBSCRIPTION)
         response = self.client.post(self.toggle_follow_url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
         self.assertEqual(response.status_code, 403)
 
     @patch.object(settings, 'COMMENT_ALLOW_SUBSCRIPTION', True)
@@ -211,4 +232,5 @@ class CanSubscribeMixinTest(BaseCommentMixinTest):
         self.client.force_login(self.user_1)
         self.assertTrue(settings.COMMENT_ALLOW_SUBSCRIPTION)
         response = self.client.post(self.toggle_follow_url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
         self.assertEqual(response.status_code, 200)
