@@ -1,6 +1,6 @@
-===========================
-Django-comments-dab v2.6.0
-===========================
+=========================
+Django-comments-dab v2.6
+=========================
 
 v2.6.0
 -------
@@ -53,3 +53,32 @@ Codebase enhancement
 .. _#144: https://github.com/Radi85/Comment/issues/144
 .. _#150: https://github.com/Radi85/Comment/issues/150
 .. _#165: https://github.com/Radi85/Comment/issues/165
+
+
+v2.6.1
+-------
+
+Features
+^^^^^^^^^
+
+- `#163`_ - Add option for default profile pic location.
+
+.. _#163: https://github.com/Radi85/Comment/issues/163
+
+Bug fixes
+^^^^^^^^^
+
+- `#168`_ - Fix redirect path after login (Pass `request` object in template context).
+- `#175`_ - Fix creating replies when subscription is disabled.
+
+.. _#168: https://github.com/Radi85/Comment/issues/168
+.. _#175: https://github.com/Radi85/Comment/issues/175
+
+Codebase enhancement
+^^^^^^^^^^^^^^^^^^^^^
+
+- `#147`_ - Add missing step to setup documentation.
+- `#173`_ - Rename default django branch to main.
+
+.. _#147: https://github.com/Radi85/Comment/issues/147
+.. _#173: https://github.com/Radi85/Comment/issues/173

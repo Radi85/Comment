@@ -1,6 +1,14 @@
 Changelog
 =========
 
+2.6.1
+------
+
+- Fix redirect path after login (Pass `request` object in template context).
+- Fix creating replies when subscription is disabled.
+- Add missing step to setup documentation.
+- Add option for default profile pic location.
+
 2.6.0
 ------
 
