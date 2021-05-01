@@ -1,5 +1,5 @@
 import os
-import sys
+import os.path
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_DIR = os.path.join(BASE_DIR, 'test/example')
@@ -7,6 +7,7 @@ PROJECT_DIR = os.path.join(BASE_DIR, 'test/example')
 SECRET_KEY = os.environ.get('SECRET_KEY', 'secret-key-is-unsafe')
 DEBUG = os.environ.get('DEBUG', True) == 'True'
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split()
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 
 # Application definition
