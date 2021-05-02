@@ -45,7 +45,11 @@ class ValidatorMixinTest(BaseCommentMixinTest):
     def setUp(self):
         super().setUp()
         self.view = MockedContentTypeValidatorView()
-        self.base_url = '/'
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.base_url = '/'
 
     def test_missing_app_name(self):
         url_data = self.data.copy()

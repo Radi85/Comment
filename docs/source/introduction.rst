@@ -73,6 +73,8 @@ It allows you to integrate commenting functionality with any model you have e.g.
 
     9. Follow and unfollow thread. (authenticated users)
 
+    10. Block users/emails (v2.7.0 admins and moderators)
+
 - All actions are done by Fetch API since V2.0.0
 
 - Bootstrap 4.1.1 is used in comment templates for responsive design.

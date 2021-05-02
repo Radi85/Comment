@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 
 from comment.messages import BlockState
-from comment.managers import BlockedUserManager
+from comment.managers import BlockedUserManager, BlockedUserHistoryManager
 
 
 class BlockedUser(models.Model):
@@ -28,3 +28,5 @@ class BlockedUserHistory(models.Model):
     reason = models.TextField(blank=True, null=True)
     state = models.SmallIntegerField(choices=STATES_CHOICES, default=BLOCKED)
     date = models.DateTimeField(auto_now_add=True)
+
+    objects = BlockedUserHistoryManager()

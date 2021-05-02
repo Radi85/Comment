@@ -37,4 +37,5 @@ COMMENT_WRAP_CONTENT_WORDS = 30
 COMMENT_DEFAULT_PROFILE_PIC_LOC = '/static/img/default.png'
 
 COMMENT_ALLOW_BLOCKING_USERS = False
-COMMENT_ALLOW_MODERATOR_PERFORM_BLOCKING = False
+COMMENT_ALLOW_MODERATOR_TO_BLOCK = False
+COMMENT_RESPONSE_FOR_BLOCKED_USER = 'You cannot perform this action at the moment! Contact the admin for more details'

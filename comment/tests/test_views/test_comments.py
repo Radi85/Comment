@@ -53,7 +53,6 @@ class CommentViewTestCase(BaseCommentViewTest):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'comment/comments/base.html')
-        self.assertHtmlTranslated(response.content, url)
 
         parent_comment = Comment.objects.get(object_id=self.post_1.id, parent=None)
 
@@ -78,7 +77,6 @@ class CommentViewTestCase(BaseCommentViewTest):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'comment/comments/child_comment.html')
-        self.assertHtmlTranslated(response.content, url)
 
         child_comment = Comment.objects.get(object_id=self.post_1.id, parent=parent_comment)
         self.assertEqual(response.context.get('comment').id, child_comment.id)
@@ -101,7 +99,7 @@ class CommentViewTestCase(BaseCommentViewTest):
     def test_create_comment_non_ajax_request(self):
         response = self.client_non_ajax.post(self.get_create_url(), data=self.data)
 
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 403)
 
     @patch.object(settings, 'COMMENT_ALLOW_ANONYMOUS', True)
     def test_create_anonymous_comment(self):
@@ -168,7 +166,6 @@ class TestEditComment(BaseCommentViewTest):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('comment/comments/comment_content.html')
-        self.assertHtmlTranslated(response.content, post_url)
         comment.refresh_from_db()
         self.assertEqual(comment.content, data['content'])
 

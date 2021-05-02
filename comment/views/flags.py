@@ -3,8 +3,8 @@ from django.shortcuts import get_object_or_404
 from django.views import View
 
 from comment.models import Comment, Flag, FlagInstance
-from comment.mixins import CanSetFlagMixin, CanEditFlagStateMixin, DABResponseData
-from comment.responses import UTF8JsonResponse
+from comment.mixins import CanSetFlagMixin, CanUpdateFlagStateMixin
+from comment.responses import UTF8JsonResponse, DABResponseData
 from comment.messages import FlagInfo, FlagError
 
 
@@ -29,6 +29,7 @@ class SetFlag(CanSetFlagMixin, View, DABResponseData):
                 self.msg = FlagInfo.UNFLAGGED_SUCCESS
 
             self.data.update({'status': 0})
+            self.status = 200
         except ValidationError as e:
             self.error = e.message
             self.status = 400
@@ -36,7 +37,7 @@ class SetFlag(CanSetFlagMixin, View, DABResponseData):
         return UTF8JsonResponse(self.json(), status=self.status)
 
 
-class ChangeFlagState(CanEditFlagStateMixin, View, DABResponseData):
+class ChangeFlagState(CanUpdateFlagStateMixin, View, DABResponseData):
     comment = None
 
     def get_object(self):
@@ -47,6 +48,7 @@ class ChangeFlagState(CanEditFlagStateMixin, View, DABResponseData):
         state = request.POST.get('state')
         try:
             self.comment.flag.toggle_state(state, request.user)
+            self.status = 200
         except ValidationError:
             self.error = FlagError.STATE_CHANGE_ERROR
             self.status = 400

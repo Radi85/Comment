@@ -110,15 +110,6 @@ class GetUserForRequestTest(BaseCommentUtilsTest):
         self.request.user = AnonymousUser()
         self.assertIsNone(get_user_for_request(self.request))
 
-    def test_user_for_request(self):
-        request = self.factory.get('/')
-        request.user = AnonymousUser()
-        # test unauthenticated user
-        self.assertIsNone(get_user_for_request(request))
-        # test authenticated user
-        request.user = self.user_1
-        self.assertEqual(get_user_for_request(request), self.user_1)
-
     def test_authenticated_user(self):
         self.request.user = self.user_1
         self.assertEqual(get_user_for_request(self.request), self.user_1)

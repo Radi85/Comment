@@ -1,8 +1,8 @@
 from django.views.generic.base import View
 
 from comment.models import Follower
-from comment.mixins import CanSubscribeMixin, DABResponseData
-from comment.responses import UTF8JsonResponse
+from comment.mixins import CanSubscribeMixin
+from comment.responses import UTF8JsonResponse, DABResponseData
 from comment.validators import ContentTypeValidator, DABEmailValidator
 from comment.messages import FollowError
 
@@ -56,5 +56,5 @@ class BaseToggleFollowView(ContentTypeValidator, DABResponseData):
         return response_class(self.json())
 
 
-class ToggleFollowView(BaseToggleFollowView, CanSubscribeMixin, View):
+class ToggleFollowView(CanSubscribeMixin, BaseToggleFollowView, View):
     response_class = UTF8JsonResponse

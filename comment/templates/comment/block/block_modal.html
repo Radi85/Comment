@@ -1,11 +1,10 @@
 {% load i18n %}
-{% load comment_tags %}
 <div id="blockModal" class="comment-modal">
     <div class="comment-modal-dialog" role="document">
         <div class="comment-modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">{% block title %}{% trans "Are you sure you want to block this user?" %}{% endblock title %}</h5>
-                <button class="modal-close-btn" aria-label="{% trans "Close" %}">
+                <h5 class="modal-title comment-translatable">{% block title %}{% trans "Are you sure you want to block this user?" %}{% endblock title %}</h5>
+                <button class="modal-close-btn comment-translatable" aria-label="{% trans "Close" %}">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -14,7 +13,7 @@
                 {% block reason_input %}
                     <div class="row">
                         <div class="col-3">
-                            <label for="reason">Reason:</label>
+                            <label for="reason" class="comment-translatable"> {% trans "Reason" %} >
                         </div>
                         <div class="col-9">
                             <textarea id="reason" class="form-control mr-2 w-100" rows="3" name="reason"></textarea>
@@ -36,4 +35,3 @@
         </div>
     </div>
 </div>
-

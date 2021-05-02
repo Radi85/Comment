@@ -6,7 +6,7 @@ from comment.models import Comment
 
 
 def create_permission_groups(sender, **kwargs):
-    if settings.COMMENT_FLAGS_ALLOWED:
+    if settings.COMMENT_FLAGS_ALLOWED or settings.COMMENT_ALLOW_BLOCKING_USERS:
         comment_ct = ContentType.objects.get_for_model(Comment)
         delete_comment_perm, __ = Permission.objects.get_or_create(
             codename='delete_comment',

@@ -5,8 +5,8 @@ from django.views import View
 from django.views.decorators.http import require_POST
 
 from comment.models import Comment, Reaction, ReactionInstance
-from comment.mixins import BaseCommentMixin, DABResponseData
-from comment.responses import UTF8JsonResponse
+from comment.mixins import BaseCommentMixin
+from comment.responses import UTF8JsonResponse, DABResponseData
 from comment.messages import ReactionInfo
 
 

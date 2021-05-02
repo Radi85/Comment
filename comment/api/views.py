@@ -7,17 +7,18 @@ from rest_framework.views import APIView
 from comment.validators import ValidatorMixin, ContentTypeValidator
 from comment.api.serializers import CommentSerializer, CommentCreateSerializer
 from comment.api.permissions import (
-    IsOwnerOrReadOnly, FlagEnabledPermission, CanChangeFlaggedCommentState,
-    SubscriptionEnabled, CanGetSubscribers)
+    IsOwnerOrReadOnly, FlagEnabledPermission, CanChangeFlaggedCommentState, SubscriptionEnabled,
+    CanGetSubscribers, CanCreatePermission, UserPermittedOrReadOnly, CanBlockUsers
+)
 from comment.models import Comment, Reaction, ReactionInstance, Flag, FlagInstance, Follower
 from comment.utils import get_comment_from_key, CommentFailReason
 from comment.messages import FlagError, EmailError
-from comment.views import BaseToggleFollowView
-from comment.mixins import CommentCreateMixin
+from comment.views import BaseToggleFollowView, CommentCreateMixin, BaseToggleBlockingView
 
 
 class CommentCreate(ValidatorMixin, generics.CreateAPIView):
     serializer_class = CommentCreateSerializer
+    permission_classes = (CanCreatePermission, UserPermittedOrReadOnly)
     api = True
 
     def get_serializer_context(self):
@@ -42,13 +43,13 @@ class CommentList(ContentTypeValidator, generics.ListAPIView):
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly, UserPermittedOrReadOnly)
 
 
 class CommentDetailForReaction(generics.RetrieveAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, UserPermittedOrReadOnly)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -76,7 +77,7 @@ class CommentDetailForReaction(generics.RetrieveAPIView):
 class CommentDetailForFlag(generics.RetrieveAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, FlagEnabledPermission)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, FlagEnabledPermission, UserPermittedOrReadOnly)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -100,7 +101,7 @@ class CommentDetailForFlag(generics.RetrieveAPIView):
 class CommentDetailForFlagStateChange(generics.RetrieveAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = (CanChangeFlaggedCommentState, )
+    permission_classes = (CanChangeFlaggedCommentState, UserPermittedOrReadOnly)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -108,13 +109,8 @@ class CommentDetailForFlagStateChange(generics.RetrieveAPIView):
         return context
 
     def post(self, request, *args, **kwargs):
-        comment = get_object_or_404(Comment, id=kwargs.get('pk'))
+        comment = self.get_object()
         flag = Flag.objects.get_for_comment(comment)
-        if not comment.is_flagged:
-            return Response(
-                {'detail': FlagError.REJECT_UNFLAGGED_COMMENT},
-                status=status.HTTP_400_BAD_REQUEST
-            )
         state = request.data.get('state') or request.POST.get('state')
         try:
             state = flag.get_clean_state(state)
@@ -150,7 +146,7 @@ class ConfirmComment(APIView, CommentCreateMixin):
 class ToggleFollowAPI(BaseToggleFollowView, APIView):
     api = True
     response_class = Response
-    permission_classes = (SubscriptionEnabled, permissions.IsAuthenticated)
+    permission_classes = (SubscriptionEnabled, permissions.IsAuthenticated, UserPermittedOrReadOnly)
 
     def post(self, request, *args, **kwargs):
         self.validate(request)
@@ -169,3 +165,8 @@ class SubscribersAPI(ContentTypeValidator, APIView):
             'model_id': self.model_obj.id,
             'followers': Follower.objects.get_emails_for_model_object(self.model_obj)
         })
+
+
+class ToggleBlockingAPI(BaseToggleBlockingView, APIView):
+    permission_classes = (CanBlockUsers,)
+    response_class = Response

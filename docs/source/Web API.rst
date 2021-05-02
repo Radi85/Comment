@@ -30,6 +30,8 @@ The available actions with permitted user as follows:
 
     12. Retrieve a list of subscribers to a given thread/content type. (admins and moderators)
 
+    13. Block users/emails. (admins and moderators)
+
 These actions are explained below.
 
 Setup:
@@ -174,8 +176,8 @@ This action requires the ``comment.id``.
 .. code:: python
 
     payload = {
-        'reason': REASON,  # number of the reason
-        'info': ''  # this is required if the reason is 100 ``Something else``
+        "reason": REASON,  # number of the reason
+        "info": str  # this is required if the reason is 100 ``Something else``
     }
 
 ::
@@ -203,7 +205,7 @@ This action requires comment `admin` or `moderator` privilege.
 .. code:: python
 
     payload = {
-        'state': 3  # accepted state is 3 (REJECTED) or 4 (RESOLVED) only
+        "state": STATE  # accepted state is 3 (REJECTED) or 4 (RESOLVED) only
     }
 
 ::
@@ -223,7 +225,8 @@ Get request accepts 3 params:
 
 Example:
 
-:: code:: bash
+::
+
     $ curl -X GET -H "Content-Type: application/json" $BASE_URL/api/comments/confirm/KEY/
 
 Since the key generated for each comment is unique, it can only be used once to verify. Any tampering with the key will result in a BAD HTTP request(400).
@@ -237,7 +240,8 @@ Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
 
 Subscription variable ``COMMENT_ALLOW_SUBSCRIPTION`` must be enabled in ``settings.py``.
 
-:: code:: bash
+::
+
     $ curl -X POST -u USERNAME:PASSWORD -H "Content-Type: application/json" "$BASE_URL/api/comments/toggle-subscription/?model_name=MODEL_NAME&model_id=ID&app_name=APP_NAME"
 
 
@@ -251,3 +255,23 @@ This action requires comment `admin` or `moderator` privilege.
 
 :: code:: bash
     $ curl -X GET -u USERNAME:PASSWORD -H "Content-Type: application/json" $BASE_URL/api/comments/subscribers/
+
+
+**11- Block users/emails**
+
+``POST`` is the allowed method to toggle blocking.
+
+Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
+
+This action requires comment `admin` or `moderator` privilege.
+
+.. code:: python
+
+    payload = {
+        "comment_id": ID,
+        "reason": str  # optional
+    }
+
+::
+
+    $ curl -X POST -u USERNAME:PASSWORD -H "Content-Type: application/json" -d '{"comment_id": ID}' $BASE_URL/api/comments/toggle-blocking/

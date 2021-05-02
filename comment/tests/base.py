@@ -218,6 +218,15 @@ class BaseCommentTest(TestCase, BaseInternationalizationTest):
                 return x
         return super().assertQuerysetEqual(qs, values, transform=transform, ordered=True, msg=msg)
 
+    def assert_permission_denied_response(self, response, reason=None):
+        forbidden_code = 403
+        data = json.loads(response.content.decode('utf-8'))
+
+        self.assertEqual(response.status_code, forbidden_code)
+        self.assertEqual(data['status'], forbidden_code)
+        if reason:
+            self.assertEqual(data['reason'], reason)
+
 
 class BaseAPITest(BaseCommentTest):
     @classmethod
@@ -303,15 +312,6 @@ class BaseCommentFlagTest(BaseCommentViewTest):
         }
         cls.comment_2 = cls.create_comment(cls.content_object_2)
         cls.flag_instance = cls.create_flag_instance(cls.user_2, cls.comment_2, **cls.flag_data)
-
-    def assert_permission_denied_response(self, response, reason=None):
-        forbidden_code = 403
-        data = json.loads(response.content.decode('utf-8'))
-
-        self.assertEqual(response.status_code, forbidden_code)
-        self.assertEqual(data['status'], forbidden_code)
-        if reason:
-            self.assertEqual(data['reason'], reason)
 
 
 class BaseTemplateTagsTest(BaseCommentTest):
@@ -410,6 +410,10 @@ class BaseCommentMigrationTest(TransactionTestCase):
 class BaseCommentMixinTest(BaseCommentTest):
     base_url = None
 
+    def setUp(self):
+        super().setUp()
+        self.client = Client(HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -423,23 +427,15 @@ class BaseCommentMixinTest(BaseCommentTest):
         }
         cls.comment = cls.create_comment(cls.post_1, cls.user_1)
 
-    def get_url(self, base_url=None, **kwargs):
+    @classmethod
+    def get_url(cls, base_url=None, **kwargs):
         if not base_url:
-            base_url = self.base_url
+            base_url = cls.base_url
         if kwargs:
             base_url += '?'
             for (key, val) in kwargs.items():
                 base_url += str(key) + '=' + str(val) + '&'
         return base_url.rstrip('&')
-
-    def assert_permission_denied_response(self, response, reason=None):
-        forbidden_code = 403
-        data = json.loads(response.content.decode('utf-8'))
-
-        self.assertEqual(response.status_code, forbidden_code)
-        self.assertEqual(data['status'], forbidden_code)
-        if reason:
-            self.assertEqual(data['reason'], reason)
 
 
 class BaseCommentSignalTest(BaseCommentManagerTest):
@@ -474,10 +470,10 @@ class BaseBlockerManagerTest(BaseCommentTest):
 
     @staticmethod
     def create_blocked_email(email):
-        blocked_email, _ = BlockedUser.objects.get_or_create_blocked_user_by_email(email)
+        blocked_email, _ = BlockedUser.objects._get_or_create_blocked_user_by_email(email)
         return blocked_email
 
     @staticmethod
     def create_blocked_user(user_id):
-        blocked_user, _ = BlockedUser.objects.get_or_create_blocked_user_by_user_id(user_id)
+        blocked_user, _ = BlockedUser.objects._get_or_create_blocked_user_by_user_id(user_id)
         return blocked_user

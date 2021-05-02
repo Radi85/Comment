@@ -168,3 +168,19 @@ COMMENT_DEFAULT_PROFILE_PIC_LOC
 
 Provides an alternate location for profile picture that can be used other than
 default image. Defaults to '/static/img/default.png'
+
+
+COMMENT_ALLOW_BLOCKING_USERS
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Enable blocking system. This gives only **admins** the right. Default to ``False``
+
+COMMENT_ALLOW_MODERATOR_TO_BLOCK
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Allow **moderators** to perform blocking action when `COMMENT_ALLOW_BLOCKING_USERS`_ is enabled. Default to ``False``
+
+COMMENT_RESPONSE_FOR_BLOCKED_USER
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The response message for blocking reason. Default to ``You cannot perform this action at the moment! Contact the admin for more details``

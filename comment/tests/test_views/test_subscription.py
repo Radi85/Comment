@@ -32,6 +32,7 @@ class BaseToggleFollowViewTest(BaseCommentMixinTest):
         )
 
     def test_invalid_email(self):
+        self.client.force_login(self.user_1)
         data = {'email': 'invalid_email'}
         response = self.client.post(self.toggle_follow_url, HTTP_X_REQUESTED_WITH='XMLHttpRequest', data=data)
 

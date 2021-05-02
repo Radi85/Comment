@@ -9,8 +9,8 @@ from comment.managers import FlagInstanceManager
 from comment.templatetags.comment_tags import (
     get_model_name, get_app_name, get_comments_count, get_img_path, get_profile_url, render_comments,
     include_bootstrap, include_static, render_field, has_reacted, has_flagged,
-    render_flag_reasons, render_content, get_username_for_comment, can_block_users_tag,
-    is_user_blocked)
+    render_flag_reasons, render_content, get_username_for_comment, can_block_users_tag, is_user_blocked
+)
 from comment.tests.base import BaseTemplateTagsTest
 
 

@@ -93,8 +93,7 @@ class SetFlagViewTest(BaseCommentFlagTest):
         self.client.logout()
         response = self.client.post(url, data=self.flag_data)
 
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
-        self.assertEqual(response.url, '{}?next={}'.format(settings.LOGIN_URL, url))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_get_request(self):
         """Test whether GET requests are allowed or not"""
@@ -108,7 +107,7 @@ class SetFlagViewTest(BaseCommentFlagTest):
         url = self.get_url('comment:flag', self.comment.id)
         response = self.client_non_ajax.post(url, data=self.flag_data)
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_incorrect_comment_id(self):
         """Test response when an incorrect comment id is passed"""
@@ -145,7 +144,7 @@ class ChangeFlagStateViewTest(BaseCommentFlagTest):
         self.assertEqual(int(self.client.session['_auth_user_id']), self.moderator.id)
         response = self.client.post(self.get_url('comment:flag-change-state', comment.id), data=self.data)
 
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 403)
 
     def test_change_flag_state_by_not_permitted_user(self):
         self.assertTrue(self.comment_for_change_state.is_flagged)
