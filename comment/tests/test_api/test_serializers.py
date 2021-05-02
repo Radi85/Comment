@@ -3,11 +3,14 @@ from unittest.mock import patch
 from django.core import mail
 from django.test import RequestFactory
 
+from rest_framework import serializers
+
 from comment.conf import settings
 from comment.models import Comment, Follower
 from comment.api.serializers import get_profile_model, get_user_fields, UserSerializerDAB, CommentCreateSerializer, \
     CommentSerializer
 from comment.tests.test_api.test_views import BaseAPITest
+from comment.messages import EmailError
 
 
 class APICommentSerializersTest(BaseAPITest):
@@ -38,7 +41,7 @@ class APICommentSerializersTest(BaseAPITest):
         }
 
         serializer = CommentCreateSerializer(context=data)
-        self.assertIsNone(serializer.fields.get('email'))
+        self.assertFalse(serializer.fields['email'].required)
         comment = serializer.create(validated_data={'content': 'test'})
         self.increase_count(parent=True)
         self.comment_count_test()
@@ -134,6 +137,23 @@ class APICommentSerializersTest(BaseAPITest):
         self.assertIsNotNone(serializer.email_service._email_thread)
         serializer.email_service._email_thread.join()
         self.assertEqual(len(mail.outbox), 1)
+
+    @patch.object(settings, 'COMMENT_ALLOW_ANONYMOUS', True)
+    def test_create_comment_serializer_for_anonymous_missing_email(self):
+        from django.contrib.auth.models import AnonymousUser
+        factory = RequestFactory()
+        request = factory.get('/')
+        request.user = AnonymousUser()
+        data = {
+            'model_obj': self.post_1,
+            'parent_comment': None,
+            'request': request
+        }
+        serializer = CommentCreateSerializer(context=data)
+
+        with self.assertRaises(serializers.ValidationError) as e:
+            serializer.create(validated_data={'content': 'test'})
+        self.assertEqual(e.exception.detail, {'email': [EmailError.EMAIL_REQUIRED_FOR_ANONYMOUS]})
 
     def test_passing_context_to_serializer(self):
         serializer = CommentSerializer(self.comment_1)

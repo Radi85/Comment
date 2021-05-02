@@ -5,7 +5,7 @@ from django.views.i18n import JavaScriptCatalog
 from comment import __version__
 from comment.views import (
     CreateComment, UpdateComment, DeleteComment, SetReaction, SetFlag, ChangeFlagState,
-    ConfirmComment, ToggleFollowView
+    ConfirmComment, ToggleFollowView, ToggleBlockingView
 )
 
 app_name = 'comment'
@@ -20,6 +20,7 @@ urlpatterns = [
     path('<int:pk>/flag/state/change/', ChangeFlagState.as_view(), name='flag-change-state'),
     re_path(r'^confirm/(?P<key>[^/]+)/$', ConfirmComment.as_view(), name='confirm-comment'),
     path('toggle-subscription/', ToggleFollowView.as_view(), name='toggle-subscription'),
+    path('toggle-blocking/', ToggleBlockingView.as_view(), name='toggle-blocking'),
     # javascript translations
     # The value returned by _get_version() must change when translations change.
     path(

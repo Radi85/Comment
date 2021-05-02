@@ -10,7 +10,7 @@ from comment.conf import settings
 from comment.models import Comment, Flag, Reaction
 from comment.utils import get_user_for_request, get_profile_instance
 from comment.messages import EmailError
-from comment.mixins import CommentCreateMixin
+from comment.views import CommentCreateMixin
 
 
 def get_profile_model():
@@ -99,25 +99,21 @@ class CommentCreateSerializer(BaseCommentSerializer, CommentCreateMixin):
         model = Comment
         fields = ('id', 'user', 'email', 'content', 'parent', 'posted', 'edited', 'reply_count', 'replies', 'urlhash')
 
-    def __init__(self, *args, **kwargs):
-        user = kwargs['context']['request'].user
-        self.email_service = None
-        if user.is_authenticated or not settings.COMMENT_ALLOW_ANONYMOUS:
-            del self.fields['email']
-
-        super().__init__(*args, **kwargs)
-
     @staticmethod
-    def validate_email(value):
-        if not value:
-            raise serializers.ValidationError(EmailError.EMAIL_MISSING, code='required')
-        return value.strip().lower()
+    def validate_email(email):
+        if not email:
+            raise serializers.ValidationError(
+                detail={'email': [EmailError.EMAIL_REQUIRED_FOR_ANONYMOUS]}, code='required'
+            )
+        return email.strip().lower()
 
     def create(self, validated_data):
         request = self.context['request']
         user = get_user_for_request(request)
         content = validated_data.get('content')
         email = validated_data.get('email')
+        if not user:
+            self.validate_email(email)
         time_posted = timezone.now()
 
         temp_comment = Comment(

@@ -194,8 +194,7 @@ class CommentCreateTest(BaseAPIViewTest):
         response = self.client.post(url, data=data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json()['email'], [EmailError.EMAIL_MISSING])
-        self.assertTextTranslated(response.json()['email'][0], base_url)
+        self.assertEqual(response.json()['email'], {'email': [EmailError.EMAIL_REQUIRED_FOR_ANONYMOUS]})
 
     @patch.object(settings, 'COMMENT_ALLOW_ANONYMOUS', True)
     def test_for_anonymous_with_valid_data(self):
@@ -508,7 +507,7 @@ class APICommentDetailForFlagStateChangeTest(BaseAPITest):
 
         response = self.client.post(self.get_base_url(comment.id), data=self.data)
 
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 403)
 
     def test_by_not_permitted_user(self):
         self.client.force_login(self.user_1)

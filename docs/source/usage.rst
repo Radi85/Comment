@@ -188,13 +188,13 @@ To further customize different attributes related to anonymous commenting, you m
 5. Enable gravatar:
 ^^^^^^^^^^^^^^^^^^^^
 
-To enable using gravatar for profile pics set ``COMMENT_USE_GRAVATAR`` in `settings.py` to ``True``
+To enable using gravatar for profile pics set ``COMMENT_USE_GRAVATAR`` in ``settings.py`` to ``True``
 
 
 6. Enable subscription:
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-To enable app subscription set ``COMMENT_ALLOW_SUBSCRIPTION`` in `settings.py` to ``True``
+To enable app subscription set ``COMMENT_ALLOW_SUBSCRIPTION`` in ``settings.py`` to ``True``
 
 This will enable the UI functionality and the API endpoint to follow and unfollow `thread`.
 
@@ -208,3 +208,12 @@ The thread can be a `parent` comment or the `content type` (i.g. Post, Picture, 
 An email notification will be sent to the thread's followers up on adding a new comment to the thread.
 
 PS: This feature needs the email settings to be configured similar to `4. Allow commenting by anonymous:`_
+
+
+7. Enable blocking system
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Blocking functionality is added in version 2.7.0. It allows moderators to block users/emails from creating/editing or reacting to a comment.
+
+To enable blocking system set ``COMMENT_ALLOW_BLOCKING_USERS`` in ``settings`` to ``True``.
+This will grant access for the **admins** only to block users. However, in order to give the **moderators** this right, you need to add ``COMMENT_ALLOW_MODERATOR_TO_BLOCK = True`` to `settings`

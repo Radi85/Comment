@@ -6,9 +6,10 @@ from django.contrib import messages
 from comment.models import Comment
 from comment.forms import CommentForm
 from comment.utils import get_comment_from_key, get_user_for_request, CommentFailReason
-from comment.mixins import CanCreateMixin, CanEditMixin, CanDeleteMixin, CommentCreateMixin, BaseCommentView
+from comment.mixins import CanCreateMixin, CanEditMixin, CanDeleteMixin
 from comment.responses import UTF8JsonResponse
 from comment.messages import EmailError
+from comment.views import CommentCreateMixin, BaseCommentView
 
 
 class CreateComment(CanCreateMixin, CommentCreateMixin):

@@ -128,9 +128,7 @@ def can_block_users_tag(user):
 @register.filter(name='is_user_blocked')
 def is_user_blocked(comment):
     user_id = comment.user.id if comment.user else None
-    if BlockedUser.objects.is_user_blocked(user_id, comment.email):
-        return True
-    return False
+    return BlockedUser.objects.is_user_blocked(user_id, comment.email)
 
 
 @register.simple_tag(name='include_static')

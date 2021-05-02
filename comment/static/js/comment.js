@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let deleteModal = document.getElementById("Modal");
     let flagModal = document.getElementById('flagModal');
     let followModal = document.getElementById('followModal');
+    let blockModal = document.getElementById('blockModal');
     let headers = {
         'X-Requested-With': 'XMLHttpRequest',
         'X-CSRFToken': csrfToken,
@@ -128,7 +129,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }).then(response => {
             return response.json();
         }).then(result => {
-            if (result.error) {
+            if (result.status === 403){
+                alert(result.reason);
+                return;
+            }
+            else if (result.error) {
                 // alert(result.error);
                 form.querySelector('.error').innerHTML = result.error;
                 form.querySelector('.error').classList.remove('d-none');
@@ -165,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 commentCount(1);
                 // update followBtn
                 let followButton = form.parentElement.previousElementSibling.querySelector(".js-comment-follow");
-                if (followButton){
+                if (followButton) {
                     followButton.querySelector('.comment-follow-icon').classList.add('user-has-followed');
                     followButton.querySelector('span').setAttribute('title', 'Unfollow this thread');
                 }
@@ -182,8 +187,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 let clean_uri = uri.substring(0, uri.indexOf("?"));
                 window.history.replaceState({}, document.title, clean_uri);
             }
-        }).catch(() => {
+        }).catch((error) => {
             alert(gettext("Unable to post your comment!, please try again"));
+            console.error(error);
         });
     };
 
@@ -194,6 +200,10 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch(url, {headers: headers}).then(response => {
             return response.json();
         }).then(result => {
+            if (result.status === 403){
+                alert(result.reason);
+                return;
+            }
             let editModeElement = stringToDom(result.data, '.js-comment-update-mode');
             commentContent.replaceWith(editModeElement);
             // set the focus on the end of text
@@ -203,8 +213,9 @@ document.addEventListener('DOMContentLoaded', () => {
             textAreaElement.value = '';
             textAreaElement.value = value;
             textAreaElement.setAttribute("style", "height: " + textAreaElement.scrollHeight + "px;");
-        }).catch(() => {
+        }).catch((error) => {
             alert(gettext("You can't edit this comment"));
+            console.error(error);
         });
     };
 
@@ -224,10 +235,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }).then(response => {
             return response.json();
         }).then(result => {
+            if (result.status === 403){
+                alert(result.reason);
+                return;
+            }
             let updatedContentElement = stringToDom(result.data, '.js-updated-comment');
             form.parentElement.replaceWith(updatedContentElement);
-        }).catch(() => {
+        }).catch((error) => {
             alert(gettext("Modification didn't take effect!, please try again"));
+            console.error(error);
         });
     };
 
@@ -267,11 +283,16 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch(url, {headers: headers}).then(response => {
             return response.json()
         }).then(result => {
+            if (result.status === 403){
+                alert(result.reason);
+                return;
+            }
             showModal(deleteModal);
             let modalContent = deleteModal.querySelector('.comment-modal-content');
             modalContent.innerHTML = result.data;
-        }).catch(() => {
+        }).catch((error) => {
             alert(gettext("Deletion cannot be performed!, please try again"));
+            console.error(error);
         });
     };
 
@@ -293,6 +314,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }).then(response => {
             return response.json();
         }).then(result => {
+            if (result.status === 403){
+                alert(result.reason);
+                return;
+            }
             if (isParent) {
                 document.getElementById("comments").outerHTML = result.data;
             } else {
@@ -312,8 +337,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             hideModal(deleteModal);
             commentElement.remove();
-        }).catch(() => {
+        }).catch((error) => {
             alert(gettext("Unable to delete your comment!, please try again"));
+            console.error(error);
         });
     };
 
@@ -364,6 +390,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }).then(response => {
             return response.json();
         }).then(result => {
+            if (result.status === 403){
+                alert(result.reason);
+                return;
+            }
             if (result.error) {
                 alert(result.error);
             } else {
@@ -373,8 +403,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     changeReactionCount(parentReactionEle, result.data.likes, result.data.dislikes);
                 }
             }
-        }).catch(() => {
+        }).catch((error) => {
             alert(gettext("Reaction couldn't be processed!, please try again"));
+            console.error(error);
         });
     };
 
@@ -392,6 +423,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }).then(response => {
             return response.json();
         }).then(result => {
+            if (result.status === 403){
+                alert(result.reason);
+                return;
+            }
             if (result.error) {
                 if (result.error.email_required) {
                     followModal.querySelector('form').setAttribute('data-target-btn-id', followButton.getAttribute('id'));
@@ -417,8 +452,60 @@ document.addEventListener('DOMContentLoaded', () => {
                     hideModal(followModal);
                 }
             }
-        }).catch(() => {
+        }).catch((error) => {
             alert(gettext("Subscription couldn't be processed!, please try again"));
+            console.error(error);
+        });
+    };
+
+    let loadBlockModal = blockBtn => {
+        blockModal.querySelector('#blockedCommentId').value = blockBtn.getAttribute('data-comment_id');
+        showModal(blockModal);
+    };
+
+    let updateBlockedUserComments = data => {
+        let commentsByBlockedUser = document.getElementsByClassName(`block-${data.blocked_user}`);
+        let pathElement = data.blocked ? '<path d="M7 11V7a5 5 0 0 1 10 0v4"/>' : '<path d="M7 11V7a5 5 0 0 1 9.9-1"/>';
+        let color = data.blocked ? '#E74C3C' : '#00BC8C';
+        for (let commentByBlockedUser of commentsByBlockedUser) {
+            commentByBlockedUser.setAttribute('stroke', color);
+            commentByBlockedUser.querySelector('path').outerHTML = pathElement;
+        }
+    };
+
+    let toggleUserBlock = form => {
+        let formDataQuery = null;
+        if (form) {
+            let formData = serializeObject(form);
+            formDataQuery = convertFormDataToURLQuery(formData);
+        }
+        let url = form.getAttribute('data-url');
+        fetch(url, {
+            method: 'POST',
+            headers: headers,
+            body: formDataQuery,
+        }).then(response => {
+            return response.json();
+        }).then(result => {
+            if (result.status === 403){
+                alert(result.reason);
+                return;
+            }
+            const infoElement = document.getElementById('comments').querySelector('.js-comment');
+            let msg = '';
+            if (result.error) {
+                msg = result.error.detail;
+            } else if (result.data) {
+                let state = result.data.blocked ? 'blocked' : 'unblocked';
+                msg = gettext(`User ${result.data.blocked_user} has been successfully ${state}`);
+                updateBlockedUserComments(result.data);
+                form.querySelector('textarea').value = '';
+            }
+            createInfoElement(infoElement, 'success', msg);
+            hideModal(blockModal);
+        }).catch((error) => {
+            alert(gettext("Blocking this user couldn't be processed!, please try again"));
+            console.error(error);
         });
     };
 
@@ -509,6 +596,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }).then(response => {
             return response.json();
         }).then(result => {
+            if (result.status === 403){
+                alert(result.reason);
+                return;
+            }
             if (result.error) {
                 alert(result.error)
             } else {
@@ -525,8 +616,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 hideModal(flagModal);
                 createInfoElement(flagButton.closest('.js-parent-comment'), result.data.status, result.msg);
             }
-        }).catch(() => {
+        }).catch((error) => {
             alert(gettext("Flagging couldn't be processed!, please try again"));
+            console.error(error);
         });
     };
 
@@ -592,6 +684,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }).then(response => {
             return response.json();
         }).then(result => {
+            if (result.status === 403){
+                alert(result.reason);
+                return;
+            }
             if (result.error) {
                 alert(result.error);
                 return;
@@ -637,11 +733,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', (event) => {
         removeTargetElement();
         if (event.target && event.target !== event.currentTarget) {
-            if (event.target === deleteModal || event.target === flagModal || event.target === followModal ||
+            if (event.target === deleteModal || event.target === flagModal || event.target === followModal || event.target === blockModal ||
                 event.target.closest('.modal-close-btn') || event.target.closest('.modal-cancel-btn')) {
                 hideModal(deleteModal);
                 hideModal(flagModal);
                 hideModal(followModal);
+                hideModal(blockModal);
             } else if (event.target.closest('.js-reply-link')) {
                 event.preventDefault();
                 replyLink(event.target);
@@ -672,6 +769,9 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (event.target.closest('.js-three-dots')) {
                 event.preventDefault();
                 openThreeDostMenu(event.target.closest('.js-three-dots'));
+            } else if (event.target.closest('.js-comment-block')) {
+                event.preventDefault();
+                loadBlockModal(event.target.closest('.js-comment-block'));
             }
         }
     }, false);
@@ -693,6 +793,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 event.preventDefault();
                 let followButton = document.getElementById(event.target.getAttribute('data-target-btn-id'));
                 toggleFollow(followButton, event.target);
+            } else if (event.target.classList.contains('js-comment-block-form')) {
+                event.preventDefault();
+                toggleUserBlock(event.target);
             }
         }
     }, false);

@@ -3,7 +3,6 @@ from rest_framework import status
 
 from comment.tests.base import BaseCommentViewTest
 from comment.messages import ReactionInfo
-from comment.conf import settings
 
 
 class SetReactionViewTest(BaseCommentViewTest):
@@ -66,8 +65,7 @@ class SetReactionViewTest(BaseCommentViewTest):
         self.client.logout()
         response = self.client.post(_url)
 
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
-        self.assertEqual(response.url, '{}?next={}'.format(settings.LOGIN_URL, _url))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_get_request(self):
         """Test whether GET requests are allowed or not"""
@@ -81,7 +79,7 @@ class SetReactionViewTest(BaseCommentViewTest):
         _url = self.get_reaction_url(self.comment.id, 'like')
         response = self.client_non_ajax.post(_url)
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_incorrect_comment_id(self):
         """Test response when an incorrect comment id is passed"""

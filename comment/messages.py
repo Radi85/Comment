@@ -1,8 +1,12 @@
 from django.utils.translation import gettext_lazy as _
 
+from comment.conf import settings
+
 
 class ErrorMessage:
     LOGIN_URL_MISSING = _('Comment App: LOGIN_URL is not in the settings')
+    LOGIN_REQUIRED = _('Comment App: You must be logged in to perform this action.')
+    NOT_AUTHORIZED = _('You do not have permission to perform this action.')
     METHOD_NOT_IMPLEMENTED = _('Your {class_name} class has not defined a {method_name} method, which is required.')
     NON_AJAX_REQUEST = _('Only AJAX request are allowed')
     INVALID_ORDER_ARGUMENT = _((
@@ -52,7 +56,7 @@ class ReactionError:
 
 class EmailError:
     EMAIL_INVALID = _('Enter a valid email address.')
-    EMAIL_MISSING = _('Email is required for posting anonymous comments.')
+    EMAIL_REQUIRED_FOR_ANONYMOUS = _('Email is required for posting anonymous comments.')
     BROKEN_VERIFICATION_LINK = _('The link seems to be broken.')
     USED_VERIFICATION_LINK = _('The comment has already been verified.')
 
@@ -86,3 +90,13 @@ class FlagState:
 class FollowError:
     EMAIL_REQUIRED = _('Email is required to subscribe {model_object}')
     SYSTEM_NOT_ENABLED = _('Subscribe system must be enabled')
+
+
+class BlockState:
+    UNBLOCKED = _('Unblocked')
+    BLOCKED = _('Blocked')
+
+
+class BlockUserError:
+    NOT_PERMITTED = _(settings.COMMENT_RESPONSE_FOR_BLOCKED_USER)
+    INVALID = _('Invalid input data')

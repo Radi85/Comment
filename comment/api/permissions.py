@@ -1,7 +1,9 @@
 from rest_framework import permissions
 
 from comment.conf import settings
-from comment.utils import is_comment_admin, is_comment_moderator
+from comment.utils import is_comment_admin, is_comment_moderator, can_block_user, can_moderate_flagging
+from comment.messages import BlockUserError
+from comment.models import BlockedUser
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
@@ -22,6 +24,25 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         return obj.user == request.user
 
 
+class UserPermittedOrReadOnly(permissions.BasePermission):
+    message = BlockUserError.NOT_PERMITTED
+
+    def has_permission(self, request, view):
+        data = request.POST or getattr(request, 'data', {})
+        return bool(
+            request.method in permissions.SAFE_METHODS or
+            not BlockedUser.objects.is_user_blocked(request.user.id, data.get('email'))
+        )
+
+
+class CanCreatePermission(permissions.BasePermission):
+    """
+    This will check if creating comment is permitted
+    """
+    def has_permission(self, request, view):
+        return request.user.is_authenticated or settings.COMMENT_ALLOW_ANONYMOUS
+
+
 class FlagEnabledPermission(permissions.BasePermission):
     """
     This will check if the COMMENT_FLAGS_ALLOWED is enabled
@@ -32,10 +53,10 @@ class FlagEnabledPermission(permissions.BasePermission):
 
 class CanChangeFlaggedCommentState(permissions.BasePermission):
     def has_permission(self, request, view):
-        return is_comment_admin(request.user) or is_comment_moderator(request.user)
+        return can_moderate_flagging(request.user)
 
     def has_object_permission(self, request, view, obj):
-        return obj.is_flagged and (is_comment_admin(request.user) or is_comment_moderator(request.user))
+        return obj.is_flagged
 
 
 class SubscriptionEnabled(permissions.BasePermission):
@@ -51,3 +72,8 @@ class CanGetSubscribers(SubscriptionEnabled):
         if not super().has_permission(request, view):
             return False
         return is_comment_admin(request.user) or is_comment_moderator(request.user)
+
+
+class CanBlockUsers(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return can_block_user(request.user)
