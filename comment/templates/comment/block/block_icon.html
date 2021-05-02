@@ -1,0 +1,22 @@
+{% load comment_tags %}
+{% load i18n %}
+<button
+    title="{% if comment|is_user_blocked %}{% trans 'Unblock user' %}{% else %}{% trans 'Block this user' %}{% endif %}"
+    class="js-comment-block {% block block_btn_cls %}btn btn-link{% endblock block_btn_cls %}"
+    data-comment_id="{{ comment.id }}"
+>
+    {% get_username_for_comment comment as username %}
+    {% block block_icon %}
+        <svg id="svgBlockIcon-{{ comment.urlhash }}" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+             stroke="{% if comment|is_user_blocked %}#E74C3C{% else %}#00BC8C{% endif %}" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round"
+             class="feather feather-lock block-{{ username }}">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            {% if comment|is_user_blocked %}
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            {% else %}
+                <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+            {% endif %}
+        </svg>
+    {% endblock block_icon %}
+</button>

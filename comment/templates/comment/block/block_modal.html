@@ -1,0 +1,39 @@
+{% load i18n %}
+{% load comment_tags %}
+<div id="blockModal" class="comment-modal">
+    <div class="comment-modal-dialog" role="document">
+        <div class="comment-modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% block title %}{% trans "Are you sure you want to block this user?" %}{% endblock title %}</h5>
+                <button class="modal-close-btn" aria-label="{% trans "Close" %}">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="js-comment-block-form" data-url="{% url 'comment:toggle-blocking' %}">
+                {% block reason_input %}
+                    <div class="row">
+                        <div class="col-3">
+                            <label for="reason">Reason:</label>
+                        </div>
+                        <div class="col-9">
+                            <textarea id="reason" class="form-control mr-2 w-100" rows="3" name="reason"></textarea>
+                            <div class="error text-danger small mt-1"></div>
+                        </div>
+                        <input id="blockedCommentId" type="hidden" name="comment_id" value="">
+                    </div>
+                {% endblock reason_input %}
+                    <br>
+                    <div class="modal-footer">
+                        {% trans "Block" as block %}
+                        <button type="submit"
+                                title="{{ block }}"
+                                class="btn btn-sm btn-danger block-modal-submit {% block block_btn_extra_cls %}{% endblock block_btn_extra_cls %}"
+                        >{{ block }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+

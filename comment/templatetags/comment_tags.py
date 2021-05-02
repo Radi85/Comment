@@ -2,10 +2,11 @@ import re
 
 from django import template
 
-from comment.models import ReactionInstance, FlagInstance, Follower
+from comment.models import ReactionInstance, FlagInstance, Follower, BlockedUser
 from comment.forms import CommentForm
 from comment.utils import (
-    is_comment_moderator, is_comment_admin, get_gravatar_img, get_profile_instance, get_wrapped_words_number
+    is_comment_moderator, is_comment_admin, get_gravatar_img, get_profile_instance, get_wrapped_words_number,
+    can_block_user
 )
 from comment.managers import FlagInstanceManager
 from comment.messages import ReactionError
@@ -111,12 +112,25 @@ def render_content(comment, number=None):
     }
 
 
+register.inclusion_tag('comment/comments/content.html')(render_content)
+
+
 @register.simple_tag(name='can_delete_comment')
 def can_delete_comment(comment, user):
     return is_comment_admin(user) or (comment.is_flagged and is_comment_moderator(user))
 
 
-register.inclusion_tag('comment/comments/content.html')(render_content)
+@register.filter(name='can_block_users')
+def can_block_users_tag(user):
+    return can_block_user(user)
+
+
+@register.filter(name='is_user_blocked')
+def is_user_blocked(comment):
+    user_id = comment.user.id if comment.user else None
+    if BlockedUser.objects.is_user_blocked(user_id, comment.email):
+        return True
+    return False
 
 
 @register.simple_tag(name='include_static')

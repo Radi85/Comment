@@ -13,3 +13,6 @@
 {% if is_subscription_allowed %}
     {% include 'comment/follow/follow_modal.html' %}
 {% endif %}
+{% if is_blocking_allowed %}
+    {% include 'comment/block/block_modal.html' %}
+{% endif %}

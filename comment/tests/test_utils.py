@@ -78,14 +78,26 @@ class HasValidProfileTest(BaseCommentUtilsTest):
 
 class IsCommentModeratorTest(BaseCommentUtilsTest):
     @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', False)
-    def test_flagging_disabled(self):
+    @patch.object(settings, 'COMMENT_ALLOW_BLOCKING_USERS', False)
+    def test_flagging_and_blocking_disabled(self):
         self.assertIs(is_comment_moderator(self.moderator), False)
+
+    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', False)
+    @patch.object(settings, 'COMMENT_ALLOW_BLOCKING_USERS', True)
+    def test_one_moderation_system_enabled(self):
+        self.assertIs(is_comment_moderator(self.moderator), True)
 
 
 class IsCommentAdminTest(BaseCommentUtilsTest):
     @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', False)
-    def test_flagging_disabled(self):
+    @patch.object(settings, 'COMMENT_ALLOW_BLOCKING_USERS', False)
+    def test_flagging_and_blocking_disabled(self):
         self.assertIs(is_comment_admin(self.admin), False)
+
+    @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', False)
+    @patch.object(settings, 'COMMENT_ALLOW_BLOCKING_USERS', True)
+    def test_one_moderation_system_enabled(self):
+        self.assertIs(is_comment_admin(self.admin), True)
 
 
 class GetUserForRequestTest(BaseCommentUtilsTest):
@@ -97,6 +109,15 @@ class GetUserForRequestTest(BaseCommentUtilsTest):
     def test_unauthenticated_user(self):
         self.request.user = AnonymousUser()
         self.assertIsNone(get_user_for_request(self.request))
+
+    def test_user_for_request(self):
+        request = self.factory.get('/')
+        request.user = AnonymousUser()
+        # test unauthenticated user
+        self.assertIsNone(get_user_for_request(request))
+        # test authenticated user
+        request.user = self.user_1
+        self.assertEqual(get_user_for_request(request), self.user_1)
 
     def test_authenticated_user(self):
         self.request.user = self.user_1
