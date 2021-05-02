@@ -148,7 +148,10 @@ class RenderContentTest(BaseTemplateTagsTest):
         cls.content = "Any long text just for testing render content function"
         cls.comment.content = cls.content
         cls.comment.save()
-        cls.comment.refresh_from_db()
+
+    def setUp(self):
+        super().setUp()
+        self.comment.refresh_from_db()
 
     def test_urlhash(self):
         result = render_content(self.comment)
