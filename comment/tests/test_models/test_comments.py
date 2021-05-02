@@ -243,7 +243,7 @@ class CommentModelManagerTest(BaseCommentManagerTest):
         # no parent_id doesn't exist passed -> although this is highly unlikely as this will be handled by the mixin
         # but is useful for admin interface if required
         self.assertIsNone(Comment.objects.get_parent_comment(100))
-        parent_comment = Comment.objects.get_parent_comment(1)
+        parent_comment = Comment.objects.get_parent_comment(self.parent_comment_1.id)
         self.assertIsNotNone(parent_comment)
         self.assertEqual(parent_comment, self.parent_comment_1)
 
