@@ -1,5 +1,9 @@
+import json
 from urllib.parse import quote_plus
 from unittest.mock import patch
+
+from lxml.html.soupparser import fromstring
+from lxml.cssselect import CSSSelector
 
 from django.apps import apps
 from django.contrib.auth import get_user_model
@@ -10,11 +14,9 @@ from django.db.migrations.executor import MigrationExecutor
 from django.test import TestCase, RequestFactory, TransactionTestCase, Client
 from django.urls import reverse, resolve
 from django.utils import timezone, translation
-from lxml.html.soupparser import fromstring
-from lxml.cssselect import CSSSelector
 
 from comment.conf import settings
-from comment.models import Comment, FlagInstance, Reaction, ReactionInstance
+from comment.models import Comment, FlagInstance, Reaction, ReactionInstance, BlockedUser
 from post.models import Post
 
 
@@ -126,7 +128,7 @@ class BaseCommentTest(TestCase, BaseInternationalizationTest):
             content_object=ct_object,
             content='comment {}'.format(cls.increment),
             user=user,
-            parent=parent,
+            parent=parent
         )
 
     @classmethod
@@ -302,6 +304,15 @@ class BaseCommentFlagTest(BaseCommentViewTest):
         cls.comment_2 = cls.create_comment(cls.content_object_2)
         cls.flag_instance = cls.create_flag_instance(cls.user_2, cls.comment_2, **cls.flag_data)
 
+    def assert_permission_denied_response(self, response, reason=None):
+        forbidden_code = 403
+        data = json.loads(response.content.decode('utf-8'))
+
+        self.assertEqual(response.status_code, forbidden_code)
+        self.assertEqual(data['status'], forbidden_code)
+        if reason:
+            self.assertEqual(data['reason'], reason)
+
 
 class BaseTemplateTagsTest(BaseCommentTest):
     class MockUser:
@@ -403,6 +414,7 @@ class BaseCommentMixinTest(BaseCommentTest):
     def setUpTestData(cls):
         super().setUpTestData()
         cls.factory = RequestFactory()
+        cls.request = cls.factory.get('/')
         cls.data = {
             'content': 'test',
             'model_name': 'post',
@@ -420,6 +432,15 @@ class BaseCommentMixinTest(BaseCommentTest):
                 base_url += str(key) + '=' + str(val) + '&'
         return base_url.rstrip('&')
 
+    def assert_permission_denied_response(self, response, reason=None):
+        forbidden_code = 403
+        data = json.loads(response.content.decode('utf-8'))
+
+        self.assertEqual(response.status_code, forbidden_code)
+        self.assertEqual(data['status'], forbidden_code)
+        if reason:
+            self.assertEqual(data['reason'], reason)
+
 
 class BaseCommentSignalTest(BaseCommentManagerTest):
     def setUp(self):
@@ -432,3 +453,31 @@ class BaseCommentSignalTest(BaseCommentManagerTest):
             'reason': str(FlagInstance.objects.reason_values[0]),
             'info': None,
         }
+
+
+class BaseBlockerManagerTest(BaseCommentTest):
+    blocked_email = 'me@test.com'
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.blocked_user = User.objects.create_user(
+            username='blocked user',
+            password='1234'
+        )
+        cls.unblocked_user = User.objects.create_user(
+            username='unblocked user',
+            password='1234'
+        )
+        cls.blocked_user_by_id = cls.create_blocked_user(cls.blocked_user.id)
+        cls.blocked_user_by_email = cls.create_blocked_email(cls.blocked_email)
+
+    @staticmethod
+    def create_blocked_email(email):
+        blocked_email, _ = BlockedUser.objects.get_or_create_blocked_user_by_email(email)
+        return blocked_email
+
+    @staticmethod
+    def create_blocked_user(user_id):
+        blocked_user, _ = BlockedUser.objects.get_or_create_blocked_user_by_user_id(user_id)
+        return blocked_user

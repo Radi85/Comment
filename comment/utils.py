@@ -75,7 +75,7 @@ def has_valid_profile():
 
 
 def is_comment_admin(user):
-    if settings.COMMENT_FLAGS_ALLOWED:
+    if settings.COMMENT_FLAGS_ALLOWED or settings.COMMENT_ALLOW_BLOCKING_USERS:
         return user.groups.filter(name="comment_admin").exists() or (
             user.has_perm("comment.delete_flagged_comment")
             and user.has_perm("comment.delete_comment")
@@ -84,11 +84,29 @@ def is_comment_admin(user):
 
 
 def is_comment_moderator(user):
-    if settings.COMMENT_FLAGS_ALLOWED:
+    if settings.COMMENT_FLAGS_ALLOWED or settings.COMMENT_ALLOW_BLOCKING_USERS:
         return user.groups.filter(name="comment_moderator").exists() or user.has_perm(
             "comment.delete_flagged_comment"
         )
     return False
+
+
+def can_moderate_flagging(user):
+    return bool(
+        settings.COMMENT_FLAGS_ALLOWED and
+        (is_comment_admin(user) or is_comment_moderator(user))
+    )
+
+
+def can_moderator_block_users(moderator):
+    return settings.COMMENT_ALLOW_MODERATOR_PERFORM_BLOCKING and is_comment_moderator(moderator)
+
+
+def can_block_user(user):
+    return bool(
+        settings.COMMENT_ALLOW_BLOCKING_USERS and
+        (is_comment_admin(user) or can_moderator_block_users(user))
+    )
 
 
 def paginate_comments(comments, comments_per_page, current_page):

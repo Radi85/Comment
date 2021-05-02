@@ -1,23 +1,24 @@
 {% load comment_tags %}
 {% load i18n %}
 
-<div class="js-updated-comment {% if comment.has_flagged_state %}flagged-comment {% endif %}{% block content_wrapper_cls %}{% if has_valid_profile %}col-9 col-md-10{% else %}co-11 mx-3{% endif %}{% endblock content_wrapper_cls %}" id="{{ comment.urlhash }}">
+<div id="{{ comment.urlhash }}" class="js-updated-comment {% if comment.has_flagged_state %}flagged-comment {% endif %}{% block content_wrapper_cls %}{% if has_valid_profile %}col-9 col-md-10{% else %}co-11 mx-3{% endif %}{% endblock content_wrapper_cls %}" >
     {% block comment_content %}
     {% render_content comment %}
     {% endblock comment_content %}
+    {% get_username_for_comment comment as username %}
     <div class="{% block footer_wrapper_cls %}mt-2 text-muted{% endblock footer_wrapper_cls %}">
         <small>
             {% get_profile_url comment as profile_url %}
             <{% if comment.user %}a{% else %}span{% endif %}
                 class="{% block username_cls %}{% endblock username_cls %}" {% if profile_url %}href="{{ profile_url }}"{% endif %}
-                title="{% if comment.user %}{% blocktrans %}view {{ comment.user }} profile{% endblocktrans %}{% else %}{% trans 'comment by anonymous user' %}{% endif %}"
+                title="{% if comment.user %}{% blocktrans %}view {{ username }} profile{% endblocktrans %}{% else %}{% trans 'comment by anonymous user' %}{% endif %}"
             >
-                {% get_username_for_comment comment %}
+                {{ username }}
             </{% if comment.user %}a{% else %}span{% endif %}> |
             {% if comment.is_edited %}
-            <span class="font-italic" title="{% trans 'Edited' %}">{% blocktrans with edited_time=comment.edited|timesince %}Edited: {{ edited_time }} ago{% endblocktrans %}</span>
+                <span class="font-italic" title="{% trans 'Edited' %}">{% blocktrans with edited_time=comment.edited|timesince %}Edited: {{ edited_time }} ago{% endblocktrans %}</span>
             {% else %}
-            <span class="font-italic" title="{% trans 'Posted' %}">{% blocktrans with posted_time=comment.posted|timesince %}{{ posted_time }} ago{% endblocktrans %}</span>
+                <span class="font-italic" title="{% trans 'Posted' %}">{% blocktrans with posted_time=comment.posted|timesince %}{{ posted_time }} ago{% endblocktrans %}</span>
             {% endif %}
             {% can_delete_comment comment user as can_delete %}
             {% if comment.user == user %}
@@ -31,6 +32,9 @@
                         {% include 'comment/comments/resolve_icon.html' %}
                     {% endif %}
                 {% endif %}
+            {% endif %}
+            {% if user|can_block_users %}
+                {% include 'comment/block/block_icon.html' %}
             {% endif %}
             {% if comment.is_parent %}
                 {% get_replies_count comment user as reply_count %}

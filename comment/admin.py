@@ -1,6 +1,8 @@
 from django.contrib import admin
 
-from comment.models import Comment, Flag, FlagInstance, Reaction, ReactionInstance, Follower
+from comment.models import (
+    Comment, Flag, FlagInstance, Reaction, ReactionInstance, Follower, BlockedUser, BlockedUserHistory
+)
 
 
 class CommentModelAdmin(admin.ModelAdmin):
@@ -43,7 +45,21 @@ class FollowerModelAdmin(admin.ModelAdmin):
     search_fields = ('email',)
 
 
+class BlockedUserModelAdmin(admin.ModelAdmin):
+    list_display = ('user', 'email', 'blocked')
+    search_fields = ('user__username', 'email')
+
+
+class BlockedUserHistoryModelAdmin(admin.ModelAdmin):
+    list_display = ('blocked_user', 'blocker', 'reason', 'state', 'date')
+    search_fields = (
+        'blocked_user__user__username', 'blocked_user__email', 'blocker__username', 'blocker__email', 'state',  'date'
+    )
+
+
 admin.site.register(Comment, CommentModelAdmin)
 admin.site.register(Reaction, ReactionModelAdmin)
 admin.site.register(Flag, FlagModelAdmin)
 admin.site.register(Follower, FollowerModelAdmin)
+admin.site.register(BlockedUser, BlockedUserModelAdmin)
+admin.site.register(BlockedUserHistory, BlockedUserHistoryModelAdmin)

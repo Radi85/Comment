@@ -9,7 +9,8 @@ from comment.managers import FlagInstanceManager
 from comment.templatetags.comment_tags import (
     get_model_name, get_app_name, get_comments_count, get_img_path, get_profile_url, render_comments,
     include_bootstrap, include_static, render_field, has_reacted, has_flagged,
-    render_flag_reasons, render_content, get_username_for_comment)
+    render_flag_reasons, render_content, get_username_for_comment, can_block_users_tag,
+    is_user_blocked)
 from comment.tests.base import BaseTemplateTagsTest
 
 
@@ -274,3 +275,22 @@ class CommentFlagTemplateTagsTest(BaseTemplateTagsTest):
 
     def test_render_flag_reasons(self):
         self.assertListEqual(FlagInstanceManager.reasons_list, render_flag_reasons())
+
+
+class BlockingTagsTest(BaseTemplateTagsTest):
+
+    @patch.object(settings, 'COMMENT_ALLOW_BLOCKING_USERS', True)
+    def test_admin_can_block_users(self):
+        self.assertTrue(can_block_users_tag(self.admin))
+
+    @patch.object(settings, 'COMMENT_ALLOW_BLOCKING_USERS', True)
+    def test_normal_user_cannot_block_users(self):
+        self.assertTrue(can_block_users_tag(self.admin))
+
+    @patch('comment.managers.BlockedUserManager.is_user_blocked', return_value=True)
+    def test_blocked_user(self, _):
+        self.assertTrue(is_user_blocked(self.parent_comment_1))
+
+    @patch('comment.managers.BlockedUserManager.is_user_blocked', return_value=False)
+    def test_unblocked_user(self, _):
+        self.assertFalse(is_user_blocked(self.parent_comment_1))
