@@ -112,10 +112,15 @@ class CanChangeFlaggedCommentStateTest(BaseAPIPermissionsTest):
 
         self.assertFalse(self.permission.has_permission(self.request, self.view))
 
-    def test_cannot_change_state_for_unflagged_comment(self):
-        self.request.user = self.admin
+    def test_can_change_for_flagged_comment(self):
+        self.assertIs(
+            True,
+            self.permission.has_object_permission(self.request, self.view, self.flagged_comment)
+        )
 
-        self.assertFalse(
+    def test_cannot_change_for_unflagged_comment(self):
+        self.assertIs(
+            False,
             self.permission.has_object_permission(self.request, self.view, self.unflagged_comment)
         )
 
