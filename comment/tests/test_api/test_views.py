@@ -320,6 +320,20 @@ class CommentDetailForReactionTest(BaseAPIViewTest):
             c_id = self.comment.id
         return reverse_lazy('comment-api:react', args=[c_id, reaction])
 
+    def test_cannot_update_comment_content(self):
+        comment = self.comment
+        original_content = comment.content
+        data = {'content': 'test updation during reactions'}
+
+        response = self.client.post(self.get_base_url(self.like), data=data, content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()['content'], original_content)
+
+        # test database response
+        comment.refresh_from_db()
+
+        self.assertEqual(comment.content, original_content)
+
     def test_like(self):
         response = self.client.post(self.get_base_url(self.like))
 
@@ -509,7 +523,7 @@ class APICommentDetailForFlagStateChangeTest(BaseAPITest):
 
         response = self.client.post(self.get_base_url(comment.id), data=self.data)
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_by_not_permitted_user(self):
         self.client.force_login(self.user_1)
