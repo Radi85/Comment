@@ -46,7 +46,7 @@ class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly, UserPermittedOrReadOnly)
 
 
-class CommentDetailForReaction(generics.RetrieveAPIView):
+class CommentDetailForReaction(generics.UpdateAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, UserPermittedOrReadOnly)
@@ -74,7 +74,7 @@ class CommentDetailForReaction(generics.RetrieveAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class CommentDetailForFlag(generics.RetrieveAPIView):
+class CommentDetailForFlag(generics.UpdateAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, FlagEnabledPermission, UserPermittedOrReadOnly)
@@ -98,7 +98,7 @@ class CommentDetailForFlag(generics.RetrieveAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class CommentDetailForFlagStateChange(generics.RetrieveAPIView):
+class CommentDetailForFlagStateChange(generics.UpdateAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = (CanChangeFlaggedCommentState, UserPermittedOrReadOnly)
