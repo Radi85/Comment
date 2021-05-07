@@ -39,7 +39,6 @@ class SetFlagViewTest(BaseCommentFlagTest):
 
     @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 0)
     def test_set_flag_when_flagging_not_enabled(self):
-        settings.COMMENT_FLAGS_ALLOWED = 0
         _url = self.get_url('comment:flag', self.comment.id)
         self.flag_data['reason'] = 1
         response = self.client.post(_url, data=self.flag_data)
@@ -119,7 +118,7 @@ class SetFlagViewTest(BaseCommentFlagTest):
     def test_incorrect_reason(self):
         """Test response when incorrect reason is passed"""
         url = self.get_url('comment:flag', self.comment.id)
-        data = self.flag_data
+        data = self.flag_data.copy()
         reason = -1
         data.update({'reason': reason})
         response = self.client.post(url, data=data)

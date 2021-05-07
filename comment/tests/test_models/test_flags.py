@@ -110,7 +110,13 @@ class ToggleFlaggedStateTest(BaseCommentFlagTest):
         cls.flag.refresh_from_db()
 
     @patch.object(settings, 'COMMENT_FLAGS_ALLOWED', 0)
-    def test_flag_disabled(self):
+    def test_flag_disabled_with_flag_count_greater_than_allowed_count(self):
+        self.flag.state = self.flag.UNFLAGGED
+        self.flag.save()
+        self.flag.refresh_from_db()
+
+        # verify that number of flags on the object is greater than the allowed flags
+        assert self.flag.count > settings.COMMENT_FLAGS_ALLOWED
         self.flag.toggle_flagged_state()
 
         self.assertEqual(self.flag.state, self.flag.UNFLAGGED)

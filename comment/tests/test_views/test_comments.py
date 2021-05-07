@@ -199,9 +199,11 @@ class TestEditComment(BaseCommentViewTest):
 
 class TestDeleteComment(BaseCommentViewTest):
 
-    def response_fails_test(self, response):
+    def response_fails_test(self, response, comment):
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.reason_phrase, 'Forbidden')
+        # comment has not been deleted
+        self.assertEqual(comment, Comment.objects.get(id=comment.id))
 
     def test_delete_comment(self):
         comment = self.create_comment(self.content_object_1)
@@ -262,21 +264,19 @@ class TestDeleteComment(BaseCommentViewTest):
         self.assertEqual(Comment.objects.count(), init_count - 1)
 
     def test_cannot_delete_comment_by_different_user(self):
+        user = self.user_2
         comment = self.create_comment(self.content_object_1)
-        self.client.force_login(self.user_2)
-        self.assertEqual(comment.content, 'comment 1')
-        self.assertEqual(comment.user.username, self.user_1.username)
+        self.client.force_login(user)
 
-        init_count = Comment.objects.all().count()
-        self.assertEqual(init_count, 1)
+        assert comment.user.username != user
 
         # test GET request
         response = self.client.get(self.get_url('comment:delete', comment.id), data=self.data)
-        self.response_fails_test(response)
+        self.response_fails_test(response, comment)
 
         # test POST request
         response = self.client.post(self.get_url('comment:delete', comment.id), data=self.data)
-        self.response_fails_test(response)
+        self.response_fails_test(response, comment)
 
 
 class ConfirmCommentViewTest(BaseAnonymousCommentTest):

@@ -114,6 +114,7 @@ class BaseCommentTest(TestCase, BaseInternationalizationTest):
         self.client.force_login(self.user_1)
         translation.activate("test")
         self.addCleanup(patch.stopall)
+        self.addCleanup(translation.deactivate)
 
     @classmethod
     def increase_comment_count(cls):
@@ -275,8 +276,8 @@ class BaseCommentViewTest(BaseCommentTest):
         self.client_non_ajax.force_login(self.user_2)
         self.data = {
             'content': 'parent comment was edited',
-            'app_name': 'post',
-            'model_name': 'post',
+            'app_name': self.post_1._meta.app_label,
+            'model_name': self.post_1.__class__.__name__.lower(),
             'model_id': self.post_1.id,
         }
 
@@ -421,9 +422,9 @@ class BaseCommentMixinTest(BaseCommentTest):
         cls.request = cls.factory.get('/')
         cls.data = {
             'content': 'test',
-            'model_name': 'post',
-            'app_name': 'post',
-            'model_id': 1
+            'model_name': cls.post_1.__class__.__name__.lower(),
+            'app_name': cls.post_1._meta.app_label,
+            'model_id': cls.post_1.id,
         }
         cls.comment = cls.create_comment(cls.post_1, cls.user_1)
 

@@ -9,6 +9,7 @@ from comment.conf import settings
 from comment.models import Comment, FlagInstanceManager, ReactionInstance
 from comment.messages import ContentTypeError, EmailError, ReactionError
 from comment.api.serializers import CommentSerializer
+from comment.utils import get_model_obj
 from comment.tests.base import BaseAPITest, timezone
 from comment.tests.test_utils import BaseAnonymousCommentTest
 
@@ -17,9 +18,9 @@ class BaseAPIViewTest(BaseAPITest):
     def setUp(self):
         super().setUp()
         self.url_data = {
-            'model_name': 'post',
-            'app_name': 'post',
-            'model_id': 1
+            'model_name': self.post_1.__class__.__name__.lower(),
+            'app_name': self.post_1._meta.app_label,
+            'model_id': self.post_1.id,
         }
         self.parents = Comment.objects.filter_parents_by_object(self.post_1).count()
         self.all_comments = Comment.objects.all().count()
@@ -163,7 +164,8 @@ class CommentCreateTest(BaseAPIViewTest):
 
     def test_create_child_comment(self):
         url_data = self.url_data.copy()
-        url_data['parent_id'] = 1
+        model_obj = get_model_obj(**url_data)
+        url_data['parent_id'] = Comment.objects.all_comments_by_object(model_obj).filter(parent=None).first().id
         data = {'content': 'new child comment from api'}
 
         response = self.client.post(self.get_url(self.get_base_url(), **url_data), data=data)
