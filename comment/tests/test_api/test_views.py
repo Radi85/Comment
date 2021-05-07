@@ -507,7 +507,7 @@ class APICommentDetailForFlagStateChangeTest(BaseAPITest):
 
         response = self.client.post(self.get_base_url(comment.id), data=self.data)
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_by_not_permitted_user(self):
         self.client.force_login(self.user_1)
