@@ -47,10 +47,20 @@ release = get_version()
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
+
+
 extensions = [
     'sphinx.ext.githubpages',
-    'sphinx.ext.autosectionlabel'
+    'sphinx.ext.autosectionlabel',
+    'sphinxcontrib.swagger',
 ]
+
+openapi = {
+    'title': 'Django Comments DAB API',
+    'spec_path': 'specs/openapi.yml',
+    'page_name': 'swagger',
+    'swagger_embedded_in': 'openapi',
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
