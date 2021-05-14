@@ -1,6 +1,8 @@
 Web API
 =======
 
+For Swagger page See `<openapi.html>`_ or `<swagger.html>`_
+
 django-comments-dab uses django-rest-framework to expose a Web API that provides
 developers with access to the same functionality offered through the web user interface.
 
@@ -253,7 +255,8 @@ Authorization must be provided as a TOKEN or USERNAME:PASSWORD.
 
 This action requires comment `admin` or `moderator` privilege.
 
-:: code:: bash
+::
+
     $ curl -X GET -u USERNAME:PASSWORD -H "Content-Type: application/json" $BASE_URL/api/comments/subscribers/
 
 

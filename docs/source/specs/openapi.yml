@@ -1,0 +1,705 @@
+openapi: 3.0.0
+
+info:
+  title: Django Comments DAB
+  description: Django Comments DAB - openapi
+  version: 2.7.0
+
+servers:
+  - url: http://localhost:8001/api
+    description: local development
+
+tags: []
+
+paths:
+  /comments/:
+    get:
+      description: Get all comments for a specific model object
+      parameters:
+        - $ref: "#/components/parameters/app_name"
+        - $ref: "#/components/parameters/model_name"
+        - $ref: "#/components/parameters/model_id"
+      responses:
+        "200":
+          description: Returns list of all comments for a specific model. object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentsList"
+        "400":
+          $ref: "#/components/responses/ContentTypeError"
+  /comments/create/:
+    post:
+      description: Create a comment for a model object. This action can be performed anonymously when providing the email in the requestBody.
+      parameters:
+        - $ref: "#/components/parameters/app_name"
+        - $ref: "#/components/parameters/model_name"
+        - $ref: "#/components/parameters/model_id"
+        - $ref: "#/components/parameters/parent_id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentInput"
+      responses:
+        "201":
+          description: Returns created comment object.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+        "403":
+          $ref: "#/components/responses/CreateCommentForbiddenError"
+        "400":
+          $ref: "#/components/responses/CreateCommentError"
+  /comments/confirm/{key}/:
+    get:
+      description: Confirm created comment anonymously.
+      parameters:
+        - $ref: "#/components/parameters/key"
+      responses:
+        "200":
+          description: Returns created comment anonymously.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FullComment"
+        "400":
+          $ref: "#/components/responses/InvalidCommentKeyError"
+  /comments/{id}/:
+    get:
+      description: Get comment object.
+      parameters:
+        - $ref: "#/components/parameters/id"
+      responses:
+        "200":
+          description: Returns comment object.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FullComment"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+    put:
+      description: Update comment content.
+      security:
+        - owner: []
+      parameters:
+        - $ref: "#/components/parameters/id"
+      responses:
+        "200":
+          description: Returns updated comment (content) object.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FullComment"
+        "400":
+          $ref: "#/components/responses/CommentPayloadError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+    delete:
+      description: Delete comment object.
+      security:
+        - owner: []
+        - comment_admin: []
+      parameters:
+        - $ref: "#/components/parameters/id"
+      responses:
+        "204":
+          description: Delete comment object (No Content).
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+  /comments/{id}/react/{reaction}/:
+    post:
+      description: React to a comment.
+      security:
+        - user: []
+      parameters:
+        - $ref: "#/components/parameters/id"
+        - $ref: "#/components/parameters/reaction"
+      responses:
+        "200":
+          description: Returns comment object with updated reactions object.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FullComment"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+  /comments/{id}/flag/:
+    post:
+      description: Report (flag) a comment.
+      security:
+        - user: []
+      parameters:
+        - $ref: "#/components/parameters/id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FlagInput"
+      responses:
+        "200":
+          description: Returns comment object with updated flags object.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FullComment"
+        "400":
+          $ref: "#/components/responses/FlagError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+  /comments/{id}/flag/state/change/:
+    post:
+      description: Toggle resolve or reject a falgged comment.
+      security:
+        - comment_admin: []
+        - comment_moderator: []
+      parameters:
+        - $ref: "#/components/parameters/id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangeFlagStateInput"
+      responses:
+        "200":
+          description: Returns comment object with updated flags object.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FullComment"
+        "400":
+          $ref: "#/components/responses/FlagError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+  /comments/toggle-subscription/:
+    post:
+      description: Toggle comment subscription.
+      security:
+        - user: []
+      parameters:
+        - $ref: "#/components/parameters/app_name"
+        - $ref: "#/components/parameters/model_name"
+        - $ref: "#/components/parameters/model_id"
+      responses:
+        "200":
+          description: Returns subscription data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscribe"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "400":
+          $ref: "#/components/responses/SubscribeError"
+  /comments/subscribers/:
+    get:
+      description: Get subscribers for a model object.
+      security:
+        - comment_admin: []
+        - comment_moderator: []
+      parameters:
+        - $ref: "#/components/parameters/app_name"
+        - $ref: "#/components/parameters/model_name"
+        - $ref: "#/components/parameters/model_id"
+      responses:
+        "200":
+          description: Returns subscribers data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscribers"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "400":
+          $ref: "#/components/responses/ContentTypeError"
+  /comments/toggle-blocking/:
+    post:
+      description: Toggle blocking comment user/email.
+      security:
+        - comment_admin: []
+        - comment_moderator: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BlockingInput"
+      responses:
+        "200":
+          description: Returns subscribers data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Blocking"
+        "400":
+          $ref: "#/components/responses/InvalidInput"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+
+components:
+  securitySchemes:
+    user:
+      description: Normal user without any comment moderation privileges. Schema is based on your app level schema.
+      scheme: basic
+      type: http
+    owner:
+      description: User who owns the comment. Schema is based on your app level schema.
+      scheme: basic
+      type: http
+    comment_admin:
+      description: User with role comment_admin. Schema is based on your app level schema.
+      scheme: basic
+      type: http
+    comment_moderator:
+      description: User with role comment_moderator. Schema is based on your app level schema.
+      scheme: basic
+      type: http
+  schemas:
+    EntityId:
+      type: object
+      properties:
+        id:
+          type: integer
+      required:
+        - id
+    User:
+      description: User model
+      allOf:
+        - $ref: "#/components/schemas/EntityId"
+        - type: object
+          properties:
+            username:
+              type: string
+            email:
+              type: string
+    BaseComment:
+      description: Comment model with basic fields
+      allOf:
+        - $ref: "#/components/schemas/EntityId"
+        - type: object
+          properties:
+            user:
+              $ref: "#/components/schemas/User"
+            email:
+              type: string
+            content:
+              type: string
+            posted:
+              type: string
+              format: date-time
+            edited:
+              type: string
+              format: date-time
+            urlhashe:
+              type: string
+    Comment:
+      description: Comment model with basic fields
+      allOf:
+        - $ref: "#/components/schemas/BaseComment"
+        - type: object
+          properties:
+            reply_count:
+              type: integer
+            parent:
+              $ref: "#/components/schemas/BaseComment"
+            replies:
+              type: array
+              items:
+                $ref: "#/components/schemas/BaseComment"
+
+    ReactionUsers:
+      description: Users who reacted to a comment.
+      type: object
+      properties:
+        likes:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+        dislikes:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+    Reactions:
+      description: Comment reactions data.
+      type: object
+      properties:
+        like:
+          type: integer
+        dislike:
+          type: integer
+        users:
+          $ref: "#/components/schemas/ReactionUsers"
+
+    Flags:
+      description: Comment flags data.
+      type: object
+      properties:
+        count:
+          type: integer
+        moderator:
+          $ref: "#/components/schemas/User"
+        state:
+          type: integer
+          enum: [1, 2, 3, 4]
+        verbose_state:
+          type: string
+          enum: [Unflagged, Flagged, Rejected, Resolved]
+        reporters:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+
+    FullComment:
+      description: Comment object.
+      allOf:
+        - $ref: "#/components/schemas/Comment"
+        - type: object
+          properties:
+            reactions:
+              $ref: "#/components/schemas/Reactions"
+            is_flagged:
+              type: boolean
+            flags:
+              $ref: "#/components/schemas/Flags"
+    CommentsList:
+      type: array
+      items:
+        $ref: "#/components/schemas/FullComment"
+    Subscribe:
+      description: Subscription data.
+      type: object
+      properties:
+        following:
+          type: boolean
+        app_name:
+          type: string
+        model_name:
+          type: string
+        model_id:
+          type: integer
+        model_object:
+          type: string
+    Subscribers:
+      description: Subscribers data. Followers is a list of emails.
+      type: object
+      properties:
+        app_name:
+          type: string
+        model_name:
+          type: string
+        model_id:
+          type: integer
+        followers:
+          type: array
+          items:
+            type: string
+    Blocking:
+      description: Blocking data.
+      type: object
+      properties:
+        blocked_user:
+          type: string
+        blocked:
+          type: boolean
+        urlhash:
+          type: string
+
+    CommentInput:
+      type: object
+      properties:
+        content:
+          type: string
+          description: Comment content (body)
+        email:
+          type: string
+          description: Email is required when posting comment anonymously
+      required:
+        - content
+    FlagInput:
+      type: object
+      properties:
+        reason:
+          type: integer
+          enum: [1, 2, 100]
+          description: >
+            Reason for flagging (reporting) a comment. Default values:
+              * (`1`, 'Spam | Exists only to promote a service')
+              * (`2`, 'Abusive | Intended at promoting hatred')
+              * (`100`, 'Something else')
+        info:
+          type: string
+          description: Email is required when posting comment anonymously
+      required:
+        - reason
+    ChangeFlagStateInput:
+      type: object
+      properties:
+        state:
+          type: integer
+          enum: [3, 4]
+          description: >
+            state:
+              * `3` - REJECTED state
+              * `4` - RESOLVED state
+      required:
+        - state
+    BlockingInput:
+      type: object
+      properties:
+        comment_id:
+          type: integer
+          description: Comment id
+      required:
+        - comment_id
+    ContentTypeError:
+      type: object
+      properties:
+        detail:
+          type: string
+    CommentPayloadError:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            type: string
+    EmailPayloadError:
+      type: object
+      properties:
+        email:
+          type: array
+          items:
+            type: string
+    CreateCommentPayloadError:
+      type: object
+      oneOf:
+        - $ref: "#/components/schemas/CommentPayloadError"
+        - $ref: "#/components/schemas/EmailPayloadError"
+
+    GeneralError:
+      type: object
+      properties:
+        detail:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+      additionalProperties: true
+
+  parameters:
+    id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: number
+      description: model (Comment) id
+    model_name:
+      name: model_name
+      in: query
+      required: true
+      schema:
+        type: string
+      description: The model name of the content type that has comments associated with it.
+    model_id:
+      name: model_id
+      required: true
+      in: query
+      schema:
+        type: number
+      description: The id of an object of that model.
+    app_name:
+      name: app_name
+      required: true
+      in: query
+      schema:
+        type: string
+      description: The name of the app that contains the model.
+    parent_id:
+      name: parent_id
+      required: false
+      in: query
+      schema:
+        type: number
+      description: The id of the parent comment. Used with child comments.
+    reaction:
+      name: reaction
+      in: path
+      required: true
+      schema:
+        type: string
+        enum: [like, dislike]
+      description: >
+        reaction type:
+         * `like` - Toggling like reaction
+         * `dislike` - Toggling dislike reaction
+    key:
+      name: key
+      in: path
+      required: true
+      schema:
+        type: string
+      description: The encrypted key that contains the comment.
+
+  responses:
+    ContentTypeError:
+      description: >
+        One or more of the content type is missing in the url query:
+          * `app_name`
+          * `model_name`
+          * `model_id`
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ContentTypeError"
+          example:
+            detail: app name must be provided
+    CommentPayloadError:
+      description: Content field is missing. Or email field is missing when creating comment anonymously.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CommentPayloadError"
+          example:
+            content:
+              - This field may not be blank.
+    CreateCommentError:
+      description: >
+        One of the following error:
+          - One or more of the content type is missing in the url query:
+            * `app_name`
+            * `model_name`
+            * `model_id`
+          - Content field is missing in the requestBod.
+          - Email field is missing or invalid when creating comment anonymously.
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: "#/components/schemas/ContentTypeError"
+              - $ref: "#/components/schemas/CreateCommentPayloadError"
+          example:
+            content:
+              - This field may not be blank.
+    SubscribeError:
+      description: >
+        One of the following error:
+          - One or more of the content type is missing in the url query:
+            * `app_name`
+            * `model_name`
+            * `model_id`
+          - Email field is missing or invalid.
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: "#/components/schemas/ContentTypeError"
+              - $ref: "#/components/schemas/EmailPayloadError"
+          example:
+            email:
+              - Email is required to subscribe {model_object}.
+    FlagError:
+      description: Invalid reason or comment is already flagged.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GeneralError"
+          example:
+            detail:
+              - REASON is an invalid reason.
+    InvalidCommentKeyError:
+      description: Invalid key for anonymous comment.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GeneralError"
+          example:
+            detail: The link seems to be broken.
+
+    NotFoundError:
+      description: Comment not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GeneralError"
+          example:
+            detail: Not found.
+
+    InvalidInput:
+      description: Invalid input data.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GeneralError"
+          example:
+            detail: Invalid input data.
+
+    UnauthenticatedError:
+      description: Unauthenticated user.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GeneralError"
+          example:
+            detail: Authentication credentials were not provided.
+    BlockedUserError:
+      description: Blocked user.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GeneralError"
+          example:
+            detail: You cannot perform this action at the moment! Contact the admin for more details.
+    PermissionDeniedError:
+      description: User does not have sufficient privileges.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GeneralError"
+          example:
+            detail: You do not have permission to perform this action.
+
+    CreateCommentForbiddenError:
+      description: >
+        One of the following reasons:
+          - Unauthenticated user (When commenting anonymously is not allowed).
+          - Blocked user.
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: "#/components/responses/UnauthenticatedError"
+              - $ref: "#/components/responses/BlockedUserError"
+          example:
+            detail: You cannot perform this action at the moment! Contact the admin for more details.
+    ForbiddenError:
+      description: >
+        One of the following reasons:
+          - Unauthenticated user.
+          - Blocked user.
+          - User does not have sufficient privileges.
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: "#/components/responses/UnauthenticatedError"
+              - $ref: "#/components/responses/BlockedUserError"
+              - $ref: "#/components/responses/PermissionDeniedError"
+          example:
+            detail: You do not have permission to perform this action.

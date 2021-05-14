@@ -9,7 +9,8 @@ Welcome to django-comments-dab's documentation!
    installation
    setup
    usage
-   Web API
+   WebAPI
+   openapi
    styling
    example
    settings
