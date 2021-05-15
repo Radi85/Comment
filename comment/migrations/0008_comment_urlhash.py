@@ -12,10 +12,9 @@ def generate_urlhash():
 
 
 def set_unique_urlhash(model, instance):
-    if not instance.urlhash:
+    instance.urlhash = generate_urlhash()
+    while model.objects.filter(urlhash=instance.urlhash).exists():
         instance.urlhash = generate_urlhash()
-        while model.objects.filter(urlhash=instance.urlhash).exists():
-            instance.urlhash = generate_urlhash()
 
 
 def set_default_urlhash(apps, schema_editor):
