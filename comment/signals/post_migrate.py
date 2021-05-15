@@ -26,6 +26,7 @@ def create_permission_groups(sender, **kwargs):
 
 
 def adjust_flagged_comments(sender, **kwargs):
-    if settings.COMMENT_FLAGS_ALLOWED:
-        for comment in Comment.objects.all():
-            comment.flag.toggle_flagged_state()
+    [
+        comment.flag.toggle_flagged_state()
+        for comment in Comment.objects.all()
+    ]

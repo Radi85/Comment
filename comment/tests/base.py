@@ -364,32 +364,24 @@ class BaseCommentMigrationTest(TransactionTestCase):
     def setUp(self):
         super().setUp()
         assert self.migrate_to and self.migrate_from, \
-            f'TestCase {type(self).__name} must define migrate_to and migrate_from properties'
+            f'TestCase {type(self).__name__} must define migrate_to and migrate_from properties'
         self.migrate_from = [(self.app, self.migrate_from)]
         self.migrate_to = [(self.app, self.migrate_to)]
         self.executor = MigrationExecutor(connection)
         self.old_apps = self.executor.loader.project_state(self.migrate_from).apps
 
-        self.user = User.objects.create_user(username="tester-1")
-        self.post = Post.objects.create(
-            author=self.user,
-            title="post 3",
-            body="third post body"
-        )
-        content_type = ContentType.objects.get(model='post')
-        self.ct_object = content_type.get_object_for_this_type(id=self.post.id)
-
+        self._create_data()
         # revert to the original migration
         self.executor.migrate(self.migrate_from)
         # ensure return to the latest migration, even if the test fails
         self.addCleanup(self.force_migrate)
 
-        self.setUpBeforeMigration(self.old_apps)
+        self.setUpBeforeMigration()
         self.executor.loader.build_graph()
         self.executor.migrate(self.migrate_to)
         self.new_apps = self.executor.loader.project_state(self.migrate_to).apps
 
-    def setUpBeforeMigration(self, apps):
+    def setUpBeforeMigration(self):
         pass
 
     @property
@@ -406,6 +398,16 @@ class BaseCommentMigrationTest(TransactionTestCase):
             # get latest migration of current app
             migrate_to = [key for key in self.executor.loader.graph.leaf_nodes() if key[0] == self.app]
         self.executor.migrate(migrate_to)
+
+    def _create_data(self):
+        self.user = User.objects.create_user(username="tester-1")
+        self.post = Post.objects.create(
+            author=self.user,
+            title="post 3",
+            body="third post body"
+        )
+        content_type = ContentType.objects.get(model='post')
+        self.ct_object = content_type.get_object_for_this_type(id=self.post.id)
 
 
 class BaseCommentMixinTest(BaseCommentTest):
