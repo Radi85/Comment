@@ -16,3 +16,6 @@
 {% if is_blocking_allowed %}
     {% include 'comment/block/block_modal.html' %}
 {% endif %}
+{% if user.is_anonymous and is_anonymous_allowed %}
+    {% include 'comment/anonymous/email_modal.html' %}
+{% endif %}

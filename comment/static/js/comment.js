@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let flagModal = document.getElementById('flagModal');
     let followModal = document.getElementById('followModal');
     let blockModal = document.getElementById('blockModal');
+    let createAnonymousCommentModal = document.getElementById('createAnonymousCommentModal');
     let headers = {
         'X-Requested-With': 'XMLHttpRequest',
         'X-CSRFToken': csrfToken,
@@ -39,6 +40,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let hideModal = modalElement => {
         modalElement.classList.remove('show-modal');
         modalElement.style.display = 'none';
+    };
+
+    let hideCreateAnonymousCommentModal = () => {
+        let form = createAnonymousCommentModal.querySelector('.modal-body').querySelector('form');
+        if (form) {
+            createAnonymousCommentModal.querySelector('.modal-body').removeChild(form);
+        }
+        resetCreateForms();
+        hideModal(createAnonymousCommentModal);
     };
 
     // show and hide child comments
@@ -111,6 +121,48 @@ document.addEventListener('DOMContentLoaded', () => {
         }).join('&');
     };
 
+    let loadAnonymousModalForm = _form => {
+        let form = _form.cloneNode(true);
+        let textareaElement = form.querySelector('textarea');
+        textareaElement.hidden = true;
+        form.querySelector('button').setAttribute('data-email-required', 'false');
+        let emailElementData = `
+                    <div class="row">
+                        <div class="col-2">
+                            <label for="email">Email:</label>
+                        </div>
+                        <div class="col-10">
+                            <input id="DABEmail" class="form-control mr-2 w-100" type="email" name="email" required>
+                            <div class="error text-danger small mt-1"></div>
+                        </div>
+                    </div>`;
+        let emailElement = stringToDom(emailElementData, '.row');
+        let inputPlaceholder = form.querySelector('#inputPlaceholder');
+        inputPlaceholder.classList.remove('col-sm-9');
+        inputPlaceholder.classList.remove('col-md-10');
+        inputPlaceholder.classList.add('col-sm-8');
+        inputPlaceholder.appendChild(emailElement);
+        let buttonPlaceholder = form.querySelector('#buttonPlaceholder');
+        buttonPlaceholder.classList.remove('col-sm-3');
+        buttonPlaceholder.classList.remove('col-md-2');
+        buttonPlaceholder.classList.add('col-sm-4');
+        createAnonymousCommentModal.querySelector('.modal-body').appendChild(form);
+        showModal(createAnonymousCommentModal);
+        form.querySelector('#DABEmail').focus();
+    };
+
+    let resetCreateForms = () => {
+        let buttons = document.getElementsByClassName('js-comment-btn');
+        Array.prototype.forEach.call(buttons, element => {
+            element.setAttribute('disabled', 'disabled');
+        });
+        let inputs = document.getElementsByClassName("js-comment-input");
+        Array.prototype.forEach.call(inputs, element => {
+            element.setAttribute("style", "height: 31px;");
+            element.value = '';
+        });
+    };
+
     // create new comment
     let submitCommentCreateForm = form => {
         let errorElement = form.querySelector('.error');
@@ -122,6 +174,11 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.page = urlParams.get('page');
         // this step is needed to append the form data to request.POST
         let formDataQuery = convertFormDataToURLQuery(formData);
+        let emailRequired = formButton.getAttribute('data-email-required') === 'true';
+        if (emailRequired) {
+            loadAnonymousModalForm(form);
+            return;
+        }
         fetch(url, {
             method: 'POST',
             headers: headers,
@@ -129,32 +186,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }).then(response => {
             return response.json();
         }).then(result => {
-            if (result.status === 403){
+            if (result.status === 403) {
                 alert(result.reason);
                 return;
-            }
-            else if (result.error) {
-                // alert(result.error);
+            } else if (result.error) {
                 form.querySelector('.error').innerHTML = result.error;
                 form.querySelector('.error').classList.remove('d-none');
                 return;
             }
+            // reset form
+            resetCreateForms();
+            if (result.anonymous) {
+                createInfoElement(document.querySelector('.js-comment'), 'success', result.msg, 3);
+                form.reset();
+                hideModal(createAnonymousCommentModal);
+                createAnonymousCommentModal.querySelector('.modal-body').removeChild(form);
+                return;
+            }
+
             // parent comment
             if (formButton.getAttribute('value') === 'parent') {
                 // reload all comments only when posting parent comment
-                if (result.anonymous) {
-                    createInfoElement(form.closest('.js-comment'), 'success', result.msg, 3);
-                    form.reset();
-                    return;
-                }
                 document.getElementById("comments").outerHTML = result.data;
             } else {
                 // child comment
-                if (result.anonymous) {
-                    createInfoElement(form.closest('.js-parent-comment'), 'success', result.msg, 3);
-                    form.reset();
-                    return;
-                }
                 let childComment = stringToDom(result.data, '.js-child-comment');
                 form.parentNode.insertBefore(childComment, form);
                 // update number of replies
@@ -175,12 +230,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     followButton.querySelector('span').setAttribute('title', 'Unfollow this thread');
                 }
             }
-            formButton.setAttribute('disabled', 'disabled');
-            let elements = document.getElementsByClassName("js-comment-input");
-            Array.prototype.forEach.call(elements, element => {
-                element.setAttribute("style", "height: 31px;");
-                element.value = '';
-            });
             // remove pagination query when posting a new comment
             let uri = window.location.toString();
             if (uri.indexOf("?") > 0) {
@@ -200,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch(url, {headers: headers}).then(response => {
             return response.json();
         }).then(result => {
-            if (result.status === 403){
+            if (result.status === 403) {
                 alert(result.reason);
                 return;
             }
@@ -235,7 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }).then(response => {
             return response.json();
         }).then(result => {
-            if (result.status === 403){
+            if (result.status === 403) {
                 alert(result.reason);
                 return;
             }
@@ -283,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch(url, {headers: headers}).then(response => {
             return response.json()
         }).then(result => {
-            if (result.status === 403){
+            if (result.status === 403) {
                 alert(result.reason);
                 return;
             }
@@ -314,7 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }).then(response => {
             return response.json();
         }).then(result => {
-            if (result.status === 403){
+            if (result.status === 403) {
                 alert(result.reason);
                 return;
             }
@@ -390,7 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }).then(response => {
             return response.json();
         }).then(result => {
-            if (result.status === 403){
+            if (result.status === 403) {
                 alert(result.reason);
                 return;
             }
@@ -423,7 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }).then(response => {
             return response.json();
         }).then(result => {
-            if (result.status === 403){
+            if (result.status === 403) {
                 alert(result.reason);
                 return;
             }
@@ -487,7 +536,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }).then(response => {
             return response.json();
         }).then(result => {
-            if (result.status === 403){
+            if (result.status === 403) {
                 alert(result.reason);
                 return;
             }
@@ -596,7 +645,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }).then(response => {
             return response.json();
         }).then(result => {
-            if (result.status === 403){
+            if (result.status === 403) {
                 alert(result.reason);
                 return;
             }
@@ -684,7 +733,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }).then(response => {
             return response.json();
         }).then(result => {
-            if (result.status === 403){
+            if (result.status === 403) {
                 alert(result.reason);
                 return;
             }
@@ -734,11 +783,13 @@ document.addEventListener('DOMContentLoaded', () => {
         removeTargetElement();
         if (event.target && event.target !== event.currentTarget) {
             if (event.target === deleteModal || event.target === flagModal || event.target === followModal || event.target === blockModal ||
+                event.target === createAnonymousCommentModal ||
                 event.target.closest('.modal-close-btn') || event.target.closest('.modal-cancel-btn')) {
                 hideModal(deleteModal);
                 hideModal(flagModal);
                 hideModal(followModal);
                 hideModal(blockModal);
+                hideCreateAnonymousCommentModal();
             } else if (event.target.closest('.js-reply-link')) {
                 event.preventDefault();
                 replyLink(event.target);

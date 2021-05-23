@@ -1,0 +1,17 @@
+{% load i18n %}
+{% load comment_tags %}
+<div id="createAnonymousCommentModal" class="comment-modal">
+    <div class="comment-modal-dialog" role="document">
+        <div class="comment-modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% block title %}
+                    {% trans "Please enter your email to post a comment" %}{% endblock title %}</h5>
+                <button class="modal-close-btn" aria-label="{% trans "Close" %}">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+            </div>
+        </div>
+    </div>
+</div>
