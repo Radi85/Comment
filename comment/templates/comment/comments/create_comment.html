@@ -4,7 +4,7 @@
     <form class="js-comment-form" method="post" data-url="{% url 'comment:create' %}">
         {% csrf_token %}
         <div class="row">
-            <div class="{% block text_area_wrapper_cls %}col-sm-9 col-md-10 px-2 m-2 m-sm-0{% endblock text_area_wrapper_cls %}">
+            <div id="inputPlaceholder" class="{% block text_area_wrapper_cls %}col-sm-9 col-md-10 px-2 m-2 m-sm-0{% endblock text_area_wrapper_cls %}">
                 {% include 'comment/comments/comment_form.html' with placeholder=placeholder %}
             </div>
             <input name="model_name" value="{% get_model_name model_object %}" hidden>
@@ -14,9 +14,9 @@
             {% if comment %}
             <input name="parent_id" value="{{ comment.id }}" type="hidden"/>
             {% endif %}
-            <div class="{% block submit_button_wrapper_cls %}col-sm-3 col-md-2 px-2 m-3 m-sm-0{% endblock submit_button_wrapper_cls %}">
+            <div id="buttonPlaceholder" class="{% block submit_button_wrapper_cls %}col-sm-3 col-md-2 px-2 m-3 m-sm-0{% endblock submit_button_wrapper_cls %}">
                 <button disabled class="js-comment-btn {% block submit_button_cls %}btn btn-outline-success btn-block btn-sm{% endblock submit_button_cls %}"
-                        type="submit" name="form_type" value="{% if comment %}child{% else %}parent{% endif %}">
+                        type="submit" name="form_type" value="{% if comment %}child{% else %}parent{% endif %}" data-email-required="{% if user.is_anonymous and is_anonymous_allowed %}true{% endif %}">
                     {% if comment %}{% trans "Reply" %}{% else %}{% trans "Comment" %}{% endif %}
                 </button>
             </div>
