@@ -1,7 +1,7 @@
 import os
 import os.path
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 PROJECT_DIR = os.path.join(BASE_DIR, 'test/example')
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'secret-key-is-unsafe')

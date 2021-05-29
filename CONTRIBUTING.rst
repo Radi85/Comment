@@ -96,7 +96,7 @@ To run tests against a particular ``python`` and ``django`` version installed in
 
 .. code:: bash
 
-    (local_env) $ python manage.py test
+    (local_env) $ python manage.py test --settings=test.settings.test
 
 
 To run tests against all supported ``python`` and ``django`` versions, you may run:
