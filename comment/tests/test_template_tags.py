@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 from django.core.exceptions import ImproperlyConfigured
 from django.template import TemplateSyntaxError
+from django.test import SimpleTestCase
 
 from comment.conf import settings
 from comment.forms import CommentForm
@@ -121,7 +122,7 @@ class RenderCommentsTest(BaseTemplateTagsTest):
         self.assertIs(data['comments'].has_previous(), True)
 
 
-class TestStaticFunctions(BaseTemplateTagsTest):
+class TestStaticFunctions(SimpleTestCase):
     def test_include_static(self):
         self.assertEqual(include_static(), '')
 

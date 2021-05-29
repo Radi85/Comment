@@ -15,7 +15,9 @@ env:
 install: pip install tox-travis coveralls
 script:
   - tox
-after_success: coveralls
+after_success:
+  - coverage combine
+  - coveralls
 
 jobs:
   allow_failures:
