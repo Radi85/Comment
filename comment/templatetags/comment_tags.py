@@ -1,6 +1,8 @@
 import re
 
 from django import template
+from django.utils.html import conditional_escape
+from django.utils.safestring import mark_safe
 
 from comment.models import ReactionInstance, FlagInstance, Follower, BlockedUser
 from comment.forms import CommentForm
@@ -88,15 +90,21 @@ def render_comments(obj, request, oauth=False):
 register.inclusion_tag('comment/base.html')(render_comments)
 
 
+def _restrict_line_breaks(content):
+    # Restrict 2 or more line breaks to 2 <br>
+    content = MULTIPLE_NEW_LINE_RE.sub(r'\1<br><br>\3', content)
+    return SINGLE_NEW_LINE_RE.sub(r'\1<br>\3', content)
+
+
 def render_content(comment, number=None):
     try:
         number = int(number)
     except (ValueError, TypeError):
         number = get_wrapped_words_number()
 
-    # Restrict 2 or more line breaks to 2 <br>
-    content = MULTIPLE_NEW_LINE_RE.sub(r'\1<br><br>\3', comment.content)
-    content = SINGLE_NEW_LINE_RE.sub(r'\1<br>\3', content)
+    # this is necessary to avoid XSS attacks
+    escaped_content = conditional_escape(comment.content)
+    content = _restrict_line_breaks(escaped_content)
     content_words = content.split()
     if not number or len(content_words) <= number:
         text_1 = content
@@ -106,8 +114,8 @@ def render_content(comment, number=None):
         text_2 = ' '.join(content_words[number:])
 
     return {
-        'text_1': text_1,
-        'text_2': text_2,
+        'text_1': mark_safe(text_1),
+        'text_2': mark_safe(text_2) if text_2 else None,
         'urlhash': comment.urlhash
     }
 

@@ -158,13 +158,13 @@ class RenderContentTest(BaseTemplateTagsTest):
         result = render_content(self.comment)
         self.assertEqual(result['urlhash'], self.comment.urlhash)
 
-    @patch.object(settings, 'COMMENT_WRAP_CONTENT_WORDS', 10)
-    def test_content_wrapping(self):
+    @patch.object(settings, 'COMMENT_WRAP_CONTENT_WORDS', 20)
+    def test_content_wrapping_with_large_truncate_number(self):
         content_words = self.comment.content.split()
-        self.assertEqual(len(content_words), len(self.content.split()))
+        self.assertIs(len(content_words) < 20, True)
 
         result = render_content(self.comment)
-        # truncate number is bigger than self.contentwords
+
         self.assertEqual(result['text_1'], self.comment.content)
         self.assertIsNone(result['text_2'])
 
@@ -190,17 +190,17 @@ class RenderContentTest(BaseTemplateTagsTest):
         self.assertIn('<br><br>', result['text_1'])
         self.assertNotIn('<br><br><br>', result['text_1'])
 
-    def test_wrapping_after_certain_length(self):
+    @patch.object(settings, 'COMMENT_WRAP_CONTENT_WORDS', 5)
+    def test_content_wrapping_with_small_truncate_number(self):
         self.comment.refresh_from_db()
         content_words = self.comment.content.split()
         self.assertEqual(len(content_words), len(self.content.split()))
 
-        truncate_words_after = 5
-        result = render_content(self.comment, truncate_words_after)
+        result = render_content(self.comment)
 
         # truncate number is smaller than words in content
-        self.assertEqual(result['text_1'], ' '.join(content_words[:truncate_words_after]))
-        self.assertEqual(result['text_2'], ' '.join(content_words[truncate_words_after:]))
+        self.assertEqual(result['text_1'], ' '.join(content_words[:5]))
+        self.assertEqual(result['text_2'], ' '.join(content_words[5:]))
 
 
 class GetUsernameForCommentTest(BaseTemplateTagsTest):
