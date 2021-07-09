@@ -6,7 +6,8 @@ from django.urls import reverse_lazy
 from rest_framework import status
 
 from comment.conf import settings
-from comment.models import Comment, FlagInstanceManager, ReactionInstance
+from comment.models import Comment, ReactionInstance
+from comment.managers import FlagInstanceManager
 from comment.messages import ContentTypeError, EmailError, ReactionError
 from comment.api.serializers import CommentSerializer
 from comment.utils import get_model_obj

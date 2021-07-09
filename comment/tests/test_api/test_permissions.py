@@ -9,7 +9,7 @@ from comment.api.permissions import (
     CanGetSubscribers, UserPermittedOrReadOnly, CanCreatePermission, CanBlockUsers
 )
 from comment.api.views import CommentList
-from comment.models import FlagInstanceManager
+from comment.managers import FlagInstanceManager
 from comment.conf import settings
 
 
