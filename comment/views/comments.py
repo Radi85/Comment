@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.contrib import messages
@@ -54,7 +54,10 @@ class UpdateComment(CanEditMixin, BaseCommentView):
     comment = None
 
     def get_object(self):
-        self.comment = get_object_or_404(Comment, pk=self.kwargs.get('pk'))
+        self.comment = get_object_or_404(
+            Comment.objects.select_related('user', 'flag', 'reaction'),
+            pk=self.kwargs.get('pk')
+        )
         return self.comment
 
     def get(self, request, *args, **kwargs):
@@ -78,7 +81,10 @@ class DeleteComment(CanDeleteMixin, BaseCommentView):
     comment = None
 
     def get_object(self):
-        self.comment = get_object_or_404(Comment, pk=self.kwargs.get('pk'))
+        self.comment = get_object_or_404(
+            Comment.objects.select_related('user', 'flag', 'reaction'),
+            pk=self.kwargs.get('pk')
+        )
         return self.comment
 
     def get(self, request, *args, **kwargs):

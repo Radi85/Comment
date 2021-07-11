@@ -4,17 +4,19 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.http import require_POST
 
-from comment.models import Comment, Reaction, ReactionInstance
 from comment.mixins import BaseCommentMixin
+from comment.models import Comment, Reaction, ReactionInstance
 from comment.responses import UTF8JsonResponse, DABResponseData
 from comment.messages import ReactionInfo
 
 
 @method_decorator(require_POST, name='dispatch')
 class SetReaction(BaseCommentMixin, View, DABResponseData):
-
     def post(self, request, *args, **kwargs):
-        comment = get_object_or_404(Comment, id=kwargs.get('pk'))
+        comment = get_object_or_404(
+            Comment.objects.select_related('user', 'reaction', 'flag'),
+            pk=self.kwargs.get('pk')
+        )
         reaction_type = kwargs.get('reaction', None)
         reaction_obj = Reaction.objects.get_reaction_object(comment)
         try:

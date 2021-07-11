@@ -161,7 +161,7 @@ class ReactionSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_users(obj):
         users = {'likes': [], 'dislikes': []}
-        for instance in obj.reactions.all():
+        for instance in obj.reactions.all().select_related('user'):
             user_info = {
                 'id': instance.user.id,
                 'username': instance.user.USERNAME_FIELD
@@ -189,7 +189,7 @@ class FlagSerializer(serializers.ModelSerializer):
                 'id': flag_instance.user.id,
                 'username': flag_instance.user.USERNAME_FIELD
             }
-            for flag_instance in obj.flags.all()
+            for flag_instance in obj.flags.all().select_related('user')
         ]
 
     @staticmethod

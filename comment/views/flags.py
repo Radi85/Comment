@@ -3,16 +3,19 @@ from django.shortcuts import get_object_or_404
 from django.views import View
 
 from comment.models import Comment, Flag, FlagInstance
-from comment.mixins import CanSetFlagMixin, CanUpdateFlagStateMixin
+from comment.mixins import CanSetFlagMixin, CanUpdateFlagStateMixin, BaseCommentMixin
 from comment.responses import UTF8JsonResponse, DABResponseData
 from comment.messages import FlagInfo, FlagError
 
 
-class SetFlag(CanSetFlagMixin, View, DABResponseData):
+class SetFlag(CanSetFlagMixin, BaseCommentMixin, View, DABResponseData):
     comment = None
 
     def get_object(self):
-        self.comment = get_object_or_404(Comment, pk=self.kwargs.get('pk'))
+        self.comment = get_object_or_404(
+            Comment.objects.select_related('user', 'reaction', 'flag'),
+            pk=self.kwargs.get('pk')
+        )
         return self.comment
 
     def post(self, request, *args, **kwargs):
@@ -41,7 +44,10 @@ class ChangeFlagState(CanUpdateFlagStateMixin, View, DABResponseData):
     comment = None
 
     def get_object(self):
-        self.comment = get_object_or_404(Comment, pk=self.kwargs.get('pk'))
+        self.comment = get_object_or_404(
+            Comment.objects.select_related('user', 'reaction', 'flag'),
+            pk=self.kwargs.get('pk')
+        )
         return self.comment
 
     def post(self, request, *args, **kwargs):
