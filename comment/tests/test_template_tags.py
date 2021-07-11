@@ -124,7 +124,12 @@ class RenderCommentsTest(BaseTemplateTagsTest):
 
 class TestStaticFunctions(SimpleTestCase):
     def test_include_static(self):
-        self.assertEqual(include_static(), '')
+        msg = (
+            'The tag `include_static` has been deprecated. Static files are now rendered implicitly.'
+            'You can remove this from your django template. This tag will be removed in v3.0.0.'
+        )
+        with self.assertWarnsMessage(DeprecationWarning, msg):
+            self.assertEqual(include_static(), '')
 
     def test_include_bootstrap(self):
         self.assertIsNone(include_bootstrap())

@@ -1,4 +1,5 @@
 import re
+import warnings
 
 from django import template
 from django.utils.html import conditional_escape
@@ -139,9 +140,17 @@ def is_user_blocked(comment):
     return BlockedUser.objects.is_user_blocked(user_id, comment.email)
 
 
+# TODO: remove in v3.0.0
 @register.simple_tag(name='include_static')
 def include_static():
     """ This function shall be deprecated """
+    warnings.warn(
+        (
+            'The tag `include_static` has been deprecated. Static files are now rendered implicitly.'
+            'You can remove this from your django template. This tag will be removed in v3.0.0.'
+        ),
+        DeprecationWarning
+    )
     return ''
 
 
