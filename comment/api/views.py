@@ -1,6 +1,5 @@
 from django.core.exceptions import ValidationError
 from rest_framework import generics, permissions, status
-from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -37,17 +36,17 @@ class CommentList(ContentTypeValidator, generics.ListAPIView):
 
     def get_queryset(self):
         self.validate(self.request)
-        return Comment.objects.filter_parents_by_object(self.model_obj)
+        return Comment.objects.filter_parents_by_object(self.model_obj).select_related('user', 'reaction', 'flag')
 
 
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Comment.objects.all()
+    queryset = Comment.objects.all().select_related('user', 'reaction', 'flag')
     serializer_class = CommentSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly, UserPermittedOrReadOnly)
 
 
 class CommentDetailForReaction(generics.UpdateAPIView):
-    queryset = Comment.objects.all()
+    queryset = Comment.objects.all().select_related('user', 'reaction', 'flag')
     serializer_class = CommentSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, UserPermittedOrReadOnly)
 
@@ -57,7 +56,7 @@ class CommentDetailForReaction(generics.UpdateAPIView):
         return context
 
     def post(self, request, *args, **kwargs):
-        comment = get_object_or_404(Comment, id=kwargs.get('pk'))
+        comment = self.get_object()
         reaction_type = kwargs.get('reaction', None)
         reaction_obj = Reaction.objects.get_reaction_object(comment)
         try:
@@ -75,7 +74,7 @@ class CommentDetailForReaction(generics.UpdateAPIView):
 
 
 class CommentDetailForFlag(generics.UpdateAPIView):
-    queryset = Comment.objects.all()
+    queryset = Comment.objects.all().select_related('user', 'reaction', 'flag')
     serializer_class = CommentSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, FlagEnabledPermission, UserPermittedOrReadOnly)
 
@@ -85,7 +84,7 @@ class CommentDetailForFlag(generics.UpdateAPIView):
         return context
 
     def post(self, request, *args, **kwargs):
-        comment = get_object_or_404(Comment, id=kwargs.get('pk'))
+        comment = self.get_object()
         flag = Flag.objects.get_for_comment(comment)
         reason = request.data.get('reason') or request.POST.get('reason')
         info = request.data.get('info') or request.POST.get('info')
@@ -99,7 +98,7 @@ class CommentDetailForFlag(generics.UpdateAPIView):
 
 
 class CommentDetailForFlagStateChange(generics.UpdateAPIView):
-    queryset = Comment.objects.all()
+    queryset = Comment.objects.all().select_related('user', 'reaction', 'flag')
     serializer_class = CommentSerializer
     permission_classes = (CanChangeFlaggedCommentState, UserPermittedOrReadOnly)
 
