@@ -1,6 +1,19 @@
 Changelog
 =========
 
+2.7.0
+------
+
+- Add support for django ``3.2``.
+- Allow blocking users/emails from adding/reacting with comments.
+- Improve commenting anonymously UI.
+- Enhance API docs by adding openapi_ and swagger page to RTD.
+- Reduce number of queries by prefetching foreign key objects on comment.
+- Reduce chances of XSS injections.
+- Fix response for state change on unflagged comments.
+
+.. _openapi: https://django-comment-dab.readthedocs.io/en/latest/openapi.html
+
 2.6.1
 ------
 
