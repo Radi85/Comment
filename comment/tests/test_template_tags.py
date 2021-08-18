@@ -1,3 +1,4 @@
+import sys
 from unittest.mock import patch
 
 from django.core.exceptions import ImproperlyConfigured
@@ -164,6 +165,7 @@ class RenderContentTest(BaseTemplateTagsTest):
         self.assertEqual(result['urlhash'], self.comment.urlhash)
 
     @patch.object(settings, 'COMMENT_WRAP_CONTENT_WORDS', 20)
+    @patch.object(settings, 'COMMENT_ALLOW_MARKDOWN', False)
     def test_content_wrapping_with_large_truncate_number(self):
         content_words = self.comment.content.split()
         self.assertIs(len(content_words) < 20, True)
@@ -173,6 +175,7 @@ class RenderContentTest(BaseTemplateTagsTest):
         self.assertEqual(result['text_1'], self.comment.content)
         self.assertIsNone(result['text_2'])
 
+    @patch.object(settings, 'COMMENT_ALLOW_MARKDOWN', False)
     def test_single_line_breaks(self):
         comment = self.parent_comment_1
         comment.content = "Any long text\njust for testing render\ncontent function"
@@ -184,6 +187,7 @@ class RenderContentTest(BaseTemplateTagsTest):
         self.assertIn('<br>', result['text_1'])
         self.assertNotIn('<br><br>', result['text_1'])
 
+    @patch.object(settings, 'COMMENT_ALLOW_MARKDOWN', False)
     def test_multiple_line_breaks(self):
         comment = self.parent_comment_1
         comment.content = "Any long text\n\njust for testing render\n\n\ncontent function"
@@ -196,6 +200,7 @@ class RenderContentTest(BaseTemplateTagsTest):
         self.assertNotIn('<br><br><br>', result['text_1'])
 
     @patch.object(settings, 'COMMENT_WRAP_CONTENT_WORDS', 5)
+    @patch.object(settings, 'COMMENT_ALLOW_MARKDOWN', False)
     def test_content_wrapping_with_small_truncate_number(self):
         self.comment.refresh_from_db()
         content_words = self.comment.content.split()
@@ -206,6 +211,48 @@ class RenderContentTest(BaseTemplateTagsTest):
         # truncate number is smaller than words in content
         self.assertEqual(result['text_1'], ' '.join(content_words[:5]))
         self.assertEqual(result['text_2'], ' '.join(content_words[5:]))
+
+    @patch.object(settings, 'COMMENT_ALLOW_MARKDOWN', True)
+    def test_raises_runtime_warning_passing_number_with_markdown_set_to_true(self):
+        msg = (
+            'The argument number is ignored when markdown is set to "True".'
+            'No wrapping will take place for markdown formatted content.'
+        )
+
+        with self.assertWarnsMessage(RuntimeWarning, msg):
+            result = render_content(self.comment, number=2, markdown=True)
+
+        # The content is surrounded by <p> tag to cater for connditional escaping which prevents from XSS attacks.
+        self.assertEqual(result['text_1'], f'<p>{self.comment.content}</p>')
+        self.assertEqual(result['text_2'], '')
+
+    @patch.object(settings, 'COMMENT_ALLOW_MARKDOWN', True)
+    def test_raises_improperly_configured_error_with_markdown_not_installed_and_markdown_set_to_true(self):
+        with patch.dict(sys.modules, {'markdown': None}):
+            from importlib import reload
+            reload(sys.modules['comment.templatetags.comment_tags'])
+            from comment.templatetags.comment_tags import render_content
+
+            msg = (
+                'Comment App: Cannot render content in markdown format because markdown extension is not available.'
+                'You can install it by visting https://pypi.org/p/markdown or by using the command '
+                '"python -m pip install django-comments-dab[markdown]".'
+            )
+
+            with self.assertRaisesMessage(ImproperlyConfigured, msg):
+                render_content(self.comment, markdown=True)
+
+    @patch.object(settings, 'COMMENT_ALLOW_MARKDOWN', True)
+    def test_rendering_markdown_content(self):
+        self.comment.content = '### Hi\n_italic_'
+        self.comment.save()
+        self.comment.refresh_from_db()
+
+        result = render_content(self.comment, markdown=True)
+
+        self.assertEqual(result['text_1'], '<h3>Hi</h3>\n<p><em>italic</em></p>')
+        self.assertEqual(result['text_2'], '')
+        self.assertEqual(result['urlhash'], self.comment.urlhash)
 
 
 class GetUsernameForCommentTest(BaseTemplateTagsTest):

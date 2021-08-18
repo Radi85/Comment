@@ -184,3 +184,33 @@ COMMENT_RESPONSE_FOR_BLOCKED_USER
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The response message for blocking reason. Default to ``You cannot perform this action at the moment! Contact the admin for more details``
+
+COMMENT_ALLOW_MARKDOWN
+^^^^^^^^^^^^^^^^^^^^^^
+
+Enable rendering comment content in markdown format. Defaults to ``False``.
+
+.. note::
+
+    When ``markdown`` format is being used to render content, no content wrapping is done. Passing a value for wrapping to the ``render_content`` template tag in such situations will raise a ``RuntimeWarning``.
+
+
+.. _settings.comment_markdown_extensions:
+
+COMMENT_MARKDOWN_EXTENSIONS
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The list of extensions to be used for the rendering the ``markdown``. Defaults to ``['markdown.extensions.fenced_code']``. See `python markdown's documentation`_ for more information on this.
+
+.. note::
+
+    Both ``COMMENT_MARKDOWN_EXTENSIONS`` and ``COMMENT_MARKDOWN_EXTENSION_CONFIG`` will only be used when ``COMMENT_ALLOW_MARKDOWN`` is set to ``True``.
+
+.. _python markdown's documentation: https://python-markdown.github.io/extensions/extra/
+
+.. _settings.comment_markdown_extension_config:
+
+COMMENT_MARKDOWN_EXTENSION_CONFIGS
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The configuration used for markdown-extensions. Defaults to ``{}``. See `python markdown's documentation`_ for more information.

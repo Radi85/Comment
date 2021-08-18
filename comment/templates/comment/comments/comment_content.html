@@ -3,7 +3,11 @@
 
 <div id="{{ comment.urlhash }}" class="js-updated-comment {% if comment.has_flagged_state %}flagged-comment {% endif %}{% block content_wrapper_cls %}{% if has_valid_profile %}col-9 col-md-10{% else %}co-11 mx-3{% endif %}{% endblock content_wrapper_cls %}" >
     {% block comment_content %}
-    {% render_content comment %}
+        {% if render_markdown %}
+            {% render_content comment markdown=True %}
+        {% else %}
+            {% render_content comment markdown=False %}
+        {% endif %}
     {% endblock comment_content %}
     {% get_username_for_comment comment as username %}
     <div class="{% block footer_wrapper_cls %}mt-2 text-muted{% endblock footer_wrapper_cls %}">
