@@ -39,3 +39,7 @@ COMMENT_DEFAULT_PROFILE_PIC_LOC = '/static/img/default.png'
 COMMENT_ALLOW_BLOCKING_USERS = False
 COMMENT_ALLOW_MODERATOR_TO_BLOCK = False
 COMMENT_RESPONSE_FOR_BLOCKED_USER = 'You cannot perform this action at the moment! Contact the admin for more details'
+
+COMMENT_ALLOW_MARKDOWN = False
+COMMENT_MARKDOWN_EXTENSIONS = ['markdown.extensions.fenced_code']
+COMMENT_MARKDOWN_EXTENSION_CONFIG = {}

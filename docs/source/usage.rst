@@ -217,3 +217,16 @@ Blocking functionality is added in version 2.7.0. It allows moderators to block 
 
 To enable blocking system set ``COMMENT_ALLOW_BLOCKING_USERS`` in ``settings`` to ``True``.
 This will grant access for the **admins** only to block users. However, in order to give the **moderators** this right, you need to add ``COMMENT_ALLOW_MODERATOR_TO_BLOCK = True`` to `settings`
+
+
+8. Enable Markdown format
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This functionality was added in version ``2.8.0``. It allows comment content to be rendered using the power of ``markdown`` format.
+
+To use this:
+    - Install additional dependency `python-markdown`_ may be installed using ``python -m pip install django-comments-dab[markdown]``.
+    - To enable set ``COMMENT_ALLOW_MARKDOWN`` to ``True`` in your ``settings`` file.
+    - For advanced configuration, you may use :ref:`settings.comment_markdown_extensions` and :ref:`settings.comment_markdown_extension_config`.
+
+.. _python-markdown: https://pypi.org/p/markdown

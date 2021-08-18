@@ -4,6 +4,7 @@ import warnings
 from django import template
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
+from django.core.exceptions import ImproperlyConfigured
 
 from comment.models import ReactionInstance, FlagInstance, Follower, BlockedUser
 from comment.forms import CommentForm
@@ -14,6 +15,8 @@ from comment.utils import (
 from comment.managers import FlagInstanceManager
 from comment.messages import ReactionError
 from comment.context import DABContext
+from comment.conf import settings
+
 
 MULTIPLE_NEW_LINE_RE = re.compile(r'(.*)(\n){2,}(.*)')
 SINGLE_NEW_LINE_RE = re.compile(r'(.*)(\n)(.*)')
@@ -97,7 +100,40 @@ def _restrict_line_breaks(content):
     return SINGLE_NEW_LINE_RE.sub(r'\1<br>\3', content)
 
 
-def render_content(comment, number=None):
+def _render_markdown(content):
+    try:
+        import markdown as md
+    except ModuleNotFoundError:
+        raise ImproperlyConfigured(
+            'Comment App: Cannot render content in markdown format because markdown extension is not available.'
+            'You can install it by visting https://pypi.org/p/markdown or by using the command '
+            '"python -m pip install django-comments-dab[markdown]".'
+        )
+    else:
+        return md.markdown(
+            conditional_escape(content),
+            extensions=settings.COMMENT_MARKDOWN_EXTENSIONS,
+            extension_config=settings.COMMENT_MARKDOWN_EXTENSION_CONFIG
+        )
+
+
+def render_content(comment, number=None, **kwargs):
+    markdown = kwargs.get('markdown', False)
+    if markdown:
+        if number:
+            warnings.warn(
+                (
+                    'The argument number is ignored when markdown is set to "True".'
+                    'No wrapping will take place for markdown formatted content.'
+                ),
+                RuntimeWarning,
+            )
+        return {
+            'text_1': mark_safe(_render_markdown(comment.content)),
+            'text_2': '',
+            'urlhash': comment.urlhash,
+        }
+
     try:
         number = int(number)
     except (ValueError, TypeError):

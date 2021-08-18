@@ -56,5 +56,6 @@ class DABContext(dict):
             'is_translation_allowed': settings.COMMENT_ALLOW_TRANSLATION,
             'is_subscription_allowed': settings.COMMENT_ALLOW_SUBSCRIPTION,
             'is_blocking_allowed': settings.COMMENT_ALLOW_BLOCKING_USERS,
-            'oauth': self.is_oauth()
+            'oauth': self.is_oauth(),
+            'render_markdown': settings.COMMENT_ALLOW_MARKDOWN,
         }
