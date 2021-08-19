@@ -6,13 +6,13 @@
     :target: https://pypi.python.org/pypi/django-comments-dab/
     :alt: django
 
-.. image:: https://coveralls.io/repos/github/Radi85/Comment/badge.svg
-    :target: https://coveralls.io/github/Radi85/Comment
-    :alt: coverage
+.. image:: https://codecov.io/gh/radi85/Comment/branch/main/graph/badge.svg?token=JBorE9i0De
+    :target: https://codecov.io/gh/radi85/Comment
+    :alt: Coverage
 
-.. image:: https://travis-ci.org/Radi85/Comment.svg?branch=develop
-    :target: https://travis-ci.org/Radi85/Comment
-    :alt: build
+.. image:: https://github.com/radi85/Comment/actions/workflows/tests.yml/badge.svg?branch=main
+    :target: https://github.com/radi85/Comment/actions
+    :alt: Test
 
 .. image:: https://readthedocs.org/projects/django-comment-dab/badge/?version=latest
     :target: https://django-comment-dab.readthedocs.io/?badge=latest

@@ -1,0 +1,45 @@
+name: Docs
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+  push:
+    branches:
+      - develop
+      - master
+    paths:
+      - 'docs/**'
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    name: docs
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('docs/source/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Ensure latest setuptools
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+
+      - name: Install dependecies
+        run: |
+          python -m pip install --upgrade pip tox
+
+      - name: Build docs
+        run: |
+          tox -e docs
