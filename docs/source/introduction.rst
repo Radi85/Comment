@@ -9,13 +9,13 @@ django-comments-dab
     :target: https://github.com/Radi85/Comment/releases
     :alt: tag
 
-.. image:: https://travis-ci.org/Radi85/Comment.svg?branch=master
-    :target: https://travis-ci.org/Radi85/Comment
-    :alt: build
+.. image:: https://img.shields.io/pypi/djversions/django-comments-dab.svg
+    :target: https://pypi.python.org/pypi/django-comments-dab/
+    :alt: django
 
-.. image:: https://coveralls.io/repos/github/Radi85/Comment/badge.svg
-    :target: https://coveralls.io/github/Radi85/Comment
-    :alt: coverage
+.. image:: https://codecov.io/gh/radi85/Comment/branch/main/graph/badge.svg?token=JBorE9i0De
+    :target: https://codecov.io/gh/radi85/Comment
+    :alt: Coverage
 
 .. image:: https://img.shields.io/pypi/pyversions/django-comments-dab.svg
     :target: https://pypi.python.org/pypi/django-comments-dab/
