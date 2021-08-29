@@ -6,11 +6,11 @@
     :target: https://pypi.python.org/pypi/django-comments-dab/
     :alt: django
 
-.. image:: https://codecov.io/gh/radi85/Comment/branch/main/graph/badge.svg?token=JBorE9i0De
+.. image:: https://codecov.io/gh/radi85/Comment/branch/develop/graph/badge.svg?token=JBorE9i0De
     :target: https://codecov.io/gh/radi85/Comment
     :alt: Coverage
 
-.. image:: https://github.com/radi85/Comment/actions/workflows/tests.yml/badge.svg?branch=main
+.. image:: https://github.com/radi85/Comment/actions/workflows/tests.yml/badge.svg?branch=develop
     :target: https://github.com/radi85/Comment/actions
     :alt: Test
 
