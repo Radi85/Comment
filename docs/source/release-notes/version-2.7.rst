@@ -15,8 +15,8 @@ Features
 - `#218`_ - Add support for django ``3.2``.
 
 .. _#143: https://github.com/Radi85/Comment/issues/143
-.. _#156:: https://github.com/Radi85/Comment/issues/156
-.. _#203:: https://github.com/Radi85/Comment/issues/203
+.. _#156: https://github.com/Radi85/Comment/issues/156
+.. _#203: https://github.com/Radi85/Comment/issues/203
 .. _#215: https://github.com/Radi85/Comment/pull/215
 .. _#218: https://github.com/Radi85/Comment/issues/218
 
