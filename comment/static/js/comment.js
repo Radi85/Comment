@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     let showModal = modalElement => {
+        if (!modalElement) return;
         modalElement.style.display = 'block';
         setTimeout(() => {
             modalElement.classList.add('show-modal');
@@ -38,11 +39,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     let hideModal = modalElement => {
+        if (!modalElement) return;
         modalElement.classList.remove('show-modal');
         modalElement.style.display = 'none';
     };
 
     let hideCreateAnonymousCommentModal = () => {
+        if (!createAnonymousCommentModal) return;
         let form = createAnonymousCommentModal.querySelector('.modal-body').querySelector('form');
         if (form) {
             createAnonymousCommentModal.querySelector('.modal-body').removeChild(form);
