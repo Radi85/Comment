@@ -48,3 +48,14 @@ Codebase enhancement
 .. _#209: https://github.com/Radi85/Comment/pull/209
 .. _#223: https://github.com/Radi85/Comment/issues/223
 .. _#225: https://github.com/Radi85/Comment/issues/225
+
+
+v2.7.1
+-------
+
+Bug fixes
+^^^^^^^^^
+
+- `#230`_ - Fix closing of anonymous create comment modal.
+
+.. _#230: https://github.com/Radi85/Comment/issues/230
