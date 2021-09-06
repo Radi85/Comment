@@ -1,6 +1,11 @@
 Changelog
 =========
 
+2.7.1
+------
+
+- Fix closing of anonymous create comment modal.
+
 2.7.0
 ------
 
