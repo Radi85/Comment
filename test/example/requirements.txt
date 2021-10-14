@@ -1,5 +1,7 @@
 django
 djangorestframework
+# since django 4.0, pytz is no longer a dependency but is used for DRF
+pytz
 # used for testing/linting
 Pillow
 lxml
