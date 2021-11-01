@@ -3,7 +3,6 @@ from django.db import models
 
 from comment.conf import settings
 from comment.utils import id_generator
-from comment.validators import _validate_order
 
 
 class CommentManager(models.Manager):
@@ -19,7 +18,7 @@ class CommentManager(models.Manager):
 
     @staticmethod
     def _filter_parents(qs, parent=None):
-        return qs.filter(parent=parent).order_by(*_validate_order())
+        return qs.filter(parent=parent).order_by(*settings.COMMENT_ORDER_BY)
 
     def all_parents(self):
         qs = self.all_exclude_flagged()

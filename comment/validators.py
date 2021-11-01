@@ -1,16 +1,13 @@
 from abc import abstractmethod, ABCMeta
-from functools import lru_cache
 
 from django.contrib.contenttypes.models import ContentType
 from django.core.validators import EmailValidator
 from django.http import JsonResponse
-from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.core.exceptions import ValidationError
 
 from comment.exceptions import CommentBadRequest
 from comment.messages import ContentTypeError, ExceptionError, EmailError
 from comment.utils import get_request_data
-from comment.messages import ErrorMessage
-from comment.conf import settings
 
 
 class BaseValidatorMixin:
@@ -140,37 +137,3 @@ class DABEmailValidator(EmailValidator):
             return True
         except ValidationError:
             return False
-
-
-@lru_cache()
-def _get_allowed_orders():
-    allowed_orders = ['reaction__likes', 'reaction__dislikes', 'posted']
-    # adds support for descending order as well
-    allowed_orders.extend(list(map(lambda a: '-' + a, allowed_orders)))
-    # django allows this to support random order
-    allowed_orders.append('?')
-    return allowed_orders
-
-
-def _validate_orders_are_unique(preferred_orders):
-    unique_values = set(map(lambda a: a.replace('-', ''), preferred_orders))
-    if len(unique_values) != len(preferred_orders):
-        duplicated_orders = list(set(preferred_orders) - unique_values)
-        raise ImproperlyConfigured(
-            ErrorMessage.DUPLICATE_ORDER_VALUE.format(
-                duplicates=duplicated_orders, order=duplicated_orders[0].replace('-', '')
-            )
-        )
-
-
-def _validate_order():
-    preferred_orders = settings.COMMENT_ORDER_BY
-    _validate_orders_are_unique(preferred_orders)
-
-    allowed_orders = _get_allowed_orders()
-    for preferred_order in preferred_orders:
-        if preferred_order not in allowed_orders:
-            raise ImproperlyConfigured(
-                ErrorMessage.INVALID_ORDER_ARGUMENT.format(order=preferred_order, allowed_orders=allowed_orders)
-            )
-    return preferred_orders
