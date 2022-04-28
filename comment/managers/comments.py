@@ -55,4 +55,4 @@ class CommentManager(models.Manager):
         return parent_comment
 
     def comment_exists(self, comment):
-        return self.model.objects.filter(email=comment.email, posted=comment.posted).count() > 0
+        return self.model.objects.filter(email=comment.email, posted=comment.posted).exists()
