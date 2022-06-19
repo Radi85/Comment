@@ -1,6 +1,15 @@
 Changelog
 =========
 
+2.8.0
+------
+
+- Using exists instead of count is faster.
+- Confirm support for django 4.0.
+- Confirm support for python 3.10
+- Move validation of orders to system checks.
+- Add support for rendering content in markdown format.
+
 2.7.1
 ------
 
