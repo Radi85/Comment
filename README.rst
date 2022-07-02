@@ -291,6 +291,6 @@ Email's HTML template is used from https://github.com/leemunroe/responsive-html-
 Contributing
 ============
 
-For contributing, please see the instructions at Contributing_
+For contributing, please see the guidelines at Contributing_
 
 .. _Contributing: https://github.com/Radi85/Comment/blob/develop/CONTRIBUTING.rst
