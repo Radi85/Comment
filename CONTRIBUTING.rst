@@ -62,7 +62,7 @@ To start development on this project, fork_ this repository and follow the guide
     # create a virtual environment
     $ python3 -m venv local_env
     # activate the virtual environment
-    $ source local_env/bin/activate
+    $ . local_env/bin/activate
     # install dependencies
     (local_env) $ pip install -e . -r test/example/requirements.txt
 
@@ -96,6 +96,7 @@ To run tests against a particular ``python`` and ``django`` version installed in
 
 .. code:: bash
 
+    (local_env) $ python manage.py compilemessages -l test
     (local_env) $ python manage.py test --settings=test.settings.test
 
 
@@ -112,6 +113,6 @@ To run tests against all supported ``python`` and ``django`` versions, you may r
 Translations
 ^^^^^^^^^^^^
 
-To add translations in your native language, please take a look at the `instructions for translators`_.
+To add translations in your native language, please take a look at the `guidelines for translators`_.
 
-.. _`instructions for translators`: https://django-comment-dab.readthedocs.io/i18n.html#adding-support-for-translation
+.. _`guidelines for translators`: https://django-comment-dab.readthedocs.io/en/latest/i18n.html#adding-support-for-translation
