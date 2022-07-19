@@ -1,0 +1,593 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Amir Aref <amiraref808@gmail.com>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-07-19 17:39+0430\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Amir Aref <amiraref808@gmail.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: apps.py:9
+msgid "comment"
+msgstr "دیدگاه"
+
+#: conf/defaults.py:14
+msgid "Spam | Exists only to promote a service"
+msgstr "هرزنامه | فقط برای تبلیغ یک سرویس وجود دارد"
+
+#: conf/defaults.py:15
+msgid "Abusive | Intended at promoting hatred"
+msgstr "توهین آمیز | با هدف ترویج نفرت"
+
+#: managers/flags.py:23
+msgid "Something else"
+msgstr "یک چیز دیگر"
+
+#: messages.py:7
+msgid "Comment App: LOGIN_URL is not in the settings"
+msgstr "برنامه Comment: LOGIN_URL در تنظیمات نیست"
+
+#: messages.py:8
+msgid "Comment App: You must be logged in to perform this action."
+msgstr "برنامه Comment: برای انجام این عملیات باید وارد شوید."
+
+#: messages.py:9
+msgid "You do not have permission to perform this action."
+msgstr "شما دسترسی انجام این عملیات را ندارید."
+
+#: messages.py:10
+#, python-brace-format
+msgid ""
+"Your {class_name} class has not defined a {method_name} method, which is "
+"required."
+msgstr ""
+"کلاس {class_name} شما یک روش {method_name} را تعریف نکرده است، که این "
+"ضروری است."
+
+#: messages.py:11
+msgid "Only AJAX request are allowed"
+msgstr "فقط درخواست AJAX مجاز است"
+
+#: messages.py:20
+msgid "Comment App: settings var COMMENT_WRAP_CONTENT_WORDS must be an integer"
+msgstr "برنامه Comment: تنظیمات COMMENT_WRAP_CONTENT_WORDS باید یک عدد صحیح باشد"
+
+#: messages.py:24
+msgid "error"
+msgstr "خطا"
+
+#: messages.py:25
+msgid "Bad Request"
+msgstr "درخواست بد"
+
+#: messages.py:29
+#, python-brace-format
+msgid "{var_name} id must be an integer, {id} is NOT"
+msgstr "{var_name} شناسه باید یک عدد صحیح باشد، {id} یک عدد صحیح نیست"
+
+#: messages.py:30
+msgid "app name must be provided"
+msgstr "نام برنامه باید ارائه شود"
+
+#: messages.py:31
+#, python-brace-format
+msgid "{app_name} is NOT a valid app name"
+msgstr "{app_name} یک نام برنامه معتبر نیست"
+
+#: messages.py:32
+msgid "model name must be provided"
+msgstr "نام مدل باید ارائه شود"
+
+#: messages.py:33
+#, python-brace-format
+msgid "{model_name} is NOT a valid model name"
+msgstr "{model_name} یک نام مدل معتبر نیست"
+
+#: messages.py:34
+msgid "model id must be provided"
+msgstr "شناسه مدل باید ارائه شود"
+
+#: messages.py:35
+#, python-brace-format
+msgid "{model_id} is NOT a valid model id for the model {model_name}"
+msgstr "{model_id} یک شناسه مدل معتبر برای مدل {model_name} نیست"
+
+#: messages.py:36
+#, python-brace-format
+msgid ""
+"{parent_id} is NOT a valid id for a parent comment or the parent comment "
+"does NOT belong to the provided model object"
+msgstr ""
+"{parent_id} یک شناسه معتبر برای دیدگاه والد نیست یا دیدگاه والد "
+"به شیء مدل ارائه شده تعلق ندارد"
+
+#: messages.py:41
+msgid "Flagging system must be enabled"
+msgstr "سیستم پرچم گذاری باید فعال شود"
+
+#: messages.py:42
+msgid "Object must be flagged!"
+msgstr "شیء باید علامت گذاری شود!"
+
+#: messages.py:43
+#, python-brace-format
+msgid "{state} is an invalid state"
+msgstr "{state} یک وضعیت نامعتبر است"
+
+#: messages.py:44
+#, python-brace-format
+msgid "{reason} is an invalid reason"
+msgstr "{reason} یک دلیل نامعتبر است"
+
+#: messages.py:45
+msgid "Please supply some information as the reason for flagging"
+msgstr "لطفاً کمی اطلاعات به عنوان علت پرچم گذاری ارائه کنید"
+
+#: messages.py:46
+#, python-brace-format
+msgid "This comment is already flagged by this user ({user})"
+msgstr "این دیدگاه قبلا توسط این کاربر ({user}) پرچم گذاری شده است"
+
+#: messages.py:47
+#, python-brace-format
+msgid "This comment was not flagged by this user ({user})"
+msgstr "این دیدگاه توسط این کاربر ({user}) پرچم گذاری نشده است"
+
+#: messages.py:48
+msgid "This action cannot be applied on unflagged comments"
+msgstr "این عمل را نمی توان روی دیدگاه های بدون پرچم اعمال کرد"
+
+#: messages.py:49
+msgid "The comment must be edited before resolving the flag"
+msgstr "دیدگاه باید قبل از رفع پرچم ویرایش شود"
+
+#: messages.py:50
+msgid "Unable to change flag state at the moment!"
+msgstr "در حال حاضر امکان تغییر وضعیت پرچم وجود ندارد!"
+
+#: messages.py:54
+#, python-brace-format
+msgid ""
+"Reaction must be an valid ReactionManager.RelationType. {reaction_type} is "
+"not"
+msgstr "{reaction_type} یک واکنش معتبر نیست"
+
+#: messages.py:58
+msgid "Enter a valid email address."
+msgstr "یک آدرس ایمیل معتبر وارد کنید."
+
+#: messages.py:59
+msgid "Email is required for posting anonymous comments."
+msgstr "برای ارسال دیدگاه های ناشناس ایمیل لازم است."
+
+#: messages.py:60
+msgid "The link seems to be broken."
+msgstr "به نظر می رسد لینک خراب است."
+
+#: messages.py:61
+msgid "The comment has already been verified."
+msgstr "دیدگاه قبلا تأیید شده است."
+
+#: messages.py:65
+msgid "Comment flagged"
+msgstr "دیدگاه پرچم گذاری شد"
+
+#: messages.py:66
+msgid "Comment flag removed"
+msgstr "پرچم دیدگاه حذف شد"
+
+#: messages.py:70
+msgid "Your reaction has been updated successfully"
+msgstr "واکنش شما با موفقیت بروزرسانی شد"
+
+#: messages.py:74
+msgid "Comment Confirmation Request"
+msgstr "درخواست تایید دیدگاه"
+
+#: messages.py:75
+msgid ""
+"We have sent a verification link to your email.The comment will be displayed "
+"after it is verified."
+msgstr ""
+"ما یک لینک تأییدیه به ایمل شما ارسال کردیم. دیدگاه پس از تأیید شدن "
+"نمایش داده خواهد شد"
+
+#: messages.py:77
+msgid "email address, this will be used for verification."
+msgstr "آدرس ایمیل، از این برای تأیید کردن استفاده خواهد شد"
+
+#: messages.py:78
+msgid "email address, it will be used for verification."
+msgstr "آدرس ایمیل، از آن برای تأیید کردن استفاده خواهد شد"
+
+#: messages.py:79
+#, python-brace-format
+msgid "{username} added comment to \"{thread_name}\""
+msgstr "{username} دیدگاه اضافه کرد به \"{thread_name}\""
+
+#: messages.py:80
+msgid "email"
+msgstr "ایمیل"
+
+#: messages.py:84
+msgid "Unflagged"
+msgstr "پرچم برداشته شد"
+
+#: messages.py:85
+msgid "Flagged"
+msgstr "پرچم گذاری شد"
+
+#: messages.py:86
+msgid "Flag rejected by the moderator"
+msgstr "پرچم توسط ناظر رد شد"
+
+#: messages.py:87
+msgid "Comment modified by the author"
+msgstr "دیدگاه توسط نویسنده اصلاح شد"
+
+#: messages.py:91
+#, python-brace-format
+msgid "Email is required to subscribe {model_object}"
+msgstr "برای مشترک شدن ایمیل الزامی است {model_object}"
+
+#: messages.py:92
+msgid "Subscribe system must be enabled"
+msgstr "سیستم اشتراک باید فعال باشد"
+
+#: messages.py:96
+msgid "Unblocked"
+msgstr "رفع مسدودیت شد"
+
+#: messages.py:97
+msgid "Blocked"
+msgstr "مسدود شد"
+
+#: messages.py:102
+msgid "Invalid input data"
+msgstr "داده های ورودی نامعتبر است"
+
+#: templates/comment/anonymous/confirmation_request.html:8
+#: templates/comment/anonymous/confirmation_request.txt:2
+msgid "Hey there,"
+msgstr "سلام،"
+
+#: templates/comment/anonymous/confirmation_request.html:10
+msgid ""
+"You or someone on your behalf have requested to post a comment into this "
+"page:"
+msgstr "شما یا شخصی از طرف شما درخواست کرده اید که دیدگاهی در این صفحه ارسال کنید"
+
+#: templates/comment/anonymous/confirmation_request.html:12
+#, python-format
+msgid "at %(posted_time)s."
+msgstr "در %(posted_time)s."
+
+#: templates/comment/anonymous/confirmation_request.html:15
+#: templates/comment/notifications/notification.html:27
+msgid "The comment:"
+msgstr "دیدگاه:"
+
+#: templates/comment/anonymous/confirmation_request.html:20
+#: templates/comment/anonymous/confirmation_request.txt:12
+msgid ""
+"If you do not wish to post the comment, please ignore this message or report "
+"an incident to"
+msgstr ""
+"اگر مایل به ارسال دیدگاه نیستید، لطفاً این پیام را نادیده بگیرید یا گزارش دهید "
+"یک اتفاق به"
+
+#: templates/comment/anonymous/confirmation_request.html:20
+msgid "Otherwise click on the button below to confirm the comment."
+msgstr "در غیر این صورت برای تأیید دیدگاه روی دکمه زیر کلیک کنید."
+
+#: templates/comment/anonymous/confirmation_request.html:29
+msgid "Confirm your comment"
+msgstr "دیدگاه خود را تأیید کنید"
+
+#: templates/comment/anonymous/confirmation_request.html:38
+msgid ""
+"If clicking does not work, you can also copy the below link and paste the "
+"address into your browser's address window"
+msgstr ""
+"اگر کلیک کردن کار نکرد، می توانید آدرس زیر را نیز کپی کرده و در "
+"پنجره آدرس مرورگر خود جایگذاری کنید"
+
+#: templates/comment/anonymous/confirmation_request.html:41
+#: templates/comment/anonymous/confirmation_request.txt:17
+#: templates/comment/notifications/notification.html:32
+#: templates/comment/notifications/notification.txt:14
+msgid "Thanks for your comment!"
+msgstr "با تشکر بابت ثبت دیدگاه تان"
+
+#: templates/comment/anonymous/confirmation_request.html:43
+#: templates/comment/anonymous/confirmation_request.txt:20
+#: templates/comment/notifications/notification.html:34
+#: templates/comment/notifications/notification.txt:17
+msgid "Kind regards,"
+msgstr "با احترام،"
+
+#: templates/comment/anonymous/confirmation_request.txt:4
+msgid "You or someone on behalf of you have requested to post a comment at"
+msgstr "شما یا شخصی از طرف شما درخواست کرده اید برای ارسال دیدگاه در"
+
+#: templates/comment/anonymous/confirmation_request.txt:4
+msgid "to the following URL"
+msgstr "به آدرس زیر"
+
+#: templates/comment/anonymous/confirmation_request.txt:8
+#: templates/comment/comments/create_comment.html:20
+#: templates/comment/notifications/notification.txt:6
+msgid "Comment"
+msgstr "دیدگاه"
+
+#: templates/comment/anonymous/confirmation_request.txt:12
+msgid "Otherwise click on the link below to confirm the comment"
+msgstr "در غیر این صورت برای تأیید دیدگاه روی لینک زیر کلیک کنید"
+
+#: templates/comment/anonymous/confirmation_request.txt:16
+#: templates/comment/notifications/notification.html:31
+#: templates/comment/notifications/notification.txt:13
+msgid ""
+"If clicking does not work, you can also copy and paste the address into your "
+"browser's address window"
+msgstr ""
+"اگر کلیک کردن کار نکرد، می توانید آدرس را نیز کپی کرده و در "
+"پنجره آدرس مرورگر خود جایگذاری کنید"
+
+#: templates/comment/anonymous/discarded.html:7
+msgid "Comment discarded"
+msgstr "دیدگاه حذف شد"
+
+#: templates/comment/anonymous/discarded.html:13
+msgid "Comment can't be verified."
+msgstr "دیدگاه را نمیتوان تأیید کرد"
+
+#: templates/comment/anonymous/discarded.html:14
+msgid "Sorry, your comment has been automatically discarded."
+msgstr "عذرخواهیم، دیدگاه شما به صورت خودکار حذف شده است"
+
+#: templates/comment/anonymous/email_modal.html:8
+msgid "Please enter your email to post a comment"
+msgstr "لطفا آدرس ایمیل خود را برای ارسال دیدگاه وارد کنید"
+
+#: templates/comment/anonymous/email_modal.html:9
+#: templates/comment/block/block_modal.html:7
+#: templates/comment/comments/comment_modal.html:7
+#: templates/comment/comments/comment_modal.html:15
+#: templates/comment/flags/flag_modal.html:8
+#: templates/comment/follow/follow_modal.html:8
+msgid "Close"
+msgstr "بستن"
+
+#: templates/comment/block/block_icon.html:4
+msgid "Unblock user"
+msgstr "رفع مسدودیت این کاربر"
+
+#: templates/comment/block/block_icon.html:4
+msgid "Block this user"
+msgstr "مسدود کردن این کاربر"
+
+#: templates/comment/block/block_modal.html:6
+msgid "Are you sure you want to block this user?"
+msgstr "آیا از مسدود کردن این کاربر اطمینان دارید ؟"
+
+#: templates/comment/block/block_modal.html:16
+msgid "Reason"
+msgstr "علت"
+
+#: templates/comment/block/block_modal.html:27
+msgid "Block"
+msgstr "مسدود کردن"
+
+#: templates/comment/comments/base.html:8
+msgid "Comments"
+msgstr "دیدگاه ها"
+
+#: templates/comment/comments/base.html:17
+msgid "comment on this post..."
+msgstr "افزودن دیدگاه به این مقاله"
+
+#: templates/comment/comments/base.html:21
+msgid "reply to this comment..."
+msgstr "پاسخ به این دیدگاه ..."
+
+#: templates/comment/comments/comment_content.html:18
+#, python-format
+msgid "view %(username)s profile"
+msgstr "نمایش پروفایل %(username)s"
+
+#: templates/comment/comments/comment_content.html:18
+msgid "comment by anonymous user"
+msgstr "دیدگاه توسط کاربر ناشناس"
+
+#: templates/comment/comments/comment_content.html:23
+msgid "Edited"
+msgstr "ویرایش شده"
+
+#: templates/comment/comments/comment_content.html:23
+#, python-format
+msgid "Edited: %(edited_time)s ago"
+msgstr "ویرایش شده: %(edited_time)s قبل"
+
+#: templates/comment/comments/comment_content.html:25
+msgid "Posted"
+msgstr "ارسال شده"
+
+#: templates/comment/comments/comment_content.html:25
+#, python-format
+msgid "%(posted_time)s ago"
+msgstr "%(posted_time)s قبل"
+
+#: templates/comment/comments/comment_content.html:47
+msgid " Reply"
+msgid_plural " Replies"
+msgstr[0] "پاسخ"
+msgstr[1] "پاسخ ها"
+
+#: templates/comment/comments/comment_modal.html:6
+msgid "Confirm comment deletion"
+msgstr "حذف دیدگاه را تأیید کنید"
+
+#: templates/comment/comments/comment_modal.html:12
+msgid "Are you sure you want to delete this comment"
+msgstr "آیا از حذف این دیدگاه اطمینان دارید"
+
+#: templates/comment/comments/comment_modal.html:22
+msgid "Delete"
+msgstr "حذف"
+
+#: templates/comment/comments/content.html:9
+msgid "read more"
+msgstr "ادامه مطلب"
+
+#: templates/comment/comments/create_comment.html:20
+msgid "Reply"
+msgstr "پاسخ"
+
+#: templates/comment/comments/create_comment.html:31
+msgid "Comment Anonymously or"
+msgstr "افزودن دیدگاه به صورت ناشناس"
+
+#: templates/comment/comments/create_comment.html:33
+#: templates/comment/comments/create_comment.html:40
+msgid "Login"
+msgstr "ورود"
+
+#: templates/comment/comments/create_comment.html:35
+msgid "to keep your conversations intact"
+msgstr "تا گفتگو خود را سالم نگه دارید"
+
+#: templates/comment/comments/create_comment.html:42
+msgid "to join the discussion"
+msgstr "برای پیوستن به گفتگو"
+
+#: templates/comment/comments/delete_icon.html:3
+msgid "Delete comment"
+msgstr "حذف دیدگاه"
+
+#: templates/comment/comments/edit_icon.html:3
+msgid "Edit comment"
+msgstr "ویرایش دیدگاه"
+
+#: templates/comment/comments/pagination.html:2
+msgid "Page navigation"
+msgstr "پیمایش صفحه"
+
+#: templates/comment/comments/pagination.html:3
+msgid "first"
+msgstr "اولین"
+
+#: templates/comment/comments/pagination.html:4
+msgid "last"
+msgstr "آخرین"
+
+#: templates/comment/comments/pagination.html:5
+msgid "Next"
+msgstr "بعدی"
+
+#: templates/comment/comments/pagination.html:6
+msgid "Previous"
+msgstr "قبلی"
+
+#: templates/comment/comments/reject_icon.html:3
+msgid "Flag rejected"
+msgstr "پرچم رد شد"
+
+#: templates/comment/comments/reject_icon.html:3
+msgid "Reject the flag"
+msgstr "پرچم را رد کن"
+
+#: templates/comment/comments/resolve_icon.html:3
+msgid "Flag resolved"
+msgstr "پرچم رفع شد"
+
+#: templates/comment/comments/resolve_icon.html:3
+msgid "Resolve the flag"
+msgstr "پرچم را رفع کن"
+
+#: templates/comment/comments/urlhash.html:2
+msgid "Permalink to this comment"
+msgstr "پیوند دائمی به این دیدگاه"
+
+#: templates/comment/flags/flag_icon.html:3
+msgid "Remove flag"
+msgstr "حذف پرچم"
+
+#: templates/comment/flags/flag_icon.html:3
+msgid "Report comment"
+msgstr "گزارش دادن دیدگاه"
+
+#: templates/comment/flags/flag_modal.html:7
+msgid "Please select a reason for flagging"
+msgstr "لطفا یک دلیل برای پرچم گذاری انتخاب کنید"
+
+#: templates/comment/flags/flag_modal.html:22
+msgid "Flag"
+msgstr "پرچم"
+
+#: templates/comment/flags/flags.html:8
+msgid "flag"
+msgstr "پرچم"
+
+#: templates/comment/follow/follow.html:9
+msgid "follow"
+msgstr "دنبال کردن"
+
+#: templates/comment/follow/follow_icon.html:3
+msgid "Unfollow this thread"
+msgstr "لغو دنبال کردن این بحث"
+
+#: templates/comment/follow/follow_icon.html:3
+msgid "Follow this thread"
+msgstr "دنبال کردن این بحث"
+
+#: templates/comment/follow/follow_modal.html:7
+msgid "Please insert your email to follow this thread"
+msgstr "لطفا برای دنبال کردن این بحث ایمیل خود را وارد کنید"
+
+#: templates/comment/follow/follow_modal.html:28
+msgid "Follow"
+msgstr "دنبال کردن"
+
+#: templates/comment/notifications/notification.html:6
+#: templates/comment/notifications/notification.txt:2
+msgid "Hey"
+msgstr "سلام"
+
+#: templates/comment/notifications/notification.html:6
+#: templates/comment/notifications/notification.txt:2
+msgid ","
+msgstr "،"
+
+#: templates/comment/notifications/notification.html:9
+#: templates/comment/notifications/notification.txt:4
+msgid "has added a comment at"
+msgstr "یک دیدگاه اشافه کرد"
+
+#: templates/comment/notifications/notification.html:9
+#: templates/comment/notifications/notification.txt:4
+msgid "to"
+msgstr "به"
+
+#: templates/comment/notifications/notification.html:18
+msgid "Go to site"
+msgstr "رفتن به سایت"
+
+#: templates/comment/reactions/reactions.html:5
+msgid "like"
+msgstr "لایک"
+
+#: templates/comment/reactions/reactions.html:16
+msgid "dislike"
+msgstr "دیسلایک"
