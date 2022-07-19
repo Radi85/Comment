@@ -20,68 +20,68 @@ msgstr ""
 
 #: static/js/comment.js:224 static/js/comment.js:383
 msgid "Replies"
-msgstr ""
+msgstr "پاسخ ها"
 
 #: static/js/comment.js:226 static/js/comment.js:385
 msgid "Reply"
-msgstr ""
+msgstr "پاسخ"
 
 #: static/js/comment.js:243
 msgid "Unable to post your comment!, please try again"
-msgstr ""
+msgstr "امکان ارسال دیدگاه شما وجود ندارد!، لطفا دوباره امتحان کنید"
 
 #: static/js/comment.js:269
 msgid "You can't edit this comment"
-msgstr ""
+msgstr "شما نمی توانید این دیدگاه را ویرایش کنید"
 
 #: static/js/comment.js:297
 msgid "Modification didn't take effect!, please try again"
-msgstr ""
+msgstr "اصلاح نشد!، لطفاً دوباره امتحان کنید"
 
 #: static/js/comment.js:346
 msgid "Deletion cannot be performed!, please try again"
-msgstr ""
+msgstr "حذف انجام نمی شود! لطفا دوباره امتحان کنید"
 
 #: static/js/comment.js:393
 msgid "Unable to delete your comment!, please try again"
-msgstr ""
+msgstr "امکان حذف دیدگاه شما وجود ندارد!، لطفا دوباره امتحان کنید"
 
 #: static/js/comment.js:459
 msgid "Reaction couldn't be processed!, please try again"
-msgstr ""
+msgstr "واکنش پردازش نشد!، لطفاً دوباره امتحان کنید"
 
 #: static/js/comment.js:508
 msgid "Subscription couldn't be processed!, please try again"
-msgstr ""
+msgstr "مشترک شدن پردازش نشد!، لطفاً دوباره امتحان کنید"
 
 #: static/js/comment.js:559
 msgid "Blocking this user couldn't be processed!, please try again"
-msgstr ""
+msgstr "مسدود کردن این کاربر پردازش نشد!، لطفاً دوباره امتحان کنید"
 
 #: static/js/comment.js:672
 msgid "Flagging couldn't be processed!, please try again"
-msgstr ""
+msgstr "پرچم گذاری پردازش نشد!، لطفاً دوباره امتحان کنید"
 
 #: static/js/comment.js:718
 msgid "read more ..."
-msgstr ""
+msgstr "ادامه مطلب ..."
 
 #: static/js/comment.js:720
 msgid "read less"
-msgstr ""
+msgstr "خواندن کمتر"
 
 #: static/js/comment.js:753
 msgid "Flag rejected"
-msgstr ""
+msgstr "پرچم رد شد"
 
 #: static/js/comment.js:754 static/js/comment.js:772
 msgid "Reject the flag"
-msgstr ""
+msgstr "پرچم را رد کن"
 
 #: static/js/comment.js:759 static/js/comment.js:767
 msgid "Resolve the flag"
-msgstr ""
+msgstr "پرچم را رفع کن"
 
 #: static/js/comment.js:766
 msgid "Flag resolved"
-msgstr ""
+msgstr "پرچم رفع شد"
