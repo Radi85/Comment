@@ -214,7 +214,7 @@ msgstr "آدرس ایمیل، از آن برای تأیید کردن استفا�
 #: messages.py:79
 #, python-brace-format
 msgid "{username} added comment to \"{thread_name}\""
-msgstr "username} دیدگاه اضافه کرد به \"{thread_name}\""
+msgstr "{username} دیدگاه اضافه کرد به \"{thread_name}\""
 
 #: messages.py:80
 msgid "email"
@@ -396,7 +396,7 @@ msgstr "دیدگاه ها"
 
 #: templates/comment/comments/base.html:17
 msgid "comment on this post..."
-msgstr "افزودن دیدگاه به ای مقاله"
+msgstr "افزودن دیدگاه به این مقاله"
 
 #: templates/comment/comments/base.html:21
 msgid "reply to this comment..."
