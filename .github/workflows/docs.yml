@@ -36,7 +36,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip setuptools wheel
 
-      - name: Install dependecies
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip tox
 
