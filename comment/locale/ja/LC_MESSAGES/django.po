@@ -1,0 +1,588 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# NaGaii1994 <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-10-31 14:31+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: NaGaii1994 <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: comment/apps.py:9
+msgid "comment"
+msgstr "コメント"
+
+#: comment/conf/defaults.py:14
+msgid "Spam | Exists only to promote a service"
+msgstr "スパム | 何らかのサービスのプローモーションだけのコンテンツ。"
+
+#: comment/conf/defaults.py:15
+msgid "Abusive | Intended at promoting hatred"
+msgstr "誹謗中傷 | 他者を傷つけることを意図したコンテンツ。"
+
+#: comment/managers/flags.py:23
+msgid "Something else"
+msgstr "その他"
+
+#: comment/messages.py:7
+msgid "Comment App: LOGIN_URL is not in the settings"
+msgstr "Comment App: LOGIN_URLが設定されていません。"
+
+#: comment/messages.py:8
+msgid "Comment App: You must be logged in to perform this action."
+msgstr "Comment App: ログインしてください。"
+
+#: comment/messages.py:9
+msgid "You do not have permission to perform this action."
+msgstr "権限がありません。"
+
+#: comment/messages.py:10
+#, python-brace-format
+msgid ""
+"Your {class_name} class has not defined a {method_name} method, which is "
+"required."
+msgstr ""
+"{method_name}メソッドが{class_name}クラスに定義されていません。"
+
+#: comment/messages.py:11
+msgid "Only AJAX request are allowed"
+msgstr "AJAXリクエストのみが許可されています。"
+
+#: comment/messages.py:20
+msgid "Comment App: settings var COMMENT_WRAP_CONTENT_WORDS must be an integer"
+msgstr "Comment App: COMMENT_WRAP_CONTENT_WORDS変数は整数でなければなりません。"
+
+#: comment/messages.py:24
+msgid "error"
+msgstr "error"
+
+#: comment/messages.py:25
+msgid "Bad Request"
+msgstr "Bad Request"
+
+#: comment/messages.py:29
+#, python-brace-format
+msgid "{var_name} id must be an integer, {id} is NOT"
+msgstr "{var_name} id は整数でなければなりません。{id}は不正な値です。"
+
+#: comment/messages.py:30
+msgid "app name must be provided"
+msgstr "app nameを設定してください。"
+
+#: comment/messages.py:31
+#, python-brace-format
+msgid "{app_name} is NOT a valid app name"
+msgstr "{app_name}は有効なapp nameではありません。"
+
+#: comment/messages.py:32
+msgid "model name must be provided"
+msgstr "model nameを設定してください。"
+
+#: comment/messages.py:33
+#, python-brace-format
+msgid "{model_name} is NOT a valid model name"
+msgstr "{model_name}は有効なmodel nameではありません。"
+
+#: comment/messages.py:34
+msgid "model id must be provided"
+msgstr "model idを設定してください。"
+
+#: comment/messages.py:35
+#, python-brace-format
+msgid "{model_id} is NOT a valid model id for the model {model_name}"
+msgstr "{model_id}は{model_name}に対する有効なidではありません。"
+
+#: comment/messages.py:36
+#, python-brace-format
+msgid ""
+"{parent_id} is NOT a valid id for a parent comment or the parent comment "
+"does NOT belong to the provided model object"
+msgstr ""
+"{parent_id}は有効なparent_idではありません。"
+"もしくは、与えられたmodel objectに存在しません。"
+
+#: comment/messages.py:41
+msgid "Flagging system must be enabled"
+msgstr "フラグシステムを有効にする必要があります。"
+
+#: comment/messages.py:42
+msgid "Object must be flagged!"
+msgstr "オブジェクトにフラグを立てる必要があります。"
+
+#: comment/messages.py:43
+#, python-brace-format
+msgid "{state} is an invalid state"
+msgstr "{state}は有効なstateではありません。"
+
+#: comment/messages.py:44
+#, python-brace-format
+msgid "{reason} is an invalid reason"
+msgstr "{reason}は有効なreasonではありません。"
+
+#: comment/messages.py:45
+msgid "Please supply some information as the reason for flagging"
+msgstr "報告にあたって理由を教えてください。"
+
+#: comment/messages.py:46
+#, python-brace-format
+msgid "This comment is already flagged by this user ({user})"
+msgstr "このコメントは、既に他のユーザー({user})によりフラグを立てられています。"
+
+#: comment/messages.py:47
+#, python-brace-format
+msgid "This comment was not flagged by this user ({user})"
+msgstr "このコメントは、このユーザー({user})からフラグを立てられていません。"
+
+#: comment/messages.py:48
+msgid "This action cannot be applied on unflagged comments"
+msgstr "このアクションはフラグのないコメントには、適用出来ません。"
+
+#: comment/messages.py:49
+msgid "The comment must be edited before resolving the flag"
+msgstr "フラグを解決する前に、コメントを編集する必要があります。"
+
+#: comment/messages.py:50
+msgid "Unable to change flag state at the moment!"
+msgstr "現在はフラグを編集することが出来ません。"
+
+#: comment/messages.py:54
+#, python-brace-format
+msgid ""
+"Reaction must be an valid ReactionManager.RelationType. {reaction_type} is "
+"not"
+msgstr ""
+"Reactionは有効なReactionManagerである必要があります。"
+"RelationType. {reaction_type}は不正な値です。"
+
+#: comment/messages.py:58
+msgid "Enter a valid email address."
+msgstr "有効なメールアドレスを入力してください。"
+
+#: comment/messages.py:59
+msgid "Email is required for posting anonymous comments."
+msgstr "ログインしていないユーザーがコメントするにはメールアドレスを入力してください。"
+
+#: comment/messages.py:60
+msgid "The link seems to be broken."
+msgstr "このリンクは壊れているみたいです。"
+
+#: comment/messages.py:61
+msgid "The comment has already been verified."
+msgstr "このコメントは既に承認されています。"
+
+#: comment/messages.py:65
+msgid "Comment flagged"
+msgstr "コメントにフラグを立てました。"
+
+#: comment/messages.py:66
+msgid "Comment flag removed"
+msgstr "コメントのフラグを削除しました。"
+
+#: comment/messages.py:70
+msgid "Your reaction has been updated successfully"
+msgstr "あなたのリアクションの変更に成功しました。"
+
+#: comment/messages.py:74
+msgid "Comment Confirmation Request"
+msgstr "コメントの確認が必要です。"
+
+#: comment/messages.py:75
+msgid ""
+"We have sent a verification link to your email.The comment will be displayed "
+"after it is verified."
+msgstr ""
+"あなたのメールアドレスに確認用メールを送信しました。"
+"メールに記載されているリンクからコメントを有効化してください。"
+
+#: comment/messages.py:77
+msgid "email address, this will be used for verification."
+msgstr "メールアドレスはコメントの有効化に使用されます。"
+
+#: comment/messages.py:78
+msgid "email address, it will be used for verification."
+msgstr "メールアドレスはコメントの有効化に使用されます。"
+
+#: comment/messages.py:79
+#, python-brace-format
+msgid "{username} added comment to \"{thread_name}\""
+msgstr "{username}が\"{thread_name}\"にコメントしました。"
+
+#: comment/messages.py:80
+msgid "email"
+msgstr "メール"
+
+#: comment/messages.py:84
+msgid "Unflagged"
+msgstr "フラグを解除"
+
+#: comment/messages.py:85
+msgid "Flagged"
+msgstr "フラグを立てる"
+
+#: comment/messages.py:86
+msgid "Flag rejected by the moderator"
+msgstr "モデレーターによりフラグが解除されました。"
+
+#: comment/messages.py:87
+msgid "Comment modified by the author"
+msgstr "コメントが作成者により変更されました。"
+
+#: comment/messages.py:91
+#, python-brace-format
+msgid "Email is required to subscribe {model_object}"
+msgstr "{model_object}の新規投稿を通知するメールアドレスを入力してください。"
+
+#: comment/messages.py:92
+msgid "Subscribe system must be enabled"
+msgstr "Subscribe systemを有効化してください。"
+
+#: comment/messages.py:96
+msgid "Unblocked"
+msgstr "ブロック解除"
+
+#: comment/messages.py:97
+msgid "Blocked"
+msgstr "ブロック"
+
+#: comment/messages.py:102
+msgid "Invalid input data"
+msgstr "無効なinput data"
+
+#: comment/templates/comment/anonymous/confirmation_request.html:8
+#: comment/templates/comment/anonymous/confirmation_request.txt:2
+msgid "Hey there,"
+msgstr "こんにちは。"
+
+#: comment/templates/comment/anonymous/confirmation_request.html:10
+msgid ""
+"You or someone on your behalf have requested to post a comment into this "
+"page:"
+msgstr "あなた、もしくはあなたの代理の方がこのページにコメントを投稿しました。"
+
+#: comment/templates/comment/anonymous/confirmation_request.html:12
+#, python-format
+msgid "at %(posted_time)s."
+msgstr "%(posted_time)s"
+
+#: comment/templates/comment/anonymous/confirmation_request.html:15
+#: comment/templates/comment/notifications/notification.html:27
+msgid "The comment:"
+msgstr "コメント"
+
+#: comment/templates/comment/anonymous/confirmation_request.html:20
+#: comment/templates/comment/anonymous/confirmation_request.txt:12
+msgid ""
+"If you do not wish to post the comment, please ignore this message or report "
+"an incident to"
+msgstr "このコメントが不適切であれば、無視するか、報告して下さい。"
+
+#: comment/templates/comment/anonymous/confirmation_request.html:20
+msgid "Otherwise click on the button below to confirm the comment."
+msgstr "そうでなければ下のボタンを押してコメントを有効化して下さい。"
+
+#: comment/templates/comment/anonymous/confirmation_request.html:29
+msgid "Confirm your comment"
+msgstr "コメントが有効化されました。"
+
+#: comment/templates/comment/anonymous/confirmation_request.html:38
+msgid ""
+"If clicking does not work, you can also copy the below link and paste the "
+"address into your browser's address window"
+msgstr "クリックしても何も起こらない場合、この下のアドレスをブラウザにコピーして下さい。"
+
+#: comment/templates/comment/anonymous/confirmation_request.html:41
+#: comment/templates/comment/anonymous/confirmation_request.txt:17
+#: comment/templates/comment/notifications/notification.html:32
+#: comment/templates/comment/notifications/notification.txt:14
+msgid "Thanks for your comment!"
+msgstr "コメントありがとうございます。"
+
+#: comment/templates/comment/anonymous/confirmation_request.html:43
+#: comment/templates/comment/anonymous/confirmation_request.txt:20
+#: comment/templates/comment/notifications/notification.html:34
+#: comment/templates/comment/notifications/notification.txt:17
+msgid "Kind regards,"
+msgstr "よろしくおねがいします。"
+
+#: comment/templates/comment/anonymous/confirmation_request.txt:4
+msgid "You or someone on behalf of you have requested to post a comment at"
+msgstr "あなたもしくは、あなたの代理人がコメントを行いました。"
+
+#: comment/templates/comment/anonymous/confirmation_request.txt:4
+msgid "to the following URL"
+msgstr "次のURL"
+
+#: comment/templates/comment/anonymous/confirmation_request.txt:8
+#: comment/templates/comment/comments/create_comment.html:20
+#: comment/templates/comment/notifications/notification.txt:6
+msgid "Comment"
+msgstr "コメント"
+
+#: comment/templates/comment/anonymous/confirmation_request.txt:12
+msgid "Otherwise click on the link below to confirm the comment"
+msgstr "そうでなければ下のボタンを押してコメントを有効化して下さい。"
+
+#: comment/templates/comment/anonymous/confirmation_request.txt:16
+#: comment/templates/comment/notifications/notification.html:31
+#: comment/templates/comment/notifications/notification.txt:13
+msgid ""
+"If clicking does not work, you can also copy and paste the address into your "
+"browser's address window"
+msgstr "クリックしても何も起こらない場合、この下のアドレスをブラウザにコピーして下さい。"
+
+#: comment/templates/comment/anonymous/discarded.html:6
+msgid "Comment discarded"
+msgstr "コメントを削除する。"
+
+#: comment/templates/comment/anonymous/discarded.html:12
+msgid "Comment can't be verified."
+msgstr "コメントを有効化出来ません。"
+
+#: comment/templates/comment/anonymous/discarded.html:13
+msgid "Sorry, your comment has been automatically discarded."
+msgstr "あなたのコメントは自動的に削除されました。"
+
+#: comment/templates/comment/anonymous/email_modal.html:8
+msgid "Please enter your email to post a comment"
+msgstr "コメントを投稿するにはメールアドレスを入力して下さい。"
+
+#: comment/templates/comment/anonymous/email_modal.html:9
+#: comment/templates/comment/block/block_modal.html:7
+#: comment/templates/comment/comments/comment_modal.html:7
+#: comment/templates/comment/comments/comment_modal.html:15
+#: comment/templates/comment/flags/flag_modal.html:8
+#: comment/templates/comment/follow/follow_modal.html:8
+msgid "Close"
+msgstr "閉じる"
+
+#: comment/templates/comment/block/block_icon.html:4
+msgid "Unblock user"
+msgstr "ブロックを解除する"
+
+#: comment/templates/comment/block/block_icon.html:4
+msgid "Block this user"
+msgstr "ブロックする"
+
+#: comment/templates/comment/block/block_modal.html:6
+msgid "Are you sure you want to block this user?"
+msgstr "本当にブロックしますか？"
+
+#: comment/templates/comment/block/block_modal.html:16
+msgid "Reason"
+msgstr "理由"
+
+#: comment/templates/comment/block/block_modal.html:27
+msgid "Block"
+msgstr "ブロック"
+
+#: comment/templates/comment/comments/base.html:8
+msgid "Comments"
+msgstr "コメント"
+
+#: comment/templates/comment/comments/base.html:17
+msgid "comment on this post..."
+msgstr "この投稿にコメントする"
+
+#: comment/templates/comment/comments/base.html:21
+msgid "reply to this comment..."
+msgstr "このコメントに返信する"
+
+#: comment/templates/comment/comments/comment_content.html:18
+#, python-format
+msgid "view %(username)s profile"
+msgstr "%(username)sのプロフィールを見る"
+
+#: comment/templates/comment/comments/comment_content.html:18
+msgid "comment by anonymous user"
+msgstr "匿名によるコメント"
+
+#: comment/templates/comment/comments/comment_content.html:23
+msgid "Edited"
+msgstr "編集済み"
+
+#: comment/templates/comment/comments/comment_content.html:23
+#, python-format
+msgid "Edited: %(edited_time)s ago"
+msgstr "編集済み: %(edited_time)s 前"
+
+#: comment/templates/comment/comments/comment_content.html:25
+msgid "Posted"
+msgstr "投稿"
+
+#: comment/templates/comment/comments/comment_content.html:25
+#, python-format
+msgid "%(posted_time)s ago"
+msgstr "%(posted_time)s 前"
+
+#: comment/templates/comment/comments/comment_content.html:47
+msgid " Reply"
+msgid_plural " Replies"
+msgstr[0] "返信"
+msgstr[1] "返信"
+
+#: comment/templates/comment/comments/comment_modal.html:6
+msgid "Confirm comment deletion"
+msgstr "コメント削除の確認"
+
+#: comment/templates/comment/comments/comment_modal.html:12
+msgid "Are you sure you want to delete this comment"
+msgstr "本当に削除しますか？"
+
+#: comment/templates/comment/comments/comment_modal.html:22
+msgid "Delete"
+msgstr "削除"
+
+#: comment/templates/comment/comments/content.html:9
+msgid "read more"
+msgstr "もっと読む"
+
+#: comment/templates/comment/comments/create_comment.html:20
+msgid "Reply"
+msgstr "返信"
+
+#: comment/templates/comment/comments/create_comment.html:31
+msgid "Comment Anonymously or"
+msgstr "匿名でコメントするもしくは"
+
+#: comment/templates/comment/comments/create_comment.html:33
+#: comment/templates/comment/comments/create_comment.html:40
+msgid "Login"
+msgstr "ログイン"
+
+#: comment/templates/comment/comments/create_comment.html:35
+msgid "to keep your conversations intact"
+msgstr "して会話を続けて下さい。"
+
+#: comment/templates/comment/comments/create_comment.html:42
+msgid "to join the discussion"
+msgstr "して議論に参加する。"
+
+#: comment/templates/comment/comments/delete_icon.html:3
+msgid "Delete comment"
+msgstr "コメントを削除する"
+
+#: comment/templates/comment/comments/edit_icon.html:3
+msgid "Edit comment"
+msgstr "コメントを編集する"
+
+#: comment/templates/comment/comments/pagination.html:2
+msgid "Page navigation"
+msgstr "ページナビゲーション"
+
+#: comment/templates/comment/comments/pagination.html:3
+msgid "first"
+msgstr "first"
+
+#: comment/templates/comment/comments/pagination.html:4
+msgid "last"
+msgstr "last"
+
+#: comment/templates/comment/comments/pagination.html:5
+msgid "Next"
+msgstr "次"
+
+#: comment/templates/comment/comments/pagination.html:6
+msgid "Previous"
+msgstr "前"
+
+#: comment/templates/comment/comments/reject_icon.html:3
+msgid "Flag rejected"
+msgstr "フラグが拒否されました。"
+
+#: comment/templates/comment/comments/reject_icon.html:3
+msgid "Reject the flag"
+msgstr "フラグを拒否する。"
+
+#: comment/templates/comment/comments/resolve_icon.html:3
+msgid "Flag resolved"
+msgstr "解決されたフラグ。"
+
+#: comment/templates/comment/comments/resolve_icon.html:3
+msgid "Resolve the flag"
+msgstr "フラグを解決する。"
+
+#: comment/templates/comment/comments/urlhash.html:2
+msgid "Permalink to this comment"
+msgstr "このコメントに対するパーマリンク。"
+
+#: comment/templates/comment/flags/flag_icon.html:3
+msgid "Remove flag"
+msgstr "フラグを削除する。"
+
+#: comment/templates/comment/flags/flag_icon.html:3
+msgid "Report comment"
+msgstr "コメントを報告する。"
+
+#: comment/templates/comment/flags/flag_modal.html:7
+msgid "Please select a reason for flagging"
+msgstr "フラグを立てる理由を選んで下さい。"
+
+#: comment/templates/comment/flags/flag_modal.html:22
+msgid "Flag"
+msgstr "フラグ"
+
+#: comment/templates/comment/flags/flags.html:8
+msgid "flag"
+msgstr "フラグ"
+
+#: comment/templates/comment/follow/follow.html:9
+msgid "follow"
+msgstr "フォロー"
+
+#: comment/templates/comment/follow/follow_icon.html:3
+msgid "Unfollow this thread"
+msgstr "このスレッドのフォローを解除する。"
+
+#: comment/templates/comment/follow/follow_icon.html:3
+msgid "Follow this thread"
+msgstr "このスレッドをフォローする。"
+
+#: comment/templates/comment/follow/follow_modal.html:7
+msgid "Please insert your email to follow this thread"
+msgstr "このスレッドをフォローするには、メールアドレスを入力して下さい。"
+
+#: comment/templates/comment/follow/follow_modal.html:28
+msgid "Follow"
+msgstr "フォロー"
+
+#: comment/templates/comment/notifications/notification.html:6
+#: comment/templates/comment/notifications/notification.txt:2
+msgid "Hey"
+msgstr "こんにちは"
+
+#: comment/templates/comment/notifications/notification.html:6
+#: comment/templates/comment/notifications/notification.txt:2
+msgid ","
+msgstr "、"
+
+#: comment/templates/comment/notifications/notification.html:9
+#: comment/templates/comment/notifications/notification.txt:4
+msgid "has added a comment at"
+msgstr "がコメントを追加しました。"
+
+#: comment/templates/comment/notifications/notification.html:9
+#: comment/templates/comment/notifications/notification.txt:4
+msgid "to"
+msgstr "へ"
+
+#: comment/templates/comment/notifications/notification.html:18
+msgid "Go to site"
+msgstr "サイトに行く"
+
+#: comment/templates/comment/reactions/reactions.html:5
+msgid "like"
+msgstr "like"
+
+#: comment/templates/comment/reactions/reactions.html:16
+msgid "dislike"
+msgstr "dislike"
