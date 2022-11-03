@@ -10,3 +10,5 @@ cssselect
 coverage
 flake8
 tox
+# used for postgresql connection
+psycopg2
