@@ -1,21 +1,20 @@
-FROM python:3.8-alpine
+FROM python:3.10-slim-bullseye
 
-RUN apk update \
-    && apk add --virtual build-deps gcc python3-dev musl-dev \
-    && apk add bash \
-    && apk add postgresql \
-    && apk add postgresql-dev \
-    && pip install psycopg2 \
-    && apk add jpeg-dev zlib-dev libjpeg \
-    && pip install Pillow \
-    && apk del build-deps
+# Install apt packages
+RUN apt-get update && apt-get install --no-install-recommends -y \
+  # dependencies for building Python packages
+  build-essential \
+  # psycopg2 dependencies
+  libpq-dev \
+  # Translations dependencies
+  gettext \
+  # cleaning up unused files
+  && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
+  && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /code/
 COPY . /code/
 WORKDIR /code/
 
-RUN pip install -r /code/test/example/requirements.txt
-
-RUN apk add --no-cache postgresql-libs
-
-ENTRYPOINT ["/code/docker-entrypoint.sh"]
+RUN pip install -r /code/test/example/requirements.txt \
+    && pip install psycopg2 \
+    && python -m pip install django-comments-dab[markdown]

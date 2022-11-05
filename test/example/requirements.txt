@@ -9,4 +9,4 @@ beautifulsoup4
 cssselect
 coverage
 flake8
-tox
+tox 
