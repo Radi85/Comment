@@ -16,4 +16,5 @@ COPY . /code/
 WORKDIR /code/
 
 RUN pip install -r /code/test/example/requirements.txt \
+    && pip install psycopg2 \
     && python -m pip install django-comments-dab[markdown]

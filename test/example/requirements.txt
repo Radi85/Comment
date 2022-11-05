@@ -9,6 +9,4 @@ beautifulsoup4
 cssselect
 coverage
 flake8
-tox
-# used for postgresql connection
-psycopg2
+tox 
