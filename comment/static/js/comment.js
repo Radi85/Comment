@@ -213,7 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 // get parent element of the form with id=comments and replace html
                 var p = form.parentElement;while(p.id !== "comments"){var o = p;p = o.parentNode;};
                 p.outerHTML = result.data;
-                
             } else {
                 // child comment
                 let childComment = stringToDom(result.data, '.js-child-comment');
