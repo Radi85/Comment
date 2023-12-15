@@ -210,7 +210,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // parent comment
             if (formButton.getAttribute('value') === 'parent') {
                 // reload all comments only when posting parent comment
-                document.getElementById("comments").outerHTML = result.data;
+                // get parent element of the form with id=comments and replace html
+                var p = form.parentElement;
+                while(p.id !== "comments"){var o = p;p = o.parentNode;};
+                p.outerHTML = result.data;
+                
             } else {
                 // child comment
                 let childComment = stringToDom(result.data, '.js-child-comment');
@@ -371,7 +375,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             if (isParent) {
-                document.getElementById("comments").outerHTML = result.data;
+                    // get parent element of the form with id=comments and replace html
+                    var p = form.parentElement;
+                    while(p.id !== "comments"){var o = p;p = o.parentNode;};
+                    p.outerHTML = result.data;
             } else {
                 // update replies count if a child was deleted
                 let replyNumberElement = getParentByClassName(commentElement, 'js-parent-comment').querySelector(".js-reply-number");
