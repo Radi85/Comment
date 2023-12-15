@@ -211,8 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (formButton.getAttribute('value') === 'parent') {
                 // reload all comments only when posting parent comment
                 // get parent element of the form with id=comments and replace html
-                var p = form.parentElement;
-                while(p.id !== "comments"){var o = p;p = o.parentNode;};
+                var p = form.parentElement;while(p.id !== "comments"){var o = p;p = o.parentNode;};
                 p.outerHTML = result.data;
                 
             } else {
@@ -375,10 +374,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             if (isParent) {
-                    // get parent element of the form with id=comments and replace html
-                    var p = form.parentElement;
-                    while(p.id !== "comments"){var o = p;p = o.parentNode;};
-                    p.outerHTML = result.data;
+                // get parent element of the form with id=comments and replace html
+                var p = form.parentElement;while(p.id !== "comments"){var o = p;p = o.parentNode;};
+                p.outerHTML = result.data;
             } else {
                 // update replies count if a child was deleted
                 let replyNumberElement = getParentByClassName(commentElement, 'js-parent-comment').querySelector(".js-reply-number");
