@@ -210,9 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // parent comment
             if (formButton.getAttribute('value') === 'parent') {
                 // reload all comments only when posting parent comment
-                // get parent element of the form with id=comments and replace html
-                var p = form.parentElement;while(p.id !== "comments"){var o = p;p = o.parentNode;};
-                p.outerHTML = result.data;
+                document.getElementById("comments").outerHTML = result.data;
             } else {
                 // child comment
                 let childComment = stringToDom(result.data, '.js-child-comment');
@@ -373,9 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             if (isParent) {
-                // get parent element of the form with id=comments and replace html
-                var p = form.parentElement;while(p.id !== "comments"){var o = p;p = o.parentNode;};
-                p.outerHTML = result.data;
+                document.getElementById("comments").outerHTML = result.data;
             } else {
                 // update replies count if a child was deleted
                 let replyNumberElement = getParentByClassName(commentElement, 'js-parent-comment').querySelector(".js-reply-number");
@@ -801,6 +797,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 event.preventDefault();
                 replyLink(event.target);
             } else if (event.target.closest('.js-comment-edit')) {
+                cancelEdit(document.querySelector(".js-comment-cancel"));
                 event.preventDefault();
                 setCommentForEditMode(event.target.closest('.js-comment-edit'));
             } else if (event.target.closest('.js-comment-cancel')) {
