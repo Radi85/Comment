@@ -797,6 +797,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 event.preventDefault();
                 replyLink(event.target);
             } else if (event.target.closest('.js-comment-edit')) {
+                cancelEdit(document.querySelector(".js-comment-cancel"));
                 event.preventDefault();
                 setCommentForEditMode(event.target.closest('.js-comment-edit'));
             } else if (event.target.closest('.js-comment-cancel')) {
