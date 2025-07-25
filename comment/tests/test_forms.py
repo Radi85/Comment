@@ -32,10 +32,13 @@ class TestCommentForm(BaseCommentTest):
         self.assertEqual(email_field.label, EmailInfo.LABEL)
         self.assertTextTranslated(email_field.label)
         self.assertEqual(email_field.widget.input_type, field)
-        self.assertDictEqual(email_field.widget.attrs, {
+        expected_attrs = {
             'placeholder': EmailInfo.INPUT_PLACEHOLDER,
-            'title': EmailInfo.INPUT_TITLE
-        })
+            'title': EmailInfo.INPUT_TITLE,
+            'maxlength': email_field.widget.attrs['maxlength']
+        }
+
+        self.assertDictEqual(email_field.widget.attrs, expected_attrs)
 
     @patch.object(settings, 'COMMENT_ALLOW_ANONYMOUS', True)
     def test_create_anonymous_comment_without_email(self):

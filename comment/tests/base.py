@@ -213,11 +213,11 @@ class BaseCommentTest(TestCase, BaseInternationalizationTest):
             f'No translation for the text "{text}" from view {self.get_view_from_url_or_none(url)}'
         )
 
-    def assertQuerysetEqual(self, qs, values, transform=None, ordered=True, msg=None):
+    def assertQuerySetEqual(self, qs, values, transform=None, ordered=True, msg=None):
         if not transform:
             def transform(x):
                 return x
-        return super().assertQuerysetEqual(qs, values, transform=transform, ordered=True, msg=msg)
+        return super().assertQuerySetEqual(qs, values, transform=transform, ordered=True, msg=msg)
 
     def assert_permission_denied_response(self, response, reason=None):
         forbidden_code = 403

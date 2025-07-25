@@ -255,14 +255,14 @@ class OrderForParentCommentsTest(BaseCommentManagerTest):
         self.all_comments_qs = Comment.objects.all_exclude_flagged()
 
     def test_default_value(self):
-        self.assertQuerysetEqual(
+        self.assertQuerySetEqual(
             Comment.objects._filter_parents(self.all_comments_qs),
             self.all_parents_qs.order_by(*settings.COMMENT_ORDER_BY)
             )
 
     @patch.object(settings, 'COMMENT_ORDER_BY', ['-reaction__likes'])
     def test_custom_values(self):
-        self.assertQuerysetEqual(
+        self.assertQuerySetEqual(
             Comment.objects._filter_parents(self.all_comments_qs),
             self.all_parents_qs.order_by(*settings.COMMENT_ORDER_BY)
             )

@@ -1,5 +1,12 @@
 Changelog
 =========
+3.0.0
+------
+- Confirm support for Python ``3.11``, ``3.12``, ``3.13``.
+- Confirm support for Django ``4.2``, ``5.0``, ``5.1``, ``5.2``.
+- Remove support for Python ``3.6``, ``3.7``, ``3.8``, ``3.9``.
+- Remove support for Django ``3.2``, ``4.0``.
+
 
 2.8.0
 ------

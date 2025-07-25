@@ -1,5 +1,4 @@
 import os
-import django
 
 __version__ = '2.8.0'
 
@@ -22,7 +21,3 @@ def check_release():
 
 
 check_release()
-
-
-if django.VERSION < (3, 2):
-    default_app_config = 'comment.apps.CommentConfig'

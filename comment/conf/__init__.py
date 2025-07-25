@@ -7,11 +7,9 @@ from comment.conf import defaults as app_settings
 
 _django_version = django.VERSION
 DEPRECATED_SETTINGS = {
-    'PASSWORD_RESET_TIMEOUT_DAYS' if _django_version > (3, 0) else None,
-    'DEFAULT_CONTENT_TYPE' if _django_version > (2, 2) else None,
-    'FILE_CHARSET' if _django_version > (2, 2) else None,
-    'USE_L10N' if _django_version > (4, 0) else None,
-    'USE_TZ' if _django_version > (4, 0) else None,
+    'DEFAULT_FILE_STORAGE' if (4, 2) <= _django_version < (5, 1) else None,
+    'STATICFILES_STORAGE' if (4, 2) <= _django_version < (5, 1) else None,
+    'USE_L10N' if (4, 0) <= _django_version < (5, 0) else None,
 }
 
 
