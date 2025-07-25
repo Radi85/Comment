@@ -53,6 +53,7 @@ extensions = [
     'sphinx.ext.githubpages',
     'sphinx.ext.autosectionlabel',
     'sphinxcontrib.swagger',
+    'sphinx_rtd_theme',
 ]
 
 openapi = {
